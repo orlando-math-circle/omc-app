@@ -1,5 +1,9 @@
 # Compiled code
 dist/
+.nuxt/
+
+# Coverage directory used by tools like istanbul
+coverage
 
 # Node Modules
 node_modules/

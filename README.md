@@ -4,4 +4,4 @@ Event calendar system with a native app-like experience for Orlando Math Circle.
 
 ## Developer Setup
 
-Current developer documentation is not yet finished. Please reference the `.env.example` file and copy the appropriate variables into a new `.env` file. Refer to the `backend/src/config/config.schema.ts` file for allowable configuration options.
+Not yet implemented.

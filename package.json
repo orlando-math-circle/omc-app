@@ -1,0 +1,27 @@
+{
+  "name": "omc-backend",
+  "version": "1.0.0",
+  "description": "Orlando Math Circle Spring-Fall 2020 senior design group to make a mobile event calendar system.",
+  "keywords": [],
+  "license": "ISC",
+  "author": "John Gilbert",
+  "private": true,
+  "scripts": {
+    "backend:debug": "cd ./src/backend && npm run debug",
+    "backend:dev": "cd ./src/backend && npm run dev",
+    "backend:prod": "cd backend && npm run prod",
+    "backend:start": "cd backend && npm run start",
+    "frontend:dev": "cd ./src/frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:start": "cd frontend && npm run start"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "always",
+    "trailingComma": "all"
+  },
+  "dependencies": {
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.12.2"
+  }
+}
