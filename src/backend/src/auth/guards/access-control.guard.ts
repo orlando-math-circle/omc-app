@@ -2,6 +2,7 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AccessControl, IQueryInfo } from 'accesscontrol';
 import { PERMISSION_METADATA } from '../../app.constants';
+import { Roles } from '../../app.roles';
 import { InjectAC } from '../decorators/inject-ac.decorator';
 import { TransformedGrant } from '../interfaces/grant.interface';
 
@@ -14,9 +15,9 @@ export class AccessGuard {
   getUserRoles(ctx: ExecutionContext) {
     const req = ctx.switchToHttp().getRequest();
 
-    if (!req.user) throw new UnauthorizedException();
+    if (!req.usr) throw new UnauthorizedException();
 
-    return req.user.roles;
+    return req.usr.roles;
   }
 
   canActivate(ctx: ExecutionContext) {
@@ -27,11 +28,14 @@ export class AccessGuard {
 
     if (!grant) return true;
 
-    const roles = this.getUserRoles(ctx);
+    const roles: Roles[] = this.getUserRoles(ctx);
+
+    if (!roles.length) roles.push(Roles.GUEST);
+
     const grants: IQueryInfo[] = grant.permissions.map((permission) => ({
       role: roles,
       resource: grant.resource,
-      permission,
+      action: permission,
     }));
 
     const hasPermission = grants.every(

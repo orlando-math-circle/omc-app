@@ -1,11 +1,10 @@
 import {
   BadRequestException,
+  forwardRef,
   GoneException,
+  Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -43,10 +42,6 @@ export class AuthService {
   }
 
   async logout(account: Account) {
-    const acc = await this.accountService.findOne(account.id);
-
-    if (!acc) throw new UnauthorizedException();
-
     await this.accountService.update(account, { logoutAt: new Date() });
   }
 

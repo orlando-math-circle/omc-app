@@ -5,8 +5,8 @@ export type Permission =
   | 'read:any'
   | 'update:own'
   | 'update:any'
-  | 'destroy:own'
-  | 'destroy:any';
+  | 'delete:own'
+  | 'delete:any';
 
 export interface Grant {
   resource: string;

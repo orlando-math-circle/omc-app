@@ -17,6 +17,7 @@ export class UserService {
   async findOne(idOrEmail: number | string) {
     return this.userRepository.findOne(
       typeof idOrEmail === 'number' ? { id: idOrEmail } : { email: idOrEmail },
+      true,
     );
   }
 

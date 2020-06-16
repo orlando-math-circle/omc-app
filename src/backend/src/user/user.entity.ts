@@ -1,4 +1,11 @@
-import { BaseEntity, Entity, ManyToOne, PrimaryKey, Property } from 'mikro-orm';
+import {
+  BaseEntity,
+  Entity,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+  ArrayType,
+} from 'mikro-orm';
 import { Account } from '../accounts/account.entity';
 import { Roles } from '../app.roles';
 
@@ -19,10 +26,10 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ nullable: true })
   emailVerified?: boolean;
 
-  @Property({ nullable: true })
+  @Property({ nullable: true, hidden: true })
   password?: string;
 
-  @Property()
+  @Property({ type: ArrayType })
   roles: Roles[] = [];
 
   @Property({ onUpdate: () => new Date() })
@@ -35,6 +42,8 @@ export class User extends BaseEntity<User, 'id'> {
    * Relationships
    */
 
-  @ManyToOne(() => Account)
-  account: Account;
+  // Intentionally hidden as serializing an account entity causes
+  // a circular JSON structure when it reaches this property.
+  @ManyToOne(() => Account, { hidden: true })
+  account!: Account;
 }

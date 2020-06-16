@@ -10,15 +10,15 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 export const config: Options = {
   type: 'postgresql',
   entities: [Account, User],
-  dbName: process.env.TESTDB_NAME || process.env.DATABASE_NAME,
-  user: process.env.TESTDB_USER || process.env.DATABASE_USER,
-  password: process.env.TESTDB_PASS || process.env.DATABASE_PASS,
+  dbName: process.env.DATABASE_NAME || 'omc',
+  user: process.env.DATABASE_USER || 'postgres',
+  password: process.env.DATABASE_PASS || 'postgres',
   metadataProvider: ReflectMetadataProvider,
   cache: { enabled: false },
   findOneOrFailHandler: (entityName: string) => {
     return new NotFoundException(`${entityName} not found`);
   },
-  debug: true,
+  debug: false,
 };
 
 export default config;

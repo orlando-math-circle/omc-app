@@ -1,4 +1,4 @@
-import { Body, Controller, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, UseGuards } from '@nestjs/common';
 import { Account } from '../accounts/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
 import { Auth } from '../auth/decorators/auth.decorator';
@@ -14,6 +14,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(UserGuard)
+  @Get('me')
   getMe(@Usr() user: User) {
     return user;
   }
@@ -28,7 +29,7 @@ export class UserController {
     return this.userService.update(id, updateUserDTO);
   }
 
-  @Auth('user', 'destroy:any')
+  @Auth('user', 'delete:any')
   delete(id: number) {
     return this.userService.delete(id);
   }

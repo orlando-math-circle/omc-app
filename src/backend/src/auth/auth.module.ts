@@ -7,6 +7,8 @@ import AccessControl from '../app.roles';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { LocalStrategy } from './strategies/local.strategy';
+import { TokenStrategy } from './strategies/token.strategy';
 
 const ACProvider = {
   provide: ACCESS_CONTROL_TOKEN,
@@ -17,16 +19,16 @@ const ACProvider = {
 @Module({
   imports: [
     JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
         secret: config.get('SECRET'),
       }),
-      imports: [ConfigModule],
+      inject: [ConfigService],
     }),
     forwardRef(() => UserModule),
     forwardRef(() => AccountModule),
   ],
-  providers: [AuthService, ACProvider],
+  providers: [AuthService, ACProvider, LocalStrategy, TokenStrategy],
   controllers: [AuthController],
   exports: [AuthService, ACProvider],
 })

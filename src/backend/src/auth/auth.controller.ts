@@ -1,8 +1,7 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Account } from '../accounts/account.entity';
 import { AccountService } from '../accounts/account.service';
-import { CreateAccountDTO } from '../accounts/dtos/create-account.dto';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
 import { Acc } from './decorators/account.decorator';
@@ -22,18 +21,13 @@ export class AuthController {
     return this.authService.login(account, user);
   }
 
-  @Post('register')
-  register(@Body() createAccountDTO: CreateAccountDTO) {
-    return this.accountService.create(createAccountDTO);
-  }
-
   @Auth()
   @Post('logout')
   logout(@Acc() account: Account) {
     return this.authService.logout(account);
   }
 
-  @Post('verify')
+  @Post('verify/:token')
   verify(@Param('token') token: string) {
     return this.authService.verify(token);
   }

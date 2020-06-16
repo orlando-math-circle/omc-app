@@ -9,7 +9,7 @@ import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ validationSchema: ConfigSchema }),
+    ConfigModule.forRoot({ validationSchema: ConfigSchema, isGlobal: true }),
     MikroOrmModule.forRoot(MikroORMConfig),
     AuthModule,
     AccountModule,
