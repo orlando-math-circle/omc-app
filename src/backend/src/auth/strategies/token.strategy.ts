@@ -6,14 +6,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
-import moment from 'moment';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Account } from '../../accounts/account.entity';
 import { AccountService } from '../../accounts/account.service';
 import { User } from '../../user/user.entity';
 import { UserService } from '../../user/user.service';
 import { AuthPayload } from '../interfaces/token.interface';
-import { date } from '@hapi/joi';
 
 export type AuthRequest = Request & { usr?: User; account: Account };
 
@@ -54,8 +52,10 @@ export class TokenStrategy extends PassportStrategy(Strategy) {
       const logoutAt = req.account.logoutAt;
       const issuedAt = new Date(payload.iat * 1000);
 
-      if (logoutAt > issuedAt) {
-        console.log(`${logoutAt} > ${issuedAt}`);
+      // Warning: The `iat` field on a JWT only has seconds precision.
+      // The results are unpredictable if someone were to try to rapidly
+      // use a token immediately after logging out. Thus the `>=`.
+      if (logoutAt >= issuedAt) {
         throw new UnauthorizedException('Token Revoked');
       }
     }

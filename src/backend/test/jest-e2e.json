@@ -12,6 +12,6 @@
     "!./src/**/*.spec{.js,.ts}",
     "!./src/**/*.dto{.js,.ts}"
   ],
-  "coverageDirectory": "./coverage",
+  "coverageDirectory": "./test/coverage",
   "verbose": true
 }

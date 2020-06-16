@@ -23,3 +23,10 @@ jobs:
         working-directory: ./src/backend
       - run: npm run test:e2e
         working-directory: ./src/backend
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: './src/backend/test/coverage/lcov.info'
+          base-path: './src/backend/'
