@@ -12,9 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node_version }}
-        working-directory: ./src/backend
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
+        working-directory: ./src/backend
       - run: npm run test:e2e
+        working-directory: ./src/backend
