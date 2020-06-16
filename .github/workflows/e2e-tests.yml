@@ -2,7 +2,7 @@ name: e2e-tests
 
 on: [push, pull_request]
 
-johs:
+jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
