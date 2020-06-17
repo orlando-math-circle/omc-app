@@ -75,7 +75,7 @@ describe('Accounts', () => {
     });
   });
 
-  describe('/GET account', () => {
+  describe('GET /account/:id', () => {
     it('should reject arbitrary account lookup', async () => {
       request(app.getHttpServer())
         .get('/account/1')
