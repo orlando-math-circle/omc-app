@@ -9,8 +9,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { SignOptions, VerifyOptions } from 'jsonwebtoken';
-import { Account } from '../accounts/account.entity';
-import { AccountService } from '../accounts/account.service';
+import { Account } from '../account/account.entity';
+import { AccountService } from '../account/account.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 

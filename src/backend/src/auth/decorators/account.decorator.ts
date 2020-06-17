@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Account } from '../../accounts/account.entity';
+import { Account } from '../../account/account.entity';
 
 /**
  * Retrieves the account from an authenticated request.

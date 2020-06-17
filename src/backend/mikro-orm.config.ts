@@ -1,9 +1,9 @@
 import { NotFoundException } from '@nestjs/common';
-import { Options, ReflectMetadataProvider } from 'mikro-orm';
-import { Account } from './src/accounts/account.entity';
-import { User } from './src/user/user.entity';
 import * as dotenv from 'dotenv';
-import path from 'path';
+import { Options, ReflectMetadataProvider } from 'mikro-orm';
+import * as path from 'path';
+import { Account } from './src/account/account.entity';
+import { User } from './src/user/user.entity';
 
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 

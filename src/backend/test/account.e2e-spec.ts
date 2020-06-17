@@ -1,8 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import request from 'supertest';
-import { Account } from '../src/accounts/account.entity';
-import { CreateAccountDTO } from '../src/accounts/dtos/create-account.dto';
+import * as request from 'supertest';
+import { Account } from '../src/account/account.entity';
+import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
 import { Roles } from '../src/app.roles';
 import { User } from '../src/user/user.entity';
 import { createMikroTestingModule } from './bootstrap';

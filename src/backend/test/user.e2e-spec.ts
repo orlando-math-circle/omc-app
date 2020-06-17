@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import request from 'supertest';
-import { CreateAccountDTO } from '../src/accounts/dtos/create-account.dto';
+import * as request from 'supertest';
+import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
 import { createMikroTestingModule } from './bootstrap';
 
 describe('Users', () => {

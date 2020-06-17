@@ -1,5 +1,5 @@
 import { Body, Controller, Get, UseGuards } from '@nestjs/common';
-import { Account } from '../accounts/account.entity';
+import { Account } from '../account/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';

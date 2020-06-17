@@ -7,10 +7,8 @@ import {
   OneToOne,
   PrimaryKey,
   Property,
-  LoadStrategy,
 } from 'mikro-orm';
 import { User } from '../user/user.entity';
-import { LocalStrategy } from '../auth/strategies/local.strategy';
 
 @Entity()
 export class Account extends BaseEntity<Account, 'id'> {

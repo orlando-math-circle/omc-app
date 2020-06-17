@@ -1,7 +1,7 @@
 import { forwardRef, Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { AccountModule } from '../accounts/account.module';
+import { AccountModule } from '../account/account.module';
 import { ACCESS_CONTROL_TOKEN } from '../app.constants';
 import AccessControl from '../app.roles';
 import { UserModule } from '../user/user.module';

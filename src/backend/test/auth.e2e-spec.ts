@@ -2,8 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
 import { createMikroTestingModule } from './bootstrap';
 import { AuthService } from '../src/auth/auth.service';
-import { CreateAccountDTO } from '../src/accounts/dtos/create-account.dto';
-import request from 'supertest';
+import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
+import * as request from 'supertest';
 
 const createAccountDTO: CreateAccountDTO = {
   name: 'Jane Doe',

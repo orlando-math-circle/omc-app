@@ -1,12 +1,12 @@
 import {
+  ArrayType,
   BaseEntity,
   Entity,
   ManyToOne,
   PrimaryKey,
   Property,
-  ArrayType,
 } from 'mikro-orm';
-import { Account } from '../accounts/account.entity';
+import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
 
 @Entity()
