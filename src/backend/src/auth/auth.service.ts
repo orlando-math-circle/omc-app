@@ -4,15 +4,22 @@ import {
   GoneException,
   Inject,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { SignOptions, VerifyOptions } from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
+import { BCRYPT_ROUNDS } from '../app.constants';
+import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
+import {
+  ResetPayload,
+  Token,
+  VerifyPayload,
+} from './interfaces/token.interface';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +29,8 @@ export class AuthService {
     private readonly userService: UserService,
     @Inject(forwardRef(() => AccountService))
     private readonly accountService: AccountService,
+    private readonly emailService: EmailService,
+    private readonly config: ConfigService,
   ) {}
 
   async validateLogin(email: string, password: string) {
@@ -38,29 +47,133 @@ export class AuthService {
     const payload =
       account.users.length > 1 ? { aid: account.id } : { uid: user.id };
 
-    return { token: this.sign(payload), complete: !!payload.uid };
+    return { token: this.signJWT(payload), complete: !!payload.uid };
   }
 
   async logout(account: Account) {
     await this.accountService.update(account, { logoutAt: new Date() });
   }
 
-  public sign(payload: any, options?: SignOptions) {
-    return this.jwtService.sign(payload, options);
+  /**
+   * Creates a JWT for the provided payload using the app-level secret
+   * or with a provided secret.
+   *
+   * @param payload claims to include in the JWT
+   * @param secret optional secret to override the app secret
+   * @param options optional options for signing
+   */
+  public signJWT(payload: any, secret?: string, options?: jwt.SignOptions) {
+    return jwt.sign(payload, secret || this.config.get('SECRET'), options);
   }
 
-  public async verify(token: string, options?: VerifyOptions) {
-    const payload = this.jwtService.verify(token, options);
+  /**
+   * Verifies if the claims within a JWT are valid by validating the hash.
+   * This will also reject the token if it is expired.
+   *
+   * @param token token to verify the claims of
+   * @param secret optional secret to override the app secret
+   * @param options optional options for signing
+   */
+  public verifyJWT<T extends Token = any>(
+    token: string,
+    secret?: string,
+    options?: jwt.VerifyOptions,
+  ) {
+    return jwt.verify(token, secret || this.config.get('SECRET'), options) as T;
+  }
 
-    if (payload.email) {
-      const user = await this.userService.findOne(payload.email);
+  /**
+   * Retrieves the claims of a JWT without verifying hashed component.
+   * Unless you know what you're doing, you probably want `verifyJWT`.
+   *
+   * @param token token whose claims are to be extracted
+   * @param options optional options for decoding
+   */
+  public decodeJWT<T extends Token = any>(
+    token: string,
+    options?: jwt.DecodeOptions,
+  ) {
+    return jwt.decode(token, options) as T;
+  }
 
-      if (!user) throw new NotFoundException();
-      if (user.emailVerified) throw new GoneException();
+  /**
+   * Verifies that a user owns an email so they can receive further notifications.
+   * The security of this hinges on the app-level token secret being secure.
+   *
+   * @param token token for verifying the user's email
+   */
+  public async verifyEmail(token: string) {
+    const payload = this.verifyJWT<VerifyPayload>(token);
 
-      return await this.userService.update(user, { emailVerified: true });
-    }
+    if (!payload || !('email' in payload))
+      throw new BadRequestException('Malformed Token');
 
-    throw new BadRequestException();
+    const user = await this.userService.findOneOrFail(payload.email);
+
+    if (user.emailVerified) throw new GoneException();
+
+    await this.userService.update(user, { emailVerified: true });
+  }
+
+  /**
+   * Creates a password reset link for valid emails, otherwise does nothing.
+   * The response should always be the same to prevent user fishing.
+   *
+   * @param email email address for sending the password reset link
+   */
+  public async forgotPassword(email: string) {
+    const user = await this.userService.findOne(email);
+
+    if (!user) return;
+
+    const token = this.signJWT(
+      { uid: user.id },
+      `${user.password}${this.config.get('SECRET')}`,
+    );
+
+    this.emailService.email(email, token);
+  }
+
+  /**
+   * Verifies that a password reset token is valid. This method does not
+   * perform password resets, only verifies that the token must have come
+   * from the user's email address.
+   *
+   * Security is enforced through a secret combining the user's *current*
+   * password hash and the app-level token secret. These tokens become
+   * invalid whenever a password is changed, or they expire.
+   *
+   * @param token token to verify that the user
+   */
+  public async getValidResetTokenUser(token: string): Promise<User> {
+    const unsafePayload = this.decodeJWT<ResetPayload>(token);
+
+    if (!unsafePayload || !('uid' in unsafePayload))
+      throw new BadRequestException('Malformed token');
+
+    const user = await this.userService.findOne(unsafePayload.uid);
+
+    // Don't use `findOneOrFail` as this would allow for user fishing,
+    // or intentionally looking for non-404 errors.
+    if (!user) throw new BadRequestException();
+
+    // Errors here percolate to the `JsonWebTokenFilter`.
+    this.verifyJWT(token, `${user.password}${this.config.get('SECRET')}`);
+
+    return user;
+  }
+
+  /**
+   * Changes the password of a user using a valid reset token.
+   *
+   * @param token token for resetting the user's password
+   * @param password new password the user wants
+   */
+  public async resetUserPassword(token: string, password: string) {
+    const user = await this.getValidResetTokenUser(token);
+
+    password = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
+    await this.userService.update(user, { password });
   }
 }

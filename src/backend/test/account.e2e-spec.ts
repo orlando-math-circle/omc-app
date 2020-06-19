@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import * as request from 'supertest';
+import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
 import { Roles } from '../src/app.roles';
@@ -60,8 +60,8 @@ describe('Accounts', () => {
   });
 
   describe('GET /account/me', () => {
-    it('should throw on unauthenticated requests', () => {
-      request(app.getHttpServer()).get('/account/me').expect(401);
+    it('should throw on unauthenticated requests', async () => {
+      await request(app.getHttpServer()).get('/account/me').expect(401);
     });
 
     it('should retrieve the authed account', async () => {
@@ -77,10 +77,10 @@ describe('Accounts', () => {
 
   describe('GET /account/:id', () => {
     it('should reject arbitrary account lookup', async () => {
-      request(app.getHttpServer())
+      await request(app.getHttpServer())
         .get('/account/1')
         .set('Authorization', `Bearer ${token}`)
-        .expect(401);
+        .expect(403);
     });
 
     it('should retrieve account lookup for admins', async () => {
@@ -98,8 +98,8 @@ describe('Accounts', () => {
         .expect(200);
     });
 
-    it('should throw 404 on non-existant accounts', () => {
-      request(app.getHttpServer())
+    it('should throw 404 on non-existant accounts', async () => {
+      await request(app.getHttpServer())
         .get('/account/2')
         .set('Authorization', `Bearer ${token}`)
         .expect(404);

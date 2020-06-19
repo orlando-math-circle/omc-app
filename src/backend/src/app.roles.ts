@@ -12,6 +12,10 @@ ac.grant(Roles.GUEST)
   .extend(Roles.GUEST)
   .readAny('account')
   .updateAny('account')
-  .deleteAny('account');
+  .deleteAny('account')
+  .createAny('user')
+  .readAny('user')
+  .updateAny('user')
+  .deleteAny('user');
 
 export default ac;

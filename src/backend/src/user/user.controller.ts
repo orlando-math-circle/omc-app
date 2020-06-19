@@ -1,10 +1,20 @@
-import { Body, Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { Account } from '../account/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
 import { UserGuard } from '../auth/guards/user.guard';
 import { CreateUserDTO } from './dtos/create-user.dto';
+import { FindUserDTO } from './dtos/find-user.dto';
 import { UpdateUserDTO } from './dtos/update-user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
@@ -20,17 +30,20 @@ export class UserController {
   }
 
   @Auth('user', 'create:own')
+  @Post()
   create(@Acc() account: Account, @Body() createUserDTO: CreateUserDTO) {
     console.log(account, createUserDTO);
   }
 
   @Auth('user', 'update:any')
-  update(id: number, updateUserDTO: UpdateUserDTO) {
+  @Patch(':id')
+  update(@Param() { id }: FindUserDTO, updateUserDTO: UpdateUserDTO) {
     return this.userService.update(id, updateUserDTO);
   }
 
   @Auth('user', 'delete:any')
-  delete(id: number) {
+  @Delete(':id')
+  delete(@Param() { id }: FindUserDTO) {
     return this.userService.delete(id);
   }
 }

@@ -1,7 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import * as request from 'supertest';
+import request from 'supertest';
 import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
+import { Roles } from '../src/app.roles';
+import { User } from '../src/user/user.entity';
 import { createMikroTestingModule } from './bootstrap';
 
 describe('Users', () => {
@@ -18,6 +20,13 @@ describe('Users', () => {
     name: 'Jane Doe',
     email: 'jane@doe.com',
     password: 'apple',
+    dob: new Date(),
+  };
+
+  const secondAccountDTO: CreateAccountDTO = {
+    name: 'Jack Doe',
+    email: 'jack@doe.com',
+    password: 'banana',
     dob: new Date(),
   };
 
@@ -43,6 +52,11 @@ describe('Users', () => {
       .send(createAccountDTO)
       .expect(201);
 
+    await request(app.getHttpServer())
+      .post('/account/register')
+      .send(secondAccountDTO)
+      .expect(201);
+
     const loginResp = await request(app.getHttpServer())
       .post('/login')
       .send({ email: 'jane@doe.com', password: 'apple' })
@@ -52,7 +66,12 @@ describe('Users', () => {
     token = loginResp.body.token;
   });
 
-  describe('GET /me', () => {
+  afterAll(async () => {
+    await orm.close();
+    await app.close();
+  });
+
+  describe('GET /user/me', () => {
     it('should retrieve the selected user', async () => {
       const resp = await request(app.getHttpServer())
         .get('/user/me')
@@ -65,8 +84,48 @@ describe('Users', () => {
     });
   });
 
-  afterAll(async () => {
-    await orm.close();
-    await app.close();
+  describe('PATCH /user/:id', () => {
+    it('should throw 403 for users without proper rank', async () => {
+      await request(app.getHttpServer())
+        .patch('/user/2')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(403);
+    });
+  });
+
+  describe('DELETE /user/:id', () => {
+    it('should fail to delete a user without a proper rank', async () => {
+      await request(app.getHttpServer())
+        .delete('/user/2')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(403);
+    });
+
+    it('should delete a user', async () => {
+      const user = await orm.em.findOne(User, { id: 1 });
+
+      expect(user).toBeDefined();
+      expect(user.id).toBe(1);
+
+      user.roles = [Roles.ADMIN];
+
+      await orm.em.flush();
+
+      const toDelete = await orm.em.findOne(User, { id: 2 });
+
+      expect(toDelete).toBeDefined();
+      expect(toDelete.id).toBe(2);
+
+      await request(app.getHttpServer())
+        .delete('/user/2')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      orm.em.clear();
+
+      const deleted = await orm.em.findOne(User, { id: 2 });
+
+      expect(deleted).toBeNull();
+    });
   });
 });

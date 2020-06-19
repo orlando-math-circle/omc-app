@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Roles } from '../../app.roles';
 
 export class UpdateUserDTO {
@@ -13,6 +13,10 @@ export class UpdateUserDTO {
   @IsOptional()
   @IsBoolean()
   emailVerified?: boolean;
+
+  @IsOptional()
+  @IsString()
+  password?: string;
 
   @IsOptional()
   @IsEnum({ each: true })

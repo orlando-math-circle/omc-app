@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { JsonWebTokenFilter } from './auth/filters/jwt.filter';
 
 declare const module: any;
 
@@ -14,6 +15,8 @@ async function bootstrap() {
       forbidUnknownValues: true,
     }),
   );
+
+  app.useGlobalFilters(new JsonWebTokenFilter());
 
   await app.listen(3000);
 

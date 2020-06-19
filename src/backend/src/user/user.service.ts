@@ -21,12 +21,18 @@ export class UserService {
     );
   }
 
+  async findOneOrFail(id: number): Promise<User>;
+  async findOneOrFail(email: string): Promise<User>;
+  async findOneOrFail(idOrEmail: number | string) {
+    return this.userRepository.findOneOrFail(
+      typeof idOrEmail === 'number' ? { id: idOrEmail } : { email: idOrEmail },
+      true,
+    );
+  }
+
   async update(id: number, updateUserDTO: UpdateUserDTO): Promise<User>;
   async update(user: User, updateUserDTO: UpdateUserDTO): Promise<User>;
-  async update(
-    idOrUser: number | User,
-    updateUserDTO: UpdateUserDTO,
-  ): Promise<User> {
+  async update(idOrUser: number | User, updateUserDTO: UpdateUserDTO) {
     const user = isNumber(idOrUser)
       ? await this.userRepository.findOneOrFail(idOrUser)
       : idOrUser;
