@@ -4,11 +4,14 @@ import {
   GoneException,
   Inject,
   Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import { Request } from 'express';
+import jwt from 'jsonwebtoken';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
 import { BCRYPT_ROUNDS } from '../app.constants';
@@ -16,15 +19,17 @@ import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import {
+  AuthPayload,
   ResetPayload,
   Token,
   VerifyPayload,
 } from './interfaces/token.interface';
 
+export type AuthRequest = Request & { usr?: User; account: Account };
+
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly jwtService: JwtService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     @Inject(forwardRef(() => AccountService))
@@ -47,11 +52,42 @@ export class AuthService {
     const payload =
       account.users.length > 1 ? { aid: account.id } : { uid: user.id };
 
-    return { token: this.signJWT(payload), complete: !!payload.uid };
+    return {
+      token: this.signJWT(
+        payload,
+        `${account.logoutHash}${this.config.get('SECRET')}`,
+      ),
+      complete: !!payload.uid,
+    };
   }
 
   async logout(account: Account) {
-    await this.accountService.update(account, { logoutAt: new Date() });
+    await this.accountService.update(account, {
+      logoutHash: crypto.randomBytes(10).toString('hex'),
+    });
+  }
+
+  async getSigningKey(req: AuthRequest, token: string) {
+    const payload = this.decodeJWT<AuthPayload>(token);
+
+    if (!payload || !(payload.aid || payload.uid)) {
+      throw new UnauthorizedException('Malformed Token');
+    }
+
+    if (payload.uid) {
+      req.usr = await this.userService.findOne(payload.uid);
+
+      if (!req.usr) throw new UnauthorizedException('USR MISSING');
+      if (!req.usr.account) throw new InternalServerErrorException();
+
+      req.account = req.usr.account;
+    } else if (payload.aid) {
+      req.account = await this.accountService.findOne(payload.aid);
+
+      if (!req.account) throw new UnauthorizedException('ACC MISSING');
+    }
+
+    return `${req.account.logoutHash}${this.config.get('SECRET')}`;
   }
 
   /**

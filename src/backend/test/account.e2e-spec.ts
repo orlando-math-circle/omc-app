@@ -1,9 +1,10 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
 import { Roles } from '../src/app.roles';
+import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { User } from '../src/user/user.entity';
 import { createMikroTestingModule } from './bootstrap';
 
@@ -36,7 +37,21 @@ describe('Accounts', () => {
     await generator.dropSchema();
     await generator.createSchema();
 
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidUnknownValues: true,
+      }),
+    );
+    app.useGlobalFilters(new JsonWebTokenFilter());
+
     await app.init();
+  });
+
+  afterAll(async () => {
+    await orm.close();
+    await app.close();
   });
 
   test('POST /account/register', async () => {
@@ -107,8 +122,8 @@ describe('Accounts', () => {
   });
 
   describe('DELETE /account/:id', () => {
-    it('should throw 401 for unauthenticated requests', () => {
-      request(app.getHttpServer()).delete('/account/1').expect(401);
+    it('should throw 401 for unauthenticated requests', async () => {
+      await request(app.getHttpServer()).delete('/account/1').expect(401);
     });
 
     it('should delete accounts', async () => {
@@ -137,10 +152,5 @@ describe('Accounts', () => {
 
       expect(users.length).toBe(0);
     });
-  });
-
-  afterAll(async () => {
-    await orm.close();
-    await app.close();
   });
 });

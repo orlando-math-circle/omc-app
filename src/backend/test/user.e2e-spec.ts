@@ -1,8 +1,9 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
 import request from 'supertest';
 import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
 import { Roles } from '../src/app.roles';
+import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { User } from '../src/user/user.entity';
 import { createMikroTestingModule } from './bootstrap';
 
@@ -41,6 +42,15 @@ describe('Users', () => {
     await generator.dropSchema();
     await generator.createSchema();
 
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidUnknownValues: true,
+      }),
+    );
+    app.useGlobalFilters(new JsonWebTokenFilter());
+
     await app.init();
 
     /**
@@ -64,6 +74,10 @@ describe('Users', () => {
 
     expect(typeof loginResp.body.token).toBe('string');
     token = loginResp.body.token;
+  });
+
+  afterEach(() => {
+    orm.em.clear();
   });
 
   afterAll(async () => {
@@ -90,6 +104,33 @@ describe('Users', () => {
         .patch('/user/2')
         .set('Authorization', `Bearer ${token}`)
         .expect(403);
+    });
+
+    it('should allow edits from qualified users', async () => {
+      const user = await orm.em.findOne(User, { id: 1 });
+
+      expect(user).toBeDefined();
+      expect(user.id).toBe(1);
+
+      user.roles = [Roles.ADMIN];
+
+      await orm.em.flush();
+
+      await request(app.getHttpServer())
+        .patch('/user/2')
+        .send({ name: 'Jackson Doe' })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const modUser = await orm.em.findOne(User, { id: 2 });
+
+      expect(modUser).toBeDefined();
+      expect(modUser.id).toBe(2);
+      expect(modUser.name).toBe('Jackson Doe');
+
+      user.roles = [];
+
+      await orm.em.flush();
     });
   });
 

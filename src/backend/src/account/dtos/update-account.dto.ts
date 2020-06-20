@@ -1,7 +1,7 @@
-import { IsDateString, IsOptional } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateAccountDTO {
   @IsOptional()
-  @IsDateString()
-  logoutAt?: Date;
+  @IsString()
+  logoutHash?: string;
 }

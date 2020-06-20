@@ -23,21 +23,21 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(UserGuard)
-  @Get('me')
-  getMe(@Usr() user: User) {
-    return user;
-  }
-
   @Auth('user', 'create:own')
   @Post()
   create(@Acc() account: Account, @Body() createUserDTO: CreateUserDTO) {
     console.log(account, createUserDTO);
   }
 
+  @UseGuards(UserGuard)
+  @Get('me')
+  getMe(@Usr() user: User) {
+    return user;
+  }
+
   @Auth('user', 'update:any')
   @Patch(':id')
-  update(@Param() { id }: FindUserDTO, updateUserDTO: UpdateUserDTO) {
+  update(@Param() { id }: FindUserDTO, @Body() updateUserDTO: UpdateUserDTO) {
     return this.userService.update(id, updateUserDTO);
   }
 
