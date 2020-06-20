@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
@@ -10,6 +10,7 @@ import { Usr } from './decorators/user.decorator';
 import { ForgotPasswordDTO } from './dtos/forgot-password.dto';
 import { ResetPasswordDTO } from './dtos/reset-password.dto';
 import { VerifyTokenDTO } from './dtos/verify-token.dto';
+import { FindUserDTO } from '../user/dtos/find-user.dto';
 
 @Controller()
 export class AuthController {
@@ -28,6 +29,12 @@ export class AuthController {
   @Post('logout')
   logout(@Acc() account: Account) {
     return this.authService.logout(account);
+  }
+
+  @Auth()
+  @Post('switch/:id')
+  switch(@Acc() account: Account, @Param() { id }: FindUserDTO) {
+    return this.authService.switchUser(account, id);
   }
 
   @Post('forgot')

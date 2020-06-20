@@ -179,6 +179,30 @@ describe('Auth', () => {
     });
   });
 
+  describe('POST /switch', () => {
+    it('should fail for non-existant users', async () => {
+      await request(app.getHttpServer())
+        .post('/switch/5')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400);
+    });
+
+    it('should succeed for multi-user accounts', async () => {
+      const resp = await request(app.getHttpServer())
+        .post('/user')
+        .send({ name: 'Jacob Doe', dob: new Date() })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      expect(resp.body.name).toBe('Jacob Doe');
+
+      await request(app.getHttpServer())
+        .post(`/switch/${resp.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+    });
+  });
+
   describe('POST /verify/email', () => {
     it('should reject malformed tokens', async () => {
       await request(app.getHttpServer())

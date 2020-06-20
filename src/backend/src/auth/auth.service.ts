@@ -39,7 +39,7 @@ export class AuthService {
   ) {}
 
   async validateLogin(email: string, password: string) {
-    const user = await this.userService.findOne(email);
+    const user = await this.userService.findOne(email, true);
 
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;
@@ -67,7 +67,34 @@ export class AuthService {
     });
   }
 
-  async getSigningKey(req: AuthRequest, token: string) {
+  /**
+   * Creates a new token for a specific user on an account.
+   *
+   * @param account account with users to switch between
+   * @param id id of the user to switch to
+   */
+  public switchUser(account: Account, id: number) {
+    const hasId = account.users.getIdentifiers().includes(id);
+
+    if (!hasId) throw new BadRequestException();
+
+    return {
+      token: this.signJWT(
+        { uid: id },
+        `${account.logoutHash}${this.config.get('SECRET')}`,
+      ),
+      complete: true,
+    };
+  }
+
+  /**
+   * Retrieves the secret key for verifying a JWT token from a
+   * user or account within the payload.
+   *
+   * @param req request for attaching information
+   * @param token JWT for decoding
+   */
+  public async getSigningKey(req: AuthRequest, token: string) {
     const payload = this.decodeJWT<AuthPayload>(token);
 
     if (!payload || !(payload.aid || payload.uid)) {
@@ -75,14 +102,14 @@ export class AuthService {
     }
 
     if (payload.uid) {
-      req.usr = await this.userService.findOne(payload.uid);
+      req.usr = await this.userService.findOne(payload.uid, true);
 
       if (!req.usr) throw new UnauthorizedException('USR MISSING');
       if (!req.usr.account) throw new InternalServerErrorException();
 
       req.account = req.usr.account;
     } else if (payload.aid) {
-      req.account = await this.accountService.findOne(payload.aid);
+      req.account = await this.accountService.findOne(payload.aid, true);
 
       if (!req.account) throw new UnauthorizedException('ACC MISSING');
     }

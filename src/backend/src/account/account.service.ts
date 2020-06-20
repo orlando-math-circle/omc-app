@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { EntityRepository } from 'mikro-orm';
+import { EntityRepository, FilterQuery } from 'mikro-orm';
 import { InjectRepository } from 'nestjs-mikro-orm';
 import { BCRYPT_ROUNDS } from '../app.constants';
 import { isNumber } from '../app.utils';
@@ -47,11 +47,31 @@ export class AccountService {
   }
 
   /**
-   * Finds an individual account or returns `undefined`
+   * Retrieves an individual user or returns null.
+   *
    * @param id id of the account to find
+   * @param populate which, or all, relationships to populate
    */
-  async findOne(id: number) {
-    return this.accountRepository.findOne(id);
+  async findOne(id: number, populate?: boolean | string[]): Promise<Account>;
+
+  /**
+   * Retrieves an individual user or returns null.
+   *
+   * @param where object query of the properties to use for retrieval
+   * @param populate which, or all, relationships to populate
+   */
+  async findOne(
+    where: FilterQuery<Account>,
+    populate?: boolean | string[],
+  ): Promise<Account>;
+
+  async findOne(
+    prop: number | FilterQuery<Account>,
+    populate?: boolean | string[],
+  ) {
+    const where = isNumber(prop) ? { id: prop } : prop;
+
+    return this.accountRepository.findOne(where, populate);
   }
 
   /**
