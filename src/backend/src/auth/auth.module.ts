@@ -1,6 +1,4 @@
 import { forwardRef, Global, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
 import { AccountModule } from '../account/account.module';
 import { ACCESS_CONTROL_TOKEN } from '../app.constants';
 import AccessControl from '../app.roles';
@@ -17,17 +15,7 @@ const ACProvider = {
 
 @Global()
 @Module({
-  imports: [
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        secret: config.get('SECRET'),
-      }),
-      inject: [ConfigService],
-    }),
-    forwardRef(() => UserModule),
-    forwardRef(() => AccountModule),
-  ],
+  imports: [forwardRef(() => UserModule), forwardRef(() => AccountModule)],
   providers: [AuthService, ACProvider, LocalStrategy, TokenStrategy],
   controllers: [AuthController],
   exports: [AuthService, ACProvider],

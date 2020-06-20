@@ -10,6 +10,7 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailService } from '../src/email/email.service';
 import { User } from '../src/user/user.entity';
 import { UserService } from '../src/user/user.service';
+import { Account } from '../src/account/account.entity';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
@@ -99,7 +100,7 @@ describe('Auth', () => {
         .expect(401);
     });
 
-    it('should throw a 500 exception a user lacks an account', async () => {
+    it('should throw a 500 exception if a user lacks an account', async () => {
       jest
         .spyOn(AuthService.prototype, 'validateLogin')
         .mockResolvedValue({ id: 1 } as User);
@@ -115,15 +116,13 @@ describe('Auth', () => {
     it('should reject invalid tokens', async () => {
       const jwt = authService.signJWT({ invalid: true });
 
-      const resp = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .get('/account/me')
         .set('Authorization', `Bearer ${jwt}`)
         .expect(401);
-
-      expect(resp.body.message).toBe('Malformed Token');
     });
 
-    it('should throw a 500 exception when a user lacks an account', async () => {
+    it('should throw an exception when a user lacks an account', async () => {
       jest
         .spyOn(UserService.prototype, 'findOne')
         .mockResolvedValue({ id: 1 } as User);
@@ -131,37 +130,38 @@ describe('Auth', () => {
       await request(app.getHttpServer())
         .get('/account/me')
         .set('Authorization', `Bearer ${token}`)
-        .expect(500);
+        .expect(401);
     });
   });
 
   describe('POST /logout', () => {
-    it('should retrieve accounts without `logoutAt`', async () => {
-      const resp = await request(app.getHttpServer())
-        .get('/account/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-
-      expect(resp.body.id).toBe(1);
-      expect(resp.body.logoutAt).toBeNull();
-    });
-
     it('should logout the account and invalidate the token', async () => {
+      const account = await orm.em.findOne(Account, { id: 1 });
+
+      expect(account).toBeDefined();
+      expect(typeof account.logoutHash).toBe('string');
+      const hash = account.logoutHash;
+
       await request(app.getHttpServer())
         .post('/logout')
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
 
-      const resp = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .get('/account/me')
         .set('Authorization', `Bearer ${token}`)
         .expect(401);
 
-      expect(resp.body.message).toBe('Token Revoked');
+      orm.em.clear();
+
+      const changedAccount = await orm.em.findOne(Account, { id: 1 });
+
+      expect(changedAccount).toBeDefined();
+      expect(typeof changedAccount.logoutHash).toBe('string');
+      expect(changedAccount.logoutHash).not.toBe(hash);
     });
 
-    it('should allow reflow with a `logoutAt` date', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1100));
+    it('should allow reflow', async () => {
       let resp = await request(app.getHttpServer())
         .post('/login')
         .send({ email: 'jane@doe.com', password: 'apple' })
@@ -176,8 +176,6 @@ describe('Auth', () => {
         .get('/account/me')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
-
-      expect(typeof resp.body.logoutAt).toBe('string');
     });
   });
 

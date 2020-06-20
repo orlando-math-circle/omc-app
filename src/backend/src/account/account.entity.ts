@@ -9,14 +9,15 @@ import {
   Property,
 } from 'mikro-orm';
 import { User } from '../user/user.entity';
+import crypto from 'crypto';
 
 @Entity()
 export class Account extends BaseEntity<Account, 'id'> {
   @PrimaryKey()
   id!: number;
 
-  @Property({ nullable: true })
-  logoutAt?: Date;
+  @Property({ hidden: true })
+  logoutHash: string = crypto.randomBytes(10).toString('hex');
 
   @Property()
   createdAt: Date = new Date();
