@@ -26,7 +26,7 @@ export class UserController {
   @Auth('user', 'create:own')
   @Post()
   create(@Acc() account: Account, @Body() createUserDTO: CreateUserDTO) {
-    console.log(account, createUserDTO);
+    return this.userService.create(account, createUserDTO);
   }
 
   @UseGuards(UserGuard)

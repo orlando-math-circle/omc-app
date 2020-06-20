@@ -8,6 +8,7 @@ export enum Roles {
 const ac = new AccessControl();
 
 ac.grant(Roles.GUEST)
+  .createOwn('user')
   .grant(Roles.ADMIN)
   .extend(Roles.GUEST)
   .readAny('account')

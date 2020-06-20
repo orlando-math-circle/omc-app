@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
 import request from 'supertest';
+import { Account } from '../src/account/account.entity';
 import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
 import { Roles } from '../src/app.roles';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -83,6 +84,23 @@ describe('Users', () => {
   afterAll(async () => {
     await orm.close();
     await app.close();
+  });
+
+  describe('POST /user', () => {
+    it('should add a user to an account', async () => {
+      await request(app.getHttpServer())
+        .post('/user')
+        .send({ name: 'First Last', dob: new Date() })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      const account = await orm.em.findOne(Account, { id: 1 }, true);
+
+      const addedUser = orm.em.getReference(User, 3);
+      expect(account).toBeDefined();
+      expect(account.users.length).toBe(2);
+      expect(account.users.contains(addedUser)).toBe(true);
+    });
   });
 
   describe('GET /user/me', () => {
