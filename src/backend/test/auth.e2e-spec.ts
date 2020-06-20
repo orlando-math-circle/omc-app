@@ -1,16 +1,19 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
 import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
+import { Account } from '../src/account/account.entity';
+import { AccountService } from '../src/account/account.service';
 import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { AccessGuard } from '../src/auth/guards/access-control.guard';
 import { EmailService } from '../src/email/email.service';
 import { User } from '../src/user/user.entity';
 import { UserService } from '../src/user/user.service';
-import { Account } from '../src/account/account.entity';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
@@ -21,6 +24,19 @@ const createAccountDTO: CreateAccountDTO = {
   email: 'jane@doe.com',
   password: 'apple',
   dob: new Date(),
+};
+
+const contextMock = {
+  switchToHttp: jest.fn(() => ({
+    getRequest: () => ({
+      originalUrl: '/',
+      method: 'GET',
+      params: undefined,
+      query: undefined,
+      body: undefined,
+    }),
+  })),
+  getHandler: jest.fn(() => ({})),
 };
 
 describe('Auth', () => {
@@ -134,6 +150,25 @@ describe('Auth', () => {
     });
   });
 
+  describe('Access Control Guard', () => {
+    it('should throw 401 unauthorized on no user', () => {
+      expect(() =>
+        AccessGuard.prototype.getUserRoles(contextMock as never),
+      ).toThrow();
+    });
+
+    it('should return true if there are no grants', () => {
+      const reflector = new Reflector();
+      jest.spyOn(reflector, 'get').mockReturnValueOnce(null as never);
+
+      const acGuard = new AccessGuard(reflector, null);
+
+      const resp = acGuard.canActivate(contextMock as never);
+
+      expect(resp).toBe(true);
+    });
+  });
+
   describe('POST /logout', () => {
     it('should logout the account and invalidate the token', async () => {
       const account = await orm.em.findOne(Account, { id: 1 });
@@ -200,6 +235,28 @@ describe('Auth', () => {
         .post(`/switch/${resp.body.id}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
+    });
+
+    it('should create a semi-qualified token with multiple accounts', async () => {
+      const resp = await request(app.getHttpServer())
+        .post('/login')
+        .send({ email: 'jane@doe.com', password: 'apple' })
+        .expect(201);
+
+      expect(typeof resp.body.token).toBe('string');
+      expect(resp.body.complete).toBe(false);
+
+      await request(app.getHttpServer())
+        .get('/account/me')
+        .set('Authorization', `Bearer ${resp.body.token}`)
+        .expect(200);
+
+      jest.spyOn(AccountService.prototype, 'findOne').mockResolvedValue(null);
+
+      await request(app.getHttpServer())
+        .get('/account/me')
+        .set('Authorization', `Bearer ${resp.body.token}`)
+        .expect(401);
     });
   });
 
