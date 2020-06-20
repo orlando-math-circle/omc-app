@@ -10,7 +10,8 @@
   "collectCoverageFrom": [
     "./src/**/*.{js,ts}",
     "!./src/**/*.spec{.js,.ts}",
-    "!./src/**/*.dto{.js,.ts}"
+    "!./src/**/*.dto{.js,.ts}",
+    "!./src/main.ts"
   ],
   "coverageDirectory": "./test/coverage",
   "verbose": true
