@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EntityRepository, QueryOrderMap, FilterQuery } from 'mikro-orm';
+import { EntityRepository, FilterQuery, QueryOrderMap } from 'mikro-orm';
 import { InjectRepository } from 'nestjs-mikro-orm';
 import { Account } from '../account/account.entity';
 import { isNumber, isString } from '../app.utils';
@@ -102,6 +102,8 @@ export class UserService {
   }
 
   async delete(id: number) {
-    return this.userRepository.remove({ id }, true);
+    const user = await this.userRepository.findOneOrFail(id);
+
+    return this.userRepository.remove(user).flush();
   }
 }

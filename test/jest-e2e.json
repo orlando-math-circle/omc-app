@@ -1,6 +1,6 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "../",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
@@ -13,6 +13,6 @@
     "!./src/**/*.dto{.js,.ts}",
     "!./src/main.ts"
   ],
-  "coverageDirectory": "../coverage",
+  "coverageDirectory": "./coverage",
   "verbose": true
 }
