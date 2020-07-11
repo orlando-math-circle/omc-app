@@ -2,13 +2,13 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
-import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
+import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
 import { Roles } from '../src/app.roles';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { User } from '../src/user/user.entity';
 import { createMikroTestingModule } from './bootstrap';
 
-const createAccountDTO: CreateAccountDTO = {
+const createAccountDto: CreateAccountDto = {
   name: 'Jane Doe',
   email: 'jane@doe.com',
   password: 'apple',
@@ -57,7 +57,7 @@ describe('Accounts', () => {
   test('POST /account/register', async () => {
     const resp = await request(app.getHttpServer())
       .post('/account/register')
-      .send(createAccountDTO)
+      .send(createAccountDto)
       .expect(201);
 
     expect(typeof resp.body).toBe('object');

@@ -8,8 +8,8 @@ import { AuthService } from '../auth/auth.service';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { Account } from './account.entity';
-import { CreateAccountDTO } from './dtos/create-account.dto';
-import { UpdateAccountDTO } from './dtos/update-account.dto';
+import { CreateAccountDto } from './dtos/create-account.dto';
+import { UpdateAccountDto } from './dtos/update-account.dto';
 
 @Injectable()
 export class AccountService {
@@ -23,11 +23,11 @@ export class AccountService {
   /**
    * Creates an account by cascade-inserting the primary user.
    *
-   * @param createAccountDTO properties of the primary user
+   * @param createAccountDto properties of the primary user
    */
-  async create(createAccountDTO: CreateAccountDTO) {
+  async create(createAccountDto: CreateAccountDto) {
     const account = new Account();
-    const user = new User().assign(createAccountDTO);
+    const user = new User().assign(createAccountDto);
 
     user.password = await bcrypt.hash(user.password, BCRYPT_ROUNDS);
     account.primaryUser = user;
@@ -86,32 +86,32 @@ export class AccountService {
    * Updates an account with admin privileges.
    *
    * @param id id of the account to update
-   * @param updateAccountDTO properties to update
+   * @param updateAccountDto properties to update
    */
   async update(
     id: number,
-    updateAccountDTO: UpdateAccountDTO,
+    updateAccountDto: UpdateAccountDto,
   ): Promise<Account>;
 
   /**
    * Updates an account with admin privileges.
    * @param account account to update
-   * @param updateAccountDTO properties to update
+   * @param updateAccountDto properties to update
    */
   async update(
     account: Account,
-    updateAccountDTO: UpdateAccountDTO,
+    updateAccountDto: UpdateAccountDto,
   ): Promise<Account>;
 
   async update(
     idOrAccount: number | Account,
-    updateAccountDTO: UpdateAccountDTO,
+    updateAccountDto: UpdateAccountDto,
   ) {
     const account = isNumber(idOrAccount)
       ? await this.accountRepository.findOneOrFail(idOrAccount)
       : idOrAccount;
 
-    account.assign(updateAccountDTO);
+    account.assign(updateAccountDto);
 
     await this.accountRepository.flush();
 

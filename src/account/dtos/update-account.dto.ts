@@ -1,6 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 
-export class UpdateAccountDTO {
+export class UpdateAccountDto {
   @IsOptional()
   @IsString()
   logoutHash?: string;

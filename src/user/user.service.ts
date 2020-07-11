@@ -3,8 +3,8 @@ import { EntityRepository, FilterQuery, QueryOrderMap } from 'mikro-orm';
 import { InjectRepository } from 'nestjs-mikro-orm';
 import { Account } from '../account/account.entity';
 import { isNumber, isString } from '../app.utils';
-import { CreateUserDTO } from './dtos/create-user.dto';
-import { UpdateUserDTO } from './dtos/update-user.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
 
 @Injectable()
@@ -14,9 +14,9 @@ export class UserService {
     private readonly userRepository: EntityRepository<User>,
   ) {}
 
-  async create(account: Account, createUserDTO: CreateUserDTO) {
+  async create(account: Account, createUserDto: CreateUserDto) {
     // TODO: Add logic for validating these emails, age checks, ...etc.
-    const user = this.userRepository.create(createUserDTO);
+    const user = this.userRepository.create(createUserDto);
 
     account.users.add(user);
 
@@ -87,14 +87,14 @@ export class UserService {
     );
   }
 
-  async update(id: number, updateUserDTO: UpdateUserDTO): Promise<User>;
-  async update(user: User, updateUserDTO: UpdateUserDTO): Promise<User>;
-  async update(idOrUser: number | User, updateUserDTO: UpdateUserDTO) {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User>;
+  async update(user: User, updateUserDto: UpdateUserDto): Promise<User>;
+  async update(idOrUser: number | User, updateUserDto: UpdateUserDto) {
     const user = isNumber(idOrUser)
       ? await this.userRepository.findOneOrFail(idOrUser)
       : idOrUser;
 
-    user.assign(updateUserDTO);
+    user.assign(updateUserDto);
 
     await this.userRepository.flush();
 

@@ -1,7 +1,7 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Roles } from '../../app.roles';
 
-export class UpdateUserDTO {
+export class UpdateUserDto {
   @IsOptional()
   @IsString()
   name?: string;

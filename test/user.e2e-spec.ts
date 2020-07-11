@@ -2,7 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
-import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
+import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
 import { Roles } from '../src/app.roles';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { User } from '../src/user/user.entity';
@@ -18,14 +18,14 @@ describe('Users', () => {
 
   let token: string;
 
-  const createAccountDTO: CreateAccountDTO = {
+  const createAccountDto: CreateAccountDto = {
     name: 'Jane Doe',
     email: 'jane@doe.com',
     password: 'apple',
     dob: new Date(),
   };
 
-  const secondAccountDTO: CreateAccountDTO = {
+  const secondAccountDto: CreateAccountDto = {
     name: 'Jack Doe',
     email: 'jack@doe.com',
     password: 'banana',
@@ -60,12 +60,12 @@ describe('Users', () => {
 
     await request(app.getHttpServer())
       .post('/account/register')
-      .send(createAccountDTO)
+      .send(createAccountDto)
       .expect(201);
 
     await request(app.getHttpServer())
       .post('/account/register')
-      .send(secondAccountDTO)
+      .send(secondAccountDto)
       .expect(201);
 
     const loginResp = await request(app.getHttpServer())

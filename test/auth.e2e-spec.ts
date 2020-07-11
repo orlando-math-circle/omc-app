@@ -6,7 +6,7 @@ import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';
 import { AccountService } from '../src/account/account.service';
-import { CreateAccountDTO } from '../src/account/dtos/create-account.dto';
+import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
 import { AppModule } from '../src/app.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -19,7 +19,7 @@ delete MikroORMConfig.user;
 delete MikroORMConfig.password;
 MikroORMConfig.dbName = 'omc_test';
 
-const createAccountDTO: CreateAccountDTO = {
+const createAccountDto: CreateAccountDto = {
   name: 'Jane Doe',
   email: 'jane@doe.com',
   password: 'apple',
@@ -97,7 +97,7 @@ describe('Auth', () => {
     it('should accept valid logins', async () => {
       await request(app.getHttpServer())
         .post('/account/register')
-        .send(createAccountDTO)
+        .send(createAccountDto)
         .expect(201);
 
       const resp = await request(app.getHttpServer())
@@ -271,7 +271,7 @@ describe('Auth', () => {
     it('should validate emails', async () => {
       // TODO: Once the email service is implemented, this needs to be replaced.
       const verifyToken = authService.signJWT({
-        email: createAccountDTO.email,
+        email: createAccountDto.email,
       });
 
       await request(app.getHttpServer())
