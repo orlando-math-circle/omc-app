@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { Acc } from '../auth/decorators/account.decorator';
-import { Auth } from '../auth/decorators/auth.decorator';
+import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
 import { Account } from './account.entity';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dtos/create-account.dto';
@@ -15,19 +15,19 @@ export class AccountController {
     return this.accountService.create(createAccountDto);
   }
 
-  @Auth()
+  @AccountAuth()
   @Get('me')
   getMe(@Acc() account: Account) {
     return account;
   }
 
-  @Auth('account', 'read:any')
+  @UserAuth('account', 'read:any')
   @Get(':id')
   findOne(@Param() { id }: FindOneAccountDto) {
     return this.accountService.findOneOrFail(id);
   }
 
-  @Auth('account', 'delete:any')
+  @UserAuth('account', 'delete:any')
   @Delete(':id')
   delete(@Param() { id }: FindOneAccountDto) {
     return this.accountService.delete(id);

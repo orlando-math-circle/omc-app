@@ -25,10 +25,10 @@ module.exports = {
   },
   overrides: [
     {
-      // Entity file `WrappedEntity` interfaces.
+      // Types must be defined explicitly in entity fiels.
       files: ['*.entity.ts'],
       rules: {
-        '@typescript-eslint/no-empty-interface': 'off',
+        '@typescript-eslint/no-inferrable-types': 'off',
       },
     },
   ],

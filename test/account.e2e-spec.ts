@@ -1,12 +1,24 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
+import { MikroOrmModule } from 'nestjs-mikro-orm';
 import request from 'supertest';
+import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';
+import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
+import configSchema from '../src/app.config';
 import { Roles } from '../src/app.roles';
+import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { EmailModule } from '../src/email/email.module';
 import { User } from '../src/user/user.entity';
-import { createMikroTestingModule } from './bootstrap';
+import { UserModule } from '../src/user/user.module';
+
+delete MikroORMConfig.user;
+delete MikroORMConfig.password;
+MikroORMConfig.dbName = 'omc_test';
 
 const createAccountDto: CreateAccountDto = {
   name: 'Jane Doe',
@@ -27,7 +39,19 @@ describe('Accounts', () => {
   let token: string;
 
   beforeAll(async () => {
-    const moduleRef = await createMikroTestingModule();
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          validationSchema: configSchema,
+          isGlobal: true,
+        }),
+        MikroOrmModule.forRoot(MikroORMConfig),
+        EmailModule,
+        AccountModule,
+        UserModule,
+        AuthModule,
+      ],
+    }).compile();
 
     app = moduleRef.createNestApplication();
     orm = moduleRef.get<MikroORM>(MikroORM);

@@ -1,23 +1,19 @@
-import { Body, Controller, Post, UseGuards, Param } from '@nestjs/common';
+import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Account } from '../account/account.entity';
-import { AccountService } from '../account/account.service';
+import { FindUserDto } from '../user/dtos/find-user.dto';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
 import { Acc } from './decorators/account.decorator';
-import { Auth } from './decorators/auth.decorator';
+import { AccountAuth } from './decorators/auth.decorator';
 import { Usr } from './decorators/user.decorator';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { VerifyTokenDto } from './dtos/verify-token.dto';
-import { FindUserDto } from '../user/dtos/find-user.dto';
 
 @Controller()
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly accountService: AccountService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @UseGuards(AuthGuard('local'))
   @Post('login')
@@ -25,13 +21,13 @@ export class AuthController {
     return this.authService.login(account, user);
   }
 
-  @Auth()
+  @AccountAuth()
   @Post('logout')
   logout(@Acc() account: Account) {
     return this.authService.logout(account);
   }
 
-  @Auth()
+  @AccountAuth()
   @Post('switch/:id')
   switch(@Acc() account: Account, @Param() { id }: FindUserDto) {
     return this.authService.switchUser(account, id);

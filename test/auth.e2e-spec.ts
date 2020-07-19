@@ -1,18 +1,24 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
+import { MikroOrmModule } from 'nestjs-mikro-orm';
 import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';
+import { AccountModule } from '../src/account/account.module';
 import { AccountService } from '../src/account/account.service';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import { AppModule } from '../src/app.module';
+import configSchema from '../src/app.config';
+import { AuthModule } from '../src/auth/auth.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { AccessGuard } from '../src/auth/guards/access-control.guard';
+import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
 import { User } from '../src/user/user.entity';
+import { UserModule } from '../src/user/user.module';
 import { UserService } from '../src/user/user.service';
 
 delete MikroORMConfig.user;
@@ -53,15 +59,18 @@ describe('Auth', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(MikroORM)
-      .useFactory({
-        factory: async () => {
-          return await MikroORM.init(MikroORMConfig);
-        },
-      })
-      .compile();
+      imports: [
+        ConfigModule.forRoot({
+          validationSchema: configSchema,
+          isGlobal: true,
+        }),
+        MikroOrmModule.forRoot(MikroORMConfig),
+        EmailModule,
+        AccountModule,
+        UserModule,
+        AuthModule,
+      ],
+    }).compile();
 
     app = moduleRef.createNestApplication();
     orm = moduleRef.get<MikroORM>(MikroORM);
