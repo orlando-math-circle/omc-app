@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "@mikro-orm/cli": "^4.0.0-alpha.5",
+    "@mikro-orm/cli": "^4.0.0-rc.1",
     "@mikro-orm/core": "^4.0.0-alpha.5",
     "@mikro-orm/knex": "^4.0.0-alpha.5",
     "@mikro-orm/migrations": "^4.0.0-alpha.5",
