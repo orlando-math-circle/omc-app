@@ -9,7 +9,7 @@ import { User } from '../src/user/user.entity';
 import { Test } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import configSchema from '../src/app.config';
-import { MikroOrmModule } from 'nestjs-mikro-orm';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import MikroORMConfig from '../mikro-orm.config';
 import { EmailModule } from '../src/email/email.module';
 import { AccountModule } from '../src/account/account.module';

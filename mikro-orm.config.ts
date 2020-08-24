@@ -1,6 +1,6 @@
+import { Options, ReflectMetadataProvider } from '@mikro-orm/core';
 import { NotFoundException } from '@nestjs/common';
 import * as dotenv from 'dotenv';
-import { Options, ReflectMetadataProvider } from 'mikro-orm';
 import * as path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
@@ -17,7 +17,9 @@ export const config: Options = {
   findOneOrFailHandler: (entityName: string) => {
     return new NotFoundException(`${entityName} not found`);
   },
-  debug: false,
+  forceUtcTimezone: true,
+  // debug: process.env.NODE_ENV === 'development',
+  debug: true,
 };
 
 export default config;

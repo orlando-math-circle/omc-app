@@ -2,7 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import { MikroOrmModule } from 'nestjs-mikro-orm';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';

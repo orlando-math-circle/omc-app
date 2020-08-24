@@ -1,6 +1,6 @@
+import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
-import { EntityRepository, FilterQuery, QueryOrderMap } from 'mikro-orm';
-import { InjectRepository } from 'nestjs-mikro-orm';
 import { Account } from '../account/account.entity';
 import { isNumber, isString } from '../app.utils';
 import { CreateUserDto } from './dtos/create-user.dto';

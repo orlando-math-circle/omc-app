@@ -1,7 +1,12 @@
+import {
+  EntityData,
+  EntityRepository,
+  FilterQuery,
+  QueryOrderMap,
+} from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { EntityRepository, FilterQuery } from 'mikro-orm';
-import { InjectRepository } from 'nestjs-mikro-orm';
 import { BCRYPT_ROUNDS } from '../app.constants';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
@@ -9,7 +14,6 @@ import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { Account } from './account.entity';
 import { CreateAccountDto } from './dtos/create-account.dto';
-import { UpdateAccountDto } from './dtos/update-account.dto';
 
 @Injectable()
 export class AccountService {
@@ -83,36 +87,26 @@ export class AccountService {
   }
 
   /**
-   * Updates an account with admin privileges.
+   * Updates an account by applying provided entity data.
    *
-   * @param id id of the account to update
-   * @param updateAccountDto properties to update
+   * @param where primary key or object of entity parameters
+   * @param data Account entity data to change
+   * @param populate loading all relations or a string array of relation names to load
+   * @param orderBy object describing the ordering nature of the selection
    */
   async update(
-    id: number,
-    updateAccountDto: UpdateAccountDto,
-  ): Promise<Account>;
-
-  /**
-   * Updates an account with admin privileges.
-   * @param account account to update
-   * @param updateAccountDto properties to update
-   */
-  async update(
-    account: Account,
-    updateAccountDto: UpdateAccountDto,
-  ): Promise<Account>;
-
-  async update(
-    idOrAccount: number | Account,
-    updateAccountDto: UpdateAccountDto,
+    where: FilterQuery<Account>,
+    data: EntityData<Account>,
+    populate?: boolean | string[],
+    orderBy?: QueryOrderMap,
   ) {
-    const account = isNumber(idOrAccount)
-      ? await this.accountRepository.findOneOrFail(idOrAccount)
-      : idOrAccount;
+    const account = await this.accountRepository.findOneOrFail(
+      where,
+      populate,
+      orderBy,
+    );
 
-    account.assign(updateAccountDto);
-
+    account.assign(data);
     await this.accountRepository.flush();
 
     return account;

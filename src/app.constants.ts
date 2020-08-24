@@ -1,4 +1,11 @@
 /**
+ * Configuration
+ */
+
+export const PORT = 'PORT';
+export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
+
+/**
  * Magic Numbers
  */
 

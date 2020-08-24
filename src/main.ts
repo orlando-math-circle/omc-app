@@ -1,5 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { PORT } from './app.constants';
 import { AppModule } from './app.module';
 import { JsonWebTokenFilter } from './auth/filters/jwt.filter';
 
@@ -7,6 +9,7 @@ declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config: ConfigService = app.get(ConfigService);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -18,7 +21,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new JsonWebTokenFilter());
 
-  await app.listen(3000);
+  await app.listen(config.get(PORT));
 
   if (module.hot) {
     module.hot.accept();
