@@ -26,17 +26,6 @@ export class UpdateEventDto {
   @IsDate()
   readonly dtend?: Date;
 
-  /**
-   * Duration of the event, 0 to 1440 (minutes in a day).
-   * TODO: More concise validation logic here, e.g. add an all-day attribute.
-   */
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(1440)
-  readonly duration?: number;
-
   @IsOptional()
   @Type(() => EventRecurrenceDto)
   @ValidateNested()

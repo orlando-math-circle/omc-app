@@ -1,22 +1,23 @@
-import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
+import {
+  EntityRepository,
+  FilterQuery,
+  QueryOrder,
+  QueryOrderMap,
+} from '@mikro-orm/core';
 import { SqlEntityManager } from '@mikro-orm/knex';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import moment from 'moment';
-import RRule, { Options } from 'rrule';
-import { diffObject, isSameDay } from '../app.utils';
+import RRule from 'rrule';
+import { addMinutes, isAfterDay, isBeforeDay, isSameDay } from '../app.utils';
 import { EventRecurrence } from '../event-recurrence/event-recurrence.entity';
 import { EventRecurrenceService } from '../event-recurrence/event-recurrence.service';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
+import { UpdateEventMetaDto } from './dtos/event-meta.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
 import { UpdateEventsDto } from './dtos/update-events.dto';
 import { Event } from './event.entity';
-import { RRuleOptions } from './interfaces/rrule.interface';
 
 @Injectable()
 export class EventService {
@@ -29,6 +30,12 @@ export class EventService {
     private readonly em: SqlEntityManager,
   ) {}
 
+  /**
+   * Creates a single event or a recurring event stream.
+   *
+   * @param createEventDto CreateEventDto
+   * @param author User author
+   */
   async create(createEventDto: CreateEventDto, author: User) {
     const { dtstart, dtend, recurring, ...meta } = createEventDto;
     const event = new Event().assign(
@@ -40,13 +47,6 @@ export class EventService {
       },
       { em: this.em },
     );
-
-    // If the event isn't all day, calculate its duration.
-    if (dtend) {
-      event.duration = Math.round(
-        (dtend.getTime() - dtstart.getTime()) / 60000,
-      );
-    }
 
     // Recurring events generate recurrence rules.
     if (recurring) {
@@ -81,6 +81,14 @@ export class EventService {
     return this.eventRepository.findOneOrFail(where, populate, orderBy);
   }
 
+  /**
+   * Retrieves all events within a date range inclusively. This method
+   * will hydrate any events that do not yet exist in this range for
+   * a recurrence rule.
+   *
+   * @param start Start of the range
+   * @param end End of the range
+   */
   async findAll(start: Date, end: Date) {
     const events = await this.eventRepository.find({
       dtstart: { $gte: start.toISOString() },
@@ -104,8 +112,266 @@ export class EventService {
   }
 
   /**
+   * Modifies an event instance as an exception. If the modifications
+   * are temporal a reference to the original times is maintained.
+   *
+   * @param id event id
+   * @param updateEventDto UpdateEventDto object
+   */
+  public async updateSingleEvent(id: number, updateEventDto: UpdateEventDto) {
+    const { dtstart, dtend, meta } = updateEventDto;
+    const event = await this.eventRepository.findOneOrFail(id);
+
+    if (dtstart) {
+      event.originalStart = event.dtstart;
+      event.dtstart = dtstart;
+    }
+
+    if (dtend) {
+      event.dtend = dtend;
+    }
+
+    event.assign({ ...meta });
+
+    return this.eventRepository.flush();
+  }
+
+  public test() {
+    const start = new Date('2020-07-15T10:00:00.000Z');
+    const end = new Date('2020-07-20T10:00:00.000Z');
+
+    const rrule = new RRule({
+      freq: 3,
+      dtstart: start,
+      until: end,
+    });
+
+    return { events: rrule.between(start, end, true), start, end };
+  }
+
+  /**
+   * Modifies the selected event instance and any future events. If the
+   * modifications are temporal, the `EventRecurrence` is split into two.
+   *
+   * @param id event id
+   * @param updateEventDto UpdateEventDto object
+   */
+  public async updateFutureEvents(id: number, updateEventDto: UpdateEventsDto) {
+    const { dtend, rrule: rruleOpts, meta } = updateEventDto;
+    const pivot = await this.eventRepository.findOneOrFail(
+      id,
+      ['recurrence.events'],
+      {
+        recurrence: { events: { dtstart: QueryOrder.ASC } },
+      },
+    );
+    const events = pivot.recurrence.events;
+
+    // No RRule changes, update topical data and return.
+    if (!rruleOpts) {
+      this.updateEventStream(pivot, events, null, null, dtend, meta);
+
+      return this.eventRepository.flush();
+    }
+
+    const oldRRule = pivot.recurrence.getRRule();
+
+    // Checks if we're making an update to the entire event stream.
+    if (isSameDay(rruleOpts.dtstart, oldRRule.origOptions.dtstart)) {
+      return this.updateAllEvents(pivot.recurrence, updateEventDto);
+    }
+
+    const dayBefore = moment(rruleOpts.dtstart).subtract(1, 'day').toDate();
+    const oldRRuleSplit = this.shortenRRule(oldRRule, dayBefore);
+
+    // Prevent the split from resetting `count`
+    if (
+      oldRRule.options.count &&
+      rruleOpts.count &&
+      rruleOpts.count === oldRRule.options.count
+    ) {
+      rruleOpts.count - oldRRuleSplit.count();
+    }
+
+    const rrule = new RRule(rruleOpts, false);
+
+    pivot.recurrence.rrule = oldRRuleSplit.toString();
+    pivot.recurrence.dtend = dayBefore;
+
+    const newRecurrence = new EventRecurrence(
+      rrule.toString(),
+      rruleOpts.dtstart,
+      rruleOpts.until,
+      pivot.recurrence,
+    );
+
+    const duration = moment(dtend || pivot.dtend).diff(
+      rruleOpts.dtstart,
+      'minutes',
+    );
+
+    pivot.dtstart = rruleOpts.dtstart;
+    pivot.dtend = dtend || addMinutes(pivot.dtstart, duration);
+
+    const dateIterator = rrule
+      .between(rruleOpts.dtstart, events[events.length - 1].dtend, true)
+      .values();
+
+    this.updateEventStream(
+      pivot,
+      pivot.recurrence.events,
+      newRecurrence,
+      dateIterator,
+      dtend,
+      meta,
+    );
+
+    return this.eventRepository.flush();
+  }
+
+  public async updateAllEvents(id: number, updateEventDto: UpdateEventDto);
+  public async updateAllEvents(
+    recurrence: EventRecurrence,
+    updateEventDto: UpdateEventDto,
+  );
+  public async updateAllEvents(
+    idOrRecurrence: number | EventRecurrence,
+    { dtend, rrule: rruleOpts, meta }: UpdateEventDto,
+  ) {
+    const recurrence =
+      typeof idOrRecurrence === 'number'
+        ? await this.recurrenceRepository.findOneOrFail(
+            { events: { id: idOrRecurrence } },
+            ['recurrence.events'],
+            {
+              recurrence: { events: { dtstart: QueryOrder.ASC } },
+            },
+          )
+        : idOrRecurrence;
+
+    // This is called pivot for consistency, but is arbitrarily
+    // the first event that exists in this collection.
+    const pivot = recurrence.events[0];
+
+    if (!rruleOpts) {
+      this.updateEventStream(
+        pivot,
+        recurrence.events,
+        recurrence,
+        null,
+        dtend,
+        meta,
+      );
+
+      return this.eventRepository.flush();
+    }
+
+    const rrule = new RRule(rruleOpts, false);
+
+    recurrence.rrule = rrule.toString();
+    recurrence.dtstart = rruleOpts.dtstart;
+
+    if (rruleOpts.until) {
+      recurrence.dtend = rruleOpts.until;
+    }
+
+    const duration = moment(dtend || pivot.dtend).diff(
+      rruleOpts.dtstart,
+      'minutes',
+    );
+
+    pivot.dtstart = rruleOpts.dtstart;
+    pivot.dtend =
+      dtend || moment(pivot.dtstart).add(duration, 'minutes').toDate();
+
+    const dateIterator = rrule
+      .between(
+        rruleOpts.dtstart,
+        pivot.recurrence.events[pivot.recurrence.events.length - 1].dtend,
+        true,
+      )
+      .values();
+
+    this.updateEventStream(
+      pivot,
+      recurrence.events,
+      null,
+      dateIterator,
+      dtend,
+      meta,
+    );
+
+    return this.eventRepository.flush();
+  }
+
+  /**
+   * Given a stream of events, this method will rectify any necessary
+   * changes as contextually necessary from the arguments.
+   *
+   * @param pivot Event instance being updated, or first event
+   * @param events Iterable array or collection of events
+   * @param recurrence Optional. Recurrence rule to apply to the events
+   * @param dateIterator Optional. Iterator housing the dates for the range of events
+   * @param dtend Optional. Dtend date to apply to all events
+   * @param meta Optional. Meta information to apply to all events
+   */
+  private async updateEventStream(
+    pivot: Event,
+    events: Iterable<Event>,
+    recurrence?: EventRecurrence,
+    dateIterator?: IterableIterator<Date>,
+    dtend?: Date,
+    meta?: UpdateEventMetaDto,
+  ) {
+    let date: IteratorResult<Date, Date> = dateIterator?.next();
+
+    for (const event of events) {
+      // Don't change events before the pivot. Only meaningful to a "future events" update.
+      if (event.dtstart < pivot.dtstart) continue;
+
+      if (recurrence) {
+        // If the date is before this event date, fast-forward.
+        while (!date.done && isBeforeDay(date.value, event.dtstart)) {
+          date = dateIterator.next();
+        }
+
+        // Overshooting an event, or running out of dates, means the event is now gone.
+        if (date.done || isAfterDay(date.value, event.dtstart)) {
+          this.eventRepository.remove(event);
+          continue;
+        }
+
+        // If we got here the event should be on the same day.
+
+        if (date.done || !isSameDay(date.value, event.dtstart)) {
+          throw new InternalServerErrorException('Event date misalignment');
+        }
+
+        // This does nothing for "all events" updates.
+        event.recurrence = recurrence;
+      }
+
+      if (dtend) {
+        // This prevents an event starting after it ended, how confusing.
+        if (event.dtstart > dtend) {
+          event.dtstart = pivot.dtstart;
+        }
+        event.dtend = dtend;
+      }
+
+      if (meta) {
+        event.assign({ ...meta });
+      }
+    }
+  }
+
+  /**
    * Hydrates a RRule into the individual event instances and attaches
    * them in the instances relationship.
+   *
+   * @param recurrence EventRecurrence
+   * @param start Beginning date range
+   * @param end Ending date range
    */
   public async getRecurrenceEvents(
     recurrence: EventRecurrence,
@@ -119,6 +385,9 @@ export class EventService {
     const dates = this.recurrenceService.getDates(recurrence, start, end);
     const events = recurrence.events.getItems();
     const newEvents = [];
+    const duration = events[0].dtend
+      ? moment(events[0].dtend).diff(events[0].dtstart, 'minutes')
+      : null;
 
     for (const date of dates) {
       const event = events.find(
@@ -137,10 +406,6 @@ export class EventService {
         );
       }
 
-      const dtend = events[0].dtend
-        ? moment(date).add(events[0].duration, 'minutes').toDate()
-        : null;
-
       newEvents.push(
         new Event().assign(
           {
@@ -149,8 +414,9 @@ export class EventService {
             picture: events[0].picture,
             color: events[0].color,
             dtstart: date,
-            dtend,
-            duration: events[0].duration,
+            dtend: duration
+              ? moment(date).add(duration, 'minutes').toDate()
+              : null,
             author: events[0].author,
             recurrence,
           },
@@ -167,61 +433,6 @@ export class EventService {
   }
 
   /**
-   * Modifies an event instance as an exception. If the modifications
-   * are temporal a reference to the original times is maintained.
-   *
-   * @param id event id
-   * @param updateEventDto UpdateEventDto object
-   */
-  public async updateSingleEvent(
-    id: number,
-    { dtstart, dtend, rrule, ...meta }: UpdateEventDto,
-  ) {
-    const event = await this.eventRepository.findOneOrFail(id);
-
-    if (dtstart) {
-      event.originalStart = event.dtstart;
-      event.dtstart = dtstart;
-    }
-
-    if (dtend) {
-      event.originalEnd = event.dtend;
-      event.dtend = dtend;
-    }
-
-    event.assign({ ...meta });
-
-    return this.eventRepository.flush();
-  }
-
-  private getSplitRules(oldRRuleString: string, newOpts?: Partial<Options>) {
-    if (!newOpts) return;
-
-    const newRRule = new RRule(newOpts);
-
-    if (oldRRuleString === newRRule.toString()) return;
-
-    const oldRRule = RRule.fromString(oldRRuleString);
-
-    const oldRRuleSplitOpts = oldRRule.origOptions;
-    oldRRuleSplitOpts.until = newOpts.dtstart;
-    delete oldRRuleSplitOpts.count;
-
-    const splitOldRRule = new RRule(oldRRuleSplitOpts);
-
-    const diff = diffObject(oldRRule.origOptions, newRRule as any);
-
-    return {
-      old: {
-        original: oldRRule,
-        split: splitOldRRule,
-      },
-      new: newRRule,
-      canShift: this.canShiftEvents(oldRRule.origOptions, diff),
-    };
-  }
-
-  /**
    * Returns a newly created `RRule` instance with a new `until` ending date.
    * If the `RRule` had a `count` specified, it is removed.
    *
@@ -235,123 +446,5 @@ export class EventService {
     options.until = date;
 
     return new RRule(options, false);
-  }
-
-  /**
-   * Modifies the selected event instance and any future events. If the
-   * modifications are temporal, the `EventRecurrence` is split into two.
-   *
-   * @param id event id
-   * @param updateEventDto UpdateEventDto object
-   */
-  public async updateFutureEvents(id: number, updateEventDto: UpdateEventsDto) {
-    const { duration, rrule: rruleOpts, meta } = updateEventDto;
-    const pivotEvent = await this.eventRepository.findOneOrFail(id, true);
-    const pivotDate = pivotEvent.dtstart;
-
-    let newRecurrence: EventRecurrence;
-    let canShift: boolean;
-
-    if (rruleOpts) {
-      const oldRRule = RRule.fromString(pivotEvent.recurrence.rrule);
-      const oldRRuleSplit = this.shortenRRule(oldRRule, rruleOpts.dtstart);
-
-      // Prevent the split from accidentally resetting `count`
-      if (
-        oldRRule.options.count &&
-        rruleOpts.count &&
-        rruleOpts.count === oldRRule.options.count
-      ) {
-        rruleOpts.count - oldRRuleSplit.count();
-      }
-
-      const rrule = new RRule(rruleOpts, false);
-
-      pivotEvent.recurrence.rrule = oldRRuleSplit.toString();
-
-      newRecurrence = new EventRecurrence(
-        rrule.toString(),
-        rruleOpts.dtstart,
-        rruleOpts.until,
-        pivotEvent.recurrence,
-      );
-
-      // This is not currently implemented.
-      // canShift = this.canShiftEvents(oldRRule.origOptions, rruleOpts);
-    }
-
-    for (const event of pivotEvent.recurrence.events) {
-      // Don't change events before the pivot.
-      if (event.dtstart < pivotDate) continue;
-
-      // Remove events after the pivot if we cannot shift the rule.
-      if (!canShift && !(event.dtstart === pivotDate)) {
-        this.eventRepository.remove(event);
-        continue;
-      }
-
-      if (duration) {
-        event.dtend = moment(event.dtstart).add(duration, 'minutes').toDate();
-      }
-
-      if (newRecurrence) {
-        newRecurrence.events.add(event);
-      }
-
-      if (meta) {
-        event.assign({ ...meta });
-      }
-    }
-
-    // Prevent orphaned `EventRecurrence` entities.
-    if (!pivotEvent.recurrence.events.count) {
-      this.recurrenceRepository.remove(newRecurrence.original);
-    }
-
-    return this.eventRepository.flush();
-  }
-
-  /**
-   * FIXME: This is not a complete or even remotely reasonable way of going about this.
-   * See `docs/calendar-update-interaction.md`.
-   */
-  private canShiftEvents(oldOpts: RRuleOptions, newOpts: RRuleOptions) {
-    const diff = diffObject(oldOpts, newOpts);
-    const keys = Object.keys(diff) as Array<keyof typeof diff>;
-
-    // Check if the new options contains keys that aren't these.
-    if (
-      keys.some(
-        (opt) => opt !== 'dtstart' && opt !== 'until' && opt !== 'count',
-      )
-    ) {
-      return false;
-    }
-
-    //
-    if (diff.dtstart && oldOpts.dtstart > diff.dtstart) {
-      throw new BadRequestException('Cannot backdate a recurrence rule');
-    }
-
-    // The starting date can only be shifted if it's on the same day.
-    if (diff.dtstart && !isSameDay(diff.dtstart, oldOpts.dtstart)) {
-      return false;
-    }
-
-    // Added a range cutoff or the cutoff date is now sooner.
-    if (diff.until && (!oldOpts.until || oldOpts.until > diff.until)) {
-      return false;
-    }
-
-    // A count was added, or the count is lower than before.
-    if (diff.count && (!oldOpts.count || oldOpts.count > diff.count)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  public async updateAllEvents(id: number, updateEventDto: UpdateEventDto) {
-    return { id, updateEventDto };
   }
 }

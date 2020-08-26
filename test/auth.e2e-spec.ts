@@ -1,9 +1,9 @@
+import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
-import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
 import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';
@@ -23,7 +23,10 @@ import { UserService } from '../src/user/user.service';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
+delete MikroORMConfig.entitiesTs;
+
 MikroORMConfig.dbName = 'omc_test';
+MikroORMConfig.entities = [Account, User];
 
 const createAccountDto: CreateAccountDto = {
   name: 'Jane Doe',

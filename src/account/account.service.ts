@@ -31,7 +31,11 @@ export class AccountService {
    */
   async create(createAccountDto: CreateAccountDto) {
     const account = new Account();
-    const user = new User().assign(createAccountDto);
+    const user = new User();
+
+    this.accountRepository.persist(user);
+
+    user.assign(createAccountDto);
 
     user.password = await bcrypt.hash(user.password, BCRYPT_ROUNDS);
     account.primaryUser = user;

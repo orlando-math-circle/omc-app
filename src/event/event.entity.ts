@@ -44,12 +44,6 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ nullable: true })
   originalStart?: Date;
 
-  @Property({ nullable: true })
-  originalEnd?: Date;
-
-  @Property({ nullable: true })
-  duration?: number;
-
   /**
    * Relationships
    */

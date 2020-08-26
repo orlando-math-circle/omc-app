@@ -34,6 +34,11 @@ export class EventController {
     return this.eventService.findAll(start, end);
   }
 
+  @Get('/test')
+  test() {
+    return this.eventService.test();
+  }
+
   @Patch(':id/single')
   updateSingleEvent(
     @Param() { id }: FindEventDto,
