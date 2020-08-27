@@ -106,7 +106,7 @@ describe('Accounts', () => {
       await request(app.getHttpServer()).get('/account/me').expect(401);
     });
 
-    it('should retrieve the authed account', async () => {
+    it('should retrieve the account', async () => {
       const resp = await request(app.getHttpServer())
         .get('/account/me')
         .set('Authorization', `Bearer ${token}`)
