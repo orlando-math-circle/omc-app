@@ -31,7 +31,7 @@ export class EventRecurrenceDto implements Partial<Options> {
   @IsOptional()
   @IsNumber()
   @IsPositive()
-  readonly count?: number;
+  count?: number;
 
   @IsOptional()
   @IsString()
@@ -81,10 +81,4 @@ export class EventRecurrenceDto implements Partial<Options> {
   @IsOptional()
   @IsNumber(null, { each: true })
   readonly bysecond?: number | number[];
-
-  /**
-   * Index type for compiler happiness.
-   */
-
-  [key: string]: unknown;
 }

@@ -11,11 +11,11 @@ import RRule, { RRuleSet } from 'rrule';
 import {
   addMinutes,
   getMinDate,
+  getMinutesDiff,
   isAfterDay,
   isBeforeDay,
   isSameDay,
   subDays,
-  getMinutesDiff,
 } from '../app.utils';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
@@ -102,14 +102,28 @@ export class EventService {
   async findAll(start: Date, end: Date) {
     const events = await this.eventRepository.find({
       dtstart: { $gte: start.toISOString() },
-      dtend: { $lte: end.toISOString() },
+      $or: [
+        {
+          dtend: { $lte: end.toISOString() },
+        },
+        {
+          dtend: null,
+        },
+      ],
       recurrence: null,
     });
 
     const recurrences = await this.recurrenceRepository.find(
       {
         dtstart: { $gte: start.toISOString() },
-        dtend: { $lte: end.toISOString() },
+        $or: [
+          {
+            dtend: { $lte: end.toISOString() },
+          },
+          {
+            dtend: null,
+          },
+        ],
       },
       ['events'],
     );
@@ -192,7 +206,7 @@ export class EventService {
       rruleOpts.count &&
       rruleOpts.count === oldRRule.options.count
     ) {
-      rruleOpts.count - oldRRuleSplit.count();
+      rruleOpts.count = rruleOpts.count - oldRRuleSplit.count();
     }
 
     const rrule = new RRule(rruleOpts);
@@ -287,11 +301,9 @@ export class EventService {
    */
   public async deleteSingleEvent(id: number) {
     const event = await this.eventRepository.findOneOrFail(id, ['recurrence']);
-
     const rruleSet = event.recurrence.getRRule(true);
 
     rruleSet.exdate(event.dtstart);
-
     event.recurrence.rrule = rruleSet.toString();
 
     return this.eventRepository.remove(event).flush();
@@ -388,11 +400,6 @@ export class EventService {
       // If the time was changed the end date of the pivot may be wrong.
       duration = getMinutesDiff(originalStart, pivot.dtend);
       pivot.setEndDate(addMinutes(pivot.dtstart, duration));
-
-      console.log(
-        `Original Duration: ${duration}, original start: ${originalStart.toISOString()}`,
-      );
-      console.log(`Pivot End: ${pivot.dtend.toISOString()}`);
     }
 
     return { start: originalStart, duration };
@@ -411,10 +418,6 @@ export class EventService {
     start: Date,
     end: Date,
   ) {
-    if (!recurrence.events.isInitialized()) {
-      await recurrence.events.loadItems();
-    }
-
     const dates = recurrence.getRRule().between(start, end, true);
     const events = recurrence.events.getItems();
     const newEvents = [];
