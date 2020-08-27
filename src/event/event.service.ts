@@ -230,25 +230,9 @@ export class EventService {
    * Updates all of the events within a recurrence rule. The event
    * selected is unimportant as the recurrence is acted upon.
    *
-   * @param id ID of a recurring event.
+   * @param idOrRecurrence ID of an event or the recurrence itself.
    * @param updateEventDto UpdateEventDto.
    */
-  public async updateAllEvents(
-    id: number,
-    updateEventDto: UpdateEventDto,
-  ): Promise<void>;
-
-  /**
-   * Updates all events with within a recurrence rule.
-   *
-   * @param recurrence EventRecurrence to update.
-   * @param updateEventDto UpdateEventDto.
-   */
-  public async updateAllEvents(
-    recurrence: EventRecurrence,
-    updateEventDto: UpdateEventDto,
-  ): Promise<void>;
-
   public async updateAllEvents(
     idOrRecurrence: number | EventRecurrence,
     { dtend, rrule: rruleOpts, meta }: UpdateEventDto,
