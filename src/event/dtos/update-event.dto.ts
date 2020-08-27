@@ -1,12 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { IsDate, IsOptional, ValidateNested } from 'class-validator';
 import { UpdateEventMetaDto } from './event-meta.dto';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 

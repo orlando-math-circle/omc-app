@@ -1,7 +1,7 @@
-import * as Joi from '@hapi/joi';
+import Joi from '@hapi/joi';
 
 const configSchema = Joi.object({
-  SECRET: Joi.string().default('EXAMPLE'),
+  SECRET: Joi.string().default('TESTING_SECRET'),
   USE_RRULE_CACHE: Joi.boolean().default(false),
 });
 

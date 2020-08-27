@@ -15,6 +15,7 @@ import { CreateEventDto } from './dtos/create-event.dto';
 import { FindAllEventsDto } from './dtos/find-all-events.dto';
 import { FindEventDto } from './dtos/find-one-event.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
+import { UpdateEventsDto } from './dtos/update-events.dto';
 import { EventService } from './event.service';
 import { EventValidationPipe } from './pipes/event-validation.pipe';
 
@@ -34,11 +35,6 @@ export class EventController {
     return this.eventService.findAll(start, end);
   }
 
-  @Get('/test')
-  test() {
-    return this.eventService.test();
-  }
-
   @Patch(':id/single')
   updateSingleEvent(
     @Param() { id }: FindEventDto,
@@ -50,17 +46,17 @@ export class EventController {
   @Patch(':id/future')
   updateFutureEvents(
     @Param() { id }: FindEventDto,
-    @Body() updateEventDto: UpdateEventDto,
+    @Body() updateEventsDto: UpdateEventsDto,
   ) {
-    return this.eventService.updateFutureEvents(id, updateEventDto);
+    return this.eventService.updateFutureEvents(id, updateEventsDto);
   }
 
   @Patch(':id/all')
   updateAllEvents(
     @Param() { id }: FindEventDto,
-    @Body() updateEventDto: UpdateEventDto,
+    @Body() updateEventsDto: UpdateEventsDto,
   ) {
-    return this.eventService.updateAllEvents(id, updateEventDto);
+    return this.eventService.updateAllEvents(id, updateEventsDto);
   }
 
   // @UserAuth('event', 'delete:any')

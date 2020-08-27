@@ -18,9 +18,10 @@ export class CreateEventDto {
   @IsString()
   readonly color?: string;
 
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
-  readonly dtstart!: Date;
+  readonly dtstart?: Date;
 
   @IsOptional()
   @IsDate()
@@ -34,5 +35,5 @@ export class CreateEventDto {
   @IsOptional()
   @Type(() => EventRecurrenceDto)
   @ValidateNested()
-  readonly recurring?: EventRecurrenceDto;
+  readonly rrule?: EventRecurrenceDto;
 }

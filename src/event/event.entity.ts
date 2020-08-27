@@ -7,6 +7,8 @@ import {
 } from '@mikro-orm/core';
 import { EventRecurrence } from '../event-recurrence/event-recurrence.entity';
 import { User } from '../user/user.entity';
+import { BadRequestException } from '@nestjs/common';
+import { getMinutesDiff } from '../app.utils';
 
 @Entity()
 export class Event extends BaseEntity<Event, 'id'> {
@@ -57,4 +59,36 @@ export class Event extends BaseEntity<Event, 'id'> {
   // project?: Project;
 
   // registrations?: EventRegistration[];
+
+  /**
+   * Methods
+   */
+
+  /**
+   * Sets a new end date on an event, if possible.
+   * If necessary, this will remove an exception start time.
+   *
+   * @param dtend New ending date.
+   */
+  public setEndDate(dtend: Date) {
+    // The starting date is after the ending date, disgusting!
+    if (dtend < this.dtstart) {
+      // Reset an exception to apply this dtend, if possible.
+      if (this.originalStart && this.originalStart < dtend) {
+        this.dtstart = this.originalStart;
+        this.originalStart = null;
+      } else {
+        throw new BadRequestException('dtstart after dtend');
+      }
+    }
+
+    this.dtend = dtend;
+  }
+
+  /**
+   * Returns the duration of an event in minutes.
+   */
+  public getDuration() {
+    return getMinutesDiff(this.dtstart, this.dtend);
+  }
 }
