@@ -192,7 +192,7 @@ describe('Events', () => {
         ['events'],
       );
 
-      const rrule = new RRule(dto.rrule, true).toString();
+      const rrule = new RRule(dto.rrule).toString();
 
       expect(recurrence).toBeDefined();
       expect(recurrence.id).toBe(1);

@@ -25,6 +25,7 @@ delete MikroORMConfig.user;
 delete MikroORMConfig.password;
 delete MikroORMConfig.entitiesTs;
 
+MikroORMConfig.debug = false;
 MikroORMConfig.dbName = 'omc_test';
 MikroORMConfig.entities = [Account, User];
 
