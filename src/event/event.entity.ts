@@ -5,10 +5,10 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import { EventRecurrence } from '../event-recurrence/event-recurrence.entity';
-import { User } from '../user/user.entity';
 import { BadRequestException } from '@nestjs/common';
 import { getMinutesDiff } from '../app.utils';
+import { User } from '../user/user.entity';
+import { EventRecurrence } from './event-recurrence.entity';
 
 @Entity()
 export class Event extends BaseEntity<Event, 'id'> {

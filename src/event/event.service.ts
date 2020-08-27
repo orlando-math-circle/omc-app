@@ -8,7 +8,7 @@ import { SqlEntityManager } from '@mikro-orm/knex';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import moment from 'moment';
-import RRule from 'rrule';
+import RRule, { RRuleSet } from 'rrule';
 import {
   addMinutes,
   getMinDate,
@@ -17,13 +17,12 @@ import {
   isSameDay,
   subDays,
 } from '../app.utils';
-import { EventRecurrence } from '../event-recurrence/event-recurrence.entity';
-import { EventRecurrenceService } from '../event-recurrence/event-recurrence.service';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { UpdateEventMetaDto } from './dtos/event-meta.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
 import { UpdateEventsDto } from './dtos/update-events.dto';
+import { EventRecurrence } from './event-recurrence.entity';
 import { Event } from './event.entity';
 
 @Injectable()
@@ -33,7 +32,6 @@ export class EventService {
     private readonly eventRepository: EntityRepository<Event>,
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
-    private readonly recurrenceService: EventRecurrenceService,
     private readonly em: SqlEntityManager,
   ) {}
 
@@ -283,6 +281,18 @@ export class EventService {
     );
   }
 
+  public async deleteSingleEvent(id: number) {
+    const event = await this.eventRepository.findOneOrFail(id, ['recurrence']);
+
+    const rruleSet = event.recurrence.getRRule(true);
+
+    rruleSet.exdate(event.dtstart);
+
+    event.recurrence.rrule = rruleSet.toString();
+
+    return this.eventRepository.remove(event).flush();
+  }
+
   /**
    * Given a stream of events, this method will rectify any necessary
    * changes as contextually necessary from the arguments.
@@ -383,7 +393,7 @@ export class EventService {
    * @param start Beginning date range
    * @param end Ending date range
    */
-  public async getRecurrenceEvents(
+  private async getRecurrenceEvents(
     recurrence: EventRecurrence,
     start: Date,
     end: Date,
@@ -392,7 +402,7 @@ export class EventService {
       await recurrence.events.loadItems();
     }
 
-    const dates = this.recurrenceService.getDates(recurrence, start, end);
+    const dates = recurrence.getRRule().between(start, end, true);
     const events = recurrence.events.getItems();
     const newEvents = [];
     const duration = events[0].dtend
@@ -455,6 +465,10 @@ export class EventService {
     delete options.count;
     options.until = date;
 
-    return new RRule(options, false);
+    const rruleSet = new RRuleSet();
+
+    rruleSet.rrule(new RRule(options));
+
+    return rruleSet;
   }
 }

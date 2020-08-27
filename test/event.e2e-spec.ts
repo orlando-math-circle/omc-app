@@ -15,14 +15,14 @@ import { isBeforeDay } from '../src/app.utils';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
-import { EventRecurrence } from '../src/event-recurrence/event-recurrence.entity';
 import { CreateEventDto } from '../src/event/dtos/create-event.dto';
 import { UpdateEventsDto } from '../src/event/dtos/update-events.dto';
+import { EventRecurrence } from '../src/event/event-recurrence.entity';
 import { Event } from '../src/event/event.entity';
 import { EventModule } from '../src/event/event.module';
+import { EventService } from '../src/event/event.service';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
-import { EventService } from '../src/event/event.service';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
@@ -460,6 +460,27 @@ describe('Events', () => {
       expect(rruleAfter.rrule).toEqual(
         'DTSTART:20200207T103000Z\nRRULE:FREQ=WEEKLY;UNTIL=20200221T120000Z',
       );
+    });
+  });
+
+  describe('DELETE /event/:id/single', () => {
+    it('should not re-create the event again', async () => {
+      await request(app.getHttpServer())
+        .delete('/event/17/single')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const resp = await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: new Date(Date.UTC(2020, 1, 19, 10, 30)),
+          end: new Date(Date.UTC(2020, 1, 20, 0, 0)),
+        })
+        .expect(200);
+
+      expect(resp.body).toBeDefined();
+      expect(Array.isArray(resp.body)).toBeTruthy();
+      expect(resp.body.length).toBe(0);
     });
   });
 });
