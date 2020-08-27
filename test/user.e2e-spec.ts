@@ -23,7 +23,7 @@ delete MikroORMConfig.entitiesTs;
 MikroORMConfig.dbName = 'omc_test';
 MikroORMConfig.entities = [Account, User];
 
-describe.skip('Users', () => {
+describe('Users', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
 

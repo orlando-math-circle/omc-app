@@ -30,7 +30,7 @@ const createAccountDto: CreateAccountDto = {
   dob: new Date(),
 };
 
-describe.skip('Accounts', () => {
+describe('Accounts', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
 

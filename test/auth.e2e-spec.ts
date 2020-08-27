@@ -48,7 +48,7 @@ const contextMock = {
   getHandler: jest.fn(() => ({})),
 };
 
-describe.skip('Auth', () => {
+describe('Auth', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
   let authService: AuthService;
