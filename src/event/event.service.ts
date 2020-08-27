@@ -303,19 +303,7 @@ export class EventService {
     dateIterator?: IterableIterator<Date>,
   ) {
     let dates: IteratorResult<Date, Date> = dateIterator?.next();
-    let duration: number;
-    const start = pivot.dtstart;
-
-    if (recurrence) {
-      pivot.recurrence = recurrence;
-      pivot.dtstart = recurrence.dtstart;
-      pivot.originalStart = null;
-    }
-
-    if (dtend) {
-      pivot.setEndDate(dtend);
-      duration = pivot.getDuration();
-    }
+    const { start, duration } = this.setPivotData(pivot, recurrence, dtend);
 
     for (const event of events) {
       // Don't change events before the pivot for `future event` updates.
@@ -354,6 +342,37 @@ export class EventService {
     }
 
     return this.eventRepository.flush();
+  }
+
+  /**
+   * Prepares the event pivot for the event updating loop.
+   * This will return the original pivot starting time
+   * and the duration of the pivot event.
+   *
+   * @param pivot First event, or event being updated.
+   * @param recurrence New recurrence if `rrule` is changed.
+   * @param dtend New ending date, if changed.
+   */
+  private setPivotData(
+    pivot: Event,
+    recurrence?: EventRecurrence,
+    dtend?: Date,
+  ) {
+    let duration: number;
+    const originalStart = pivot.dtstart;
+
+    if (recurrence) {
+      pivot.recurrence = recurrence;
+      pivot.dtstart = recurrence.dtstart;
+      pivot.originalStart = null;
+    }
+
+    if (dtend) {
+      pivot.setEndDate(dtend);
+      duration = pivot.getDuration();
+    }
+
+    return { start: originalStart, duration };
   }
 
   /**
