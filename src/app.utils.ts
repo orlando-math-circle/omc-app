@@ -32,37 +32,3 @@ export const getMinDate = (...dates: Date[]) =>
 
 export const subDays = (date: Date, days = 1) =>
   moment(date).subtract(days, 'day').toDate();
-
-/**
- * Returns an array contains the keys of object A which
- * are missing or not equal to those in object B.
- *
- * @param a parent object for key retrieval
- * @param b object for comparison
- */
-export const diffObject = <A extends Dict, B extends Dict>(
-  a: A,
-  b: B,
-): Partial<A> =>
-  _.reduce(
-    a,
-    (result, value, key) =>
-      _.isEqual(value, b[key])
-        ? result
-        : Object.assign(result, { [key]: value }),
-    {},
-  );
-
-/**
- * Creates a generator for all of the elements in a MikroORM collection.
- *
- * @param collection Entity collection
- */
-export function* getCollectionIterator<T>(collection: Collection<T>) {
-  const items = collection.getItems();
-  let i = 0;
-
-  while (i < collection.length) {
-    yield items[i++];
-  }
-}
