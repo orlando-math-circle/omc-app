@@ -65,6 +65,14 @@ export class Event extends BaseEntity<Event, 'id'> {
    */
 
   /**
+   * Returns the most accurate starting time for an event.
+   * This is used when exceptions are inside the event loop.
+   */
+  public start() {
+    return this.originalStart || this.dtstart;
+  }
+
+  /**
    * Sets a new end date on an event, if possible.
    * If necessary, this will remove an exception start time.
    *

@@ -4,7 +4,6 @@ import {
   QueryOrder,
   QueryOrderMap,
 } from '@mikro-orm/core';
-import { SqlEntityManager } from '@mikro-orm/knex';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import moment from 'moment';
@@ -16,6 +15,7 @@ import {
   isBeforeDay,
   isSameDay,
   subDays,
+  getMinutesDiff,
 } from '../app.utils';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
@@ -32,7 +32,6 @@ export class EventService {
     private readonly eventRepository: EntityRepository<Event>,
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
-    private readonly em: SqlEntityManager,
   ) {}
 
   /**
@@ -196,7 +195,7 @@ export class EventService {
       rruleOpts.count - oldRRuleSplit.count();
     }
 
-    const rrule = new RRule(rruleOpts, false);
+    const rrule = new RRule(rruleOpts);
 
     pivot.recurrence.rrule = oldRRuleSplit.toString();
     pivot.recurrence.dtend = oldRRuleCutoff;
@@ -281,6 +280,11 @@ export class EventService {
     );
   }
 
+  /**
+   * Removes an event by creating an event exception.
+   *
+   * @param id ID of the event being removed.
+   */
   public async deleteSingleEvent(id: number) {
     const event = await this.eventRepository.findOneOrFail(id, ['recurrence']);
 
@@ -317,11 +321,11 @@ export class EventService {
 
     for (const event of events) {
       // Don't change events before the pivot for `future event` updates.
-      if (event.dtstart < start) continue;
+      if (event.start() < start) continue;
 
       if (recurrence) {
         // If the date is before this event date, fast-forward.
-        while (!dates.done && isBeforeDay(dates.value, event.dtstart)) {
+        while (!dates.done && isBeforeDay(dates.value, event.start())) {
           dates = dateIterator.next();
         }
 
@@ -329,8 +333,8 @@ export class EventService {
         // by the pivot is cause for event destruction.
         if (
           dates.done ||
-          isAfterDay(dates.value, event.dtstart) ||
-          (event.id !== pivot.id && isSameDay(pivot.dtstart, event.dtstart))
+          isAfterDay(dates.value, event.start()) ||
+          (event.id !== pivot.id && isSameDay(pivot.dtstart, event.start()))
         ) {
           this.eventRepository.remove(event);
           continue;
@@ -380,6 +384,15 @@ export class EventService {
     if (dtend) {
       pivot.setEndDate(dtend);
       duration = pivot.getDuration();
+    } else {
+      // If the time was changed the end date of the pivot may be wrong.
+      duration = getMinutesDiff(originalStart, pivot.dtend);
+      pivot.setEndDate(addMinutes(pivot.dtstart, duration));
+
+      console.log(
+        `Original Duration: ${duration}, original start: ${originalStart.toISOString()}`,
+      );
+      console.log(`Pivot End: ${pivot.dtend.toISOString()}`);
     }
 
     return { start: originalStart, duration };
@@ -427,21 +440,18 @@ export class EventService {
       }
 
       newEvents.push(
-        new Event().assign(
-          {
-            name: events[0].name,
-            description: events[0].description,
-            picture: events[0].picture,
-            color: events[0].color,
-            dtstart: date,
-            dtend: duration
-              ? moment(date).add(duration, 'minutes').toDate()
-              : null,
-            author: events[0].author,
-            recurrence,
-          },
-          { em: this.em },
-        ),
+        this.eventRepository.create({
+          name: events[0].name,
+          description: events[0].description,
+          picture: events[0].picture,
+          color: events[0].color,
+          dtstart: date,
+          dtend: duration
+            ? moment(date).add(duration, 'minutes').toDate()
+            : null,
+          author: events[0].author,
+          recurrence,
+        }),
       );
     }
 

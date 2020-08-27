@@ -16,6 +16,7 @@ import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
 import { CreateEventDto } from '../src/event/dtos/create-event.dto';
+import { UpdateEventDto } from '../src/event/dtos/update-event.dto';
 import { UpdateEventsDto } from '../src/event/dtos/update-events.dto';
 import { EventRecurrence } from '../src/event/event-recurrence.entity';
 import { Event } from '../src/event/event.entity';
@@ -138,6 +139,53 @@ describe('Events', () => {
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Event Name', dtend: new Date() })
+        .expect(400);
+    });
+
+    it('should throw 400 with both a dtstart and rrule', async () => {
+      const dto: CreateEventDto = {
+        name: 'Title',
+        dtstart: new Date(Date.UTC(2020, 11, 24)),
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 11, 24)),
+          until: new Date(Date.UTC(2020, 12, 24)),
+        },
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .set('Authorization', `Bearer ${token}`)
+        .send(dto)
+        .expect(400);
+    });
+
+    it('should throw 400 when dtstart is after dtend', async () => {
+      const dto: CreateEventDto = {
+        name: 'Title',
+        dtstart: new Date(Date.UTC(2020, 12, 24)),
+        dtend: new Date(Date.UTC(2020, 11, 24)),
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .set('Authorization', `Bearer ${token}`)
+        .send(dto)
+        .expect(400);
+
+      const dtoTwo: CreateEventDto = {
+        name: 'Title',
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 12, 24)),
+          until: new Date(Date.UTC(2020, 11, 24)),
+        },
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .set('Authorization', `Bearer ${token}`)
+        .send(dtoTwo)
         .expect(400);
     });
 
@@ -461,6 +509,39 @@ describe('Events', () => {
         'DTSTART:20200207T103000Z\nRRULE:FREQ=WEEKLY;UNTIL=20200221T120000Z',
       );
     });
+
+    it('should reset an exception if dtstart > dtend > originalStart', async () => {
+      const dto: UpdateEventDto = {
+        dtstart: new Date(Date.UTC(2020, 1, 19, 5, 0)),
+        dtend: new Date(Date.UTC(2020, 1, 19, 10, 0)),
+      };
+
+      await request(app.getHttpServer())
+        .patch('/event/16/single/')
+        .set('Authorization', `Bearer ${token}`)
+        .send(dto)
+        .expect(200);
+
+      const dtoTwo: UpdateEventsDto = {
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 1, 17, 10, 0)),
+          until: new Date(Date.UTC(2020, 1, 21, 12, 0)),
+        },
+      };
+
+      await request(app.getHttpServer())
+        .patch('/event/12/all')
+        .set('Authorization', `Bearer ${token}`)
+        .send(dtoTwo)
+        .expect(200);
+
+      const event = await orm.em.findOne(Event, 16);
+
+      expect(event).toBeDefined();
+      expect(event.id).toBe(16);
+      expect(event.originalStart).toBe(null);
+    });
   });
 
   describe('DELETE /event/:id/single', () => {
@@ -481,6 +562,16 @@ describe('Events', () => {
       expect(resp.body).toBeDefined();
       expect(Array.isArray(resp.body)).toBeTruthy();
       expect(resp.body.length).toBe(0);
+    });
+  });
+
+  describe('Post-Test Scanning', () => {
+    it('should not have created any events where dtstart > dtend', async () => {
+      const events = await orm.em.find(Event, {});
+
+      expect(
+        events.every((e) => !e.dtstart || +e.dtstart < +e.dtend),
+      ).toBeTruthy();
     });
   });
 });
