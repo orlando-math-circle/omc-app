@@ -7,8 +7,8 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import RRule, { RRuleSet, rrulestr } from 'rrule';
 import { Event } from './event.entity';
+import { Schedule } from './schedule.class';
 
 @Entity()
 export class EventRecurrence extends BaseEntity<EventRecurrence, 'id'> {
@@ -52,14 +52,9 @@ export class EventRecurrence extends BaseEntity<EventRecurrence, 'id'> {
    */
 
   /**
-   * Returns a `RRule` or `RRuleSet` class from the rule in this entity.
-   * If exceptions are found, an `RRuleSet` is created.
-   *
-   * @param forceset Forces the generation of a `RRuleSet`.
+   * Returns a schedule class from the rrule stored in this entity.
    */
-  public getRRule<T extends boolean>(
-    forceset?: T,
-  ): T extends true ? RRuleSet : RRuleSet | RRule {
-    return rrulestr(this.rrule, { forceset }) as any;
+  public getSchedule() {
+    return new Schedule(this.rrule);
   }
 }

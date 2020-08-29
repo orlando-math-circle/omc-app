@@ -1,13 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
   Post,
   Query,
   UsePipes,
-  Delete,
 } from '@nestjs/common';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
@@ -60,9 +60,21 @@ export class EventController {
     return this.eventService.updateAllEvents(id, updateEventsDto);
   }
 
-  @UserAuth('event', 'delete:any')
+  // @UserAuth('event', 'delete:any')
   @Delete(':id/single')
   delete(@Param() { id }: FindEventDto) {
     return this.eventService.deleteSingleEvent(id);
+  }
+
+  @UserAuth('event', 'delete:any')
+  @Delete(':id/future')
+  deleteFutureEvents(@Param() { id }: FindEventDto) {
+    return this.eventService.deleteFutureEvents(id);
+  }
+
+  @UserAuth('event', 'delete:any')
+  @Delete(':id/all')
+  deleteAllEvents(@Param() { id }: FindEventDto) {
+    return this.eventService.deleteAllEvents(id);
   }
 }

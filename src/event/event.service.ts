@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import moment from 'moment';
-import RRule, { RRuleSet } from 'rrule';
 import {
   addMinutes,
   getMinDate,
@@ -24,6 +23,7 @@ import { UpdateEventDto } from './dtos/update-event.dto';
 import { UpdateEventsDto } from './dtos/update-events.dto';
 import { EventRecurrence } from './event-recurrence.entity';
 import { Event } from './event.entity';
+import { Schedule } from './schedule.class';
 
 @Injectable()
 export class EventService {
@@ -41,9 +41,9 @@ export class EventService {
    * @param author User author
    */
   async create(createEventDto: CreateEventDto, author: User) {
-    const { dtstart, dtend, rrule: rruleOpts, ...meta } = createEventDto;
+    const { dtstart, dtend, rrule, ...meta } = createEventDto;
 
-    if (!rruleOpts) {
+    if (!rrule) {
       const event = this.eventRepository.create({
         dtstart,
         dtend,
@@ -57,13 +57,13 @@ export class EventService {
     }
 
     const recurrence = new EventRecurrence(
-      new RRule(rruleOpts).toString(),
-      rruleOpts.dtstart,
-      rruleOpts.until,
+      new Schedule(rrule).toString(),
+      rrule.dtstart,
+      rrule.until,
     );
 
     const event = this.eventRepository.create({
-      dtstart: rruleOpts.dtstart,
+      dtstart: rrule.dtstart,
       dtend,
       author,
       recurrence,
@@ -75,14 +75,13 @@ export class EventService {
     return event;
   }
 
-  async findOne(
-    where: FilterQuery<Event>,
-    populate?: boolean | string[],
-    orderBy?: QueryOrderMap,
-  ) {
-    return this.eventRepository.findOne(where, populate, orderBy);
-  }
-
+  /**
+   * Finds an existing event entity or throws an error.
+   *
+   * @param where Id or query with Event parameters.
+   * @param populate Array list of relationships, or true for all.
+   * @param orderBy Query for element ordering.
+   */
   async findOneOrFail(
     where: FilterQuery<Event>,
     populate?: boolean | string[],
@@ -173,7 +172,7 @@ export class EventService {
     id: number,
     updateEventsDto: UpdateEventsDto,
   ) {
-    const { dtend, rrule: rruleOpts, meta } = updateEventsDto;
+    const { dtend, rrule, meta } = updateEventsDto;
     const pivot = await this.eventRepository.findOneOrFail(
       id,
       ['recurrence.events'],
@@ -183,49 +182,44 @@ export class EventService {
     );
 
     // No RRule changes, update topical data and return.
-    if (!rruleOpts) {
+    if (!rrule) {
       return this.setEventData(pivot, pivot.recurrence.events, dtend, meta);
     }
 
-    const oldRRule = pivot.recurrence.getRRule();
+    const oldSchedule = pivot.recurrence.getSchedule();
 
     // Checks if we're making an update to the entire event stream.
-    if (isSameDay(rruleOpts.dtstart, oldRRule.origOptions.dtstart)) {
+    if (isSameDay(rrule.dtstart, oldSchedule.dtstart)) {
       return this.updateAllEvents(pivot.recurrence, updateEventsDto);
     }
 
-    const oldRRuleCutoff = subDays(
-      getMinDate(rruleOpts.dtstart, pivot.dtstart),
-      1,
-    );
-    const oldRRuleSplit = this.shortenRRule(oldRRule, oldRRuleCutoff);
+    const oldRRuleCutoff = subDays(getMinDate(rrule.dtstart, pivot.dtstart), 1);
+    const oldRRuleSplit = this.shortenRRule(oldSchedule, oldRRuleCutoff);
 
     // Prevent the split from resetting `count`
     if (
-      oldRRule.options.count &&
-      rruleOpts.count &&
-      rruleOpts.count === oldRRule.options.count
+      oldSchedule.options.count &&
+      rrule.count &&
+      rrule.count === oldSchedule.options.count
     ) {
-      rruleOpts.count = rruleOpts.count - oldRRuleSplit.count();
+      rrule.count -= oldRRuleSplit.count();
     }
 
-    const rrule = new RRule(rruleOpts);
+    const schedule = new Schedule(rrule);
 
     pivot.recurrence.rrule = oldRRuleSplit.toString();
     pivot.recurrence.dtend = oldRRuleCutoff;
 
     const newRecurrence = new EventRecurrence(
-      rrule.toString(),
-      rruleOpts.dtstart,
-      rruleOpts.until,
+      schedule.toString(),
+      rrule.dtstart,
+      rrule.until,
       pivot.recurrence,
     );
 
     const lastEvent =
       pivot.recurrence.events[pivot.recurrence.events.length - 1];
-    const dates = rrule
-      .between(rruleOpts.dtstart, lastEvent.dtend, true)
-      .values();
+    const dates = schedule.between(rrule.dtstart, lastEvent.dtend).values();
 
     return this.setEventData(
       pivot,
@@ -246,7 +240,7 @@ export class EventService {
    */
   public async updateAllEvents(
     idOrRecurrence: number | EventRecurrence,
-    { dtend, rrule: rruleOpts, meta }: UpdateEventDto,
+    { dtend, rrule, meta }: UpdateEventDto,
   ): Promise<void> {
     const recurrence =
       typeof idOrRecurrence === 'number'
@@ -265,20 +259,20 @@ export class EventService {
     // the first event that exists in this collection.
     const pivot = recurrence.events[0];
 
-    if (!rruleOpts) {
+    if (!rrule) {
       return this.setEventData(pivot, recurrence.events, dtend, meta);
     }
 
-    const rrule = new RRule(rruleOpts, false);
+    const schedule = new Schedule(rrule);
 
-    recurrence.rrule = rrule.toString();
-    recurrence.dtstart = rruleOpts.dtstart;
-    recurrence.dtend = rruleOpts.until || null;
+    recurrence.rrule = schedule.toString();
+    recurrence.dtstart = rrule.dtstart;
+    recurrence.dtend = rrule.until || null;
 
     // Obtains all viable new dates for the range of existing events.
-    const iterator = rrule
+    const iterator = schedule
       .between(
-        rruleOpts.dtstart,
+        rrule.dtstart,
         recurrence.events[recurrence.events.length - 1].dtend,
         true,
       )
@@ -301,12 +295,68 @@ export class EventService {
    */
   public async deleteSingleEvent(id: number) {
     const event = await this.eventRepository.findOneOrFail(id, ['recurrence']);
-    const rruleSet = event.recurrence.getRRule(true);
+    const rruleSet = event.recurrence.getSchedule();
 
     rruleSet.exdate(event.dtstart);
     event.recurrence.rrule = rruleSet.toString();
 
     return this.eventRepository.remove(event).flush();
+  }
+
+  /**
+   * Removes an event and events following it by shortening
+   * the associated `rrule` to before this event.
+   *
+   * @param id ID of the pivot event to remove it and subsequent events.
+   */
+  public async deleteFutureEvents(id: number) {
+    const pivot = await this.eventRepository.findOneOrFail(
+      id,
+      ['recurrence.events'],
+      { recurrence: { events: { dtstart: QueryOrder.ASC } } },
+    );
+    const schedule = pivot.recurrence.getSchedule();
+
+    // Deleting the first event in a recurrence is equivalent to an "all" deletion.
+    // This doesn't use the schedule's dtstart because it may misaligned with the rrule.
+    if (+schedule.first() === +pivot.start()) {
+      this.eventRepository.remove(pivot.recurrence.events);
+      this.recurrenceRepository.remove(pivot.recurrence);
+
+      return this.eventRepository.flush();
+    }
+
+    const dayBefore = subDays(pivot.dtstart, 1);
+    const shortenedRRule = this.shortenRRule(schedule, dayBefore);
+
+    pivot.recurrence.rrule = shortenedRRule.toString();
+    pivot.recurrence.dtend = dayBefore;
+
+    // Remove all events that are after (or on) the pivot date.
+    for (const event of pivot.recurrence.events) {
+      if (event.start() < pivot.start()) continue;
+
+      this.eventRepository.remove(event);
+    }
+
+    return this.eventRepository.flush();
+  }
+
+  /**
+   * Deletes all events using a single event ID by targeting
+   * the associated EventRecurrence.
+   *
+   * @param id ID of an event to delete the recurrence of.
+   */
+  public async deleteAllEvents(id: number) {
+    const event = await this.eventRepository.findOneOrFail(id, [
+      'recurrence.events',
+    ]);
+
+    this.eventRepository.remove(event.recurrence.events);
+    this.recurrenceRepository.remove(event.recurrence);
+
+    return this.eventRepository.flush();
   }
 
   /**
@@ -418,9 +468,10 @@ export class EventService {
     start: Date,
     end: Date,
   ) {
-    const dates = recurrence.getRRule().between(start, end, true);
+    const dates = recurrence.getSchedule().between(start, end, true);
     const events = recurrence.events.getItems();
     const newEvents = [];
+
     const duration = events[0].dtend
       ? moment(events[0].dtend).diff(events[0].dtstart, 'minutes')
       : null;
@@ -466,22 +517,18 @@ export class EventService {
   }
 
   /**
-   * Returns a newly created `RRule` instance with a new `until` ending date.
-   * If the `RRule` had a `count` specified, it is removed.
+   * Returns a new Schedule instance where an until date is added.
+   * If a count exists, it is removed.
    *
-   * @param rrule RRule
-   * @param date until Date
+   * @param schedule Schedule instance.
+   * @param until Date to end the schedule.
    */
-  private shortenRRule(rrule: RRule, date: Date) {
-    const options = rrule.origOptions;
+  private shortenRRule(schedule: Schedule, until: Date) {
+    const options = schedule.options;
 
     delete options.count;
-    options.until = date;
+    options.until = until;
 
-    const rruleSet = new RRuleSet();
-
-    rruleSet.rrule(new RRule(options));
-
-    return rruleSet;
+    return new Schedule(options);
   }
 }

@@ -3,6 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import moment from 'moment';
 import RRule, { Frequency } from 'rrule';
 import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
@@ -24,7 +25,6 @@ import { EventModule } from '../src/event/event.module';
 import { EventService } from '../src/event/event.service';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
-import moment from 'moment';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
@@ -241,7 +241,7 @@ describe('Events', () => {
         ['events'],
       );
 
-      const rrule = new RRule(dto.rrule).toString();
+      const rrule = new RRule(dto.rrule, true).toString();
 
       expect(recurrence).toBeDefined();
       expect(recurrence.id).toBe(1);
@@ -289,7 +289,7 @@ describe('Events', () => {
       expect(events.length).toBeTruthy();
 
       // Ensures no duplicate dates; sets don't allow duplicates.
-      const eventDates = events.map((e) => e.dtstart);
+      const eventDates = events.map((e) => e.start());
       expect(new Set(eventDates).size === eventDates.length).toBeTruthy();
 
       const length = events.length;
@@ -311,7 +311,7 @@ describe('Events', () => {
       expect(eventsAgain.length).toBe(length);
 
       // Ensures no duplicate dates; sets don't allow duplicates.
-      const eventsAgainDates = eventsAgain.map((e) => e.dtstart);
+      const eventsAgainDates = eventsAgain.map((e) => e.start());
       expect(
         new Set(eventsAgainDates).size === eventsAgainDates.length,
       ).toBeTruthy();
@@ -564,6 +564,66 @@ describe('Events', () => {
       expect(Array.isArray(resp.body)).toBeTruthy();
       expect(resp.body.length).toBe(0);
     });
+
+    it('should return 404 on a subsequent deletion', async () => {
+      await request(app.getHttpServer())
+        .delete('/event/17/single')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404);
+    });
+  });
+
+  describe('DELETE /event/:id/future', () => {
+    it('should delete events and prevent their re-creation', async () => {
+      const dto: CreateEventDto = {
+        name: 'Deleting Future Recurrences',
+        dtend: new Date(Date.UTC(2020, 10, 10, 3, 0)),
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 10, 10, 2, 30)),
+          until: new Date(Date.UTC(2020, 10, 20, 3, 0)),
+        },
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .set('Authorization', `Bearer ${token}`)
+        .send(dto)
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: dto.rrule.dtstart,
+          end: dto.rrule.until,
+        })
+        .expect(200);
+
+      const events = await orm.em.find(Event, {
+        dtstart: { $gte: dto.rrule.dtstart },
+        dtend: { $lte: dto.rrule.until },
+      });
+
+      expect(events).toBeDefined();
+      expect(Array.isArray(events)).toBeTruthy();
+      expect(events.length).toBe(11);
+
+      await request(app.getHttpServer())
+        .delete(`/event/${events[2].id}/future`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      orm.em.clear();
+
+      const remainingEvents = await orm.em.find(Event, {
+        dtstart: { $gte: dto.rrule.dtstart },
+        dtend: { $lte: dto.rrule.until },
+      });
+
+      expect(remainingEvents).toBeDefined();
+      expect(Array.isArray(remainingEvents)).toBeTruthy();
+      expect(remainingEvents.length).toBe(2);
+    });
   });
 
   describe('RRULE: Count Events', () => {
@@ -610,7 +670,7 @@ describe('Events', () => {
       };
 
       await request(app.getHttpServer())
-        .patch('/event/23/future')
+        .patch('/event/33/future')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
         .expect(200);
@@ -622,12 +682,12 @@ describe('Events', () => {
       };
 
       await request(app.getHttpServer())
-        .patch('/event/24/all')
+        .patch('/event/35/all')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
         .expect(200);
 
-      const events = await orm.em.find(Event, { recurrence: 5 });
+      const events = await orm.em.find(Event, { recurrence: 6 });
 
       for (const event of events) {
         expect(event.name).toBe(dto.meta.name);
@@ -640,7 +700,7 @@ describe('Events', () => {
       const events = await orm.em.find(Event, {});
 
       expect(
-        events.every((e) => !e.dtstart || +e.dtstart < +e.dtend),
+        events.every((e) => !e.dtend || +e.dtstart < +e.dtend),
       ).toBeTruthy();
     });
   });

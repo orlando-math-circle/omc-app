@@ -27,10 +27,10 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ nullable: true })
   color?: string;
 
-  @Property({ onUpdate: () => new Date() })
+  @Property({ onUpdate: () => new Date(), hidden: true })
   updatedAt: Date = new Date();
 
-  @Property()
+  @Property({ hidden: true })
   createdAt: Date = new Date();
 
   /**
