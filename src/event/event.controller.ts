@@ -36,6 +36,7 @@ export class EventController {
     return this.eventService.findAll(start, end);
   }
 
+  @UserAuth('event', 'update:any')
   @Patch(':id/single')
   updateSingleEvent(
     @Param() { id }: FindEventDto,
@@ -44,6 +45,7 @@ export class EventController {
     return this.eventService.updateSingleEvent(id, updateEventDto);
   }
 
+  @UserAuth('event', 'update:any')
   @Patch(':id/future')
   updateFutureEvents(
     @Param() { id }: FindEventDto,
@@ -52,6 +54,7 @@ export class EventController {
     return this.eventService.updateFutureEvents(id, updateEventsDto);
   }
 
+  @UserAuth('event', 'update:any')
   @Patch(':id/all')
   updateAllEvents(
     @Param() { id }: FindEventDto,
@@ -60,7 +63,7 @@ export class EventController {
     return this.eventService.updateAllEvents(id, updateEventsDto);
   }
 
-  // @UserAuth('event', 'delete:any')
+  @UserAuth('event', 'delete:any')
   @Delete(':id/single')
   delete(@Param() { id }: FindEventDto) {
     return this.eventService.deleteSingleEvent(id);
