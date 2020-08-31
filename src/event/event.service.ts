@@ -526,7 +526,7 @@ export class EventService {
    * @param until Date to end the schedule.
    */
   private shortenRRule(schedule: Schedule, until: Date) {
-    const options = schedule.options;
+    const options = Object.assign({}, schedule.options);
 
     delete options.count;
     options.until = until;
