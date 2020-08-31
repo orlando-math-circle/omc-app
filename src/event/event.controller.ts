@@ -36,6 +36,11 @@ export class EventController {
     return this.eventService.findAll(start, end);
   }
 
+  @Get(':id')
+  findOne(@Param() { id }: FindEventDto) {
+    return this.eventService.findOneOrFail(id);
+  }
+
   @UserAuth('event', 'update:any')
   @Patch(':id/single')
   updateSingleEvent(

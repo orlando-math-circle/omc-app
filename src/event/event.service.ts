@@ -112,7 +112,7 @@ export class EventService {
         events: {
           dtstart: { $lte: end },
           $or: [{ dtend: { $gte: start } }, { dtend: null }],
-          },
+        },
       },
       ['events'],
     );
