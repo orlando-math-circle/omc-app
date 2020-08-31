@@ -100,29 +100,19 @@ export class EventService {
    */
   async findAll(start: Date, end: Date) {
     const events = await this.eventRepository.find({
-      dtstart: { $gte: start.toISOString() },
-      $or: [
-        {
-          dtend: { $lte: end.toISOString() },
-        },
-        {
-          dtend: null,
-        },
-      ],
+      dtend: { $gte: start },
+      dtstart: { $lte: end },
       recurrence: null,
     });
 
     const recurrences = await this.recurrenceRepository.find(
       {
-        dtstart: { $gte: start.toISOString() },
-        $or: [
-          {
-            dtend: { $lte: end.toISOString() },
+        dtstart: { $lte: end },
+        $or: [{ dtend: { $gte: start } }, { dtend: null }],
+        events: {
+          dtstart: { $lte: end },
+          $or: [{ dtend: { $gte: start } }, { dtend: null }],
           },
-          {
-            dtend: null,
-          },
-        ],
       },
       ['events'],
     );
