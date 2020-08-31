@@ -320,10 +320,9 @@ export class EventService {
     // Deleting the first event in a recurrence is equivalent to an "all" deletion.
     // This doesn't use the schedule's dtstart because it may misaligned with the rrule.
     if (+schedule.first() === +pivot.start()) {
-      this.eventRepository.remove(pivot.recurrence.events);
       this.recurrenceRepository.remove(pivot.recurrence);
 
-      return this.eventRepository.flush();
+      return this.recurrenceRepository.flush();
     }
 
     const dayBefore = subDays(pivot.dtstart, 1);
@@ -353,7 +352,6 @@ export class EventService {
       'recurrence.events',
     ]);
 
-    this.eventRepository.remove(event.recurrence.events);
     this.recurrenceRepository.remove(event.recurrence);
 
     return this.eventRepository.flush();

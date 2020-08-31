@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryKey,
   Property,
+  Cascade,
 } from '@mikro-orm/core';
 import { Event } from './event.entity';
 import { Schedule } from './schedule.class';
@@ -41,7 +42,10 @@ export class EventRecurrence extends BaseEntity<EventRecurrence, 'id'> {
    * Relationships
    */
 
-  @OneToMany(() => Event, (event) => event.recurrence, { hidden: true })
+  @OneToMany(() => Event, (event) => event.recurrence, {
+    hidden: true,
+    cascade: [Cascade.ALL],
+  })
   events: Collection<Event> = new Collection<Event>(this);
 
   @ManyToOne(() => EventRecurrence, { nullable: true })
