@@ -22,6 +22,8 @@ async function bootstrap() {
 
   app.useGlobalFilters(new JsonWebTokenFilter());
 
+  app.enableCors();
+
   await app.listen(config.get(PORT));
 
   if (module.hot) {
