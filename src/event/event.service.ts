@@ -217,9 +217,15 @@ export class EventService {
       pivot.recurrence,
     );
 
-    const lastEvent =
-      pivot.recurrence.events[pivot.recurrence.events.length - 1];
-    const dates = schedule.between(rrule.dtstart, lastEvent.dtend).values();
+    let end = pivot.recurrence.events[pivot.recurrence.events.length - 1].dtend;
+
+    // If there is no end or its after the start, at minimum preserve the new pivot.
+    // Without this, moving a pivot past the existing event range removes the pivot.
+    if (!end || rrule.dtstart > end) {
+      end = rrule.dtstart;
+    }
+
+    const dates = schedule.between(rrule.dtstart, end).values();
 
     return this.setEventData(
       pivot,
