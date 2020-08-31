@@ -1,6 +1,10 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  InternalServerErrorException,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import moment from 'moment';
@@ -23,6 +27,7 @@ import { EventRecurrence } from '../src/event/event-recurrence.entity';
 import { Event } from '../src/event/event.entity';
 import { EventModule } from '../src/event/event.module';
 import { EventService } from '../src/event/event.service';
+import { Schedule } from '../src/event/schedule.class';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 
@@ -37,6 +42,7 @@ MikroORMConfig.entities = [Account, User, Event, EventRecurrence];
 describe('Events', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
+  let eventService: EventService;
 
   /**
    * Testing Data
@@ -69,6 +75,7 @@ describe('Events', () => {
 
     app = moduleRef.createNestApplication();
     orm = moduleRef.get<MikroORM>(MikroORM);
+    eventService = moduleRef.get(EventService);
 
     const generator = orm.getSchemaGenerator();
     await generator.ensureDatabase();
@@ -318,6 +325,16 @@ describe('Events', () => {
     });
   });
 
+  describe('GET /event/:id', () => {
+    it('should retrieve single events', async () => {
+      await request(app.getHttpServer()).get('/event/1').expect(200);
+    });
+
+    it('should throw on a non-existant event', async () => {
+      await request(app.getHttpServer()).get('/event/10').expect(404);
+    });
+  });
+
   describe('PATCH /event/:id/single', () => {
     it('should update individual events by exception', async () => {
       const newStart = new Date(Date.UTC(2020, 0, 31, 11, 30));
@@ -343,6 +360,20 @@ describe('Events', () => {
         new Date(Date.UTC(2020, 0, 31, 10, 30)).toISOString(),
       );
       expect(resp.body.dtend).toBe(newEnd.toISOString());
+    });
+
+    it('should do nothing else if only updating meta information', async () => {
+      const dto: UpdateEventDto = {
+        meta: {
+          description: 'Update Single',
+        },
+      };
+
+      await request(app.getHttpServer())
+        .patch('/event/3/single')
+        .send(dto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
     });
   });
 
@@ -456,6 +487,64 @@ describe('Events', () => {
         .expect(200);
 
       expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not reset a count in a recurrence split', async () => {
+      const dto: CreateEventDto = {
+        name: 'Count Split Test',
+        dtend: new Date(Date.UTC(2020, 11, 10, 5, 0)),
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 11, 10, 0, 0)),
+          count: 5,
+        },
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .send(dto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      const resp = await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: dto.rrule.dtstart,
+          end: moment(dto.rrule.dtstart).add(5, 'days').toDate(),
+        })
+        .expect(200);
+
+      expect(resp.body).toBeDefined();
+      expect(Array.isArray(resp.body)).toBeTruthy();
+      expect(resp.body.length).toBe(5);
+
+      const secondDto: UpdateEventsDto = {
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 11, 20)),
+          count: 5,
+        },
+      };
+
+      await request(app.getHttpServer())
+        .patch('/event/21/future')
+        .send(secondDto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: secondDto.rrule.dtstart,
+          end: moment(secondDto.rrule.dtstart).add(5, 'days').toDate(),
+        })
+        .expect(200);
+
+      const recurrence = await orm.em.findOne(EventRecurrence, 5, ['events']);
+
+      expect(recurrence).toBeDefined();
+      expect(recurrence.events.length).toBe(3);
+      expect(recurrence.rrule.includes('COUNT=3')).toBeTruthy();
     });
   });
 
@@ -624,74 +713,54 @@ describe('Events', () => {
       expect(Array.isArray(remainingEvents)).toBeTruthy();
       expect(remainingEvents.length).toBe(2);
     });
+
+    it('should pivot to deleting all events if the first instance is selected', async () => {
+      const recurrence = await orm.em.findOne(EventRecurrence, 5, ['events']);
+
+      expect(recurrence).toBeDefined();
+      expect(recurrence.events.length).toBe(3);
+
+      const eventId = recurrence.events.getIdentifiers();
+
+      await request(app.getHttpServer())
+        .delete('/event/21/future')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      orm.em.clear();
+
+      const recurrenceAfter = await orm.em.findOne(EventRecurrence, 5);
+
+      expect(recurrenceAfter).toBeFalsy();
+
+      const events = await orm.em.find(Event, { id: { $in: eventId } });
+
+      expect(events.length).toBe(0);
+    });
   });
 
-  describe('RRULE: Count Events', () => {
-    it('should probably create events with COUNT options', async () => {
-      const dto: CreateEventDto = {
-        name: 'Count Event',
-        dtend: new Date(Date.UTC(2020, 4, 1, 3, 45)),
-        rrule: {
-          freq: Frequency.DAILY,
-          dtstart: new Date(Date.UTC(2020, 4, 1, 2, 15)),
-          count: 5,
-        },
-      };
+  describe('DELETE /event/:id/all', () => {
+    it('should remove all events and the recurrence', async () => {
+      const recurrence = await orm.em.findOne(EventRecurrence, 3, ['events']);
+
+      expect(recurrence).toBeDefined();
+
+      const eventIds = recurrence.events.getIdentifiers();
 
       await request(app.getHttpServer())
-        .post('/event')
+        .delete('/event/16/all')
         .set('Authorization', `Bearer ${token}`)
-        .send(dto)
-        .expect(201);
-
-      const resp = await request(app.getHttpServer())
-        .get('/event')
-        .query({
-          start: dto.rrule.dtstart,
-          end: moment(dto.rrule.dtstart).add(5, 'days').toDate(),
-        })
         .expect(200);
 
-      expect(resp.body).toBeDefined();
-      expect(Array.isArray(resp.body)).toBeTruthy();
-      expect(resp.body.length).toBe(5);
-    });
+      orm.em.clear();
 
-    it('should split a recurring event without resetting count', async () => {
-      const dto: UpdateEventsDto = {
-        meta: {
-          name: 'Split Count',
-        },
-        rrule: {
-          freq: Frequency.DAILY,
-          dtstart: new Date(Date.UTC(2020, 4, 3, 2, 15)),
-          count: 5,
-        },
-      };
+      const recurrenceAfter = await orm.em.findOne(EventRecurrence, 3);
 
-      await request(app.getHttpServer())
-        .patch('/event/33/future')
-        .set('Authorization', `Bearer ${token}`)
-        .send(dto)
-        .expect(200);
-    });
+      expect(recurrenceAfter).toBeFalsy();
 
-    it('should update all events', async () => {
-      const dto: UpdateEventsDto = {
-        meta: { name: '5-Count Events' },
-      };
+      const events = await orm.em.find(Event, { id: { $in: eventIds } });
 
-      await request(app.getHttpServer())
-        .patch('/event/35/all')
-        .set('Authorization', `Bearer ${token}`)
-        .send(dto)
-        .expect(200);
-
-      const events = await orm.em.find(Event, { recurrence: 6 });
-
-      for (const event of events) {
-        expect(event.name).toBe(dto.meta.name);
-      }
+      expect(events.length).toBe(0);
     });
   });
 
@@ -702,6 +771,35 @@ describe('Events', () => {
       expect(
         events.every((e) => !e.dtend || +e.dtstart < +e.dtend),
       ).toBeTruthy();
+    });
+  });
+
+  describe('getRecurrenceEvents()', () => {
+    it('should throw an error if the recurrence has no events', async () => {
+      const dto: CreateEventDto = {
+        name: 'UNUSED',
+        rrule: {
+          freq: Frequency.WEEKLY,
+          dtstart: new Date(Date.UTC(2020, 0, 1)),
+          until: new Date(Date.UTC(2020, 0, 20)),
+        },
+      };
+
+      const recurrence = orm.em.create(EventRecurrence, {
+        dtstart: dto.rrule.dtstart,
+        dtend: dto.rrule.until,
+        rrule: new Schedule(dto.rrule).toString(),
+      });
+
+      expect.assertions(1);
+
+      await expect(
+        eventService['getRecurrenceEvents'](
+          recurrence,
+          recurrence.dtstart,
+          recurrence.dtend,
+        ),
+      ).rejects.toThrowError(InternalServerErrorException);
     });
   });
 });
