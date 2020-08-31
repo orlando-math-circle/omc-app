@@ -476,6 +476,14 @@ export class EventService {
     const events = recurrence.events.getItems();
     const newEvents = [];
 
+    // Recurring event metadata is obtained from the first event
+    // instance. If it is deleted manually this event recurrence
+    // is no longer valid. This could be a silent warning.
+
+    if (!events[0]) {
+      throw new InternalServerErrorException('Event recurrence has no events');
+    }
+
     const duration = events[0].dtend
       ? moment(events[0].dtend).diff(events[0].dtstart, 'minutes')
       : null;
@@ -486,16 +494,6 @@ export class EventService {
       );
 
       if (event) continue;
-
-      // Recurring event metadata is obtained from the first event
-      // instance. If it is deleted manually this event recurrence
-      // is no longer valid. This could be a silent warning.
-
-      if (!events[0]) {
-        throw new InternalServerErrorException(
-          'Event recurrence has no events',
-        );
-      }
 
       newEvents.push(
         this.eventRepository.create({
