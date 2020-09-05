@@ -18,7 +18,6 @@ import {
 } from '../app.utils';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
-import { UpdateEventMetaDto } from './dtos/event-meta.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
 import { UpdateEventsDto } from './dtos/update-events.dto';
 import { EventRecurrence } from './event-recurrence.entity';
@@ -132,7 +131,7 @@ export class EventService {
    * @param updateEventDto UpdateEventDto object
    */
   public async updateSingleEvent(id: number, updateEventDto: UpdateEventDto) {
-    const { dtstart, dtend, meta } = updateEventDto;
+    const { dtstart, dtend, ...meta } = updateEventDto;
     const event = await this.eventRepository.findOneOrFail(id);
 
     if (dtstart) {
@@ -162,7 +161,7 @@ export class EventService {
     id: number,
     updateEventsDto: UpdateEventsDto,
   ) {
-    const { dtend, rrule, meta } = updateEventsDto;
+    const { dtend, rrule, ...meta } = updateEventsDto;
     const pivot = await this.eventRepository.findOneOrFail(
       id,
       ['recurrence.events'],
@@ -236,7 +235,7 @@ export class EventService {
    */
   public async updateAllEvents(
     idOrRecurrence: number | EventRecurrence,
-    { dtend, rrule, meta }: UpdateEventDto,
+    { dtend, rrule, ...meta }: UpdateEventDto,
   ): Promise<void> {
     const recurrence =
       typeof idOrRecurrence === 'number'
@@ -368,7 +367,7 @@ export class EventService {
     pivot: Event,
     events: Iterable<Event>,
     dtend?: Date,
-    meta?: UpdateEventMetaDto,
+    meta?: Omit<UpdateEventsDto, 'dtend' | 'rrule'>,
     recurrence?: EventRecurrence,
     dateIterator?: IterableIterator<Date>,
   ) {
