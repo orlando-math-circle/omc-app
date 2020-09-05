@@ -1,13 +1,23 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, ValidateNested } from 'class-validator';
-import { UpdateEventMetaDto } from './event-meta.dto';
+import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
 export class UpdateEventDto {
   @IsOptional()
-  @Type(() => UpdateEventMetaDto)
-  @ValidateNested()
-  readonly meta?: UpdateEventMetaDto;
+  @IsString()
+  readonly name?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly description?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly picture?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly color?: string;
 
   @IsOptional()
   @Type(() => Date)

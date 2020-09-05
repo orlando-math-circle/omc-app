@@ -339,17 +339,16 @@ describe('Events', () => {
     it('should update individual events by exception', async () => {
       const newStart = new Date(Date.UTC(2020, 0, 31, 11, 30));
       const newEnd = new Date(Date.UTC(2020, 0, 31, 20, 0));
+      const dto: UpdateEventDto = {
+        name: 'Exception Event',
+        dtstart: newStart,
+        dtend: newEnd,
+      };
 
       const resp = await request(app.getHttpServer())
         .patch('/event/3/single')
         .set('Authorization', `Bearer ${token}`)
-        .send({
-          meta: {
-            name: 'Exception Event',
-          },
-          dtstart: newStart,
-          dtend: newEnd,
-        })
+        .send(dto)
         .expect(200);
 
       expect(resp.body).toBeDefined();
@@ -364,9 +363,7 @@ describe('Events', () => {
 
     it('should do nothing else if only updating meta information', async () => {
       const dto: UpdateEventDto = {
-        meta: {
-          description: 'Update Single',
-        },
+        description: 'Update Single',
       };
 
       await request(app.getHttpServer())
@@ -380,7 +377,8 @@ describe('Events', () => {
   describe('PATCH /event/:id/future', () => {
     it('should update meta information', async () => {
       const dto: UpdateEventsDto = {
-        meta: { name: 'Name Change', description: 'Test' },
+        name: 'Name Change',
+        description: 'Test',
         dtend: new Date(Date.UTC(2020, 1, 14, 15, 30)),
       };
 
@@ -470,9 +468,7 @@ describe('Events', () => {
       const spy = jest.spyOn<any, any>(EventService.prototype, 'setEventData');
 
       const dto: UpdateEventsDto = {
-        meta: {
-          name: 'Recurring Event',
-        },
+        name: 'Recurring Event',
         rrule: {
           freq: Frequency.DAILY,
           dtstart: new Date(Date.UTC(2020, 1, 7, 10, 30)),
@@ -550,10 +546,14 @@ describe('Events', () => {
 
   describe('PATCH /event/:id/all', () => {
     it('should update all events, regardless of the event id', async () => {
+      const dto: UpdateEventsDto = {
+        name: 'All Events',
+      };
+
       await request(app.getHttpServer())
         .patch('/event/10/all')
         .set('Authorization', `Bearer ${token}`)
-        .send({ meta: { name: 'All Events' } })
+        .send(dto)
         .expect(200);
 
       const events = await orm.em.find(Event, { recurrence: { id: 2 } });
