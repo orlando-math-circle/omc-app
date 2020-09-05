@@ -7,9 +7,9 @@ import {
   OneToOne,
   PrimaryKey,
   Property,
-} from 'mikro-orm';
-import { User } from '../user/user.entity';
+} from '@mikro-orm/core';
 import crypto from 'crypto';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class Account extends BaseEntity<Account, 'id'> {
@@ -40,5 +40,5 @@ export class Account extends BaseEntity<Account, 'id'> {
     cascade: [Cascade.ALL],
     orphanRemoval: true,
   })
-  users = new Collection<User>(this);
+  users: Collection<User> = new Collection<User>(this);
 }

@@ -11,6 +11,9 @@ node_modules/
 # dotenv Environment Variables
 .env
 
+# Personal VSCode workplace settings
+.vscode/
+
 # Logs
 logs
 *.log

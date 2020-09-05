@@ -22,7 +22,5 @@ jobs:
       - run: npm install
       - run: npm run test:e2e
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Codecov
+        uses: codecov/codecov-action@v1

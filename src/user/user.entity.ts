@@ -5,9 +5,10 @@ import {
   ManyToOne,
   PrimaryKey,
   Property,
-} from 'mikro-orm';
+} from '@mikro-orm/core';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
+// import { ProjectWork } from '../project-work/project-work.entity';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -46,4 +47,7 @@ export class User extends BaseEntity<User, 'id'> {
   // a circular JSON structure when it reaches this property.
   @ManyToOne(() => Account, { hidden: true })
   account!: Account;
+
+  // @OneToMany(() => ProjectWork, (pw) => pw.user)
+  // work = new Collection<ProjectWork>(this);
 }

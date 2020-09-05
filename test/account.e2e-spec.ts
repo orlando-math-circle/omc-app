@@ -1,8 +1,8 @@
+import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import { MikroOrmModule } from 'nestjs-mikro-orm';
 import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';
@@ -18,7 +18,11 @@ import { UserModule } from '../src/user/user.module';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
+delete MikroORMConfig.entitiesTs;
+
+MikroORMConfig.debug = false;
 MikroORMConfig.dbName = 'omc_test';
+MikroORMConfig.entities = [Account, User];
 
 const createAccountDto: CreateAccountDto = {
   name: 'Jane Doe',
@@ -103,7 +107,7 @@ describe('Accounts', () => {
       await request(app.getHttpServer()).get('/account/me').expect(401);
     });
 
-    it('should retrieve the authed account', async () => {
+    it('should retrieve the account', async () => {
       const resp = await request(app.getHttpServer())
         .get('/account/me')
         .set('Authorization', `Bearer ${token}`)

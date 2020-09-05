@@ -1,24 +1,28 @@
+import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { Connection, IDatabaseDriver, MikroORM } from 'mikro-orm';
-import request from 'supertest';
-import { Account } from '../src/account/account.entity';
-import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import { Roles } from '../src/app.roles';
-import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
-import { User } from '../src/user/user.entity';
-import { Test } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
-import configSchema from '../src/app.config';
-import { MikroOrmModule } from 'nestjs-mikro-orm';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
 import MikroORMConfig from '../mikro-orm.config';
-import { EmailModule } from '../src/email/email.module';
+import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
-import { UserModule } from '../src/user/user.module';
+import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
+import configSchema from '../src/app.config';
+import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
+import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { EmailModule } from '../src/email/email.module';
+import { User } from '../src/user/user.entity';
+import { UserModule } from '../src/user/user.module';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
+delete MikroORMConfig.entitiesTs;
+
+MikroORMConfig.debug = false;
 MikroORMConfig.dbName = 'omc_test';
+MikroORMConfig.entities = [Account, User];
 
 describe('Users', () => {
   let app: INestApplication;
