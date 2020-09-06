@@ -4,11 +4,16 @@ import {
   ManyToOne,
   PrimaryKey,
   Property,
+  OneToMany,
+  Cascade,
+  Collection,
 } from '@mikro-orm/core';
 import { BadRequestException } from '@nestjs/common';
 import { getMinutesDiff } from '../app.utils';
 import { User } from '../user/user.entity';
 import { EventRecurrence } from './event-recurrence.entity';
+import { EventPermissionsDto } from './dtos/event-permissions.dto';
+import { Invoice } from '../invoice/invoice.entity';
 
 @Entity()
 export class Event extends BaseEntity<Event, 'id'> {
@@ -26,6 +31,12 @@ export class Event extends BaseEntity<Event, 'id'> {
 
   @Property({ nullable: true })
   color?: string;
+
+  @Property({ nullable: true })
+  permissions?: EventPermissionsDto;
+
+  @Property({ nullable: true })
+  fee?: string;
 
   @Property({ onUpdate: () => new Date(), hidden: true })
   updatedAt: Date = new Date();
@@ -52,6 +63,9 @@ export class Event extends BaseEntity<Event, 'id'> {
 
   @ManyToOne(() => EventRecurrence, { nullable: true, hidden: true })
   recurrence?: EventRecurrence;
+
+  @OneToMany(() => Invoice, (i) => i.event, { nullable: true })
+  invoices = new Collection<Invoice>(this);
 
   @ManyToOne(() => User)
   author!: User;
