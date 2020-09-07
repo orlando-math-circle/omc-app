@@ -48,6 +48,7 @@ export class PayPalService {
       {
         headers: {
           'Content-Type': 'application/json',
+          Prefer: 'return=representation',
         },
       },
     );
@@ -160,7 +161,7 @@ export class PayPalService {
     });
   }
 
-  private async retryRequest(config: AxiosRetryConfig) {
+  private retryRequest(config: AxiosRetryConfig) {
     config.retries++;
 
     const promise = this.loader.enqueue(config).then(() => {
@@ -172,6 +173,6 @@ export class PayPalService {
 
     this.getAccessToken();
 
-    return await promise;
+    return promise;
   }
 }
