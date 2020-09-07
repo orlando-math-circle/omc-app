@@ -21,6 +21,9 @@ jobs:
 
       - run: npm install
       - run: npm run test:e2e
+        env:
+          PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+          PAYPAL_SECRET_KEY: ${{ secrets.PAYPAL_SECRET_KEY }}
 
       - name: Codecov
         uses: codecov/codecov-action@v1
