@@ -2,10 +2,10 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import qs from 'querystring';
 import { PAYPAL_ENV_TOKEN, PAYPAL_MAX_RETRIES } from '../app.constants';
-import { PayPalCreateOrder } from './interfaces/create-order.interface';
 import { PayPalEnvironment } from './paypal-environment.class';
 import { PayPalTokenLoader } from './paypal-token-loader.class';
 import { PayPalToken } from './paypal-token.class';
+import { CreateOrderRequest } from './interfaces/orders/requests/create-order.interface';
 
 export type AxiosRetryConfig = AxiosRequestConfig & { retries: number };
 
@@ -16,7 +16,8 @@ export class PayPalService {
 
   constructor(
     private readonly loader: PayPalTokenLoader,
-    @Inject(PAYPAL_ENV_TOKEN) private readonly environment: PayPalEnvironment,
+    @Inject(PAYPAL_ENV_TOKEN)
+    private readonly environment: PayPalEnvironment,
   ) {
     this.axios = axios.create({
       baseURL: this.environment.baseUrl,
@@ -29,18 +30,35 @@ export class PayPalService {
   }
 
   /**
-   * Creates a simple PayPal order with a provided cost. This method
-   * only supports
+   * Creates a simple PayPal order with a provided cost.
+   *
+   * @param cost Cost of the order, e.g. '15.75'.
    */
-  public async createOrder(paypalCreateOrder: PayPalCreateOrder) {
-    const resp = await this.axios.post(
-      '/v2/checkout/orders',
-      paypalCreateOrder,
-    );
+  public async createOrder(cost: string) {
+    const order: CreateOrderRequest = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            value: cost,
+          },
+        },
+      ],
+    };
+
+    const resp = await this.axios.post('/v2/checkout/orders', order);
 
     return resp.data;
   }
 
+  /**
+   * Completes an order with the `CAPTURE` intent for immediately
+   * available funds. This method will not work on `AUTHORIZE`
+   * transactions.
+   *
+   * @param id ID of the order to complete.
+   */
   public async captureOrder(id: string) {
     const resp = await this.axios.post(
       `/v2/checkout/orders/${id}/capture`,
@@ -56,6 +74,12 @@ export class PayPalService {
     return resp.data;
   }
 
+  /**
+   * Retrives an order by its ID from PayPal. These entities can expire,
+   * however.
+   *
+   * @param id ID of the order to retrieve.
+   */
   public async getOrder(id: string) {
     const resp = await this.axios.get(`/v2/checkout/orders/${id}`);
 
@@ -121,8 +145,9 @@ export class PayPalService {
   }
 
   /**
-   * Sets an interceptor on the axios instance to attempt
-   * to retry failed requests due to an expired token.
+   * Installs both a request and error response interceptor. The request
+   * interceptor shall configure retries and ensure the token exists whereas
+   * the error response interceptor will attempt retries when appropriate.
    */
   private initInterceptor() {
     this.axios.interceptors.request.use(async (config: AxiosRetryConfig) => {
@@ -147,6 +172,7 @@ export class PayPalService {
       // No request config; cannot retry.
       if (!config) return Promise.reject(error);
 
+      // Only retry 401 Unathenticated requests (token issues).
       if (
         error?.response?.status === 401 &&
         config.retries < PAYPAL_MAX_RETRIES
@@ -161,6 +187,12 @@ export class PayPalService {
     });
   }
 
+  /**
+   * Reinitiates an Axios request from its configuration after
+   * refreshing the token and enqueuing the request on the loader.
+   *
+   * @param config Axios request config with retries.
+   */
   private retryRequest(config: AxiosRetryConfig) {
     config.retries++;
 
@@ -169,6 +201,8 @@ export class PayPalService {
       return this.request(config);
     });
 
+    // If the loader is locked, a token is already being retrieved.
+    // The enqueued config will be released once it finishes.
     if (this.loader.isLocked) return promise;
 
     this.getAccessToken();

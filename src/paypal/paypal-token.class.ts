@@ -1,5 +1,5 @@
 import { PAYPAL_EXP_THRESHOLD } from '../app.constants';
-import { PayPalTokenResponse } from './interfaces/token.interface';
+import { PayPalTokenResponse } from './interfaces/authentication/token.interface';
 
 export class PayPalToken {
   private readonly token: string;

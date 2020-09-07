@@ -22,5 +22,5 @@ export interface VerifyPayload extends Token {
  * Password reset token payload.
  */
 export interface ResetPayload extends Token {
-  uid: string;
+  uid: number;
 }
