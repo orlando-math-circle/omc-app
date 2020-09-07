@@ -1,19 +1,18 @@
 import {
   BaseEntity,
+  Collection,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
-  OneToMany,
-  Cascade,
-  Collection,
 } from '@mikro-orm/core';
 import { BadRequestException } from '@nestjs/common';
 import { getMinutesDiff } from '../app.utils';
-import { User } from '../user/user.entity';
-import { EventRecurrence } from './event-recurrence.entity';
-import { EventPermissionsDto } from './dtos/event-permissions.dto';
 import { Invoice } from '../invoice/invoice.entity';
+import { User } from '../user/user.entity';
+import { EventPermissionsDto } from './dtos/event-permissions.dto';
+import { EventRecurrence } from './event-recurrence.entity';
 
 @Entity()
 export class Event extends BaseEntity<Event, 'id'> {

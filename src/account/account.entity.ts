@@ -40,5 +40,5 @@ export class Account extends BaseEntity<Account, 'id'> {
     cascade: [Cascade.ALL],
     orphanRemoval: true,
   })
-  users: Collection<User> = new Collection<User>(this);
+  users = new Collection<User>(this);
 }

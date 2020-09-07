@@ -30,6 +30,7 @@ import { EventService } from '../src/event/event.service';
 import { Schedule } from '../src/event/schedule.class';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
+import { Invoice } from '../src/invoice/invoice.entity';
 
 delete MikroORMConfig.user;
 delete MikroORMConfig.password;
@@ -37,7 +38,7 @@ delete MikroORMConfig.entitiesTs;
 
 MikroORMConfig.debug = false;
 MikroORMConfig.dbName = 'omc_test';
-MikroORMConfig.entities = [Account, User, Event, EventRecurrence];
+MikroORMConfig.entities = [Account, User, Invoice, Event, EventRecurrence];
 
 describe('Events', () => {
   let app: INestApplication;

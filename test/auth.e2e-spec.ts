@@ -17,6 +17,9 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { AccessGuard } from '../src/auth/guards/access-control.guard';
 import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
+import { EventRecurrence } from '../src/event/event-recurrence.entity';
+import { Event } from '../src/event/event.entity';
+import { Invoice } from '../src/invoice/invoice.entity';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { UserService } from '../src/user/user.service';
@@ -27,7 +30,7 @@ delete MikroORMConfig.entitiesTs;
 
 MikroORMConfig.debug = false;
 MikroORMConfig.dbName = 'omc_test';
-MikroORMConfig.entities = [Account, User];
+MikroORMConfig.entities = [Account, User, Invoice, Event, EventRecurrence];
 
 const createAccountDto: CreateAccountDto = {
   name: 'Jane Doe',
