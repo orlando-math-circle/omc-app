@@ -4,7 +4,6 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
@@ -13,19 +12,9 @@ import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
-import { EventRecurrence } from '../src/event/event-recurrence.entity';
-import { Event } from '../src/event/event.entity';
-import { Invoice } from '../src/invoice/invoice.entity';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
-
-delete MikroORMConfig.user;
-delete MikroORMConfig.password;
-delete MikroORMConfig.entitiesTs;
-
-MikroORMConfig.debug = false;
-MikroORMConfig.dbName = 'omc_test';
-MikroORMConfig.entities = [Account, User, Invoice, Event, EventRecurrence];
+import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 describe('Users', () => {
   let app: INestApplication;
@@ -58,7 +47,7 @@ describe('Users', () => {
           validationSchema: configSchema,
           isGlobal: true,
         }),
-        MikroOrmModule.forRoot(MikroORMConfig),
+        MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
         AccountModule,
         UserModule,

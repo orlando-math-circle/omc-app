@@ -10,8 +10,6 @@ import { Test } from '@nestjs/testing';
 import moment from 'moment';
 import RRule, { Frequency } from 'rrule';
 import request from 'supertest';
-import MikroORMConfig from '../mikro-orm.config';
-import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
 import configSchema from '../src/app.config';
@@ -30,15 +28,7 @@ import { EventService } from '../src/event/event.service';
 import { Schedule } from '../src/event/schedule.class';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
-import { Invoice } from '../src/invoice/invoice.entity';
-
-delete MikroORMConfig.user;
-delete MikroORMConfig.password;
-delete MikroORMConfig.entitiesTs;
-
-MikroORMConfig.debug = false;
-MikroORMConfig.dbName = 'omc_test';
-MikroORMConfig.entities = [Account, User, Invoice, Event, EventRecurrence];
+import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 describe('Events', () => {
   let app: INestApplication;
@@ -65,7 +55,7 @@ describe('Events', () => {
           validationSchema: configSchema,
           isGlobal: true,
         }),
-        MikroOrmModule.forRoot(MikroORMConfig),
+        MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
         AccountModule,
         UserModule,
