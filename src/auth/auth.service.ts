@@ -39,7 +39,7 @@ export class AuthService {
   ) {}
 
   async validateLogin(email: string, password: string) {
-    const user = await this.userService.findOne(email, ['account.users']);
+    const user = await this.userService.findOne({ email }, ['account.users']);
 
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;
@@ -185,7 +185,7 @@ export class AuthService {
    * @param email email address for sending the password reset link
    */
   public async forgotPassword(email: string) {
-    const user = await this.userService.findOne(email);
+    const user = await this.userService.findOne({ email });
 
     if (!user) return;
 

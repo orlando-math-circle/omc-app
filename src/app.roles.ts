@@ -10,6 +10,7 @@ const ac = new AccessControl();
 ac.grant(Roles.GUEST)
   .createOwn('user')
   .readOwn('user')
+  .createOwn('event-registration')
   .grant(Roles.ADMIN)
   .extend(Roles.GUEST)
   .readAny('account')

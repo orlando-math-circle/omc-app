@@ -15,6 +15,8 @@ import {
   isBeforeDay,
   isSameDay,
   subDays,
+  PopulateFail,
+  Populate,
 } from '../app.utils';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
@@ -75,15 +77,30 @@ export class EventService {
   }
 
   /**
+   * Finds a hydrated event entity or returns null.
+   *
+   * @param where Id or query of event parameters.
+   * @param populate Boolean, attribute array, or population options.
+   * @param orderBy Query for element ordering.
+   */
+  public async findOne(
+    where: FilterQuery<Event>,
+    populate?: Populate<Event>,
+    orderBy?: QueryOrderMap,
+  ) {
+    return this.eventRepository.findOne(where, populate, orderBy);
+  }
+
+  /**
    * Finds an existing event entity or throws an error.
    *
-   * @param where Id or query with Event parameters.
-   * @param populate Array list of relationships, or true for all.
+   * @param where Id or query of event parameters.
+   * @param populate Boolean, attribute array, or population options.
    * @param orderBy Query for element ordering.
    */
   async findOneOrFail(
     where: FilterQuery<Event>,
-    populate?: boolean | string[],
+    populate?: PopulateFail<Event>,
     orderBy?: QueryOrderMap,
   ) {
     return this.eventRepository.findOneOrFail(where, populate, orderBy);

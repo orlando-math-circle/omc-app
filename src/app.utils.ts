@@ -1,6 +1,27 @@
+import {
+  FindOneOptions,
+  FindOneOrFailOptions,
+  Populate as MikroORMPopulate,
+} from '@mikro-orm/core';
 import moment from 'moment';
 
+/**
+ * Types
+ */
+
 export type Dict = Record<string, unknown>;
+
+export type Populate<T, P extends MikroORMPopulate<T> = any> =
+  | P
+  | FindOneOptions<T, P>;
+
+export type PopulateFail<T, P extends MikroORMPopulate<T> = any> =
+  | P
+  | FindOneOrFailOptions<T, P>;
+
+/**
+ * Assertion Utilities
+ */
 
 export const isNumber = (fn: any): fn is number => typeof fn === 'number';
 

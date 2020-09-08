@@ -52,7 +52,7 @@ export interface PurchaseUnit {
   id?: string;
   soft_descriptor?: string;
   items?: Item[];
-  payments: PaymentCollection[];
+  payments: PaymentCollection;
 }
 
 /**

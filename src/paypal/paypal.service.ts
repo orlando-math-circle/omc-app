@@ -1,11 +1,17 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  BadRequestException,
+} from '@nestjs/common';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import qs from 'querystring';
 import { PAYPAL_ENV_TOKEN, PAYPAL_MAX_RETRIES } from '../app.constants';
+import { OrderDetails } from './interfaces/orders/order-details.interface';
+import { CreateOrderRequest } from './interfaces/orders/requests/create-order.interface';
 import { PayPalEnvironment } from './paypal-environment.class';
 import { PayPalTokenLoader } from './paypal-token-loader.class';
 import { PayPalToken } from './paypal-token.class';
-import { CreateOrderRequest } from './interfaces/orders/requests/create-order.interface';
 
 export type AxiosRetryConfig = AxiosRequestConfig & { retries: number };
 
@@ -33,8 +39,9 @@ export class PayPalService {
    * Creates a simple PayPal order with a provided cost.
    *
    * @param cost Cost of the order, e.g. '15.75'.
+   * @param customId ID associated with the purchase unit.
    */
-  public async createOrder(cost: string) {
+  public async createOrder(cost: string, customId: string) {
     const order: CreateOrderRequest = {
       intent: 'CAPTURE',
       purchase_units: [
@@ -43,6 +50,7 @@ export class PayPalService {
             currency_code: 'USD',
             value: cost,
           },
+          custom_id: customId,
         },
       ],
     };
@@ -60,7 +68,7 @@ export class PayPalService {
    * @param id ID of the order to complete.
    */
   public async captureOrder(id: string) {
-    const resp = await this.axios.post(
+    const resp = await this.axios.post<OrderDetails>(
       `/v2/checkout/orders/${id}/capture`,
       null,
       {
@@ -81,9 +89,47 @@ export class PayPalService {
    * @param id ID of the order to retrieve.
    */
   public async getOrder(id: string) {
-    const resp = await this.axios.get(`/v2/checkout/orders/${id}`);
+    const resp = await this.axios.get<OrderDetails>(
+      `/v2/checkout/orders/${id}`,
+    );
 
     return resp.data;
+  }
+
+  /**
+   * Validates that an order matches the expected arributes.
+   */
+  public validateCapture(
+    order: OrderDetails,
+    status: OrderDetails['status'],
+    value: string,
+    customId?: string,
+  ) {
+    console.log(order);
+
+    if (order.intent !== 'CAPTURE') {
+      throw new BadRequestException('Order intent mismatch');
+    }
+
+    if (order.status !== status) {
+      throw new BadRequestException('Order status mismatch');
+    }
+
+    // For now, this is hardcoded. If this were changed,
+    // the total cost may need to be calculated some other way.
+    if (order.purchase_units.length !== 1) {
+      throw new BadRequestException('Purchase unit size mismatch');
+    }
+
+    const unit = order.purchase_units[0];
+
+    if (customId && unit.custom_id !== customId) {
+      throw new BadRequestException('CustomId mismatch');
+    }
+
+    if (unit.amount.value !== value) {
+      throw new BadRequestException('Order cost mismatch');
+    }
   }
 
   /**

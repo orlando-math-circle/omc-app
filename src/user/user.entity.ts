@@ -1,14 +1,17 @@
 import {
   ArrayType,
   BaseEntity,
+  Collection,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
-// import { ProjectWork } from '../project-work/project-work.entity';
+import { EventRegistration } from '../event-registration/event-registration.entity';
+import { Invoice } from '../invoice/invoice.entity';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -33,6 +36,9 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ type: ArrayType })
   roles: Roles[] = [];
 
+  @Property({ nullable: true })
+  feeWaived: boolean;
+
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
@@ -48,6 +54,9 @@ export class User extends BaseEntity<User, 'id'> {
   @ManyToOne(() => Account, { hidden: true })
   account!: Account;
 
-  // @OneToMany(() => ProjectWork, (pw) => pw.user)
-  // work = new Collection<ProjectWork>(this);
+  @OneToMany(() => EventRegistration, (r) => r.user)
+  registrations = new Collection<EventRegistration>(this);
+
+  @OneToMany(() => Invoice, (i) => i.user)
+  invoices = new Collection<Invoice>(this);
 }

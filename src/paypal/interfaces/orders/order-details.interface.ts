@@ -1,15 +1,15 @@
-import { PurchaseUnit } from '../purchase-unit.interface';
-import { HATEOASLink } from '../shared/link.interface';
-import { Payer } from '../shared/payer.interface';
+import { PurchaseUnit } from './purchase-unit.interface';
+import { HATEOASLink } from './shared/link.interface';
+import { Payer } from './shared/payer.interface';
 
 /**
- * PayPal Capture Order
+ * PayPal Capture & Get Order Details
  *
  * Some fields require the `Prefer return=representation` header.
  *
  * @see https://developer.paypal.com/docs/api/orders/v2/#orders_capture
  */
-export interface CaptureOrderRequest {
+export interface OrderDetails {
   id: string;
   intent: 'CAPTURE' | 'AUTHORIZE';
   payer: Payer;
