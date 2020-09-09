@@ -27,6 +27,10 @@ export class PayPalService {
   ) {
     this.axios = axios.create({
       baseURL: this.environment.baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
     });
     this.initInterceptor();
   }
@@ -70,13 +74,6 @@ export class PayPalService {
   public async captureOrder(id: string) {
     const resp = await this.axios.post<OrderDetails>(
       `/v2/checkout/orders/${id}/capture`,
-      null,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Prefer: 'return=representation',
-        },
-      },
     );
 
     return resp.data;
