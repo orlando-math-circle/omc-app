@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsDate,
+  IsOptional,
+  IsString,
+  Matches,
+  ValidateNested,
+} from 'class-validator';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
 export class CreateEventDto {
@@ -17,6 +23,11 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   readonly color?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$/)
+  readonly fee?: string;
 
   @IsOptional()
   @IsDate()

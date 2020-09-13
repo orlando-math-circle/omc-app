@@ -25,6 +25,6 @@ export const MikroORMTestingConfig: Options = {
     return new NotFoundException(`${entityName} not found`);
   },
   forceUtcTimezone: true,
-  debug: process.env.TESTING_DEBUG === 'true' || true,
+  debug: process.env.TESTING_DEBUG === 'true',
   highlighter: new SqlHighlighter(),
 };

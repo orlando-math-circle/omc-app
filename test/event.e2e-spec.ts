@@ -12,7 +12,7 @@ import RRule, { Frequency } from 'rrule';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import configSchema from '../src/app.config';
+import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { isBeforeDay } from '../src/app.utils';
 import { AuthModule } from '../src/auth/auth.module';
@@ -52,7 +52,7 @@ describe('Events', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          validationSchema: configSchema,
+          validationSchema: testSchema,
           isGlobal: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),

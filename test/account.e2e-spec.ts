@@ -3,13 +3,11 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import path from 'path';
 import request from 'supertest';
-import MikroORMConfig from '../mikro-orm.config';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import configSchema from '../src/app.config';
+import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -40,7 +38,7 @@ describe('Accounts', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          validationSchema: configSchema,
+          validationSchema: testSchema,
           isGlobal: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),

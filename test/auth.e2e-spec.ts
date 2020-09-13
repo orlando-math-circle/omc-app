@@ -9,7 +9,7 @@ import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { AccountService } from '../src/account/account.service';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import configSchema from '../src/app.config';
+import { testSchema } from '../src/app.config';
 import { AuthModule } from '../src/auth/auth.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -57,7 +57,7 @@ describe('Auth', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          validationSchema: configSchema,
+          validationSchema: testSchema,
           isGlobal: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),

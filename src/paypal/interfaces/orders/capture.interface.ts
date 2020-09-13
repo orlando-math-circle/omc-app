@@ -25,7 +25,7 @@ export interface Capture {
   seller_receivable_breakdown: SellerReceivableBreakdown;
   disbursement_mode?: 'INSTANT' | 'DELAYED';
   links: HATEOASLink[];
-  supplementary_data: any;
+  supplementary_data?: any;
   create_time: string;
   update_time: string;
 }

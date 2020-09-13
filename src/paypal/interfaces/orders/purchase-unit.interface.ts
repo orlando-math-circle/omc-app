@@ -6,6 +6,7 @@ import { Item } from './shared/item.interface';
 import { Payee } from './shared/payee-base.interface';
 import { PlatformFee } from './shared/platform-fee.interface';
 import { Shipping } from './shared/shipping.interface';
+import { Money } from './shared/money.interface';
 
 /**
  * PayPal `purchase_unit_request`
@@ -38,6 +39,7 @@ export interface PaymentInstruction {
 /**
  * PayPal `purchase_unit`
  *
+ * Header: Prefer return=minimal
  * @see https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit
  */
 export interface PurchaseUnit {
@@ -53,6 +55,28 @@ export interface PurchaseUnit {
   soft_descriptor?: string;
   items?: Item[];
   payments: PaymentCollection;
+}
+
+/**
+ * PayPal `purchase_unit`
+ *
+ * TODO: Incomplete, not all fields are checked yet.
+ * Header: Prefer return=minimal
+ * @see https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit
+ */
+export interface MinimalPurchaseUnit {
+  reference_id: string;
+  shipping: Shipping;
+  description?: string;
+  custom_id?: string;
+  invoice_id?: string;
+  payments: PaymentCollection;
+}
+
+export interface CreateOrderPurchaseUnitResponse {
+  reference_id: string;
+  amount: Money;
+  payee: Payee;
 }
 
 /**

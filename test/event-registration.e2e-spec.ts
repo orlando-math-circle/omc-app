@@ -4,19 +4,22 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import configSchema, { testSchema } from '../src/app.config';
+import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
+import { EventRegistrationModule } from '../src/event-registration/event-registration.module';
+import { CreateEventDto } from '../src/event/dtos/create-event.dto';
+import { InvoiceModule } from '../src/invoice/invoice.module';
+import { PayPalModule } from '../src/paypal/paypal.module';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
-describe('Users', () => {
+describe('Event Registrations', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
 
@@ -25,6 +28,7 @@ describe('Users', () => {
    */
 
   let token: string;
+  let adminToken: string;
 
   const createAccountDto: CreateAccountDto = {
     name: 'Jane Doe',
@@ -33,10 +37,10 @@ describe('Users', () => {
     dob: new Date(),
   };
 
-  const secondAccountDto: CreateAccountDto = {
-    name: 'Jack Doe',
-    email: 'jack@doe.com',
-    password: 'banana',
+  const createAdminAccountDto: CreateAccountDto = {
+    name: 'John Doe',
+    email: 'john@doe.com',
+    password: 'apple',
     dob: new Date(),
   };
 
@@ -52,6 +56,9 @@ describe('Users', () => {
         AccountModule,
         UserModule,
         AuthModule,
+        PayPalModule,
+        InvoiceModule,
+        EventRegistrationModule,
       ],
     }).compile();
 
@@ -83,11 +90,6 @@ describe('Users', () => {
       .send(createAccountDto)
       .expect(201);
 
-    await request(app.getHttpServer())
-      .post('/account/register')
-      .send(secondAccountDto)
-      .expect(201);
-
     const loginResp = await request(app.getHttpServer())
       .post('/login')
       .send({ email: 'jane@doe.com', password: 'apple' })
@@ -95,6 +97,25 @@ describe('Users', () => {
 
     expect(typeof loginResp.body.token).toBe('string');
     token = loginResp.body.token;
+
+    await request(app.getHttpServer())
+      .post('/account/register')
+      .send(createAdminAccountDto)
+      .expect(201);
+
+    const adminLoginResp = await request(app.getHttpServer())
+      .post('/login')
+      .send({ email: 'john@doe.com', password: 'apple' })
+      .expect(201);
+
+    expect(typeof adminLoginResp.body.token).toBe('string');
+    adminToken = adminLoginResp.body.token;
+
+    const user = await orm.em.findOneOrFail(User, 2);
+
+    user.roles = [Roles.ADMIN];
+
+    await orm.em.flush();
   });
 
   afterEach(() => {
@@ -106,105 +127,51 @@ describe('Users', () => {
     await app.close();
   });
 
-  describe('POST /user', () => {
-    it('should add a user to an account', async () => {
+  describe('POST /order/create/:id', () => {
+    it('should throw insufficient permissions', async () => {
       await request(app.getHttpServer())
-        .post('/user')
-        .send({ name: 'First Last', dob: new Date() })
+        .post('/registration/order/create/1')
+        .expect(401);
+
+      await request(app.getHttpServer())
+        .post('/registration/order/create/1')
         .set('Authorization', `Bearer ${token}`)
+        .expect(403);
+    });
+
+    it('should throw 404 Not Found for unknown event ids', async () => {
+      // Upgrade to parent-level permissions.
+      const user = await orm.em.findOneOrFail(User, 1);
+      user.roles = [Roles.PARENT];
+      await orm.em.flush();
+
+      await request(app.getHttpServer())
+        .post('/registration/order/create/1')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404);
+    });
+
+    it.skip('should generate a PayPal order', async () => {
+      const eventDto: CreateEventDto = {
+        name: 'Event',
+        dtstart: new Date(Date.UTC(2020, 11, 25)),
+        dtend: new Date(Date.UTC(2020, 11, 25, 2, 30)),
+        fee: '15.75',
+      };
+
+      // Generate an event with the admin account.
+      await request(app.getHttpServer())
+        .post('/event')
+        .send(eventDto)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(201);
 
-      const account = await orm.em.findOne(Account, { id: 1 }, true);
-
-      const addedUser = orm.em.getReference(User, 3);
-      expect(account).toBeDefined();
-      expect(account.users.length).toBe(2);
-      expect(account.users.contains(addedUser)).toBe(true);
-    });
-  });
-
-  describe('GET /user/me', () => {
-    it('should retrieve the selected user', async () => {
       const resp = await request(app.getHttpServer())
-        .get('/user/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+        .post('/registration/order/create/1')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(201);
 
-      expect(resp.body.id).toBe(1);
-      expect(resp.body.email).toBe('jane@doe.com');
-      expect(resp.body.password).not.toBe('apple');
-    });
-  });
-
-  describe('PATCH /user/:id', () => {
-    it('should throw 403 for users without proper rank', async () => {
-      await request(app.getHttpServer())
-        .patch('/user/2')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(403);
-    });
-
-    it('should allow edits from qualified users', async () => {
-      const user = await orm.em.findOne(User, { id: 1 });
-
-      expect(user).toBeDefined();
-      expect(user.id).toBe(1);
-
-      user.roles = [Roles.ADMIN];
-
-      await orm.em.flush();
-
-      await request(app.getHttpServer())
-        .patch('/user/2')
-        .send({ name: 'Jackson Doe' })
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-
-      const modUser = await orm.em.findOne(User, { id: 2 });
-
-      expect(modUser).toBeDefined();
-      expect(modUser.id).toBe(2);
-      expect(modUser.name).toBe('Jackson Doe');
-
-      user.roles = [];
-
-      await orm.em.flush();
-    });
-  });
-
-  describe('DELETE /user/:id', () => {
-    it('should fail to delete a user without a proper rank', async () => {
-      await request(app.getHttpServer())
-        .delete('/user/2')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(403);
-    });
-
-    it('should delete a user', async () => {
-      const user = await orm.em.findOne(User, { id: 1 });
-
-      expect(user).toBeDefined();
-      expect(user.id).toBe(1);
-
-      user.roles = [Roles.ADMIN];
-
-      await orm.em.flush();
-
-      const toDelete = await orm.em.findOne(User, { id: 2 });
-
-      expect(toDelete).toBeDefined();
-      expect(toDelete.id).toBe(2);
-
-      await request(app.getHttpServer())
-        .delete('/user/2')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-
-      orm.em.clear();
-
-      const deleted = await orm.em.findOne(User, { id: 2 });
-
-      expect(deleted).toBeNull();
+      console.log(resp.body);
     });
   });
 });
