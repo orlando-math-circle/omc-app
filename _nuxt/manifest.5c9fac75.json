@@ -1,0 +1,10 @@
+{
+  "name": "omc-docs",
+  "short_name": "omc-docs",
+  "icons": [],
+  "start_url": "/omc-app/?standalone=true",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "black",
+  "lang": "en"
+}
