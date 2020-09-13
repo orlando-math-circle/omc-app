@@ -13,7 +13,11 @@ import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ validationSchema: ConfigSchema, isGlobal: true }),
+    ConfigModule.forRoot({
+      validationSchema: ConfigSchema,
+      isGlobal: true,
+      envFilePath: '../.env',
+    }),
     MikroOrmModule.forRoot(MikroORMConfig),
     EmailModule,
     AuthModule,
