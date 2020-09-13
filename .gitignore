@@ -1,6 +1,10 @@
 # Compiled code
 dist/
 .nuxt/
+temp/
+
+# Service Worker
+sw.*
 
 # Coverage directory used by tools like istanbul
 coverage/
