@@ -59,3 +59,10 @@ The format of the meeting consisted of clarifications on event registration, pay
 ## Notes for Programmer Documentation
 
 - The design _hydrates_ events through a GET request the first time a specific range of dates is retrieved. This means infinitely recurring events are supported by default, however, certain systems such as projects may have issues rectifying events with no end. It may be useful at some point in the future to create _something else_ that is infinitely recurring by adapting the logic, for example with quizzes, games, or assignments that reward points that continue forever but can only be done once. So the ability to make recurring events is disallowed, but is possible within the system.
+
+## Design Ideas
+
+These are some design ideas made by Sheina
+
+<img src="/images/meeting2_design_mock.png"></img>
+<img src="/images/meeting2_login_mockup.png"></img>
