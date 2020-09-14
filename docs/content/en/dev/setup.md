@@ -120,7 +120,7 @@ If git is not found, the installation may differ slightly based on your operatin
 
 Obtaining a repository is the first major command for git. Visit a GitHub page and find the obvious green **Code** button. Then, click on the symbol to the right of the text field containing the repository url to copy it, and then run the following command.
 
-<img src="/images/checkout.png" />
+<img src="./images/checkout.png" />
 
 ```sh
 git clone https://github.com/duckies/omc-app.git <folder>

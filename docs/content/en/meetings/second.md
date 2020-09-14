@@ -64,5 +64,5 @@ The format of the meeting consisted of clarifications on event registration, pay
 
 These are some design ideas made by Sheina
 
-<img src="/images/meeting2_design_mock.png"></img>
-<img src="/images/meeting2_login_mockup.png"></img>
+<img src="./images/meeting2_design_mock.png"></img>
+<img src="./images/meeting2_login_mockup.png"></img>

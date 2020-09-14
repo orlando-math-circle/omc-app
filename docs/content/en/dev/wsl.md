@@ -52,7 +52,7 @@ When you aren't in your IDE you may want to use a different terminal than the on
 The Windows Terminal supports easily switching between PowerShell, Command Prompt, and your Linux Distros in a sleek interface whereas the Hyper terminal is more theme-friendly.
 
 <video controls="controls">
-  <source src="/videos/terminal.webm" type="video/webm">
+  <source src="./videos/terminal.webm" type="video/webm">
 </video>
 
 [^1]: Hyper terminal running a compiler for documentation.
