@@ -1,8 +1,8 @@
 {
-  "name": "frontend",
+  "name": "omc-frontend",
   "version": "1.0.0",
-  "description": "My fabulous Nuxt.js project",
-  "author": "duckies",
+  "description": "Orlando Math Circle app frontend",
+  "author": "John Gilbert",
   "private": true,
   "scripts": {
     "dev": "nuxt-ts",
