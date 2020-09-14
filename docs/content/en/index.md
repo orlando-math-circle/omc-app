@@ -5,4 +5,4 @@ category: Getting Started
 position: 1
 ---
 
-Hello!
+This is an example of where the docs would go.
