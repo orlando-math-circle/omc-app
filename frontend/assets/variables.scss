@@ -1,0 +1,16 @@
+// Override the Vuetify settings
+// https://github.com/vuetifyjs/vuetify/tree/master/packages/vuetify/src/styles/settings
+
+$body-font-family: 'DM Sans', sans-serif;
+$color-pack: false;
+
+// Light Theme Changes
+$material-light: (
+  'app-bar': #30dfe5,
+  'background': #f5f6fa,
+);
+
+// Dark Theme Scheme
+$material-dark: (
+  'background': #1b1c22,
+);

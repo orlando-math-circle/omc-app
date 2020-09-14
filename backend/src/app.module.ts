@@ -16,7 +16,7 @@ import { UserModule } from './user/user.module';
     ConfigModule.forRoot({
       validationSchema: ConfigSchema,
       isGlobal: true,
-      envFilePath: '../.env',
+      envFilePath: '../backend.env',
     }),
     MikroOrmModule.forRoot(MikroORMConfig),
     EmailModule,
