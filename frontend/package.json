@@ -18,7 +18,7 @@
     "@nuxtjs/axios": "^5.12.2",
     "@nuxtjs/dotenv": "^1.4.1",
     "@nuxtjs/pwa": "^3.0.2",
-    "moment": "^2.27.0",
+    "moment": "2.28.0",
     "nuxt": "^2.14.4",
     "rrule": "^2.6.4",
     "vue-class-component": "^7.2.5",
