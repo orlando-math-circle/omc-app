@@ -27,7 +27,7 @@
     "@mikro-orm/knex": "4.0.0",
     "@mikro-orm/migrations": "4.0.0",
     "@mikro-orm/nestjs": "4.0.0",
-    "@mikro-orm/postgresql": "4.0.0",
+    "@mikro-orm/postgresql": "4.0.3",
     "@mikro-orm/sql-highlighter": "^1.0.1",
     "@nestjs/common": "7.4.4",
     "@nestjs/config": "0.5.0",
