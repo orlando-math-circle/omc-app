@@ -51,6 +51,7 @@ The format of the meeting consisted of clarifications on event registration, pay
 - Parents set grade level once. The system will store both the `grade_level` and `grade_set_date` and add a grade for however many times **August 1st** has elapsed since then as a computed property on user retrieval.
 - Once a user turns 18, their grade level is some "Graduated" value, and the user is treated as an adult.
 - Adult users should be able to customize an optional `occupation` field to set if they are in college, working, ...etc.
+- Users will be given a random default profile picture and will be allowed to select a new one on their account management page from a list of pre-determined avatars.
 
 ## Questions
 
