@@ -25,7 +25,7 @@
     "@mikro-orm/cli": "4.0.0",
     "@mikro-orm/core": "4.0.0",
     "@mikro-orm/knex": "4.0.0",
-    "@mikro-orm/migrations": "4.0.0",
+    "@mikro-orm/migrations": "4.0.3",
     "@mikro-orm/nestjs": "4.0.0",
     "@mikro-orm/postgresql": "4.0.0",
     "@mikro-orm/sql-highlighter": "^1.0.1",
