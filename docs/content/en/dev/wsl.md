@@ -2,7 +2,7 @@
 title: "Linux on Windows"
 description: The alternative approach to installing Node.js on Windows using WSL.
 category: Development
-position: 2
+position: 3
 ---
 
 <alert type="warning">

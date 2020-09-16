@@ -2,7 +2,7 @@
 title: "Install & Setup"
 description: Tools and setting them up for developing the application.
 category: Development
-position: 1
+position: 2
 items:
   - Node.js
   - Git
