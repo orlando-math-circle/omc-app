@@ -1,5 +1,7 @@
 {
   "extends": ["config:base"],
+  "semanticCommits": true,
+  "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{controls}}}",
   "packageRules": [
     {
       "packagePatterns": ["*"],
