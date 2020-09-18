@@ -31,13 +31,11 @@ export class EventController {
     return this.eventService.create(createEventDto, user);
   }
 
-  @UserAuth('event', 'read:any')
   @Get()
   findAll(@Query() { start, end }: FindAllEventsDto) {
     return this.eventService.findAll(start, end);
   }
 
-  @UserAuth('event', 'read:any')
   @Get(':id')
   findOne(@Param() { id }: FindEventDto) {
     return this.eventService.findOneOrFail(id);
