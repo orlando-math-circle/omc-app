@@ -17,6 +17,7 @@ import { Roles } from '../src/app.roles';
 import { isBeforeDay } from '../src/app.utils';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { CourseModule } from '../src/course/course.module';
 import { EmailModule } from '../src/email/email.module';
 import { CreateEventDto } from '../src/event/dtos/create-event.dto';
 import { UpdateEventDto } from '../src/event/dtos/update-event.dto';
@@ -62,6 +63,7 @@ describe('Events', () => {
         UserModule,
         AuthModule,
         EventModule,
+        CourseModule,
       ],
     }).compile();
 

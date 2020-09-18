@@ -14,6 +14,7 @@ import { AuthModule } from '../src/auth/auth.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { AccessGuard } from '../src/auth/guards/access-control.guard';
+import { CourseModule } from '../src/course/course.module';
 import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
@@ -67,6 +68,7 @@ describe('Auth', () => {
         AccountModule,
         UserModule,
         AuthModule,
+        CourseModule,
       ],
     }).compile();
 

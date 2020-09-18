@@ -115,11 +115,14 @@ export class EventService {
    * @param end End of the range
    */
   async findAll(start: Date, end: Date) {
-    const events = await this.eventRepository.find({
-      dtend: { $gte: start },
-      dtstart: { $lte: end },
-      recurrence: null,
-    });
+    const events = await this.eventRepository.find(
+      {
+        dtend: { $gte: start },
+        dtstart: { $lte: end },
+        recurrence: null,
+      },
+      ['course'],
+    );
 
     const recurrences = await this.recurrenceRepository.find(
       {
@@ -130,7 +133,7 @@ export class EventService {
           $or: [{ dtend: { $gte: start } }, { dtend: null }],
         },
       },
-      ['events'],
+      ['events.course'],
     );
 
     for (const recurrence of recurrences) {

@@ -9,6 +9,7 @@ import {
 } from '@mikro-orm/core';
 import { BadRequestException } from '@nestjs/common';
 import { getMinutesDiff } from '../app.utils';
+import { Course } from '../course/course.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { Invoice } from '../invoice/invoice.entity';
 import { User } from '../user/user.entity';
@@ -69,6 +70,9 @@ export class Event extends BaseEntity<Event, 'id'> {
 
   @OneToMany(() => EventRegistration, (r) => r.event)
   registrations = new Collection<EventRegistration>(this);
+
+  @ManyToOne(() => Course, { nullable: true })
+  course?: Course;
 
   @ManyToOne(() => User)
   author!: User;
