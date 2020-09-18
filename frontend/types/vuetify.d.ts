@@ -1,13 +1,7 @@
-declare module 'vuetify/lib' {
-  import 'vuetify/types/lib'
+import { Framework } from 'vuetify'
+
+declare module '@nuxt/types' {
+  interface Context {
+    $vuetify: Framework
+  }
 }
-
-declare module 'vuetify-loader'
-
-// declare module '@nuxt/types' {
-//   import { Framework } from 'vuetify'
-
-//   interface Context {
-//     $vuetify: Framework
-//   }
-// }

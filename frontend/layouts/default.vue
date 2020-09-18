@@ -26,33 +26,20 @@
 
       <v-spacer />
 
-      <template v-if="$auth.loggedIn">
-        <v-menu offset-y>
-          <template #activator="{ on, attrs }">
-            <v-btn text v-bind="attrs" v-on="on">
-              <v-icon class="mr-2">mdi-account-circle</v-icon>
-              {{ $auth.user.name }}
-            </v-btn>
-          </template>
-
-          <v-list>
-            <v-list-item @click="$auth.logout()">
-              <v-list-item-title>Logout</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </template>
-
       <v-menu offset-y>
         <template #activator="{ on, attrs }">
-          <v-btn v-attrs="attrs" icon v-on="on">
+          <v-btn v-bind="attrs" icon v-on="on">
             <v-icon>mdi-dots-vertical</v-icon>
           </v-btn>
         </template>
 
         <v-list>
-          <v-list-item @click="$auth.logout">
+          <v-list-item @click="$auth.logout()">
             <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item v-if="isAdmin" link to="/admin">
+            <v-list-item-title>Admin Panel</v-list-item-title>
           </v-list-item>
 
           <v-list-item @click="isDark = !isDark">
@@ -84,6 +71,7 @@
 <script>
 export default {
   name: 'Default',
+  middleware: 'auth',
   data() {
     return {
       drawer: false,
@@ -92,7 +80,7 @@ export default {
         {
           icon: 'mdi-home',
           title: 'Home',
-          to: '/',
+          to: '/landing',
         },
         {
           icon: 'mdi-calendar-star',
@@ -117,6 +105,11 @@ export default {
     }
   },
   computed: {
+    isAdmin() {
+      return this.$auth.loggedIn
+        ? this.$auth.user.roles.includes('admin')
+        : false
+    },
     isDark: {
       get() {
         return this.$vuetify.theme.isDark

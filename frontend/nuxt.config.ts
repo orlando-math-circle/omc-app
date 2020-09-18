@@ -60,7 +60,7 @@ const config: NuxtConfig = {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['~/plugins/vuetify'],
+  plugins: ['~/plugins/vuetify', '~/plugins/vee-validate'],
   /**
    * Automatic importing of components
    */
@@ -68,7 +68,7 @@ const config: NuxtConfig = {
   /*
    ** Nuxt.js dev-modules
    */
-  buildModules: ['@nuxt/typescript-build'],
+  buildModules: ['@nuxt/typescript-build', '@nuxtjs/color-mode'],
   /*
    ** Nuxt.js modules
    */
@@ -87,6 +87,9 @@ const config: NuxtConfig = {
   },
 
   auth: {
+    redirect: {
+      home: '/landing',
+    },
     strategies: {
       local: {
         token: {
@@ -106,7 +109,7 @@ const config: NuxtConfig = {
   },
 
   build: {
-    transpile: ['vuetify'],
+    transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {
       sass: {
@@ -117,6 +120,20 @@ const config: NuxtConfig = {
         },
         additionalData: "@import '@/assets/variables.scss'",
       },
+    },
+    /*
+     ** You can extend webpack config here
+     */
+    extend(config, ctx) {
+      // Run ESLint on save
+      if (ctx.isDev && ctx.isClient && config.module) {
+        config.module.rules.push({
+          enforce: 'pre',
+          test: /\.(js|vue)$/,
+          loader: 'eslint-loader',
+          exclude: /(node_modules)/,
+        })
+      }
     },
   },
 }

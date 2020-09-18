@@ -32,12 +32,13 @@
         <v-col cols="auto">
           <v-select
             v-model="calendar.type"
-            class="filled--bright type-selector"
+            class="filled--bright type-selector elevation-2"
             :items="calendar.types"
             append-icon="mdi-chevron-down"
             solo
             flat
             hide-details
+            :menu-props="{ offsetY: true }"
           >
           </v-select>
         </v-col>
@@ -53,9 +54,10 @@
         </v-col>
       </v-row>
 
+      <!-- Calendar -->
       <v-row>
         <v-col>
-          <v-sheet height="600" class="rounded">
+          <v-sheet class="rounded">
             <v-calendar
               ref="calendar"
               v-model="calendar.value"
@@ -88,7 +90,9 @@
         </v-col>
       </v-row>
 
-      <paypal />
+      <v-row>
+        <h2>Events</h2>
+      </v-row>
     </v-col>
   </v-row>
 </template>
@@ -203,32 +207,32 @@ export default class EventsPage extends Vue {
   border-radius: 25px !important;
 }
 
-.calendar {
-  border-radius: 25px;
-  border: 0;
+// .calendar {
+//   border-radius: 25px;
+//   border: 0;
 
-  ::v-deep {
-    .v-calendar-weekly__head-weekday {
-      padding-top: 20px;
+//   ::v-deep {
+//     .v-calendar-weekly__head-weekday {
+//       padding-top: 20px;
 
-      &:last-child {
-        border-right: 0;
-      }
-    }
+//       &:last-child {
+//         border-right: 0;
+//       }
+//     }
 
-    .v-calendar-weekly__week {
-      .v-calendar-weekly__day:last-child {
-        border-right: 0;
-      }
+//     .v-calendar-weekly__week {
+//       .v-calendar-weekly__day:last-child {
+//         border-right: 0;
+//       }
 
-      &:last-child {
-        .v-calendar-weekly__day {
-          border-bottom: 0;
-        }
-      }
-    }
-  }
-}
+//       &:last-child {
+//         .v-calendar-weekly__day {
+//           border-bottom: 0;
+//         }
+//       }
+//     }
+//   }
+// }
 
 .rounded-card {
   border-radius: 20px;
@@ -241,14 +245,11 @@ export default class EventsPage extends Vue {
 
 .add-event {
   font-weight: bold;
-  color: #fff;
   height: 55px !important;
   border-radius: 15px;
-  background-color: #455af7 !important;
 }
 
 .filled--bright {
-  background-color: #fff;
   border-radius: 15px;
   height: 55px;
 
