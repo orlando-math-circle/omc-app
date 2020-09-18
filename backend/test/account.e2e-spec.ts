@@ -17,7 +17,8 @@ import { UserModule } from '../src/user/user.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 const createAccountDto: CreateAccountDto = {
-  name: 'Jane Doe',
+  first: 'Jane',
+  last: 'Doe',
   email: 'jane@doe.com',
   password: 'apple',
   dob: new Date(),

@@ -42,7 +42,8 @@ describe('Events', () => {
   let token: string;
 
   const createAccountDto: CreateAccountDto = {
-    name: 'Jane Doe',
+    first: 'Jane',
+    last: 'Doe',
     email: 'jane@doe.com',
     password: 'apple',
     dob: new Date(),
@@ -124,7 +125,7 @@ describe('Events', () => {
     });
 
     it('should throw 400 on an invalid request body', async () => {
-      const user = await orm.em.findOne(User, { name: 'Jane Doe' });
+      const user = await orm.em.findOne(User, { first: 'Jane', last: 'Doe' });
 
       expect(user).toBeDefined();
 

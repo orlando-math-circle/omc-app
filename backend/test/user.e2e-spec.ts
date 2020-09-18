@@ -7,11 +7,13 @@ import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import configSchema, { testSchema } from '../src/app.config';
+import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
+import { CreateUserDto } from '../src/user/dtos/create-user.dto';
+import { UpdateUserDto } from '../src/user/dtos/update-user.dto';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
@@ -27,14 +29,16 @@ describe('Users', () => {
   let token: string;
 
   const createAccountDto: CreateAccountDto = {
-    name: 'Jane Doe',
+    first: 'Jane',
+    last: 'Doe',
     email: 'jane@doe.com',
     password: 'apple',
     dob: new Date(),
   };
 
   const secondAccountDto: CreateAccountDto = {
-    name: 'Jack Doe',
+    first: 'Jack',
+    last: 'Doe',
     email: 'jack@doe.com',
     password: 'banana',
     dob: new Date(),
@@ -108,9 +112,15 @@ describe('Users', () => {
 
   describe('POST /user', () => {
     it('should add a user to an account', async () => {
+      const dto: CreateUserDto = {
+        first: 'First',
+        last: 'Last',
+        dob: new Date(),
+      };
+
       await request(app.getHttpServer())
         .post('/user')
-        .send({ name: 'First Last', dob: new Date() })
+        .send(dto)
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
 
@@ -154,9 +164,14 @@ describe('Users', () => {
 
       await orm.em.flush();
 
+      const dto: UpdateUserDto = {
+        first: 'Jackson',
+        last: 'Doe',
+      };
+
       await request(app.getHttpServer())
         .patch('/user/2')
-        .send({ name: 'Jackson Doe' })
+        .send(dto)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
@@ -164,7 +179,7 @@ describe('Users', () => {
 
       expect(modUser).toBeDefined();
       expect(modUser.id).toBe(2);
-      expect(modUser.name).toBe('Jackson Doe');
+      expect(modUser.first).toBe('Jackson');
 
       user.roles = [];
 

@@ -29,7 +29,8 @@ describe('PayPal', () => {
   let token: string;
 
   const createAccountDto: CreateAccountDto = {
-    name: 'Jane Doe',
+    first: 'Jane',
+    last: 'Doe',
     email: 'jane@doe.com',
     password: 'apple',
     dob: new Date(),

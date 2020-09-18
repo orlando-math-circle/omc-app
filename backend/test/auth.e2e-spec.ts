@@ -16,13 +16,15 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { AccessGuard } from '../src/auth/guards/access-control.guard';
 import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
+import { CreateUserDto } from '../src/user/dtos/create-user.dto';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { UserService } from '../src/user/user.service';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 const createAccountDto: CreateAccountDto = {
-  name: 'Jane Doe',
+  first: 'Jane',
+  last: 'Doe',
   email: 'jane@doe.com',
   password: 'apple',
   dob: new Date(),
@@ -228,13 +230,19 @@ describe('Auth', () => {
     });
 
     it('should succeed for multi-user accounts', async () => {
+      const dto: CreateUserDto = {
+        first: 'Jacob',
+        last: 'Doe',
+        dob: new Date(),
+      };
+
       const resp = await request(app.getHttpServer())
         .post('/user')
-        .send({ name: 'Jacob Doe', dob: new Date() })
+        .send(dto)
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
 
-      expect(resp.body.name).toBe('Jacob Doe');
+      expect(resp.body.first).toBe('Jacob');
 
       await request(app.getHttpServer())
         .post(`/switch/${resp.body.id}`)

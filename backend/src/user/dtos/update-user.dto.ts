@@ -4,7 +4,11 @@ import { Roles } from '../../app.roles';
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
-  name?: string;
+  first?: string;
+
+  @IsOptional()
+  @IsString()
+  last?: string;
 
   @IsOptional()
   @IsString()

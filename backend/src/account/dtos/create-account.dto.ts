@@ -5,7 +5,10 @@ export class CreateAccountDto {
   email!: string;
 
   @IsString()
-  name!: string;
+  first!: string;
+
+  @IsString()
+  last!: string;
 
   @IsString()
   password!: string;

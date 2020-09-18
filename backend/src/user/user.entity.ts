@@ -19,7 +19,10 @@ export class User extends BaseEntity<User, 'id'> {
   id!: number;
 
   @Property()
-  name!: string;
+  first!: string;
+
+  @Property()
+  last!: string;
 
   @Property()
   dob!: Date;

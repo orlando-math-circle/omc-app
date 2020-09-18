@@ -31,14 +31,16 @@ describe('Event Registrations', () => {
   let adminToken: string;
 
   const createAccountDto: CreateAccountDto = {
-    name: 'Jane Doe',
+    first: 'Jane',
+    last: 'Doe',
     email: 'jane@doe.com',
     password: 'apple',
     dob: new Date(),
   };
 
   const createAdminAccountDto: CreateAccountDto = {
-    name: 'John Doe',
+    first: 'John',
+    last: 'Doe',
     email: 'john@doe.com',
     password: 'apple',
     dob: new Date(),

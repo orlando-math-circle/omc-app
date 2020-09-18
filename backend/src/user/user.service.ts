@@ -57,6 +57,10 @@ export class UserService {
     );
   }
 
+  findAll(where: FilterQuery<User>, limit: number, offset: number) {
+    return this.userRepository.findAndCount(where, { limit, offset });
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User>;
   async update(user: User, updateUserDto: UpdateUserDto): Promise<User>;
   async update(idOrUser: number | User, updateUserDto: UpdateUserDto) {
