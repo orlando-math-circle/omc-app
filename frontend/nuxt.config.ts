@@ -109,6 +109,7 @@ const config: NuxtConfig = {
   },
 
   build: {
+    parallel: true,
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {

@@ -13,7 +13,7 @@ export class TokenStrategy extends PassportStrategy(Strategy, 'jwt') {
       secretOrKeyProvider: async function (
         req: AuthRequest,
         token: string,
-        done,
+        done: (error: Error, key: string) => void,
       ) {
         try {
           return done(null, await authService.getSigningKey(req, token));

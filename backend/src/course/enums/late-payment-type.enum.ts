@@ -1,5 +1,5 @@
 export enum LatePaymentType {
   DENY = 'deny',
-  ALL = 'all',
-  BYEVENT = 'event',
+  DEFAULT = 'default',
+  LATEFEE = 'latefee',
 }

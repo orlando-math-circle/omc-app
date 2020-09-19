@@ -23,7 +23,6 @@ export class CourseController {
     return this.courseService.create(createCourseDto);
   }
 
-  @UserAuth('course', 'read:any')
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.courseService.findOneOrFail(id);

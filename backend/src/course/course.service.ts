@@ -1,6 +1,7 @@
-import { EntityRepository, FilterQuery } from '@mikro-orm/core';
+import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
+import { PopulateFail } from '../app.utils';
 import { Course } from './course.entity';
 import { CreateCourseDto } from './dtos/create-course.dto';
 import { UpdateCourseDto } from './dtos/update-course.dto';
@@ -20,8 +21,12 @@ export class CourseService {
     return course;
   }
 
-  findOneOrFail(where: FilterQuery<Course>) {
-    return this.courseRepository.findOneOrFail(where, ['events']);
+  findOneOrFail(
+    where: FilterQuery<Course>,
+    populate?: PopulateFail<Course>,
+    orderBy?: QueryOrderMap,
+  ) {
+    return this.courseRepository.findOneOrFail(where, populate, orderBy);
   }
 
   findAll(where: FilterQuery<Course>, limit: number, offset: number) {

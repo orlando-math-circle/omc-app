@@ -10,6 +10,7 @@ import {
   QueryOrder,
 } from '@mikro-orm/core';
 import { Event } from '../event/event.entity';
+import { Invoice } from '../invoice/invoice.entity';
 import { Project } from '../project/project.entity';
 import { LatePaymentType } from './enums/late-payment-type.enum';
 import { PaymentType } from './enums/payment-type.enum';
@@ -74,4 +75,7 @@ export class Course extends BaseEntity<Course, 'id'> {
     orderBy: { dtstart: QueryOrder.ASC },
   })
   events = new Collection<Event>(this);
+
+  @OneToMany(() => Invoice, (i) => i.course)
+  invoices = new Collection<Invoice>(this);
 }

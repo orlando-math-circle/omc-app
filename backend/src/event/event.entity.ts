@@ -2,12 +2,17 @@ import {
   BaseEntity,
   Collection,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import moment from 'moment';
 import { getMinutesDiff } from '../app.utils';
 import { Course } from '../course/course.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
@@ -65,7 +70,7 @@ export class Event extends BaseEntity<Event, 'id'> {
   @ManyToOne(() => EventRecurrence, { nullable: true, hidden: true })
   recurrence?: EventRecurrence;
 
-  @OneToMany(() => Invoice, (i) => i.event, { nullable: true })
+  @OneToMany(() => Invoice, (i) => i.event)
   invoices = new Collection<Invoice>(this);
 
   @OneToMany(() => EventRegistration, (r) => r.event)
@@ -76,6 +81,20 @@ export class Event extends BaseEntity<Event, 'id'> {
 
   @ManyToOne(() => User)
   author!: User;
+
+  /**
+   * Getters
+   */
+
+  get isStarted() {
+    return new Date() > this.dtstart;
+  }
+
+  get isEnded() {
+    return moment(new Date()).isAfter(
+      this.dtend ? this.dtend : moment(this.dtstart).add('1', 'day'),
+    );
+  }
 
   /**
    * Methods

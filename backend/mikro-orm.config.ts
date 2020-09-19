@@ -4,7 +4,7 @@ import { NotFoundException } from '@nestjs/common';
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, '../../../../backend.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../backend.env') });
 
 export const config: Options = {
   type: 'postgresql',

@@ -57,9 +57,9 @@ export class User extends BaseEntity<User, 'id'> {
   @ManyToOne(() => Account, { hidden: true })
   account!: Account;
 
-  @OneToMany(() => EventRegistration, (r) => r.user)
+  @OneToMany(() => EventRegistration, (r) => r.user, { eager: false })
   registrations = new Collection<EventRegistration>(this);
 
-  @OneToMany(() => Invoice, (i) => i.user)
+  @OneToMany(() => Invoice, (i) => i.user, { eager: false })
   invoices = new Collection<Invoice>(this);
 }

@@ -1,11 +1,14 @@
 import {
   BaseEntity,
+  Collection,
   Entity,
   Enum,
+  ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
+import { Course } from '../course/course.entity';
 import { Event } from '../event/event.entity';
 import { User } from '../user/user.entity';
 import { InvoiceStatus } from './enums/invoice-status.enum';
@@ -34,8 +37,11 @@ export class Invoice extends BaseEntity<Invoice, 'id'> {
    * Relationships
    */
 
-  @ManyToOne(() => Event)
-  event!: Event;
+  @ManyToOne(() => Event, { nullable: true })
+  event?: Event;
+
+  @ManyToOne(() => Course, { nullable: true })
+  course?: Course;
 
   @ManyToOne(() => User)
   user!: User;

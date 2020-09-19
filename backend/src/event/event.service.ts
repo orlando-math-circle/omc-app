@@ -14,9 +14,9 @@ import {
   isAfterDay,
   isBeforeDay,
   isSameDay,
-  subDays,
-  PopulateFail,
   Populate,
+  PopulateFail,
+  subDays,
 } from '../app.utils';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
@@ -104,6 +104,14 @@ export class EventService {
     orderBy?: QueryOrderMap,
   ) {
     return this.eventRepository.findOneOrFail(where, populate, orderBy);
+  }
+
+  async populate(
+    event: Event,
+    populate: Populate<Event>,
+    where: FilterQuery<Event>,
+  ) {
+    return this.eventRepository.populate(event, populate, where);
   }
 
   /**
