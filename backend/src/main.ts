@@ -22,8 +22,6 @@ async function bootstrap() {
 
   app.enableCors();
 
-  await app
-    .listen(config.get(PORT))
-    .then((port) => console.log(`App started on port ${JSON.stringify(port)}`));
+  await app.listen(config.get(PORT));
 }
 bootstrap();

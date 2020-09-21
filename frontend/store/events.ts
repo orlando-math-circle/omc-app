@@ -1,5 +1,5 @@
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
-import { Event } from '../types/event.interface'
+import { Event } from '../../backend/src/event/event.entity'
 import { CreateEventDto } from '../interfaces/events/create-event.interface'
 import { GetEventsDto } from '../interfaces/events/get-events.interface'
 import { StateStatus } from '../interfaces/state-status.enum'
@@ -18,8 +18,8 @@ export const getters: GetterTree<EventState, EventState> = {
     state.events.map((e) => ({
       name: e.name,
       description: e.description,
-      start: e.dtstart.substring(0, 16),
-      end: e.dtend?.substring(0, 16) || undefined,
+      start: ((e.dtstart as unknown) as string).substring(0, 16),
+      end: ((e.dtend as unknown) as string)?.substring(0, 16) || undefined,
     })),
 }
 

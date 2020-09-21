@@ -3,6 +3,7 @@ import {
   BaseEntity,
   Collection,
   Entity,
+  Enum,
   ManyToOne,
   OneToMany,
   PrimaryKey,
@@ -10,8 +11,10 @@ import {
 } from '@mikro-orm/core';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
+import { getYearsDiff } from '../app.utils';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { Invoice } from '../invoice/invoice.entity';
+import { Grades } from './enums/grades.enum';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -42,11 +45,41 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ nullable: true })
   feeWaived: boolean;
 
+  @Enum({ type: () => Grades, nullable: true })
+  gradeSet: Grades;
+
+  @Property({ nullable: true })
+  gradeSetAt: Date = new Date();
+
+  @Property({ nullable: true })
+  avatar?: string;
+
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
   @Property()
   createdAt: Date = new Date();
+
+  /**
+   * Computed Properties
+   */
+
+  @Property({ persist: false })
+  get grade() {
+    if (!this.gradeSet) return null;
+
+    const now = new Date();
+    // If August has not happened this year, the current
+    // school year is in the last year.
+    const yearOffset = now.getUTCMonth() < 7 ? -1 : 0;
+    // The current school year is the threshold of August 1st.
+    const currentSchoolYear = new Date(now.getUTCFullYear() + yearOffset, 7, 1);
+
+    return Math.min(
+      Grades.GRADUATED,
+      this.gradeSet + getYearsDiff(this.gradeSetAt, currentSchoolYear),
+    );
+  }
 
   /**
    * Relationships

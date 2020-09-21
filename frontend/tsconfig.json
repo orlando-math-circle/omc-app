@@ -15,12 +15,15 @@
       "~/*": ["./*"],
       "@/*": ["./*"]
     },
+    "typeRoots": ["./node_modules/@types", "./node_modules/vuetify/types"],
     "types": [
       "@types/node",
       "@nuxt/types",
       "@nuxtjs/axios",
-      "@nuxtjs/auth-next"
+      "@nuxtjs/auth-next",
+      "cookie-universal-nuxt",
+      "vuetify"
     ]
   },
-  "exclude": ["node_modules", "assets/.nuxt", "dist"]
+  "exclude": ["node_modules", "assets/.nuxt", ".nuxt", "dist"]
 }

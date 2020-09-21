@@ -1,5 +1,5 @@
 <template>
-  <div class="wave-top">
+  <div style="height: 100%">
     <v-toolbar flat color="transparent">
       <v-btn icon to="/">
         <v-icon large>mdi-chevron-left</v-icon>
@@ -7,7 +7,7 @@
     </v-toolbar>
 
     <v-container fill-height>
-      <v-row align="end" justify="center">
+      <v-row align="end" justify="center" no-gutters>
         <v-col cols="10" md="6">
           <h2>Sign in</h2>
 
@@ -26,6 +26,7 @@
                   v-model="email"
                   label="Email"
                   type="email"
+                  autocomplete="email"
                   prepend-inner-icon="mdi-email-outline"
                   :error-messages="errors"
                   required
@@ -36,22 +37,25 @@
                 label="Password"
                 :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showPassword ? 'test' : 'password'"
+                autocomplete="current-password"
                 prepend-inner-icon="mdi-lock-outline"
                 required
                 @click:append="showPassword = !showPassword"
               />
 
               <v-row no-gutters>
-                <v-col>
-                  <v-checkbox label="Remember me?" />
+                <v-col align="center">
+                  <v-checkbox v-model="remember" label="Remember me?" />
                 </v-col>
 
-                <v-col>
+                <v-col align="center" justify="center" class="forgot">
                   <nuxt-link to="/forgot">Forgot password?</nuxt-link>
                 </v-col>
               </v-row>
 
-              <v-btn block type="submit" :loading="loading">Log in</v-btn>
+              <v-btn block type="submit" color="primary" :loading="loading">
+                Log in
+              </v-btn>
               <div class="or-separator">or</div>
               <v-btn block outlined color="accent" to="/register"
                 >Sign up</v-btn
@@ -65,66 +69,67 @@
 </template>
 
 <script lang="ts">
-import Component from 'vue-class-component'
-import { Vue } from 'vue-property-decorator'
+import Vue from 'vue'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
-@Component({
+export default Vue.extend({
   layout: 'landing',
   components: {
-    ValidationProvider,
     ValidationObserver,
+    ValidationProvider,
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      showPassword: false,
+      error: null as any,
+      authFailure: false,
+      loading: false,
+      remember: true,
+    }
+  },
+  methods: {
+    async login() {
+      this.authFailure = false
+      this.loading = true
+
+      try {
+        await this.$store.dispatch('auth/login', {
+          email: this.email,
+          password: this.password,
+          remember: this.remember,
+        })
+
+        if (this.$store.state.auth.token.complete) {
+          this.$router.push('/')
+        } else {
+          this.$router.push('/switcher')
+        }
+      } catch (error) {
+        // TODO: Catch other types of errors with fallback message.
+        if (error.response) {
+          if (error.response.status === 401) {
+            this.authFailure = true
+          }
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+  },
+  head: {
+    title: 'Login',
   },
 })
-export default class LoginPage extends Vue {
-  private email = ''
-  private password = ''
-  private showPassword = false
-  private error: any
-  private authFailure = false
-  private loading = false
-
-  async login() {
-    this.authFailure = false
-    this.loading = true
-
-    try {
-      await this.$auth.loginWith('local', {
-        data: { email: this.email, password: this.password },
-      })
-    } catch (error) {
-      if (error.response) {
-        if (error.response.status === 401) {
-          this.authFailure = true
-        }
-        console.log(error.response)
-      }
-      console.log(error)
-    } finally {
-      this.loading = false
-    }
-  }
-}
 </script>
 
 <style lang="scss" scoped>
-.wave-top {
-  position: relative;
+.forgot {
+  display: flex;
+  align-self: center;
+  margin-left: 15px;
   height: 100%;
-  z-index: 0;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    height: 50vw;
-    background-size: cover;
-    background-image: url('~assets/images/welcome-wave.svg');
-    overflow: visible;
-    z-index: -1;
-  }
 }
 
 .or-separator {

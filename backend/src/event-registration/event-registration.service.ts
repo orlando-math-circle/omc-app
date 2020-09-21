@@ -79,17 +79,17 @@ export class EventRegistrationService {
     //   if (!canRegister) throw new ForbiddenException();
     // }
 
-    if (event.fee && !user.feeWaived) {
-      const invoice = this.invoiceService.findOne({ user: user.id });
+    // if (event.fee && !user.feeWaived) {
+    //   const invoice = this.invoiceService.findOne({ user: user.id });
 
-      if (!invoice) throw new HttpException('Payment required', 402);
-    }
+    //   if (!invoice) throw new HttpException('Payment required', 402);
+    // }
 
-    const registration = this.regRepository.create({ user, event });
+    // const registration = this.regRepository.create({ user, event });
 
-    await this.regRepository.persist(registration).flush();
+    // await this.regRepository.persist(registration).flush();
 
-    return registration;
+    // return registration;
   }
 
   /**
@@ -125,6 +125,11 @@ export class EventRegistrationService {
     }
 
     const cost = this.getEventCost(event);
+
+    if (!cost) {
+      throw new BadRequestException('Event has no cost');
+    }
+
     const purchaseUnits: PurchaseUnitRequest[] = [];
 
     for (const id of users) {
@@ -162,8 +167,14 @@ export class EventRegistrationService {
     ]);
 
     const cost = this.getEventCost(event);
+
+    if (!cost) {
+      throw new BadRequestException('Event has no cost');
+    }
+
     this.paypalService.validateCapture(order, 'APPROVED', cost);
 
+    // WARNING: If this completes but subsequent code fails, money is taken but no registration.
     const capturedOrder = await this.paypalService.captureOrder(orderId);
     const createInvoiceDtos: CreateInvoiceDto[] = [];
 

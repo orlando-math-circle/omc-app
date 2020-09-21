@@ -22,3 +22,9 @@ export const weekdays = [
   'Friday',
   'Saturday',
 ]
+
+/**
+ * Authentication
+ */
+
+export const COOKIE_NAME = 'omc_token'

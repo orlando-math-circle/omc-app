@@ -18,18 +18,8 @@
     </v-col>
 
     <v-col>
-      <v-row class="mb-10">
-        <v-col>
-          <h1 class="d-inline-flex" v-text="header" />
-          <v-btn icon class="ma-2" @click="$refs.calendar.prev()">
-            <v-icon x-large>mdi-chevron-left</v-icon>
-          </v-btn>
-          <v-btn icon class="ma-2" @click="$refs.calendar.next()">
-            <v-icon x-large>mdi-chevron-right</v-icon>
-          </v-btn>
-        </v-col>
-
-        <v-col cols="auto">
+      <v-row>
+        <v-col cols="auto" class="ml-auto">
           <v-select
             v-model="calendar.type"
             class="filled--bright type-selector elevation-2"
@@ -42,7 +32,20 @@
           >
           </v-select>
         </v-col>
+      </v-row>
 
+      <!-- Header -->
+      <v-row>
+        <v-col>
+          <h1 class="d-inline-flex header" v-text="header" />
+          <v-btn icon class="ma-2" @click="$refs.calendar.prev()">
+            <v-icon x-large>mdi-chevron-left</v-icon>
+          </v-btn>
+          <v-btn icon class="ma-2" @click="$refs.calendar.next()">
+            <v-icon x-large>mdi-chevron-right</v-icon>
+          </v-btn>
+        </v-col>
+        <!-- 
         <v-col cols="auto">
           <create-event-dialog @created="onCreate">
             <template #activator="{ on, attrs }">
@@ -51,7 +54,7 @@
               </v-btn>
             </template>
           </create-event-dialog>
-        </v-col>
+        </v-col> -->
       </v-row>
 
       <!-- Calendar -->
@@ -67,6 +70,7 @@
               :loading="$store.getters['events/isLoading']"
               :short-weekdays="false"
               @click:event="showEvent"
+              @click:date="setDate"
               @change="updateRange"
             />
 
@@ -91,7 +95,13 @@
       </v-row>
 
       <v-row>
-        <h2>Events</h2>
+        <v-col>
+          <h2>
+            {{
+              calendar.date ? `Events on ${formattedDate(calendar.date)}` : ''
+            }}
+          </h2>
+        </v-col>
       </v-row>
     </v-col>
   </v-row>
@@ -99,8 +109,9 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
+import { format } from 'date-fns'
 import { CalendarTimestamp } from 'vuetify/types'
-import { Event } from '~/types/event.interface'
+import { Event } from '../../backend/src/event/event.entity'
 import { months } from '~/utils/constants'
 
 export type CalendarUpdateType = {
@@ -129,6 +140,7 @@ export default class EventsPage extends Vue {
       { value: 'day', text: 'Day' },
       { value: '4day', text: '4-Day' },
     ],
+    date: null as Date | null,
     events: [],
     dialogs: {
       create: false,
@@ -161,8 +173,16 @@ export default class EventsPage extends Vue {
     return `${months[this.today.getMonth()]}, ${this.today.getFullYear()}`
   }
 
+  formattedDate(date: Date) {
+    return format(date, 'MMMM do')
+  }
+
   getEvents(start: Date, end: Date) {
     return this.$axios.$get('/event', { params: { start, end } })
+  }
+
+  setDate(day: any) {
+    this.calendar.date = new Date(day.date)
   }
 
   showEvent({ nativeEvent, event }: any) {
@@ -203,6 +223,10 @@ export default class EventsPage extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.header {
+  font-size: 1.5em;
+}
+
 .rounded {
   border-radius: 25px !important;
 }
@@ -240,7 +264,7 @@ export default class EventsPage extends Vue {
 
 .type-selector {
   font-weight: bold;
-  width: 140px;
+  width: 130px;
 }
 
 .add-event {

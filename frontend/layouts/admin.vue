@@ -12,7 +12,7 @@
         </v-list-item-avatar>
 
         <v-list-item-title>
-          {{ $auth.user.first }} {{ $auth.user.last }}
+          {{ user.first }} {{ user.last }}
         </v-list-item-title>
 
         <v-btn icon @click.stop="mini = !mini">
@@ -80,5 +80,9 @@ import { Vue, Component } from 'vue-property-decorator'
 export default class Admin extends Vue {
   drawer = false
   mini = false
+
+  get user() {
+    return this.$store.state.auth.user
+  }
 }
 </script>

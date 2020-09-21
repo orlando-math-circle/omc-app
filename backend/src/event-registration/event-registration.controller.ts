@@ -18,7 +18,8 @@ export class EventRegistrationController {
     @Param() { eventId, invoiceId }: FindEventWithInvoiceDto,
     @Usr() user: User,
   ) {
-    return this.registrationService.create(eventId, invoiceId, user);
+    // return this.registrationService.create(eventId, invoiceId, user);
+    return { eventId, invoiceId, user };
   }
 
   @UserAuth('event-registration', 'create:own')

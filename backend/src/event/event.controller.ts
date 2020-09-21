@@ -38,7 +38,7 @@ export class EventController {
 
   @Get(':id')
   findOne(@Param() { id }: FindEventDto) {
-    return this.eventService.findOneOrFail(id);
+    return this.eventService.findOneOrFail(id, ['author', 'course']);
   }
 
   @UserAuth('event', 'update:any')

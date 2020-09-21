@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsDate,
   IsOptional,
   IsString,
@@ -15,6 +16,13 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   readonly description?: string;
+
+  @IsBoolean()
+  readonly isOnline!: boolean;
+
+  @IsOptional()
+  @IsString()
+  readonly location?: string;
 
   @IsOptional()
   @IsString()

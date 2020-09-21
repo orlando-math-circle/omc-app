@@ -32,6 +32,12 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ nullable: true })
   description?: string;
 
+  @Property()
+  isOnline!: boolean;
+
+  @Property({ nullable: true })
+  location?: string;
+
   @Property({ nullable: true })
   picture?: string;
 

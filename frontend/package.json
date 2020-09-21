@@ -13,11 +13,11 @@
   },
   "dependencies": {
     "@nuxt/typescript-runtime": "2.0.0",
-    "@nuxtjs/auth": "4.9.1",
-    "@nuxtjs/auth-next": "5.0.0-1595976864.509d9d6",
     "@nuxtjs/axios": "5.12.2",
     "@nuxtjs/dotenv": "1.4.1",
     "@nuxtjs/pwa": "3.0.2",
+    "cookie-universal-nuxt": "^2.1.4",
+    "date-fns": "^2.16.1",
     "moment": "2.28.0",
     "nuxt": "2.14.5",
     "rrule": "2.6.6",

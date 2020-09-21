@@ -518,6 +518,7 @@ export class EventService {
           description: events[0].description,
           picture: events[0].picture,
           color: events[0].color,
+          isOnline: events[0].isOnline,
           dtstart: date,
           dtend: duration
             ? moment(date).add(duration, 'minutes').toDate()
