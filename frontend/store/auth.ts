@@ -79,16 +79,12 @@ export const actions: ActionTree<AuthState, AuthState> = {
   setTokenCookie({ state, commit }, data: AuthState['token']) {
     commit('SET_TOKEN', data)
 
-    // Sets the Authorization: Bearer <token> header on requests.
-    this.$axios.setToken(state.token.jwt as string, 'Bearer')
-
     this.$cookies.set(COOKIE_NAME, state.token, {
       maxAge: state.token.remember ? 365 * 24 * 60 * 60 * 1000 : undefined,
     })
   },
   removeTokenCookie({ commit }) {
     commit('SET_TOKEN', { jwt: null, complete: false, remember: true })
-    this.$axios.setToken(false, 'Bearer')
     this.$cookies.remove(COOKIE_NAME)
   },
 }
