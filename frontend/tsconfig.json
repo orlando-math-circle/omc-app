@@ -20,7 +20,6 @@
       "@types/node",
       "@nuxt/types",
       "@nuxtjs/axios",
-      "@nuxtjs/auth-next",
       "cookie-universal-nuxt",
       "vuetify"
     ]
