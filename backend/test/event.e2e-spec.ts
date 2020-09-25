@@ -47,7 +47,7 @@ describe('Events', () => {
     last: 'Doe',
     email: 'jane@doe.com',
     password: 'apple',
-    dob: new Date(),
+    dob: new Date(Date.UTC(1995, 0, 1)),
   };
 
   beforeAll(async () => {
@@ -147,6 +147,7 @@ describe('Events', () => {
     it('should throw 400 with both a dtstart and rrule', async () => {
       const dto: CreateEventDto = {
         name: 'Title',
+        isOnline: true,
         dtstart: new Date(Date.UTC(2020, 11, 24)),
         rrule: {
           freq: Frequency.DAILY,
@@ -165,6 +166,7 @@ describe('Events', () => {
     it('should throw 400 when dtstart is after dtend', async () => {
       const dto: CreateEventDto = {
         name: 'Title',
+        isOnline: true,
         dtstart: new Date(Date.UTC(2020, 12, 24)),
         dtend: new Date(Date.UTC(2020, 11, 24)),
       };
@@ -177,6 +179,7 @@ describe('Events', () => {
 
       const dtoTwo: CreateEventDto = {
         name: 'Title',
+        isOnline: true,
         rrule: {
           freq: Frequency.DAILY,
           dtstart: new Date(Date.UTC(2020, 12, 24)),
@@ -194,6 +197,7 @@ describe('Events', () => {
     it('should successfully create non-recurring events', async () => {
       const dto: CreateEventDto = {
         name: 'Test Event',
+        isOnline: true,
         dtstart: new Date(Date.UTC(2020, 11, 24)),
         dtend: new Date(Date.UTC(2020, 11, 25)),
       };
@@ -213,6 +217,7 @@ describe('Events', () => {
     it('should successfully create recurring events with an ending date', async () => {
       const dto: CreateEventDto = {
         name: 'Test Recurring Event',
+        isOnline: true,
         dtend: new Date(Date.UTC(2020, 0, 25)),
         rrule: {
           freq: Frequency.WEEKLY,
@@ -482,6 +487,7 @@ describe('Events', () => {
     it('should not reset a count in a recurrence split', async () => {
       const dto: CreateEventDto = {
         name: 'Count Split Test',
+        isOnline: true,
         dtend: new Date(Date.UTC(2020, 11, 10, 5, 0)),
         rrule: {
           freq: Frequency.DAILY,
@@ -660,6 +666,7 @@ describe('Events', () => {
     it('should delete events and prevent their re-creation', async () => {
       const dto: CreateEventDto = {
         name: 'Deleting Future Recurrences',
+        isOnline: true,
         dtend: new Date(Date.UTC(2020, 10, 10, 3, 0)),
         rrule: {
           freq: Frequency.DAILY,
@@ -772,6 +779,7 @@ describe('Events', () => {
     it('should throw an error if the recurrence has no events', async () => {
       const dto: CreateEventDto = {
         name: 'UNUSED',
+        isOnline: true,
         rrule: {
           freq: Frequency.WEEKLY,
           dtstart: new Date(Date.UTC(2020, 0, 1)),

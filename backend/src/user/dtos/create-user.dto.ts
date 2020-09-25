@@ -8,8 +8,9 @@ export class CreateUserDto {
   @IsString()
   last!: string;
 
+  @IsOptional()
   @IsEnum(Grades)
-  gradeSet!: Grades;
+  grade?: Grades;
 
   @IsOptional()
   @IsString()

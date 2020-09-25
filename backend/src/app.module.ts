@@ -11,6 +11,7 @@ import { EventRegistrationModule } from './event-registration/event-registration
 import { EventModule } from './event/event.module';
 import { PayPalModule } from './paypal/paypal.module';
 import { ProjectModule } from './project/project.module';
+import { TwitterModule } from './twitter/twitter.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module';
     PayPalModule,
     CourseModule,
     ProjectModule,
+    TwitterModule,
   ],
 })
 export class AppModule {}

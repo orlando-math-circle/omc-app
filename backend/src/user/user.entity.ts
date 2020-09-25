@@ -11,7 +11,7 @@ import {
 } from '@mikro-orm/core';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
-import { getYearsDiff } from '../app.utils';
+import { birthdayToAge, getYearsDiff } from '../app.utils';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { Invoice } from '../invoice/invoice.entity';
 import { Grades } from './enums/grades.enum';
@@ -64,6 +64,10 @@ export class User extends BaseEntity<User, 'id'> {
    * Computed Properties
    */
 
+  set grade(grade: Grades) {
+    this.gradeSet = grade;
+  }
+
   @Property({ persist: false })
   get grade() {
     if (!this.gradeSet) return null;
@@ -79,6 +83,15 @@ export class User extends BaseEntity<User, 'id'> {
       Grades.GRADUATED,
       this.gradeSet + getYearsDiff(this.gradeSetAt, currentSchoolYear),
     );
+  }
+
+  /**
+   * This may be quite a few hours. The frontend will assume their
+   * birthday is 12:00 AM on that day in their time zone.
+   */
+  @Property({ persist: false })
+  get age() {
+    return birthdayToAge(this.dob);
   }
 
   /**

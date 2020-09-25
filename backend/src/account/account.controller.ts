@@ -1,6 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UsePipes,
+} from '@nestjs/common';
 import { Acc } from '../auth/decorators/account.decorator';
 import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
+import { UserValidationPipe } from '../user/pipe/user-validator.pipe';
 import { Account } from './account.entity';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dtos/create-account.dto';
@@ -10,6 +19,7 @@ import { FindOneAccountDto } from './dtos/find-one-account.dto';
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
+  @UsePipes(new UserValidationPipe())
   @Post('register')
   create(@Body() createAccountDto: CreateAccountDto) {
     return this.accountService.create(createAccountDto);

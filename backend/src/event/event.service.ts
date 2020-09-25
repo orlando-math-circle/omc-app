@@ -129,7 +129,7 @@ export class EventService {
         dtstart: { $lte: end },
         recurrence: null,
       },
-      ['course'],
+      ['course', 'author'],
     );
 
     const recurrences = await this.recurrenceRepository.find(

@@ -31,6 +31,8 @@ export const isString = (fn: any): fn is string => typeof fn === 'string';
  * Moment Library & Date Utilities
  */
 
+export const birthdayToAge = (date: Date) => moment().diff(date, 'years');
+
 export const isSameDay = (dt1: Date, dt2: Date) =>
   moment(dt1).isSame(dt2, 'day');
 

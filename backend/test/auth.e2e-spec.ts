@@ -28,7 +28,7 @@ const createAccountDto: CreateAccountDto = {
   last: 'Doe',
   email: 'jane@doe.com',
   password: 'apple',
-  dob: new Date(),
+  dob: new Date(Date.UTC(1995, 0, 1)),
 };
 
 const contextMock = {
@@ -235,7 +235,7 @@ describe('Auth', () => {
       const dto: CreateUserDto = {
         first: 'Jacob',
         last: 'Doe',
-        dob: new Date(),
+        dob: new Date(Date.UTC(1995, 0, 1)),
       };
 
       const resp = await request(app.getHttpServer())

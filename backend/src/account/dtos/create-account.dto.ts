@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsString } from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Grades } from '../../user/enums/grades.enum';
 
 export class CreateAccountDto {
@@ -12,7 +12,8 @@ export class CreateAccountDto {
   last!: string;
 
   @IsEnum(Grades)
-  grade!: Grades;
+  @IsOptional()
+  grade?: Grades;
 
   @IsString()
   password!: string;

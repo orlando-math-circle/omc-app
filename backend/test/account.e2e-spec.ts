@@ -21,7 +21,7 @@ const createAccountDto: CreateAccountDto = {
   last: 'Doe',
   email: 'jane@doe.com',
   password: 'apple',
-  dob: new Date(),
+  dob: new Date(Date.UTC(1995, 0, 1)),
 };
 
 describe('Accounts', () => {
