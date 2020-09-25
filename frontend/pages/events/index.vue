@@ -18,7 +18,7 @@
     </v-col>
 
     <v-col>
-      <v-row>
+      <v-row v-if="false">
         <v-col cols="auto" class="ml-auto">
           <v-select
             v-model="calendar.type"
@@ -35,8 +35,8 @@
       </v-row>
 
       <!-- Header -->
-      <v-row>
-        <v-col>
+      <!-- <v-row> -->
+      <!-- <v-col>
           <h1 class="d-inline-flex header" v-text="header" />
           <v-btn icon class="ma-2" @click="$refs.calendar.prev()">
             <v-icon x-large>mdi-chevron-left</v-icon>
@@ -44,21 +44,21 @@
           <v-btn icon class="ma-2" @click="$refs.calendar.next()">
             <v-icon x-large>mdi-chevron-right</v-icon>
           </v-btn>
-        </v-col>
-        <!-- 
-        <v-col cols="auto">
-          <create-event-dialog @created="onCreate">
-            <template #activator="{ on, attrs }">
-              <v-btn class="add-event" v-bind="attrs" v-on="on">
-                <v-icon>mdi-plus</v-icon>Add
-              </v-btn>
-            </template>
-          </create-event-dialog>
         </v-col> -->
-      </v-row>
+
+      <v-col cols="auto">
+        <create-event-dialog @created="onCreate">
+          <template #activator="{ on, attrs }">
+            <v-btn class="add-event" v-bind="attrs" v-on="on">
+              <v-icon>mdi-plus</v-icon>Add
+            </v-btn>
+          </template>
+        </create-event-dialog>
+      </v-col>
+      <!-- </v-row> -->
 
       <!-- Calendar -->
-      <v-row>
+      <v-row v-if="false">
         <v-col>
           <v-sheet class="rounded">
             <v-calendar
@@ -96,11 +96,34 @@
 
       <v-row>
         <v-col>
-          <h2>
-            {{
+          <v-date-picker
+            v-model="calendar.date"
+            :events="eventsArray"
+            :allowed-dates="(date) => eventsArray.includes(date)"
+            :event-color="
+              (date) =>
+                date[9] % 3 ? '#44d9e6' : date[9] % 2 ? '#ff4299' : '#fee266'
+            "
+            full-width
+            no-title
+            elevation="2"
+            @change="setDate"
+          />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col>
+          <h2
+            class="mb-3"
+            v-text="
               calendar.date ? `Events on ${formattedDate(calendar.date)}` : ''
-            }}
-          </h2>
+            "
+          ></h2>
+
+          <template v-for="event in calendar.eventsForDate" class="mb-3">
+            <event :key="event.id" :value="event" />
+          </template>
         </v-col>
       </v-row>
     </v-col>
@@ -108,10 +131,11 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { format } from 'date-fns'
 import { CalendarTimestamp } from 'vuetify/types'
-import { Event } from '../../backend/src/event/event.entity'
+import moment from 'moment'
+// import { Event } from '../../backend/src/event/event.entity'
 import { months } from '~/utils/constants'
 
 export type CalendarUpdateType = {
@@ -120,6 +144,12 @@ export type CalendarUpdateType = {
 }
 
 @Component({
+  async fetch({ store }) {
+    await store.dispatch('events/fetchEvents', {
+      start: moment().startOf('month').toDate(),
+      end: moment().endOf('year').toDate(),
+    })
+  },
   head: {
     title: 'Events',
   },
@@ -140,8 +170,9 @@ export default class EventsPage extends Vue {
       { value: 'day', text: 'Day' },
       { value: '4day', text: '4-Day' },
     ],
-    date: null as Date | null,
-    events: [],
+    date: new Date().toISOString().substr(0, 10),
+    events: [] as Event[],
+    eventsForDate: [] as Event[],
     dialogs: {
       create: false,
     },
@@ -163,6 +194,10 @@ export default class EventsPage extends Vue {
     return this.$store.getters['events/events']
   }
 
+  get eventsArray() {
+    return this.events.map((event: any) => event.start.substr(0, 10))
+  }
+
   get header() {
     if (this.calendar.range.start) {
       return `${months[this.calendar.range.start.month - 1]}, ${
@@ -173,16 +208,25 @@ export default class EventsPage extends Vue {
     return `${months[this.today.getMonth()]}, ${this.today.getFullYear()}`
   }
 
+  @Watch('calendar.date')
+  changeDate(newD: string, old: string) {
+    console.log(newD, old)
+  }
+
   formattedDate(date: Date) {
-    return format(date, 'MMMM do')
+    const d = new Date(date)
+    return format(d.setDate(d.getDate() + 1), 'MMMM do')
   }
 
   getEvents(start: Date, end: Date) {
     return this.$axios.$get('/event', { params: { start, end } })
   }
 
-  setDate(day: any) {
-    this.calendar.date = new Date(day.date)
+  setDate(date: string) {
+    this.calendar.date = date
+    this.calendar.eventsForDate = this.events.filter((event: any) =>
+      moment(event.start).isSame(this.calendar.date, 'day')
+    )
   }
 
   showEvent({ nativeEvent, event }: any) {

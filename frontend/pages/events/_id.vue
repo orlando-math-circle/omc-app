@@ -3,7 +3,7 @@
     <v-col v-if="!!event">
       <v-row no-gutters class="mb-5">
         <v-col cols="auto" align-self="center" align="center">
-          <v-btn icon class="pr-2">
+          <v-btn icon class="pr-2" @click="$router.back()">
             <v-icon large>mdi-chevron-left</v-icon>
           </v-btn>
         </v-col>
@@ -93,15 +93,24 @@
               <v-list-item v-for="user in account.users" :key="user.id">
                 <template v-slot:default="{ active }">
                   <v-list-item-avatar>
-                    <v-icon>mdi-account-circle-outline</v-icon>
+                    <!-- <v-icon>mdi-account-circle-outline</v-icon> -->
+                    <v-img
+                      :src="user.avatar || '/images/default_avatars/paper.png'"
+                    ></v-img>
                   </v-list-item-avatar>
 
                   <v-list-item-content>
                     <v-list-item-title>
                       {{ user.first }} {{ user.last }}
                     </v-list-item-title>
-                    <v-list-item-subtitle>
-                      Grade {{ user.grade }} —
+                    <v-list-item-subtitle v-if="user.age >= 18">
+                      Adult — {{ active ? 'Selected' : 'Eligible' }}
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle v-else>
+                      {{
+                        user.grade === 13 ? 'Graduated' : `Grade ${user.grade}`
+                      }}
+                      —
                       {{ active ? 'Selected' : 'Eligible' }}
                     </v-list-item-subtitle>
                   </v-list-item-content>
@@ -182,6 +191,9 @@ export default {
 
       return fee * this.selected.length
     },
+  },
+  head: {
+    title: 'Event',
   },
 }
 </script>

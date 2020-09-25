@@ -16,8 +16,12 @@ export const getters: GetterTree<EventState, EventState> = {
   isLoading: (state) => state.status === StateStatus.BUSY,
   events: (state) =>
     state.events.map((e) => ({
+      id: e.id,
       name: e.name,
       description: e.description,
+      author: e.author,
+      isOnline: e.isOnline,
+      location: e.location,
       start: ((e.dtstart as unknown) as string).substring(0, 16),
       end: ((e.dtend as unknown) as string)?.substring(0, 16) || undefined,
     })),
@@ -32,6 +36,8 @@ export const mutations: MutationTree<EventState> = {
 export const actions: ActionTree<EventState, EventState> = {
   async fetchEvents({ commit }, { start, end }: GetEventsDto) {
     commit('SET_STATUS', StateStatus.BUSY)
+
+    console.log(start, end)
 
     const events = await this.$axios.$get('/event', { params: { start, end } })
 

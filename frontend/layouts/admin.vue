@@ -4,16 +4,23 @@
       v-model="drawer"
       :mini-variant.sync="mini"
       permanent
+      dark
       app
     >
       <v-list-item class="px-2">
         <v-list-item-avatar>
-          <v-icon>mdi-account-circle</v-icon>
+          <v-img :src="user.avatar"></v-img>
         </v-list-item-avatar>
 
-        <v-list-item-title>
-          {{ user.first }} {{ user.last }}
-        </v-list-item-title>
+        <v-list-item-content>
+          <v-list-item-title>
+            {{ user.first }} {{ user.last }}
+          </v-list-item-title>
+
+          <v-list-item-subtitle>
+            {{ user.email }}
+          </v-list-item-subtitle>
+        </v-list-item-content>
 
         <v-btn icon @click.stop="mini = !mini">
           <v-icon>mdi-chevron-left</v-icon>
@@ -25,11 +32,11 @@
       <v-list>
         <v-list-item link exact to="/admin/">
           <v-list-item-icon>
-            <v-icon>mdi-home</v-icon>
+            <v-icon>mdi-home-analytics</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title>Home</v-list-item-title>
+            <v-list-item-title>Dashboard</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
@@ -52,15 +59,73 @@
             <v-list-item-title>Events</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+
+        <v-list-item link to="/admin/courses">
+          <v-list-item-icon>
+            <v-icon>mdi-school</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Courses</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item link to="/admin/projects">
+          <v-list-item-icon>
+            <v-icon>mdi-palette</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Projects</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item link to="/admin/volunteers">
+          <v-list-item-icon>
+            <v-icon>mdi-hand-heart</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Volunteers</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item link to="/admin/volunteers">
+          <v-list-item-icon>
+            <v-icon>mdi-cloud-upload</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Uploads</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider></v-divider>
+
+        <v-list-item link to="/" exact>
+          <v-list-item-icon>
+            <v-icon>mdi-arrow-left-circle</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Return to Site</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item link @click="$store.dispatch('auth/logout')">
+          <v-list-item-icon>
+            <v-icon>mdi-logout</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar flat app>
-      <v-toolbar-title>OMC Admin</v-toolbar-title>
-
-      <v-spacer></v-spacer>
-
-      <v-btn text to="/landing">User View</v-btn>
+    <v-app-bar flat app color="primary">
+      <v-toolbar-title class="title">OMC Admin</v-toolbar-title>
     </v-app-bar>
 
     <v-main>
@@ -72,17 +137,38 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import Vue from 'vue'
+import { Roles } from '~/../backend/src/app.roles'
 
-@Component({
+export default Vue.extend({
   middleware: 'auth',
+  data() {
+    return {
+      drawer: false,
+      mini: false,
+    }
+  },
+  computed: {
+    user() {
+      return this.$store.state.auth.user
+    },
+  },
+  meta: {
+    auth: {
+      roles: [Roles.ADMIN],
+    },
+  },
 })
-export default class Admin extends Vue {
-  drawer = false
-  mini = false
-
-  get user() {
-    return this.$store.state.auth.user
-  }
-}
 </script>
+
+<style lang="scss" scoped>
+.title {
+  color: #fff;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: 700;
+}
+</style>
