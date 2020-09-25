@@ -2,7 +2,7 @@
 title: First Meeting
 description: First meeting with Sheina, Matt, and Margarita.
 category: Meetings
-position: 10
+position: 4
 ---
 
 <alert type="warning">

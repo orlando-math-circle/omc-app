@@ -1,4 +1,8 @@
 {
   "title": "Orlando Math Circle",
-  "github": "duckies/omc-app"
+  "github": "duckies/omc-app",
+  "logo": {
+    "light": "/images/logo-light.svg",
+    "dark": "/images/logo-dark.svg"
+  }
 }
