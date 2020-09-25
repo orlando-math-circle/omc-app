@@ -14,6 +14,9 @@ export const state = () => ({
   },
   user: null as User | null,
   account: null as Account | null,
+  settings: {
+    calendarType: 'month',
+  },
 })
 
 export type AuthState = ReturnType<typeof state>
@@ -32,6 +35,8 @@ export const mutations: MutationTree<AuthState> = {
     (state.token = Object.assign({}, state.token, data)),
   SET_USER: (state, user: User) => (state.user = user),
   SET_ACCOUNT: (state, account: Account) => (state.account = account),
+  SET_SETTINGS: (state, setting: Partial<AuthState['settings']>) =>
+    (state.settings = Object.assign({}, state.settings, setting)),
 }
 
 export const actions: ActionTree<AuthState, AuthState> = {

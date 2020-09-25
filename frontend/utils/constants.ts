@@ -28,3 +28,4 @@ export const weekdays = [
  */
 
 export const COOKIE_NAME = 'omc_token'
+export const COOKIE_CALENDAR_TYPE = 'omc_calendar_type'

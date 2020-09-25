@@ -141,7 +141,7 @@ import Vue from 'vue'
 import { Roles } from '~/../backend/src/app.roles'
 
 export default Vue.extend({
-  middleware: 'auth',
+  middleware: ['auth', 'admin'],
   data() {
     return {
       drawer: false,
