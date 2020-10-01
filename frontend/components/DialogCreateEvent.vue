@@ -208,10 +208,8 @@
                 <v-list-item-content>
                   <v-row no-gutters>
                     <v-col cols="auto">
-                      <!-- <dialog-create-project /> -->
-                    </v-col>
-                    <v-col>
-                      <dialog-select-project v-model="project" />
+                      <dialog-select-project v-model="project.id" />
+                      <dialog-create-project />
                     </v-col>
                   </v-row>
                 </v-list-item-content>
@@ -305,7 +303,9 @@ export default (Vue as ComponentRefs).extend({
         name: '',
         description: '',
       },
-      project: 0,
+      project: {
+        id: 0,
+      },
     }
   },
   beforeMount() {
@@ -387,8 +387,8 @@ export default (Vue as ComponentRefs).extend({
         console.error(error)
       }
     },
-    onProjectSelect(project: number) {
-      this.project = project
+    onProjectSelect(id: number) {
+      this.project.id = id
     },
   },
 })

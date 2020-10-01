@@ -7,8 +7,8 @@
             <v-autocomplete
               v-model="project"
               :items="projects.auto"
-              :search-input.sync="search"
               :loading="loading"
+              :search-input.sync="search.auto"
               item-text="name"
               item-value="id"
               placeholder="Search for a project"
@@ -34,7 +34,7 @@
 
       <v-card-text>
         <v-text-field
-          v-model="tableSearch"
+          v-model="search.table"
           label="Search projects"
           outlined
           autocomplete="off"
@@ -45,11 +45,11 @@
           <v-data-table
             :items="projects.table"
             :headers="headers"
-            :search="tableSearch"
+            :search="search.table"
             :server-items-length="$store.state.projects.total"
             show-select
             single-select
-            @item-selected="onSelected"
+            @item-selected="onTableSelected"
             @update:options="onTableOptionsChange"
           ></v-data-table>
         </v-expand-transition>
@@ -67,6 +67,7 @@
 import Vue from 'vue'
 import { DebouncedFunc, throttle } from 'lodash'
 import { DataTableOptions } from '../interfaces/data-table.interface'
+import { FindAllProjectsDto } from '../../backend/src/project/dto/find-all-projects.dto'
 import { Project } from '~/../backend/src/project/project.entity'
 
 export default Vue.extend({
@@ -77,35 +78,33 @@ export default Vue.extend({
     },
   },
   async fetch() {
-    const [projects, count] = await this.$store.dispatch('projects/findAll', {
+    await this.$store.dispatch('projects/findAll', {
       limit: this.pagination.limit,
       offset: this.pagination.offset,
     })
-
-    this.pagination.total = count
-    this.projects.table = [...projects]
-    this.projects.auto = [...projects]
   },
   data() {
     return {
       dialog: false,
-      autoQuery: '',
+      search: {
+        auto: '',
+        table: '',
+      },
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Description', value: 'description' },
       ],
-      bounced: false,
-      tableQuery: '',
-      projects: {
-        auto: [] as Project[],
-        table: [] as Project[],
-      },
+      throttled: false,
       throttler: null as DebouncedFunc<any> | null,
       pagination: {
         total: 0,
         limit: 10,
         offset: 0,
         sort: [] as string[],
+      },
+      projects: {
+        auto: [] as Project[],
+        table: [] as Project[],
       },
     }
   },
@@ -119,51 +118,55 @@ export default Vue.extend({
       },
     },
     loading(): boolean {
-      return this.bounced || this.$store.getters['projects/isLoading']
+      return this.throttled || this.$store.getters['projects/isLoading']
     },
-    search: {
-      get(): string {
-        return this.autoQuery
-      },
-      async set(value: string) {
-        if (value === this.autoQuery) return
-
-        this.autoQuery = value
-        await this.throttle(value)
-        this.projects.auto = this.$store.state.projects.projects
-      },
+  },
+  watch: {
+    'search.auto'() {
+      this.searchAuto()
     },
-    tableSearch: {
-      get(): string {
-        return this.tableQuery
-      },
-      async set(value: string) {
-        if (value === this.tableQuery) return
-
-        this.tableQuery = value
-        await this.throttle(value)
-        this.projects.table = this.$store.state.projects.projects
-      },
+    'search.table'() {
+      this.searchTable()
     },
   },
   methods: {
-    async throttle(search: string, limit?: number, offset?: number) {
-      this.bounced = true
+    async searchAuto() {
+      await this.findAll({
+        search: this.search.auto,
+        limit: this.pagination.limit,
+      })
+
+      this.projects.auto = this.$store.state.projects.projects
+    },
+    async searchTable() {
+      const all = this.pagination.limit === -1
+
+      await this.findAll({
+        search: this.search.table,
+        limit: all ? undefined : this.pagination.limit,
+        offset: all ? undefined : this.pagination.offset,
+        sort: this.pagination.sort.length ? this.pagination.sort : undefined,
+      })
+
+      this.projects.table = this.$store.state.projects.projects
+      this.projects.auto = this.$store.state.projects.projects
+    },
+    async findAll(dto: FindAllProjectsDto) {
+      this.throttled = true
 
       if (!this.throttler) {
-        this.throttler = throttle(this.query, 500)
+        this.throttler = throttle(async (dto: FindAllProjectsDto) => {
+          await this.$store.dispatch('projects/findAll', dto)
+          this.throttled = false
+        }, 500)
       }
 
-      await this.throttler(search, limit, offset)
+      await this.throttler(dto)
     },
-    async query(search: string, limit?: number, offset?: number) {
-      await this.$store.dispatch('projects/findAll', { search, limit, offset })
-      this.bounced = false
-    },
-    onSelected(value: any) {
+    onTableSelected(value: any) {
       this.project = value.item.id
     },
-    async onTableOptionsChange(options: DataTableOptions) {
+    onTableOptionsChange(options: DataTableOptions) {
       this.pagination.limit = options.itemsPerPage
       this.pagination.offset = this.pagination.limit * (options.page - 1)
 
@@ -177,17 +180,7 @@ export default Vue.extend({
         }
       }
 
-      const all = this.pagination.limit === -1
-      const sorted = options.sortBy.length
-
-      await this.$store.dispatch('projects/findAll', {
-        search: this.tableQuery,
-        limit: all ? undefined : this.pagination.limit,
-        offset: all ? undefined : this.pagination.offset,
-        sort: sorted ? this.pagination.sort : undefined,
-      })
-
-      this.projects.table = this.$store.state.projects.projects
+      this.searchTable()
     },
   },
 })

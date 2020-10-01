@@ -16,12 +16,4 @@ export class FindAllProjectsDto extends SortingDTO {
   @Type(() => Number)
   @IsNumber()
   offset?: number;
-
-  @IsOptional()
-  @IsString({ each: true })
-  sortASC: string[];
-
-  @IsOptional()
-  @IsString({ each: true })
-  sortDESC: string[];
 }
