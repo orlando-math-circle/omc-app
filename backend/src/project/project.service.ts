@@ -1,8 +1,9 @@
-import { EntityRepository, FilterQuery } from '@mikro-orm/core';
+import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
-import { CreateProjectDto } from './dtos/create-project.dto';
-import { UpdateProjectDto } from './dtos/update-project.dto';
+import { Populate } from '../app.utils';
+import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './project.entity';
 
 @Injectable()
@@ -24,8 +25,19 @@ export class ProjectService {
     return this.projectRepository.findOneOrFail(where);
   }
 
-  findAll(where: FilterQuery<Project>, limit: number, offset: number) {
-    return this.projectRepository.findAndCount(where, {}, {}, limit, offset);
+  findAll(
+    where: FilterQuery<Project>,
+    populate?: Populate<Project>,
+    orderBy?: QueryOrderMap,
+    limit?: number,
+    offset?: number,
+  ) {
+    return this.projectRepository.findAndCount(where, {
+      limit,
+      offset,
+      populate,
+      orderBy,
+    });
   }
 
   async update(id: number, updateProjectDto: UpdateProjectDto) {

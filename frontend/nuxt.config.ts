@@ -3,7 +3,7 @@ import { NuxtConfig } from '@nuxt/types'
 import { VuetifyLoaderPlugin } from 'vuetify-loader'
 
 const config: NuxtConfig = {
-  mode: 'universal',
+  ssr: true,
 
   server: {
     port: 8000,

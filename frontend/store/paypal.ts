@@ -20,7 +20,6 @@ export const actions: ActionTree<PayPalState, PayPalState> = {
     return this.$axios.$post('/paypal/orders/create')
   },
   captureOrder(_ctx, { id }) {
-    console.log(id)
     return this.$axios.$post(`/paypal/orders/capture/${id}`)
   },
 }

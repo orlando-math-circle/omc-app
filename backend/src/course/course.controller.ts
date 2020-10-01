@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { CourseService } from './course.service';
@@ -26,12 +25,6 @@ export class CourseController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.courseService.findOneOrFail(id);
-  }
-
-  @UserAuth('course', 'read:any')
-  @Get()
-  findAll(@Query('limit') limit: number, @Query('offset') offset: number) {
-    return this.courseService.findAll({}, limit, offset);
   }
 
   @UserAuth('course', 'update:any')

@@ -1,25 +1,8 @@
 <template>
   <v-row>
-    <!-- Left Sidebar -->
-    <v-col v-if="false" md="3">
-      <!-- Monthly Calendar -->
-      <v-card class="rounded-card" flat>
-        <v-card-title></v-card-title>
-
-        <v-card-text>
-          <v-calendar
-            ref="mini-calendar"
-            v-model="calendar.value"
-            type="month"
-            :events="events"
-          ></v-calendar>
-        </v-card-text>
-      </v-card>
-    </v-col>
-
     <v-col>
-      <v-row v-if="false">
-        <v-col cols="auto" class="ml-auto">
+      <v-row>
+        <v-col cols="auto" class="ml-auto py-0">
           <v-select
             v-model="calendar.type"
             class="filled--bright type-selector elevation-2"
@@ -27,10 +10,39 @@
             append-icon="mdi-chevron-down"
             solo
             flat
+            dense
             hide-details
             :menu-props="{ offsetY: true }"
           >
           </v-select>
+        </v-col>
+
+        <v-col cols="auto py-0 pl-0">
+          <v-menu offset-y>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                class="filled--bright"
+                color="primary"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <span>Admin</span>
+                <v-icon>mdi-chevron-down</v-icon>
+              </v-btn>
+            </template>
+
+            <v-list>
+              <create-event-dialog @created="onCreate">
+                <template #activator="{ on, attrs }">
+                  <v-list-item v-bind="attrs" v-on="on">
+                    <v-list-item-content>
+                      <v-list-item-title>Add Event</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </template>
+              </create-event-dialog>
+            </v-list>
+          </v-menu>
         </v-col>
       </v-row>
 
@@ -45,56 +57,71 @@
             <v-icon x-large>mdi-chevron-right</v-icon>
           </v-btn>
         </v-col> -->
-
-      <v-col cols="auto">
-        <create-event-dialog @created="onCreate">
-          <template #activator="{ on, attrs }">
-            <v-btn class="add-event" v-bind="attrs" v-on="on">
-              <v-icon>mdi-plus</v-icon>Add
-            </v-btn>
-          </template>
-        </create-event-dialog>
-      </v-col>
       <!-- </v-row> -->
 
-      <!-- Calendar -->
-      <v-row v-if="false">
+      <!-- Full-Size Calendar -->
+      <v-row v-if="calendar.type !== 'simple'">
         <v-col>
-          <v-sheet class="rounded">
-            <v-calendar
-              ref="calendar"
-              v-model="calendar.value"
-              class="calendar"
-              :type="calendar.type"
-              :events="events"
-              :loading="$store.getters['events/isLoading']"
-              :short-weekdays="false"
-              @click:event="showEvent"
-              @click:date="setDate"
-              @change="updateRange"
-            />
+          <v-card>
+            <div class="calendar--header d-flex justify-center align-center">
+              <v-btn icon @click="$refs.calendar.prev()">
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn>
 
-            <v-menu
-              v-model="selected.open"
-              :close-on-content-click="false"
-              :activator="selected.element"
-              offset-x
-            >
-              <v-card v-if="selected.event">
-                <v-toolbar>
-                  <v-btn icon>
-                    <v-icon>mdi-pencil</v-icon>
-                  </v-btn>
+              <div class="calendar--header__title">
+                {{ header }}
+              </div>
 
-                  <v-toolbar-title>{{ selected.event.name }}</v-toolbar-title>
-                </v-toolbar>
-              </v-card>
-            </v-menu>
-          </v-sheet>
+              <v-btn icon @click="$refs.calendar.next()">
+                <v-icon>mdi-chevron-right</v-icon>
+              </v-btn>
+            </div>
+
+            <v-sheet class="calendar--wrapper" height="500">
+              <v-calendar
+                ref="calendar"
+                v-model="calendar.value"
+                class="calendar"
+                :type="calendar.type"
+                :events="events"
+                :loading="$store.getters['events/isLoading']"
+                :short-weekdays="false"
+                @click:event="showEvent"
+                @click:date="setDate"
+                @change="updateRange"
+              >
+                <!-- <template #day-body="{ date, week }">
+                  <div
+                    class="calendar__time"
+                    :class="{ first: date === week[0].date }"
+                    :style="{ top: nowY }"
+                  ></div>
+                </template> -->
+              </v-calendar>
+
+              <v-menu
+                v-model="selected.open"
+                :close-on-content-click="false"
+                :activator="selected.element"
+                offset-x
+              >
+                <v-card v-if="selected.event">
+                  <v-toolbar>
+                    <v-btn icon>
+                      <v-icon>mdi-pencil</v-icon>
+                    </v-btn>
+
+                    <v-toolbar-title>{{ selected.event.name }}</v-toolbar-title>
+                  </v-toolbar>
+                </v-card>
+              </v-menu>
+            </v-sheet>
+          </v-card>
         </v-col>
       </v-row>
 
-      <v-row>
+      <!-- Date-Picker Calendar -->
+      <v-row v-else>
         <v-col>
           <v-date-picker
             v-model="calendar.date"
@@ -112,6 +139,7 @@
         </v-col>
       </v-row>
 
+      <!-- Event List -->
       <v-row>
         <v-col>
           <h2
@@ -161,10 +189,13 @@ export default class EventsPage extends Vue {
 
   today = new Date()
 
+  isMounted = false
+
   calendar = {
     value: '',
     type: 'month',
     types: [
+      { value: 'simple', text: 'Simple' },
       { value: 'month', text: 'Month' },
       { value: 'week', text: 'Week' },
       { value: 'day', text: 'Day' },
@@ -189,6 +220,10 @@ export default class EventsPage extends Vue {
   }
 
   loaded = false
+
+  mounted() {
+    this.isMounted = true
+  }
 
   get events() {
     return this.$store.getters['events/events']
@@ -271,8 +306,21 @@ export default class EventsPage extends Vue {
   font-size: 1.5em;
 }
 
-.rounded {
-  border-radius: 25px !important;
+.calendar {
+  &--wrapper {
+    padding: 0 16px 16px 16px;
+  }
+
+  &--header {
+    padding: 4px 16px;
+
+    &__title {
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      padding: 0.5rem;
+    }
+  }
 }
 
 // .calendar {
@@ -319,11 +367,12 @@ export default class EventsPage extends Vue {
 
 .filled--bright {
   border-radius: 15px;
-  height: 55px;
+  height: 45px !important;
+  width: 120px;
 
   ::v-deep .v-input__slot {
-    height: 55px;
-    padding: 0 20px !important;
+    height: 45px !important;
+    padding: 0 15px !important;
   }
 }
 </style>
