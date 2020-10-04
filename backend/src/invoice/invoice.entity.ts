@@ -1,9 +1,7 @@
 import {
   BaseEntity,
-  Collection,
   Entity,
   Enum,
-  ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
@@ -43,6 +41,6 @@ export class Invoice extends BaseEntity<Invoice, 'id'> {
   @ManyToOne(() => Course, { nullable: true })
   course?: Course;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { eager: true })
   user!: User;
 }

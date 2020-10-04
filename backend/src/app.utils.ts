@@ -28,6 +28,14 @@ export const isNumber = (fn: any): fn is number => typeof fn === 'number';
 export const isString = (fn: any): fn is string => typeof fn === 'string';
 
 /**
+ * Determines if two single-dimension arrays of primities are equal.
+ */
+export const isEqual = <T extends string | number | boolean | null>(
+  a: T[],
+  b: T[],
+) => a.length === b.length && a.every((i) => b.includes(i));
+
+/**
  * Moment Library & Date Utilities
  */
 

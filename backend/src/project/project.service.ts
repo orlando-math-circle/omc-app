@@ -28,9 +28,9 @@ export class ProjectService {
   findAll(
     where: FilterQuery<Project>,
     populate?: Populate<Project>,
-    orderBy?: QueryOrderMap,
     limit?: number,
     offset?: number,
+    orderBy?: QueryOrderMap,
   ) {
     return this.projectRepository.findAndCount(where, {
       limit,

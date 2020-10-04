@@ -55,4 +55,20 @@ export class CreateEventDto {
   @Type(() => EventRecurrenceDto)
   @ValidateNested()
   readonly rrule?: EventRecurrenceDto;
+
+  /**
+   * Course
+   */
+
+  @IsOptional()
+  @Type(() => Number)
+  readonly course?: number;
+
+  /**
+   * Project
+   */
+
+  @IsOptional()
+  @Type(() => Number)
+  readonly project?: number;
 }

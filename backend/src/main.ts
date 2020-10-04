@@ -5,6 +5,8 @@ import { PORT } from './app.constants';
 import { AppModule } from './app.module';
 import { JsonWebTokenFilter } from './auth/filters/jwt.filter';
 import { MikroORMConstraintExceptionFilter } from './shared/errors/mikro-orm.exception';
+import { SearchPipe } from './shared/pipes/search.pipe';
+import { SortingPipe } from './shared/pipes/sorting.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +19,8 @@ async function bootstrap() {
       forbidUnknownValues: true,
       forbidNonWhitelisted: true,
     }),
+    new SearchPipe(),
+    new SortingPipe(),
   );
 
   app.useGlobalFilters(

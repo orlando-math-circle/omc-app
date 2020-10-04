@@ -6,9 +6,7 @@ import {
   Patch,
   Post,
   Query,
-  UsePipes,
 } from '@nestjs/common';
-import { SortingPipe } from '../shared/pipes/project-sort.pipe';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { FindAllProjectsDto } from './dto/find-all-projects.dto';
 import { FindProjectDto } from './dto/find-project.dto';
@@ -30,24 +28,20 @@ export class ProjectController {
   }
 
   @Get()
-  @UsePipes(new SortingPipe())
-  findAll(@Query() { search, limit, offset, orderBy }: FindAllProjectsDto) {
-    const text =
-      search && search !== '' ? search.trim().toLowerCase() : undefined;
-
+  findAll(@Query() { limit, offset, contains, orderBy }: FindAllProjectsDto) {
     return this.projectService.findAll(
-      text
+      contains
         ? ({
             $or: [
-              { 'lower(name)': { $like: `${text}%` } },
-              { 'lower(description)': { $like: `%${text}%` } },
+              { 'lower(name)': { $like: `${contains}%` } },
+              { 'lower(description)': { $like: `%${contains}%` } },
             ],
           } as any)
         : {},
       {},
-      orderBy,
       limit,
       offset,
+      orderBy,
     );
   }
 

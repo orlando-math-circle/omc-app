@@ -27,6 +27,7 @@ export class CreateCourseDto {
   @IsNumber()
   project!: number;
 
+  @IsOptional()
   @IsNumber({}, { each: true })
-  events: number[];
+  events?: number[];
 }

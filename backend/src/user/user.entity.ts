@@ -86,7 +86,7 @@ export class User extends BaseEntity<User, 'id'> {
   }
 
   /**
-   * This may be quite a few hours. The frontend will assume their
+   * This may be quite a few hours off. The frontend will assume their
    * birthday is 12:00 AM on that day in their time zone.
    */
   @Property({ persist: false })

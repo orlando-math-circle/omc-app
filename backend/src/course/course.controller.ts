@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { CourseService } from './course.service';
-import { CreateCourseDto } from './dtos/create-course.dto';
-import { UpdateCourseDto } from './dtos/update-course.dto';
+import { CreateCourseDto } from './dto/create-course.dto';
+import { FindAllCoursesDto } from './dto/find-all-courses.dto';
+import { UpdateCourseDto } from './dto/update-course.dto';
 
 @Controller('/course')
 export class CourseController {
@@ -20,6 +22,23 @@ export class CourseController {
   @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
     return this.courseService.create(createCourseDto);
+  }
+
+  @Get()
+  findAll(@Query() { contains, limit, offset, orderBy }: FindAllCoursesDto) {
+    return this.courseService.findAll(
+      contains
+        ? ({
+            $or: [
+              { 'lower(name)': { $like: `${contains}%` } },
+              { 'lower(description)': { $like: `%${contains}%` } },
+            ],
+          } as any)
+        : {},
+      limit,
+      offset,
+      orderBy,
+    );
   }
 
   @Get(':id')

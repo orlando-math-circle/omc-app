@@ -1,10 +1,11 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { Account } from '../account/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
-import { UserAuth } from '../auth/decorators/auth.decorator';
+import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
+import { CreateRegistrationDto } from './dtos/create-registration.dto';
 import { FindEventWithInvoiceDto } from './dtos/find-event-with-invoice.dto';
 import { EventRegistrationService } from './event-registration.service';
 
@@ -13,13 +14,19 @@ export class EventRegistrationController {
   constructor(private readonly registrationService: EventRegistrationService) {}
 
   @UserAuth('event-registration', 'create:own')
-  @Post(':eventId/:invoiceId')
+  @Post()
   create(
-    @Param() { eventId, invoiceId }: FindEventWithInvoiceDto,
+    @Body() { eventId, users }: CreateRegistrationDto,
     @Usr() user: User,
+    @Acc() account: Account,
   ) {
-    // return this.registrationService.create(eventId, invoiceId, user);
-    return { eventId, invoiceId, user };
+    return this.registrationService.create(eventId, users, user, account);
+  }
+
+  @AccountAuth()
+  @Get('/status/:eventId')
+  getStatus(@Param('eventId') eventId: number, @Acc() account: Account) {
+    return this.registrationService.getRegistrationStatus(eventId, account);
   }
 
   @UserAuth('event-registration', 'create:own')

@@ -3,6 +3,7 @@ import { AccountModule } from '../account/account.module';
 import { ACCESS_CONTROL_TOKEN } from '../app.constants';
 import AccessControl from '../app.roles';
 import { UserModule } from '../user/user.module';
+import { AccessService } from './access.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -16,8 +17,14 @@ const ACProvider = {
 @Global()
 @Module({
   imports: [forwardRef(() => UserModule), forwardRef(() => AccountModule)],
-  providers: [AuthService, ACProvider, LocalStrategy, TokenStrategy],
+  providers: [
+    AuthService,
+    AccessService,
+    ACProvider,
+    LocalStrategy,
+    TokenStrategy,
+  ],
   controllers: [AuthController],
-  exports: [AuthService, ACProvider],
+  exports: [AuthService, AccessService, ACProvider],
 })
 export class AuthModule {}

@@ -1,6 +1,5 @@
 import { QueryOrder, QueryOrderMap } from '@mikro-orm/core';
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { SortingDTO } from '../dto/sorting.dto';
 
 /**
  * Transforms sorting parameters in GET requests into
@@ -12,7 +11,7 @@ import { SortingDTO } from '../dto/sorting.dto';
 
 @Injectable()
 export class SortingPipe implements PipeTransform {
-  transform(value: SortingDTO, { type }: ArgumentMetadata) {
+  transform(value: any, { type }: ArgumentMetadata) {
     if (type !== 'query' || !value.sort || !value.sort.length) return value;
 
     const parameters = Array.isArray(value.sort) ? value.sort : [value.sort];

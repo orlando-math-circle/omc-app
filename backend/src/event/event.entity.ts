@@ -2,21 +2,18 @@ import {
   BaseEntity,
   Collection,
   Entity,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import moment from 'moment';
 import { getMinutesDiff } from '../app.utils';
 import { Course } from '../course/course.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { Invoice } from '../invoice/invoice.entity';
+import { Project } from '../project/project.entity';
 import { User } from '../user/user.entity';
 import { EventPermissionsDto } from './dtos/event-permissions.dto';
 import { EventRecurrence } from './event-recurrence.entity';
@@ -82,8 +79,11 @@ export class Event extends BaseEntity<Event, 'id'> {
   @OneToMany(() => EventRegistration, (r) => r.event)
   registrations = new Collection<EventRegistration>(this);
 
-  @ManyToOne(() => Course, { nullable: true })
+  @ManyToOne(() => Course, { nullable: true, eager: true })
   course?: Course;
+
+  @ManyToOne(() => Project, { nullable: true, eager: true })
+  project?: Project;
 
   @ManyToOne(() => User)
   author!: User;
@@ -140,5 +140,26 @@ export class Event extends BaseEntity<Event, 'id'> {
    */
   public getDuration() {
     return getMinutesDiff(this.dtstart, this.dtend);
+  }
+
+  /**
+   * Checks if a user fits the permissions of an event.
+   *
+   * @param user User
+   */
+  public hasPermission(user: User) {
+    // TODO: Add default permissions, e.g. adults not being able to register.
+
+    if (this.permissions) {
+      const { age } = this.permissions;
+
+      if (user.age > age.max || user.age < age.min) {
+        return false;
+      }
+
+      // TODO: Add grade
+    }
+
+    return true;
   }
 }

@@ -2,7 +2,7 @@ import { QueryOrderMap } from '@mikro-orm/core';
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class FindAllProjectsDto {
+export class FindAllCoursesDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

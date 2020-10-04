@@ -1,4 +1,5 @@
 import {
+  EntityManager,
   EntityRepository,
   FilterQuery,
   QueryOrder,
@@ -33,6 +34,7 @@ export class EventService {
     private readonly eventRepository: EntityRepository<Event>,
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
+    private readonly em: EntityManager,
   ) {}
 
   /**
@@ -480,9 +482,9 @@ export class EventService {
    * Hydrates a RRule into the individual event instances and attaches
    * them in the instances relationship.
    *
-   * @param recurrence EventRecurrence
-   * @param start Beginning date range
-   * @param end Ending date range
+   * @param recurrence EventRecurrence to hydrate.
+   * @param start Date signifying the beginning of the date range.
+   * @param end Date signifying the end of the date range.
    */
   private async getRecurrenceEvents(
     recurrence: EventRecurrence,
@@ -512,6 +514,8 @@ export class EventService {
 
       if (event) continue;
 
+      // TODO: Split this into an event factory function.
+      // This has to be manually updated whenever the event structure is changed.
       newEvents.push(
         this.eventRepository.create({
           name: events[0].name,
@@ -524,6 +528,7 @@ export class EventService {
             ? moment(date).add(duration, 'minutes').toDate()
             : null,
           author: events[0].author,
+          course: events[0].course,
           recurrence,
         }),
       );
