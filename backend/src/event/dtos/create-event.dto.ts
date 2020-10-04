@@ -18,7 +18,7 @@ export class CreateEventDto {
   readonly description?: string;
 
   @IsBoolean()
-  readonly isOnline = false;
+  readonly isOnline: boolean = false;
 
   @IsOptional()
   @IsString()

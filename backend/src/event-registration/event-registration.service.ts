@@ -152,8 +152,6 @@ export class EventRegistrationService {
         event.fee ||
         (event.course && event.course.paymentType !== PaymentType.FREE);
 
-      console.log(hasFee);
-
       if (hasFee) {
         if (event.course && event.course.paymentType === PaymentType.ALL) {
           hasInvoice = !!event.course.invoices

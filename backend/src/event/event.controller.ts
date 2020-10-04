@@ -28,7 +28,6 @@ export class EventController {
   @Post()
   @UsePipes(new EventValidationPipe())
   create(@Usr() user: User, @Body() createEventDto: CreateEventDto) {
-    console.log(createEventDto);
     return this.eventService.create(createEventDto, user);
   }
 
