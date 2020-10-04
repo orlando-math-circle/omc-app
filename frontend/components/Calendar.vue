@@ -13,6 +13,7 @@
       full-width
       no-title
       elevation="2"
+      @update:picker-date="onPickerChange"
     />
 
     <!-- Regular, Full-Size Calendar -->
@@ -51,7 +52,6 @@
 <script lang="ts">
 import Vue, { PropType, VueConstructor } from 'vue'
 import {
-  isSameDay,
   parseISO,
   startOfWeek,
   endOfWeek,
@@ -99,7 +99,7 @@ export default (Vue as ComponentRefs).extend({
         break
     }
 
-    await this.$store.dispatch('events/fetchEvents', { start, end })
+    await this.$accessor.events.findAll({ start, end })
   },
   data() {
     return {
@@ -132,15 +132,7 @@ export default (Vue as ComponentRefs).extend({
       return this.$store.getters['events/events']
     },
     dates(): string[] {
-      return this.events.map((event) => event.start.substr(0, 10))
-    },
-    dateNative(): Date {
-      return parseISO(this.date)
-    },
-    eventsForDate(): CalendarEvent[] {
-      return this.events.filter((event) =>
-        isSameDay(this.dateNative, parseISO(event.start))
-      )
+      return this.$store.getters['events/dates']
     },
     header(): string {
       if (this.range.start) {
@@ -151,9 +143,6 @@ export default (Vue as ComponentRefs).extend({
     },
   },
   methods: {
-    onPickerChange(date: any) {
-      console.log(date)
-    },
     async onChange({ start, end }: VCalendarChange) {
       this.range.start = start
       this.range.end = end
@@ -165,10 +154,28 @@ export default (Vue as ComponentRefs).extend({
         return
       }
 
-      await this.$store.dispatch('events/fetchEvents', {
+      await this.$accessor.events.findAll({
         start: parseISO(start.date),
         end: parseISO(end.date),
       })
+    },
+    async onPickerChange(dateString: string) {
+      const now = parseISO(dateString)
+
+      await this.$accessor.events.findAll({
+        start: startOfMonth(now),
+        end: endOfMonth(now),
+      })
+    },
+    async refresh() {
+      if (this.type === 'simple') {
+        const now = new Date()
+
+        await this.$accessor.events.findAll({
+          start: startOfMonth(now),
+          end: endOfMonth(now),
+        })
+      }
     },
   },
 })

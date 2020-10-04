@@ -229,32 +229,44 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import moment from 'moment'
+import { Vue, Component } from 'nuxt-property-decorator'
+import { Account } from '~/../backend/src/account/account.entity'
+import { User } from '~/../backend/src/user/user.entity'
 
-export default {
-  async fetch() {
-    this.account = await this.$axios.$get('/account/me')
-  },
-  data() {
+@Component({
+  head() {
     return {
-      account: null,
+      title: 'Account',
     }
   },
-  computed: {
-    user() {
-      return this.$store.state.auth.user
-    },
-    otherUsers() {
-      return this.account.users.filter((user) => user.id !== this.user.id)
-    },
-    birthday() {
-      return moment(this.user.dob).format('dddd, MMMM Do, YYYY')
-    },
-  },
-  head: {
-    title: 'Account',
-  },
+})
+export default class AccountPage extends Vue {
+  get user() {
+    return this.$accessor.auth.user as User
+  }
+
+  get account() {
+    return this.$accessor.auth.account as Account
+  }
+
+  // TODO: This is obnoxious, find a proper type for MikroORM Collections
+  get accountUsers() {
+    return (this.$accessor.auth.account!.users as unknown) as User[]
+  }
+
+  get otherUsers() {
+    return this.accountUsers.filter((user) => user.id !== this.user.id)
+  }
+
+  get birthday() {
+    return moment(this.user.dob).format('dddd, MMMM Do, YYYY')
+  }
+
+  async fetch() {
+    await this.$accessor.auth.getAccount()
+  }
 }
 </script>
 

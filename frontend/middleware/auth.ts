@@ -4,7 +4,7 @@ import { Middleware } from '@nuxt/types'
  * Auth Middleware
  */
 const middleware: Middleware = (ctx) => {
-  const loggedIn = ctx.store.getters['auth/loggedIn']
+  const loggedIn = ctx.app.$accessor.auth.loggedIn
 
   if (!loggedIn) return ctx.redirect('/login')
 }

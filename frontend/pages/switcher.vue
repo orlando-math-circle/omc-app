@@ -39,30 +39,30 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { Vue, Component } from 'nuxt-property-decorator'
+import { User } from '~/../backend/src/user/user.entity'
+
+@Component({
   layout: 'landing',
-  async fetch() {
-    this.account = await this.$axios.$get('/account/me')
-  },
-  data() {
+  head() {
     return {
-      account: null,
+      title: 'Switch User',
     }
   },
-  methods: {
-    async switchUser(user) {
-      try {
-        await this.$store.dispatch('auth/switchUser', user.id)
+})
+export default class SwitcherPage extends Vue {
+  get account() {
+    return this.$accessor.auth.account
+  }
 
-        this.$router.push('/landing')
-      } catch (error) {
-        console.log(error)
-      }
-    },
-  },
-  head: {
-    title: 'Switch User',
-  },
+  async fetch() {
+    await this.$accessor.auth.getAccount()
+  }
+
+  async switchUser(user: User) {
+    await this.$accessor.auth.switchUser(user.id)
+    this.$router.push('/home')
+  }
 }
 </script>

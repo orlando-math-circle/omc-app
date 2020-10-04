@@ -1,12 +1,35 @@
 import { format, parse } from 'date-fns'
 
 /**
+ * Method for quickly obtaining the ordinal suffix of a number
+ * so long as the number isn't negative.
+ *
+ * @see https://stackoverflow.com/questions/13627308/add-st-nd-rd-and-th-ordinal-suffix-to-a-number
+ *
+ * @param i Positive number
+ */
+export const getOrdinal = (i: number) =>
+  ['', 'st', 'nd', 'rd'][(i / 10) % 10 ^ 1 && i % 10] || 'th'
+
+/**
+ * Given an input object, determines if the `isAxiosError`
+ * property is present on Axios-related errors and a response
+ * was not found. This is indicative of some kind of network or
+ * timeout error.
+ *
+ * @param error Axios error.
+ */
+export const isNetworkError = (error: any) =>
+  !!error.isAxiosError && !error.response
+
+/**
  * Returns if the parameter is a Date instance and if
  * the date is created correctly and has a time representation.
  *
  * @param d Object to check.
  */
-export const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime())
+export const isValidDate = (d: any): d is Date =>
+  d instanceof Date && !isNaN(d.getTime())
 
 /**
  * Takes a date string in ISO format and optionally the
@@ -34,6 +57,16 @@ export const roundDate = (seed = new Date(), minutes = 5) => {
   const milliseconds = 1000 * 60 * minutes
 
   return new Date(Math.ceil(seed.getTime() / milliseconds) * milliseconds)
+}
+
+/**
+ * TODO: Write out what this does without rambling.
+ */
+export const toLocalISO = (d: Date | string) => {
+  const date = isValidDate(d) ? d : new Date(d)
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+
+  return localDate.toISOString().substr(0, 16)
 }
 
 /**

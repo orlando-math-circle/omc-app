@@ -37,12 +37,16 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Vue, Component } from 'nuxt-property-decorator'
 
-export default Vue.extend({
+@Component({
   layout: 'landing',
   middleware: 'auth',
+  head: {
+    title: 'Welcome',
+  },
 })
+export default class IndexPage extends Vue {}
 </script>
 
 <style lang="scss" scoped>

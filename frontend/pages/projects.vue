@@ -105,11 +105,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Vue, Component } from 'nuxt-property-decorator'
 
-export default Vue.extend({
-  head: {
-    title: 'Projects',
+@Component({
+  head() {
+    return {
+      title: 'Projects',
+    }
   },
 })
+export default class ProjectsPage extends Vue {}
 </script>

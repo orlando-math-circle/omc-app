@@ -50,33 +50,31 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Vue, Component } from 'nuxt-property-decorator'
 import { format } from 'date-fns'
 
-export default Vue.extend({
-  async fetch() {
-    this.tweets = await this.$axios.$get('/twitter')
-  },
-
-  data() {
+@Component({
+  head() {
     return {
-      tweets: [] as any[],
+      title: 'Home',
     }
   },
-  computed: {
-    nonReplyTweets(): any[] {
-      return this.tweets.filter((tweet: any) => !tweet.in_reply_to_status_id)
-    },
-  },
-  methods: {
-    formatDate(dateString: string) {
-      const date = new Date(dateString)
-
-      return format(date, 'MMMM do, yyyy')
-    },
-  },
-  head: {
-    title: 'Home',
-  },
 })
+export default class HomePage extends Vue {
+  tweets: any[] = []
+
+  async fetch() {
+    this.tweets = await this.$axios.$get('/twitter')
+  }
+
+  get nonReplyTweets() {
+    return this.tweets.filter((tweet: any) => !tweet.in_reply_to_status_id)
+  }
+
+  formatDate(dateString: string) {
+    const date = new Date(dateString)
+
+    return format(date, 'MMMM do, yyyy')
+  }
+}
 </script>

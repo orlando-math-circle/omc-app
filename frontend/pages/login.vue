@@ -69,59 +69,57 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Vue, Component } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
-export default Vue.extend({
-  layout: 'landing',
+@Component({
   components: {
     ValidationObserver,
     ValidationProvider,
   },
-  data() {
-    return {
-      email: '',
-      password: '',
-      showPassword: false,
-      error: null as any,
-      authFailure: false,
-      loading: false,
-      remember: true,
-    }
-  },
-  methods: {
-    async login() {
-      this.authFailure = false
-      this.loading = true
-
-      try {
-        await this.$store.dispatch('auth/login', {
-          email: this.email,
-          password: this.password,
-          remember: this.remember,
-        })
-
-        if (this.$store.state.auth.token.complete) {
-          this.$router.push('/')
-        } else {
-          this.$router.push('/switcher')
-        }
-      } catch (error) {
-        // TODO: Catch other types of errors with fallback message.
-        if (error.response) {
-          if (error.response.status === 401) {
-            this.authFailure = true
-          }
-        }
-      } finally {
-        this.loading = false
-      }
-    },
-  },
+  layout: 'landing',
   head: {
     title: 'Login',
   },
 })
+export default class LoginPage extends Vue {
+  private email = ''
+  private password = ''
+
+  showPassword = false
+  error: Error | null = null
+  authFailure = false
+  loading = false
+  remember = true
+
+  async login() {
+    this.authFailure = false
+    this.loading = true
+
+    try {
+      await this.$accessor.auth.login({
+        email: this.email,
+        password: this.password,
+        remember: this.remember,
+      })
+
+      if (this.$accessor.auth.token.complete) {
+        this.$router.push('/')
+      } else {
+        this.$router.push('/switcher')
+      }
+    } catch (error) {
+      // TODO: Catch other types of errors with fallback message.
+      if (error.response) {
+        if (error.response.status === 401) {
+          this.authFailure = true
+        }
+      }
+    } finally {
+      this.loading = false
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

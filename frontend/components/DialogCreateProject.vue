@@ -2,7 +2,7 @@
   <v-dialog v-model="dialog" max-width="440">
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn text v-bind="attrs" v-on="on">Add Project</v-btn>
+        <v-btn v-bind="attrs" large text v-on="on">Create</v-btn>
       </slot>
     </template>
 
@@ -20,20 +20,32 @@
       <ValidationObserver v-slot="{ passes, passed }" ref="form">
         <v-form @submit.prevent="passes(onSubmit)">
           <v-card-text>
+            <alert-error v-if="error" :error="error" />
+
             <ValidationProvider v-slot="{ errors }" rules="required">
               <v-text-field
                 v-model="dto.name"
                 label="Name"
                 required
                 :error-messages="errors"
+                outlined
               />
             </ValidationProvider>
-            <v-textarea v-model="dto.description" label="Description" />
-            <v-text-field v-model="dto.picture" label="Picture"></v-text-field>
+            <v-textarea
+              v-model="dto.description"
+              label="Description"
+              outlined
+            />
+            <v-text-field v-model="dto.picture" label="Picture" outlined />
           </v-card-text>
 
           <v-card-actions>
-            <v-btn text type="button" :disabled="!passed" :loading="loading"
+            <v-spacer></v-spacer>
+            <v-btn
+              text
+              type="submit"
+              :disabled="!passed"
+              :loading="$store.getters['projects/isLoading']"
               >Create</v-btn
             >
           </v-card-actions>
@@ -53,9 +65,6 @@ export default Vue.extend({
     ValidationObserver,
     ValidationProvider,
   },
-  async fetch() {
-    await this.$store.dispatch('projects/findAll')
-  },
   data() {
     return {
       dialog: false,
@@ -71,13 +80,18 @@ export default Vue.extend({
     projects(): Project[] {
       return this.$store.state.projects.projects
     },
-    loading() {
-      return this.$store.getters['projects/isLoading']
+    error(): Error {
+      return this.$store.state.projects.error
     },
   },
   methods: {
     async onSubmit() {
-      await this.$store.dispatch('projects/create', this.dto)
+      const project = await this.$store.dispatch('projects/create', this.dto)
+
+      if (!this.error) {
+        this.$emit('create:project', project)
+        this.dialog = false
+      }
     },
   },
 })

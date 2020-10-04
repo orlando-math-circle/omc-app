@@ -1,35 +1,67 @@
 import { Context } from '@nuxt/types'
-import { ActionTree } from 'vuex'
+import { actionTree, getAccessorType } from 'nuxt-typed-vuex'
 import { COOKIE_CALENDAR_TYPE, COOKIE_NAME } from '../utils/constants'
+import * as auth from '~/store/auth'
+import * as courses from '~/store/courses'
+import * as events from '~/store/events'
+import * as invoices from '~/store/invoices'
+import * as paypal from '~/store/paypal'
+import * as projects from '~/store/projects'
+import * as registrations from '~/store/registrations'
+import * as users from '~/store/users'
 
-export type BaseState = {}
+export const state = () => ({})
 
-export const actions: ActionTree<BaseState, BaseState> = {
-  /**
-   * Nuxt calls `nuxtServerInit` on the first load or during reload.
-   *
-   * This method is used for rectifying cookies and login state.
-   */
-  async nuxtServerInit({ commit, dispatch }, ctx: Context) {
-    const token = ctx.app.$cookies.get(COOKIE_NAME)
+export const getters = {}
 
-    if (!token) return dispatch('auth/removeTokenCookie')
+export const mutations = {}
 
-    dispatch('auth/setTokenCookie', token)
+/**
+ * Nuxt calls `nuxtServerInit` on the first load or during reload.
+ *
+ * This method is used for rectifying cookies and login state.
+ */
+export const actions = actionTree(
+  { state, getters, mutations },
+  {
+    async nuxtServerInit(_vuexContext, nuxtContext: Context): Promise<void> {
+      const token = nuxtContext.app.$cookies.get(COOKIE_NAME)
 
-    try {
-      await dispatch('auth/getMe')
-    } catch (error) {
-      console.error('Error fetching user', error)
+      if (!token) return this.app.$accessor.auth.removeTokenCookie()
 
-      dispatch('auth/removeTokenCookie')
-    }
+      this.app.$accessor.auth.setTokenCookie(token)
 
-    // Parse calendar type setting.
-    const calendarType = ctx.app.$cookies.get(COOKIE_CALENDAR_TYPE)
+      try {
+        await this.app.$accessor.auth.getMe()
+      } catch (error) {
+        console.error('Error fetching user', error)
 
-    if (calendarType) {
-      commit('auth/SET_SETTINGS', { calendarType })
-    }
+        this.app.$accessor.auth.removeTokenCookie()
+      }
+
+      // Parse calendar type setting.
+      const calendarType = nuxtContext.app.$cookies.get(COOKIE_CALENDAR_TYPE)
+
+      if (calendarType) {
+        this.app.$accessor.auth.setSettings({ calendarType })
+      }
+    },
+  }
+)
+
+export const accessorType = getAccessorType({
+  actions,
+  getters,
+  mutations,
+  state,
+  modules: {
+    auth,
+    courses,
+    events,
+    invoices,
+    paypal,
+    projects,
+    registrations,
+    users,
   },
-}
+})

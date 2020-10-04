@@ -13,8 +13,9 @@ import { Vue, Component } from 'vue-property-decorator'
 
 @Component({
   name: 'landing',
+  middleware: 'guest',
 })
-export default class Landing extends Vue {}
+export default class LandingLayout extends Vue {}
 </script>
 
 <style lang="scss" scoped>

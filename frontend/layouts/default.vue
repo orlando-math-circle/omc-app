@@ -22,7 +22,7 @@
     <v-app-bar flat absolute app class="wave-bar">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
-      <v-toolbar-title class="title" v-text="title" />
+      <v-toolbar-title class="title"> Orlando Math Circle </v-toolbar-title>
 
       <v-spacer />
 
@@ -75,67 +75,59 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Vue, Component } from 'nuxt-property-decorator'
 
-export default Vue.extend({
-  name: 'Default',
+@Component({
   middleware: 'auth',
+})
+export default class DefaultLayout extends Vue {
+  drawer = false
+  fixed = false
+  items = [
+    {
+      icon: 'mdi-home',
+      title: 'Home',
+      to: '/home',
+    },
+    {
+      icon: 'mdi-calendar-star',
+      title: 'Events',
+      to: '/events',
+    },
+    {
+      icon: 'mdi-puzzle',
+      title: 'Projects',
+      to: '/projects',
+    },
+    {
+      icon: 'mdi-account-circle',
+      title: 'Account',
+      to: '/account',
+    },
+  ]
+
+  get isAdmin() {
+    return this.$store.getters['auth/isAdmin']
+  }
+
+  get isDark() {
+    return this.$vuetify.theme.dark
+  }
+
+  set isDark(value: boolean) {
+    this.$vuetify.theme.dark = value
+  }
+
   async fetch() {
     await this.$store.dispatch('auth/getMe')
-  },
-  data() {
-    return {
-      drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: 'mdi-home',
-          title: 'Home',
-          to: '/landing',
-        },
-        {
-          icon: 'mdi-calendar-star',
-          title: 'Events',
-          to: '/events',
-        },
-        {
-          icon: 'mdi-puzzle',
-          title: 'Projects',
-          to: '/projects',
-        },
-        {
-          icon: 'mdi-account-circle',
-          title: 'Account',
-          to: '/account',
-        },
-      ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: 'Orlando Math Circle',
-    }
-  },
-  computed: {
-    isAdmin() {
-      return this.$store.getters['auth/isAdmin']
-    },
-    isDark: {
-      get() {
-        return this.$vuetify.theme.dark
-      },
-      set() {
-        this.$vuetify.theme.dark = !this.$vuetify.theme.dark
-      },
-    },
-  },
-  methods: {
-    logout() {
-      this.$store.dispatch('auth/logout')
+  }
 
-      this.$router.push('/')
-    },
-  },
-})
+  logout() {
+    this.$store.dispatch('auth/logout')
+
+    this.$router.push('/')
+  }
+}
 </script>
 
 <style lang="scss" scoped>

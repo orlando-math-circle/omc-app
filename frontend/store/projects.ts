@@ -1,48 +1,61 @@
-import { ActionTree, GetterTree, MutationTree } from 'vuex'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { CreateProjectDto } from '../../backend/src/project/dto/create-project.dto'
 import { FindAllProjectsDto } from '../../backend/src/project/dto/find-all-projects.dto'
 import { Project } from '../../backend/src/project/project.entity'
-import { StateStatus } from '../interfaces/state-status.enum'
+import { State, StatePayload } from '../interfaces/state.interface'
 
 export const state = () => ({
-  status: StateStatus.UNLOADED,
+  status: State.UNLOADED,
+  error: null as Error | null,
   projects: [] as Project[],
   total: 0,
 })
 
-export type ProjectState = ReturnType<typeof state>
+export const getters = getterTree(state, {
+  isLoading: (state) => state.status === State.BUSY,
+})
 
-export const getters: GetterTree<ProjectState, ProjectState> = {
-  isLoading: (state) => state.status === StateStatus.BUSY,
-}
-
-export const mutations: MutationTree<ProjectState> = {
-  SET_STATUS: (state, status: StateStatus) => (state.status = status),
-  SET_PROJECTS: (state, projects: Project[]) => (state.projects = projects),
-  SET_TOTAL: (state, number: number) => (state.total = number),
-}
-
-export const actions: ActionTree<ProjectState, ProjectState> = {
-  async create({ commit }, createProjectDto: CreateProjectDto) {
-    commit('SET_STATUS', StateStatus.BUSY)
-
-    const project = await this.$axios.$post('/project', createProjectDto)
-
-    commit('SET_STATUS', StateStatus.WAITING)
-
-    return project
+export const mutations = mutationTree(state, {
+  setStatus(state, { status, error }: StatePayload) {
+    state.status = status
+    state.error = error || null
   },
-  async findAll({ commit }, findAllProjectsDto: FindAllProjectsDto) {
-    commit('SET_STATUS', StateStatus.BUSY)
-
-    const [projects, count] = await this.$axios.$get('/project', {
-      params: findAllProjectsDto,
-    })
-
-    commit('SET_PROJECTS', projects)
-    commit('SET_TOTAL', count)
-    commit('SET_STATUS', StateStatus.WAITING)
-
-    return [projects, count]
+  setProjects(state, projects: Project[]) {
+    state.projects = projects
   },
-}
+  setTotal(state, total: number) {
+    state.total = total
+  },
+})
+
+export const actions = actionTree(
+  { state, mutations },
+  {
+    async create({ commit, state }, createProjectDto: CreateProjectDto) {
+      try {
+        commit('setStatus', { status: State.BUSY })
+        const project = await this.$axios.$post('/project', createProjectDto)
+
+        commit('setProjects', [...state.projects, project])
+        commit('setStatus', { status: State.WAITING })
+
+        return project
+      } catch (error) {
+        commit('setStatus', { status: State.ERROR, error })
+      }
+    },
+    async findAll({ commit }, findAllProjectsDto: FindAllProjectsDto) {
+      commit('setStatus', { status: State.BUSY })
+
+      const [projects, count] = await this.$axios.$get('/project', {
+        params: findAllProjectsDto,
+      })
+
+      commit('setProjects', projects)
+      commit('setTotal', count)
+      commit('setStatus', { status: State.WAITING })
+
+      return [projects, count]
+    },
+  }
+)

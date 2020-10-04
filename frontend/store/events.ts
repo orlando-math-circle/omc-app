@@ -1,58 +1,73 @@
-import { ActionTree, GetterTree, MutationTree } from 'vuex'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { CreateEventDto } from '../../backend/src/event/dtos/create-event.dto'
 import { Event } from '../../backend/src/event/event.entity'
-import { CreateEventDto } from '../interfaces/events/create-event.interface'
-import { GetEventsDto } from '../interfaces/events/get-events.interface'
-import { StateStatus } from '../interfaces/state-status.enum'
 import { CalendarEvent } from '../interfaces/calendar-event.interface'
+import { GetEventsDto } from '../interfaces/events/get-events.interface'
+import { State } from '../interfaces/state.interface'
+import { toLocalISO } from '../utils/utilities'
 
 export const state = () => ({
-  status: StateStatus.UNLOADED,
+  status: State.UNLOADED,
   error: null as Error | null,
   events: [] as Event[],
+  event: null as Event | null,
 })
 
-export type EventState = ReturnType<typeof state>
-
-export const getters: GetterTree<EventState, EventState> = {
-  isLoading: (state) => state.status === StateStatus.BUSY,
-  events: (state): CalendarEvent[] =>
-    state.events.map((e) => {
-      const start = new Date(e.dtstart)
-      const end = e.dtend ? new Date(e.dtend) : undefined
-
-      return Object.assign(e, {
-        start: new Date(start.getTime() - start.getTimezoneOffset() * 60000)
-          .toISOString()
-          .substr(0, 16),
-        end: end
-          ? new Date(end.getTime() - end.getTimezoneOffset() * 60000)
-              .toISOString()
-              .substr(0, 16)
-          : undefined,
+export const getters = getterTree(state, {
+  isLoading: (state) => state.status === State.BUSY,
+  calendarEvents: (state): CalendarEvent[] =>
+    state.events.map((event) =>
+      Object.assign(event, {
+        start: toLocalISO(event.dtstart),
+        end: event.dtend ? toLocalISO(event.dtend) : undefined,
       })
-    }),
-}
+    ),
+  dates: (_state, getters): string[] =>
+    getters.calendarEvents.map((e: CalendarEvent) => e.start.substr(0, 10)),
+})
 
-export const mutations: MutationTree<EventState> = {
-  SET_STATUS: (state, status: StateStatus) => (state.status = status),
-  SET_ERROR: (state, error: Error | null) => (state.error = error),
-  SET_EVENTS: (state, events: Event[]) => (state.events = events),
-}
-
-export const actions: ActionTree<EventState, EventState> = {
-  async fetchEvents({ commit }, { start, end }: GetEventsDto) {
-    commit('SET_STATUS', StateStatus.BUSY)
-
-    const events = await this.$axios.$get('/event', { params: { start, end } })
-
-    commit('SET_EVENTS', events)
-    commit('SET_STATUS', StateStatus.WAITING)
+export const mutations = mutationTree(state, {
+  setStatus(state, status: State) {
+    state.status = status
   },
-  async createEvent({ commit }, createEventDto: CreateEventDto) {
-    commit('SET_STATUS', StateStatus.BUSY)
-
-    await this.$axios.$post('/event', createEventDto)
-
-    commit('SET_STATUS', StateStatus.WAITING)
+  setError(state, error: Error) {
+    state.error = error
   },
-}
+  setEvents(state, events: Event[]) {
+    state.events = events
+  },
+  setEvent(state, event: Event) {
+    state.event = event
+  },
+})
+
+export const actions = actionTree(
+  { state, getters, mutations },
+  {
+    async create({ commit }, createEventDto: CreateEventDto) {
+      commit('setStatus', State.BUSY)
+
+      await this.$axios.$post('/event', createEventDto)
+
+      commit('setStatus', State.WAITING)
+    },
+    async findAll({ commit }, { start, end }: GetEventsDto) {
+      commit('setStatus', State.BUSY)
+
+      const events = await this.$axios.$get('/event', {
+        params: { start, end },
+      })
+
+      commit('setEvents', events)
+      commit('setStatus', State.WAITING)
+    },
+    async findOne({ commit }, eventId: number | string) {
+      commit('setStatus', State.BUSY)
+
+      const event = await this.$axios.$get(`/event/${eventId}`)
+
+      commit('setEvent', event)
+      commit('setStatus', State.WAITING)
+    },
+  }
+)

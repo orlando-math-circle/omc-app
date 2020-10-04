@@ -99,15 +99,14 @@
   </div>
 </template>
 
-<script>
-export default {
+<script land="ts">
+import { Vue, Component } from 'nuxt-property-decorator'
+
+@Component({
   layout: 'landing',
-  auth: 'guest',
-  data() {
-    return {
-      error: 'Please have a parent or guardian register for you',
-    }
-  },
+})
+export default class RegisterPage extends Vue {
+  error = 'Please have a parent or guardian register for you'
 }
 </script>
 

@@ -1,37 +1,58 @@
-import { ActionTree, MutationTree } from 'vuex'
+import { getterTree, mutationTree, actionTree } from 'nuxt-typed-vuex'
 import { Course } from '../../backend/src/course/course.entity'
-import { CreateCourseDto } from '../../backend/src/course/dtos/create-course.dto'
-import { StateStatus } from '../interfaces/state-status.enum'
+import { CreateCourseDto } from '../../backend/src/course/dto/create-course.dto'
+import { FindAllCoursesDto } from '../../backend/src/course/dto/find-all-courses.dto'
+import { State, StatePayload } from '../interfaces/state.interface'
 
 export const state = () => ({
-  status: StateStatus.UNLOADED,
-  course: null as Course | null,
+  status: State.UNLOADED,
+  error: null as Error | null,
   courses: [] as Course[],
+  total: 0,
 })
 
-export type CourseState = ReturnType<typeof state>
+export const getters = getterTree(state, {
+  isLoading: (state) => state.status === State.BUSY,
+})
 
-export const mutations: MutationTree<CourseState> = {
-  SET_STATUS: (state, status: StateStatus) => (state.status = status),
-  SET_COURE: (state, course: Course) => (state.course = course),
-  SET_COURSES: (state, courses: Course[]) => (state.courses = courses),
-}
-
-export const actions: ActionTree<CourseState, CourseState> = {
-  async createCourse({ commit }, dto: CreateCourseDto) {
-    commit('SET_STATUS', StateStatus.BUSY)
-
-    const course = await this.$axios.$post('/course', dto)
-
-    commit('SET_EVENT', course)
-    commit('SET_STATUS', StateStatus.WAITING)
+export const mutations = mutationTree(state, {
+  setStatus(state, { status, error }: StatePayload) {
+    state.status = status
+    state.error = error || null
   },
-  async getCourses({ commit }) {
-    commit('SET_STATUS', StateStatus.BUSY)
-
-    const courses = await this.$axios.$get('/course')
-
-    commit('SET_EVENTS', courses)
-    commit('SET_STATUS', StateStatus.WAITING)
+  setCourses(state, courses: Course[]) {
+    state.courses = courses
   },
-}
+  setTotal(state, total: number) {
+    state.total = total
+  },
+})
+
+export const actions = actionTree(
+  { state, getters, mutations },
+  {
+    async create({ commit, state }, createCourseDto: CreateCourseDto) {
+      try {
+        commit('setStatus', { status: State.BUSY })
+        const course = await this.$axios.$post('/course', createCourseDto)
+
+        commit('setCourses', [...state.courses, course])
+        commit('setStatus', { status: State.WAITING })
+
+        return course
+      } catch (error) {
+        commit('setStatus', { status: State.ERROR, error })
+      }
+    },
+    async findAll({ commit }, dto: FindAllCoursesDto) {
+      commit('setStatus', { status: State.BUSY })
+      const [courses, total] = await this.$axios.$get('/course', {
+        params: dto,
+      })
+
+      commit('setCourses', courses)
+      commit('setTotal', total)
+      commit('setStatus', { status: State.WAITING })
+    },
+  }
+)

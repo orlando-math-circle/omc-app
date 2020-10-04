@@ -200,20 +200,56 @@
 
               <v-divider></v-divider>
 
+              <!-- Project Management -->
               <v-list-item>
+                <v-list-item-avatar>
+                  <v-icon>mdi-puzzle</v-icon>
+                </v-list-item-avatar>
+
+                <v-list-item-content>
+                  <v-row>
+                    <v-col>
+                      <auto-complete-project v-model="project.id" />
+                    </v-col>
+                    <v-col cols="auto">
+                      <dialog-select-project v-model="project.id" />
+                    </v-col>
+                    <v-col cols="auto">
+                      <dialog-create-project
+                        @create:project="onProjectCreated"
+                      />
+                    </v-col>
+                  </v-row>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-divider></v-divider>
+
+              <v-list-item v-if="project.id">
                 <v-list-item-avatar>
                   <v-icon>mdi-school-outline</v-icon>
                 </v-list-item-avatar>
 
                 <v-list-item-content>
-                  <v-row no-gutters>
+                  <v-row>
+                    <v-col>
+                      <auto-complete-course v-model="course.id" />
+                    </v-col>
+
                     <v-col cols="auto">
-                      <dialog-select-project v-model="project.id" />
-                      <dialog-create-project />
+                      <dialog-select-course v-model="course.id" />
+                    </v-col>
+
+                    <v-col cols="auto">
+                      <dialog-create-course
+                        :project="project.id"
+                        @create:course="onCourseCreated"
+                      />
                     </v-col>
                   </v-row>
                 </v-list-item-content>
               </v-list-item>
+              <v-divider></v-divider>
             </v-list>
           </v-card-text>
 
@@ -233,10 +269,12 @@ import Vue, { VueConstructor } from 'vue'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 import { format } from 'date-fns'
 import { Options } from 'rrule'
+import { CreateEventDto } from '../../backend/src/event/dtos/create-event.dto'
+import { Project } from '../../backend/src/project/project.entity'
 import RecurrenceDialog from './events/RecurrenceDialog.vue'
-import { CreateEventDto } from '~/interfaces/events/create-event.interface'
 import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
+import { Course } from '~/../backend/src/course/course.entity'
 
 export type RRuleOptions = Partial<Options>
 
@@ -306,6 +344,10 @@ export default (Vue as ComponentRefs).extend({
       project: {
         id: 0,
       },
+      course: {
+        id: 0,
+      },
+      loading: false,
     }
   },
   beforeMount() {
@@ -376,19 +418,32 @@ export default (Vue as ComponentRefs).extend({
           ? undefined
           : toDate(this.dates.end.date, this.times.end.time),
         rrule: this.rrule || undefined,
+        isOnline: false, // TODO: Temporary
+        project: this.project?.id,
+        course: this.course?.id,
       }
 
       try {
-        await this.$store.dispatch('events/createEvent', createEventDto)
+        this.loading = true
+        await this.$accessor.events.create(createEventDto)
 
         this.$emit('created')
         this.close()
       } catch (error) {
         console.error(error)
+      } finally {
+        this.loading = false
       }
     },
     onProjectSelect(id: number) {
       this.project.id = id
+    },
+    onProjectCreated(project: Project) {
+      console.log('PROJECT CREATED')
+      this.project.id = project.id
+    },
+    onCourseCreated(course: Course) {
+      this.course.id = course.id
     },
   },
 })

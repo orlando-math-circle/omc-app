@@ -69,7 +69,11 @@ const config: NuxtConfig = {
   /*
    ** Nuxt.js dev-modules
    */
-  buildModules: ['@nuxt/typescript-build', '@nuxtjs/color-mode'],
+  buildModules: [
+    '@nuxt/typescript-build',
+    '@nuxtjs/color-mode',
+    'nuxt-typed-vuex',
+  ],
   /*
    ** Nuxt.js modules
    */
