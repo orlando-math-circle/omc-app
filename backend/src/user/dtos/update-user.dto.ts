@@ -1,5 +1,6 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Roles } from '../../app.roles';
+import { Grades } from '../enums/grades.enum';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -9,6 +10,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   last?: string;
+
+  @IsOptional()
+  @IsEnum(Grades)
+  gradeSet?: Grades;
 
   @IsOptional()
   @IsString()

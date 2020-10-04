@@ -14,6 +14,7 @@ import { AuthModule } from '../src/auth/auth.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { AccessGuard } from '../src/auth/guards/access-control.guard';
+import { CourseModule } from '../src/course/course.module';
 import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
@@ -27,7 +28,7 @@ const createAccountDto: CreateAccountDto = {
   last: 'Doe',
   email: 'jane@doe.com',
   password: 'apple',
-  dob: new Date(),
+  dob: new Date(Date.UTC(1995, 0, 1)),
 };
 
 const contextMock = {
@@ -67,6 +68,7 @@ describe('Auth', () => {
         AccountModule,
         UserModule,
         AuthModule,
+        CourseModule,
       ],
     }).compile();
 
@@ -233,7 +235,7 @@ describe('Auth', () => {
       const dto: CreateUserDto = {
         first: 'Jacob',
         last: 'Doe',
-        dob: new Date(),
+        dob: new Date(Date.UTC(1995, 0, 1)),
       };
 
       const resp = await request(app.getHttpServer())

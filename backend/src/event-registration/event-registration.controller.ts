@@ -1,8 +1,11 @@
-import { Controller, Param, Post } from '@nestjs/common';
-import { UserAuth } from '../auth/decorators/auth.decorator';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Account } from '../account/account.entity';
+import { Acc } from '../auth/decorators/account.decorator';
+import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
-import { FindEventDto } from '../event/dtos/find-one-event.dto';
 import { User } from '../user/user.entity';
+import { CreateOrderDto } from './dtos/create-order.dto';
+import { CreateRegistrationDto } from './dtos/create-registration.dto';
 import { FindEventWithInvoiceDto } from './dtos/find-event-with-invoice.dto';
 import { EventRegistrationService } from './event-registration.service';
 
@@ -11,26 +14,34 @@ export class EventRegistrationController {
   constructor(private readonly registrationService: EventRegistrationService) {}
 
   @UserAuth('event-registration', 'create:own')
-  @Post(':eventId/:invoiceId')
+  @Post()
   create(
-    @Param() { eventId, invoiceId }: FindEventWithInvoiceDto,
+    @Body() { eventId, users }: CreateRegistrationDto,
     @Usr() user: User,
+    @Acc() account: Account,
   ) {
-    return this.registrationService.create(eventId, invoiceId, user);
+    return this.registrationService.create(eventId, users, user, account);
+  }
+
+  @AccountAuth()
+  @Get('/status/:eventId')
+  getStatus(@Param('eventId') eventId: number, @Acc() account: Account) {
+    return this.registrationService.getRegistrationStatus(eventId, account);
   }
 
   @UserAuth('event-registration', 'create:own')
   @Post('/order/create/:id')
-  createOrder(@Param() { id }: FindEventDto, @Usr() user: User) {
-    return this.registrationService.createOrder(id, user);
+  createOrder(
+    @Param('id') id: number,
+    @Acc() account: Account,
+    @Body() { users }: CreateOrderDto,
+  ) {
+    return this.registrationService.createOrder(id, account, users);
   }
 
-  @UserAuth('event-registration', 'create:own')
+  // @UserAuth('event-registration', 'create:own')
   @Post('/order/capture/:eventId/:invoiceId')
-  captureOrder(
-    @Param() { eventId, invoiceId }: FindEventWithInvoiceDto,
-    @Usr() user: User,
-  ) {
-    return this.registrationService.captureOrder(invoiceId, eventId, user);
+  captureOrder(@Param() { eventId, invoiceId }: FindEventWithInvoiceDto) {
+    return this.registrationService.captureOrder(invoiceId, eventId);
   }
 }

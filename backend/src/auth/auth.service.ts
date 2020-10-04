@@ -102,16 +102,23 @@ export class AuthService {
     }
 
     if (payload.uid) {
-      req.usr = await this.userService.findOne(payload.uid, true);
+      req.usr = await this.userService.findOne(payload.uid, [
+        'account',
+        'account.primaryUser',
+        'account.users',
+      ]);
 
-      if (!req.usr) throw new UnauthorizedException('USR MISSING');
+      if (!req.usr) throw new UnauthorizedException('User missing');
       if (!req.usr.account) throw new InternalServerErrorException();
 
       req.account = req.usr.account;
     } else if (payload.aid) {
-      req.account = await this.accountService.findOne(payload.aid, true);
+      req.account = await this.accountService.findOne(payload.aid, [
+        'primaryUser',
+        'users',
+      ]);
 
-      if (!req.account) throw new UnauthorizedException('ACC MISSING');
+      if (!req.account) throw new UnauthorizedException('Account missing');
     }
 
     return `${req.account.logoutHash}${this.config.get('SECRET')}`;
@@ -171,7 +178,7 @@ export class AuthService {
     if (!payload || !('email' in payload))
       throw new BadRequestException('Malformed Token');
 
-    const user = await this.userService.findOneOrFail(payload.email);
+    const user = await this.userService.findOneOrFail({ email: payload.email });
 
     if (user.emailVerified) throw new GoneException();
 

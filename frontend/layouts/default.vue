@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-app dark class="wave">
     <v-navigation-drawer v-model="drawer" fixed temporary app>
       <v-list>
         <v-list-item
@@ -19,10 +19,10 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar flat absolute app>
+    <v-app-bar flat absolute app class="wave-bar">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
-      <v-toolbar-title class="title" v-text="title" />
+      <v-toolbar-title class="title"> Orlando Math Circle </v-toolbar-title>
 
       <v-spacer />
 
@@ -34,12 +34,18 @@
         </template>
 
         <v-list>
-          <v-list-item @click="$auth.logout()">
+          <v-list-item @click="logout">
             <v-list-item-title>Logout</v-list-item-title>
           </v-list-item>
 
           <v-list-item v-if="isAdmin" link to="/admin">
             <v-list-item-title>Admin Panel</v-list-item-title>
+          </v-list-item>
+
+          <v-divider></v-divider>
+
+          <v-list-item @click="$router.push('/switcher')">
+            <v-list-item-title>Switch User</v-list-item-title>
           </v-list-item>
 
           <v-list-item @click="isDark = !isDark">
@@ -51,8 +57,8 @@
       </v-menu>
     </v-app-bar>
 
-    <v-main>
-      <v-container class="top-wave">
+    <v-main app>
+      <v-container>
         <div class="wave-after">
           <nuxt />
         </div>
@@ -68,68 +74,99 @@
   </v-app>
 </template>
 
-<script>
-export default {
-  name: 'Default',
+<script lang="ts">
+import { Vue, Component } from 'nuxt-property-decorator'
+
+@Component({
   middleware: 'auth',
-  data() {
-    return {
-      drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: 'mdi-home',
-          title: 'Home',
-          to: '/landing',
-        },
-        {
-          icon: 'mdi-calendar-star',
-          title: 'Events',
-          to: '/events',
-        },
-        {
-          icon: 'mdi-puzzle',
-          title: 'Projects',
-          to: '/projects',
-        },
-        {
-          icon: 'mdi-account-circle',
-          title: 'Account',
-          to: '/account',
-        },
-      ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: 'Orlando Math Circle',
-    }
-  },
-  computed: {
-    isAdmin() {
-      return this.$auth.loggedIn
-        ? this.$auth.user.roles.includes('admin')
-        : false
+})
+export default class DefaultLayout extends Vue {
+  drawer = false
+  fixed = false
+  items = [
+    {
+      icon: 'mdi-home',
+      title: 'Home',
+      to: '/home',
     },
-    isDark: {
-      get() {
-        return this.$vuetify.theme.isDark
-      },
-      set() {
-        this.$vuetify.theme.isDark = !this.$vuetify.theme.isDark
-      },
+    {
+      icon: 'mdi-calendar-star',
+      title: 'Events',
+      to: '/events',
     },
-  },
+    {
+      icon: 'mdi-puzzle',
+      title: 'Projects',
+      to: '/projects',
+    },
+    {
+      icon: 'mdi-account-circle',
+      title: 'Account',
+      to: '/account',
+    },
+  ]
+
+  get isAdmin() {
+    return this.$store.getters['auth/isAdmin']
+  }
+
+  get isDark() {
+    return this.$vuetify.theme.dark
+  }
+
+  set isDark(value: boolean) {
+    this.$vuetify.theme.dark = value
+  }
+
+  async fetch() {
+    await this.$store.dispatch('auth/getMe')
+  }
+
+  logout() {
+    this.$store.dispatch('auth/logout')
+
+    this.$router.push('/')
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+.page-enter-active,
+.page-leave-active {
+  transition-property: opacity;
+  transition-timing-function: ease-in-out;
+  transition-duration: 250ms;
+}
+.page-enter,
+.page-leave-to {
+  opacity: 0;
+}
+
 .title {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   width: 100%;
   text-align: center;
   font-size: 1.5em;
   font-weight: 700;
+}
+
+.wave {
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: block;
+    height: 70vw;
+    background-size: cover;
+    background-image: url('~assets/images/welcome-wave.svg');
+  }
+
+  &-bar {
+    background-color: transparent !important;
+  }
 }
 
 .top-wave {

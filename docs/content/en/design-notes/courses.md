@@ -1,6 +1,6 @@
 ---
 title: Courses
-description: Developer stream of though for implementing event groupings.
+description: Developer stream of thought for implementing event groupings.
 category: Design Notes
 position: 7
 ---

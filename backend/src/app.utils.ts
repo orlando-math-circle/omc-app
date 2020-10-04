@@ -28,8 +28,18 @@ export const isNumber = (fn: any): fn is number => typeof fn === 'number';
 export const isString = (fn: any): fn is string => typeof fn === 'string';
 
 /**
- * Moment Library Utilities
+ * Determines if two single-dimension arrays of primities are equal.
  */
+export const isEqual = <T extends string | number | boolean | null>(
+  a: T[],
+  b: T[],
+) => a.length === b.length && a.every((i) => b.includes(i));
+
+/**
+ * Moment Library & Date Utilities
+ */
+
+export const birthdayToAge = (date: Date) => moment().diff(date, 'years');
 
 export const isSameDay = (dt1: Date, dt2: Date) =>
   moment(dt1).isSame(dt2, 'day');
@@ -51,3 +61,15 @@ export const getMinDate = (...dates: Date[]) =>
 
 export const subDays = (date: Date, days = 1) =>
   moment(date).subtract(days, 'day').toDate();
+
+export const getYearsDiff = (start: Date, end: Date) => {
+  let retval = 0;
+  const pivot = new Date(start.getTime());
+
+  while (pivot < end) {
+    pivot.setFullYear(pivot.getFullYear() + 1);
+    retval++;
+  }
+
+  return retval;
+};

@@ -14,6 +14,7 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
 import { UpdateUserDto } from '../src/user/dtos/update-user.dto';
+import { Grades } from '../src/user/enums/grades.enum';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
@@ -31,17 +32,19 @@ describe('Users', () => {
   const createAccountDto: CreateAccountDto = {
     first: 'Jane',
     last: 'Doe',
+    grade: Grades.GRADUATED,
     email: 'jane@doe.com',
     password: 'apple',
-    dob: new Date(),
+    dob: new Date(Date.UTC(1995, 0, 1)),
   };
 
   const secondAccountDto: CreateAccountDto = {
     first: 'Jack',
     last: 'Doe',
+    grade: Grades.GRADUATED,
     email: 'jack@doe.com',
     password: 'banana',
-    dob: new Date(),
+    dob: new Date(Date.UTC(1995, 0, 1)),
   };
 
   beforeAll(async () => {
@@ -115,7 +118,7 @@ describe('Users', () => {
       const dto: CreateUserDto = {
         first: 'First',
         last: 'Last',
-        dob: new Date(),
+        dob: new Date(Date.UTC(1995, 0, 1)),
       };
 
       await request(app.getHttpServer())

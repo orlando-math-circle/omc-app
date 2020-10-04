@@ -1,36 +1,52 @@
 <template>
   <v-container fluid fill-height>
-    <v-row align="center" justify="center">
-      <v-col cols="auto">
-        <v-img
-          v-if="$vuetify.theme.isDark"
-          class="logo"
-          :src="require(`@/assets/images/logo_dark.png`)"
-        />
-        <v-img
-          v-else
-          class="logo"
-          :src="require(`@/assets/images/logo_white.png`)"
-        />
+    <v-row justify="center">
+      <v-col cols="12">
+        <v-row>
+          <v-col align="center">
+            <v-img
+              v-if="$vuetify.theme.isDark"
+              class="logo"
+              :src="require(`@/assets/images/logo_dark.png`)"
+            />
+            <v-img
+              v-else
+              class="logo"
+              :src="require(`@/assets/images/logo_white.png`)"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col class="mx-5">
+            <div class="wave"></div>
+            <v-btn block color="primary" to="/login" class="mb-4">
+              Log in
+            </v-btn>
+            <v-btn block outlined to="/register"> Sign up </v-btn>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
 
-    <v-row align="stretch" justify="end">
-      <v-col justify="end">
-        <div class="wave"></div>
-        <v-btn block color="secondary" to="/login" class="mb-4"> Log in </v-btn>
-        <v-btn block outlined to="/register"> Sign up </v-btn>
+    <!-- <v-row justify="end" align="end" align-self="end">
+      <v-col>
+
       </v-col>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { Vue, Component } from 'nuxt-property-decorator'
+
+@Component({
   layout: 'landing',
   middleware: 'auth',
-  auth: 'guest',
-}
+  head: {
+    title: 'Welcome',
+  },
+})
+export default class IndexPage extends Vue {}
 </script>
 
 <style lang="scss" scoped>
@@ -38,6 +54,7 @@ export default {
   height: 100%;
   max-width: 208px;
   max-height: 208px;
+  margin: 30% 0 50% 0;
 }
 
 @keyframes wave {

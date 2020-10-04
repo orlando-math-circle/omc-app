@@ -5,10 +5,13 @@ import MikroORMConfig from '../mikro-orm.config';
 import { AccountModule } from './account/account.module';
 import ConfigSchema from './app.config';
 import { AuthModule } from './auth/auth.module';
+import { CourseModule } from './course/course.module';
 import { EmailModule } from './email/email.module';
 import { EventRegistrationModule } from './event-registration/event-registration.module';
 import { EventModule } from './event/event.module';
 import { PayPalModule } from './paypal/paypal.module';
+import { ProjectModule } from './project/project.module';
+import { TwitterModule } from './twitter/twitter.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -26,6 +29,9 @@ import { UserModule } from './user/user.module';
     EventModule,
     EventRegistrationModule,
     PayPalModule,
+    CourseModule,
+    ProjectModule,
+    TwitterModule,
   ],
 })
 export class AppModule {}

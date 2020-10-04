@@ -23,6 +23,7 @@ export const PAYPAL_MAX_RETRIES = 3;
  */
 
 export const BCRYPT_ROUNDS = 12;
+export const ADULT_AGE = 18;
 
 /**
  * Injection Keys

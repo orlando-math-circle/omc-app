@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsDate,
   IsOptional,
   IsString,
@@ -15,6 +16,13 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   readonly description?: string;
+
+  @IsBoolean()
+  readonly isOnline: boolean = false;
+
+  @IsOptional()
+  @IsString()
+  readonly location?: string;
 
   @IsOptional()
   @IsString()
@@ -47,4 +55,20 @@ export class CreateEventDto {
   @Type(() => EventRecurrenceDto)
   @ValidateNested()
   readonly rrule?: EventRecurrenceDto;
+
+  /**
+   * Course
+   */
+
+  @IsOptional()
+  @Type(() => Number)
+  readonly course?: number;
+
+  /**
+   * Project
+   */
+
+  @IsOptional()
+  @Type(() => Number)
+  readonly project?: number;
 }

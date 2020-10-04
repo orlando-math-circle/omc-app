@@ -1,26 +1,26 @@
-import { ActionTree, GetterTree, MutationTree } from 'vuex'
-import { StateStatus } from '../interfaces/state-status.enum'
+import { actionTree } from 'nuxt-typed-vuex'
+import { Invoice } from '../../backend/src/invoice/invoice.entity'
 
-export const state = () => ({
-  status: StateStatus.UNLOADED,
-  error: null as Error | null,
-})
+export const state = () => ({})
 
-export type PayPalState = ReturnType<typeof state>
-
-export const getters: GetterTree<PayPalState, PayPalState> = {}
-
-export const mutations: MutationTree<PayPalState> = {
-  SET_STATUS: (state, status: StateStatus) => (state.status = status),
-  SET_ERROR: (state, error: Error | null) => (state.error = error),
-}
-
-export const actions: ActionTree<PayPalState, PayPalState> = {
-  createOrder() {
-    return this.$axios.$post('/paypal/orders/create')
-  },
-  captureOrder(_ctx, { id }) {
-    console.log(id)
-    return this.$axios.$post(`/paypal/orders/capture/${id}`)
-  },
-}
+export const actions = actionTree(
+  { state },
+  {
+    create(
+      _actionTree,
+      { eventId, users }: { eventId: number; users: number[] }
+    ) {
+      return this.$axios.$post(`/registration/order/create/${eventId}`, {
+        users,
+      })
+    },
+    capture(
+      _actionTree,
+      { eventId, orderId }: { eventId: number; orderId: number }
+    ) {
+      return this.$axios.$post<Invoice[]>(
+        `/registration/order/capture/${eventId}/${orderId}`
+      )
+    },
+  }
+)

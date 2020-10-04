@@ -8,6 +8,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import qs from 'querystring';
 import { PAYPAL_ENV_TOKEN, PAYPAL_MAX_RETRIES } from '../app.constants';
 import { OrderDetails } from './interfaces/orders/order-details.interface';
+import { PurchaseUnitRequest } from './interfaces/orders/purchase-unit.interface';
 import { CreateOrderRequest } from './interfaces/orders/requests/create-order.interface';
 import { PayPalEnvironment } from './paypal-environment.class';
 import { PayPalTokenLoader } from './paypal-token-loader.class';
@@ -45,18 +46,10 @@ export class PayPalService {
    * @param cost Cost of the order, e.g. '15.75'.
    * @param customId ID associated with the purchase unit.
    */
-  public async createOrder(cost: string, customId: string) {
+  public async createOrder(purchaseUnits: PurchaseUnitRequest[]) {
     const order: CreateOrderRequest = {
       intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: 'USD',
-            value: cost,
-          },
-          custom_id: customId,
-        },
-      ],
+      purchase_units: purchaseUnits,
     };
 
     const resp = await this.axios.post('/v2/checkout/orders', order);
@@ -100,10 +93,7 @@ export class PayPalService {
     order: OrderDetails,
     status: OrderDetails['status'],
     value: string,
-    customId?: string,
   ) {
-    console.log(order);
-
     if (order.intent !== 'CAPTURE') {
       throw new BadRequestException('Order intent mismatch');
     }
@@ -112,20 +102,10 @@ export class PayPalService {
       throw new BadRequestException('Order status mismatch');
     }
 
-    // For now, this is hardcoded. If this were changed,
-    // the total cost may need to be calculated some other way.
-    if (order.purchase_units.length !== 1) {
-      throw new BadRequestException('Purchase unit size mismatch');
-    }
-
-    const unit = order.purchase_units[0];
-
-    if (customId && unit.custom_id !== customId) {
-      throw new BadRequestException('CustomId mismatch');
-    }
-
-    if (unit.amount.value !== value) {
-      throw new BadRequestException('Order cost mismatch');
+    for (const purchase_unit of order.purchase_units) {
+      if (purchase_unit.amount.value !== value) {
+        throw new BadRequestException('Order cost mismatch');
+      }
     }
   }
 

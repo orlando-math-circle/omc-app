@@ -18,7 +18,7 @@ export class EventRegistration extends BaseEntity<EventRegistration, 'id'> {
    * Relationships
    */
 
-  @ManyToOne(() => Event)
+  @ManyToOne(() => Event, { eager: false })
   event!: Event;
 
   @ManyToOne(() => User)

@@ -1,4 +1,5 @@
 import {
+  EntityManager,
   EntityRepository,
   FilterQuery,
   QueryOrder,
@@ -14,9 +15,9 @@ import {
   isAfterDay,
   isBeforeDay,
   isSameDay,
-  subDays,
-  PopulateFail,
   Populate,
+  PopulateFail,
+  subDays,
 } from '../app.utils';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
@@ -33,6 +34,7 @@ export class EventService {
     private readonly eventRepository: EntityRepository<Event>,
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
+    private readonly em: EntityManager,
   ) {}
 
   /**
@@ -106,6 +108,14 @@ export class EventService {
     return this.eventRepository.findOneOrFail(where, populate, orderBy);
   }
 
+  async populate(
+    event: Event,
+    populate: Populate<Event>,
+    where: FilterQuery<Event>,
+  ) {
+    return this.eventRepository.populate(event, populate, where);
+  }
+
   /**
    * Retrieves all events within a date range inclusively. This method
    * will hydrate any events that do not yet exist in this range for
@@ -115,11 +125,14 @@ export class EventService {
    * @param end End of the range
    */
   async findAll(start: Date, end: Date) {
-    const events = await this.eventRepository.find({
-      dtend: { $gte: start },
-      dtstart: { $lte: end },
-      recurrence: null,
-    });
+    const events = await this.eventRepository.find(
+      {
+        dtend: { $gte: start },
+        dtstart: { $lte: end },
+        recurrence: null,
+      },
+      ['course', 'author'],
+    );
 
     const recurrences = await this.recurrenceRepository.find(
       {
@@ -130,7 +143,7 @@ export class EventService {
           $or: [{ dtend: { $gte: start } }, { dtend: null }],
         },
       },
-      ['events'],
+      ['events.course'],
     );
 
     for (const recurrence of recurrences) {
@@ -469,9 +482,9 @@ export class EventService {
    * Hydrates a RRule into the individual event instances and attaches
    * them in the instances relationship.
    *
-   * @param recurrence EventRecurrence
-   * @param start Beginning date range
-   * @param end Ending date range
+   * @param recurrence EventRecurrence to hydrate.
+   * @param start Date signifying the beginning of the date range.
+   * @param end Date signifying the end of the date range.
    */
   private async getRecurrenceEvents(
     recurrence: EventRecurrence,
@@ -501,17 +514,21 @@ export class EventService {
 
       if (event) continue;
 
+      // TODO: Split this into an event factory function.
+      // This has to be manually updated whenever the event structure is changed.
       newEvents.push(
         this.eventRepository.create({
           name: events[0].name,
           description: events[0].description,
           picture: events[0].picture,
           color: events[0].color,
+          isOnline: events[0].isOnline,
           dtstart: date,
           dtend: duration
             ? moment(date).add(duration, 'minutes').toDate()
             : null,
           author: events[0].author,
+          course: events[0].course,
           recurrence,
         }),
       );

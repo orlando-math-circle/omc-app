@@ -1,8 +1,9 @@
 import { NuxtConfig } from '@nuxt/types'
+// @ts-ignore
 import { VuetifyLoaderPlugin } from 'vuetify-loader'
 
 const config: NuxtConfig = {
-  mode: 'universal',
+  ssr: true,
 
   server: {
     port: 8000,
@@ -11,7 +12,7 @@ const config: NuxtConfig = {
    ** Headers of the page
    */
   head: {
-    titleTemplate: '%s - OMC',
+    titleTemplate: '%s · OMC',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -35,7 +36,7 @@ const config: NuxtConfig = {
       {
         rel: 'stylesheet',
         href:
-          'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900',
+          'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Spartan:wght@700&display=swap',
       },
       {
         rel: 'stylesheet',
@@ -60,7 +61,7 @@ const config: NuxtConfig = {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['~/plugins/vuetify', '~/plugins/vee-validate'],
+  plugins: ['~/plugins/vuetify', '~/plugins/vee-validate', '~/plugins/axios'],
   /**
    * Automatic importing of components
    */
@@ -68,15 +69,19 @@ const config: NuxtConfig = {
   /*
    ** Nuxt.js dev-modules
    */
-  buildModules: ['@nuxt/typescript-build', '@nuxtjs/color-mode'],
+  buildModules: [
+    '@nuxt/typescript-build',
+    '@nuxtjs/color-mode',
+    'nuxt-typed-vuex',
+  ],
   /*
    ** Nuxt.js modules
    */
   modules: [
     '@nuxtjs/axios',
-    '@nuxtjs/auth-next',
     '@nuxtjs/pwa',
     '@nuxtjs/dotenv',
+    'cookie-universal-nuxt',
   ],
   /*
    ** Axios module configuration
@@ -84,6 +89,12 @@ const config: NuxtConfig = {
    */
   axios: {
     baseURL: 'http://localhost:3030/',
+  },
+
+  vue: {
+    config: {
+      productionTip: false,
+    },
   },
 
   auth: {
@@ -102,13 +113,18 @@ const config: NuxtConfig = {
         endpoints: {
           login: { url: '/login', method: 'post' },
           logout: false,
-          user: { url: '/user/me', method: 'get' },
+          user: false,
         },
       },
+    },
+
+    vuex: {
+      namespace: 'nuxtauth',
     },
   },
 
   build: {
+    parallel: true,
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {

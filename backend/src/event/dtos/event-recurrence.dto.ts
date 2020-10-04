@@ -63,7 +63,7 @@ export class EventRecurrenceDto implements Partial<Options> {
   readonly byweekno?: number | number[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly byweekday?: ByWeekday | ByWeekday[];
 
   @IsOptional()

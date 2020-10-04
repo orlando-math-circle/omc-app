@@ -352,7 +352,6 @@ export default class RecurrenceDialog extends Vue {
   }
 
   customRuleToText(rule: Partial<RecurrenceOpts>) {
-    console.log(rule)
     const retval = ['Repeats']
     const freq = this.frequencies.find((f) => f.value === rule.freq)
 
@@ -363,7 +362,6 @@ export default class RecurrenceDialog extends Vue {
     }
 
     if (rule.byweekday && rule.freq === Frequency.WEEKLY) {
-      console.log('got here')
       // This is super dangerous code with possible undefined stuff everywhere.
       const days = Array.isArray(rule.byweekday)
         ? rule.byweekday.map(
