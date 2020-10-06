@@ -51,7 +51,7 @@ export class AccountService {
       }),
     );
 
-    return account;
+    return this.authService.login(account, user);
   }
 
   /**
