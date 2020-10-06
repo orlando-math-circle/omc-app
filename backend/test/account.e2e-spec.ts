@@ -6,7 +6,6 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
-import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
 import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
@@ -14,15 +13,8 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
+import { createAccountFixture } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
-
-const createAccountDto: CreateAccountDto = {
-  first: 'Jane',
-  last: 'Doe',
-  email: 'jane@doe.com',
-  password: 'apple',
-  dob: new Date(Date.UTC(1995, 0, 1)),
-};
 
 describe('Accounts', () => {
   let app: INestApplication;
@@ -32,11 +24,10 @@ describe('Accounts', () => {
    * Testing Data
    */
 
-  let account: Account;
   let token: string;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           validationSchema: testSchema,
@@ -50,8 +41,8 @@ describe('Accounts', () => {
       ],
     }).compile();
 
-    app = moduleRef.createNestApplication();
-    orm = moduleRef.get<MikroORM>(MikroORM);
+    app = module.createNestApplication();
+    orm = module.get<MikroORM>(MikroORM);
 
     const generator = orm.getSchemaGenerator();
     await generator.ensureDatabase();
@@ -68,31 +59,17 @@ describe('Accounts', () => {
     app.useGlobalFilters(new JsonWebTokenFilter());
 
     await app.init();
+
+    token = await createAccountFixture(app);
+  });
+
+  afterEach(() => {
+    orm.em.clear();
   });
 
   afterAll(async () => {
     await orm.close();
     await app.close();
-  });
-
-  test('POST /account/register', async () => {
-    const resp = await request(app.getHttpServer())
-      .post('/account/register')
-      .send(createAccountDto)
-      .expect(201);
-
-    expect(typeof resp.body).toBe('object');
-    expect(resp.body.id).toBe(1);
-    account = resp.body;
-
-    // Login for token
-    const loginResp = await request(app.getHttpServer())
-      .post('/login')
-      .send({ email: 'jane@doe.com', password: 'apple' })
-      .expect(201);
-
-    expect(typeof loginResp.body.token).toBe('string');
-    token = loginResp.body.token;
   });
 
   describe('GET /account/me', () => {
@@ -107,7 +84,7 @@ describe('Accounts', () => {
         .expect(200);
 
       expect(resp.body).toBeDefined();
-      expect(resp.body.id).toBe(account.id);
+      expect(resp.body.id).toBe(1);
     });
   });
 
@@ -162,8 +139,7 @@ describe('Accounts', () => {
     });
 
     it('should no longer find the account', async () => {
-      orm.em.clear();
-      const acc = await orm.em.findOne(Account, { id: account.id });
+      const acc = await orm.em.findOne(Account, { id: 1 });
 
       expect(acc).toBeNull();
     });

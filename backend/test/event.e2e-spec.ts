@@ -29,6 +29,7 @@ import { EventService } from '../src/event/event.service';
 import { Schedule } from '../src/event/schedule.class';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
+import { createAccountFixture } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 describe('Events', () => {
@@ -41,14 +42,6 @@ describe('Events', () => {
    */
 
   let token: string;
-
-  const createAccountDto: CreateAccountDto = {
-    first: 'Jane',
-    last: 'Doe',
-    email: 'jane@doe.com',
-    password: 'apple',
-    dob: new Date(Date.UTC(1995, 0, 1)),
-  };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -91,18 +84,7 @@ describe('Events', () => {
      * Seeding Data
      */
 
-    await request(app.getHttpServer())
-      .post('/account/register')
-      .send(createAccountDto)
-      .expect(201);
-
-    const loginResp = await request(app.getHttpServer())
-      .post('/login')
-      .send({ email: 'jane@doe.com', password: 'apple' })
-      .expect(201);
-
-    expect(typeof loginResp.body.token).toBe('string');
-    token = loginResp.body.token;
+    token = await createAccountFixture(app);
   });
 
   afterEach(() => {

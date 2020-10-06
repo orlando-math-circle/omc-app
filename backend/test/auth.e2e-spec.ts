@@ -23,14 +23,6 @@ import { UserModule } from '../src/user/user.module';
 import { UserService } from '../src/user/user.service';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
-const createAccountDto: CreateAccountDto = {
-  first: 'Jane',
-  last: 'Doe',
-  email: 'jane@doe.com',
-  password: 'apple',
-  dob: new Date(Date.UTC(1995, 0, 1)),
-};
-
 const contextMock = {
   switchToHttp: jest.fn(() => ({
     getRequest: () => ({
@@ -104,6 +96,14 @@ describe('Auth', () => {
 
   describe('POST /login', () => {
     it('should accept valid logins', async () => {
+      const createAccountDto: CreateAccountDto = {
+        first: 'Jane',
+        last: 'Doe',
+        email: 'jane@doe.com',
+        password: 'apple',
+        dob: new Date(Date.UTC(1995, 0, 1)),
+      };
+
       await request(app.getHttpServer())
         .post('/account/register')
         .send(createAccountDto)
@@ -286,7 +286,7 @@ describe('Auth', () => {
     it('should validate emails', async () => {
       // TODO: Once the email service is implemented, this needs to be replaced.
       const verifyToken = authService.signJWT({
-        email: createAccountDto.email,
+        email: 'jane@doe.com',
       });
 
       await request(app.getHttpServer())
