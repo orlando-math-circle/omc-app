@@ -13,7 +13,7 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
-import { createAccountFixture } from './fixtures/user.fixture';
+import { UserFixtures } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 describe('Accounts', () => {
@@ -24,6 +24,7 @@ describe('Accounts', () => {
    * Testing Data
    */
 
+  let userFixtures: UserFixtures;
   let token: string;
 
   beforeAll(async () => {
@@ -44,6 +45,8 @@ describe('Accounts', () => {
     app = module.createNestApplication();
     orm = module.get<MikroORM>(MikroORM);
 
+    userFixtures = new UserFixtures(app, orm);
+
     const generator = orm.getSchemaGenerator();
     await generator.ensureDatabase();
     await generator.dropSchema();
@@ -60,7 +63,7 @@ describe('Accounts', () => {
 
     await app.init();
 
-    token = await createAccountFixture(app);
+    token = await userFixtures.createAccount();
   });
 
   afterEach(() => {

@@ -3,10 +3,10 @@ import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 @Injectable()
 export class SearchPipe implements PipeTransform {
   transform(value: any, { type }: ArgumentMetadata) {
-    if (type !== 'query' || !value.contains) return value;
+    if (type !== 'query' || value.contains === undefined) return value;
 
-    // An empty string is synonymous with no search string.
-    if (value.contains === '') {
+    // A string with no characters is not a valid search.
+    if (!value.contains.trim().length) {
       delete value.contains;
       return value;
     }

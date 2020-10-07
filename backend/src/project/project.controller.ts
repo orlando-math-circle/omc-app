@@ -7,6 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { UserAuth } from '../auth/decorators/auth.decorator';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { FindAllProjectsDto } from './dto/find-all-projects.dto';
 import { FindProjectDto } from './dto/find-project.dto';
@@ -17,6 +18,7 @@ import { ProjectService } from './project.service';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
+  @UserAuth('project', 'create:any')
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectService.create(createProjectDto);
@@ -33,7 +35,7 @@ export class ProjectController {
       contains
         ? ({
             $or: [
-              { 'lower(name)': { $like: `${contains}%` } },
+              { 'lower(name)': { $like: `%${contains}%` } },
               { 'lower(description)': { $like: `%${contains}%` } },
             ],
           } as any)
@@ -45,6 +47,7 @@ export class ProjectController {
     );
   }
 
+  @UserAuth('project', 'update:any')
   @Patch(':id')
   update(
     @Param() { id }: FindProjectDto,

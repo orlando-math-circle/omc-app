@@ -11,7 +11,6 @@ import moment from 'moment';
 import RRule, { Frequency } from 'rrule';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
-import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
 import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { isBeforeDay } from '../src/app.utils';
@@ -29,7 +28,7 @@ import { EventService } from '../src/event/event.service';
 import { Schedule } from '../src/event/schedule.class';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
-import { createAccountFixture } from './fixtures/user.fixture';
+import { UserFixtures } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 describe('Events', () => {
@@ -41,6 +40,7 @@ describe('Events', () => {
    * Testing Data
    */
 
+  let userFixtures: UserFixtures;
   let token: string;
 
   beforeAll(async () => {
@@ -64,6 +64,8 @@ describe('Events', () => {
     orm = moduleRef.get<MikroORM>(MikroORM);
     eventService = moduleRef.get(EventService);
 
+    userFixtures = new UserFixtures(app, orm);
+
     const generator = orm.getSchemaGenerator();
     await generator.ensureDatabase();
     await generator.dropSchema();
@@ -84,7 +86,7 @@ describe('Events', () => {
      * Seeding Data
      */
 
-    token = await createAccountFixture(app);
+    token = await userFixtures.createAccount();
   });
 
   afterEach(() => {
