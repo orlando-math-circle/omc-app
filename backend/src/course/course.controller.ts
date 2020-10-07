@@ -30,7 +30,7 @@ export class CourseController {
       contains
         ? ({
             $or: [
-              { 'lower(name)': { $like: `${contains}%` } },
+              { 'lower(name)': { $like: `%${contains}%` } },
               { 'lower(description)': { $like: `%${contains}%` } },
             ],
           } as any)
