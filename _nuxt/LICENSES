@@ -1,5 +1,5 @@
 /*!
-  * vue-router v3.4.3
+  * vue-router v3.4.6
   * (c) 2020 Evan You
   * @license MIT
   */
@@ -66,3 +66,5 @@
  * (c) 2020 Evan You
  * @license MIT
  */
+
+/*! @docsearch/js 1.0.0-alpha.28 (UNRELEASED 0a58769) | MIT License | © Algolia, Inc. and contributors | https://github.com/francoischalifour/autocomplete.js */
