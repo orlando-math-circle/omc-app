@@ -71,6 +71,7 @@ const config: NuxtConfig = {
    */
   buildModules: [
     '@nuxt/typescript-build',
+    '@nuxtjs/eslint-module',
     '@nuxtjs/color-mode',
     'nuxt-typed-vuex',
   ],
@@ -136,20 +137,6 @@ const config: NuxtConfig = {
         },
         additionalData: "@import '@/assets/variables.scss'",
       },
-    },
-    /*
-     ** You can extend webpack config here
-     */
-    extend(config, ctx) {
-      // Run ESLint on save
-      if (ctx.isDev && ctx.isClient && config.module) {
-        config.module.rules.push({
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /(node_modules)/,
-        })
-      }
     },
   },
 }
