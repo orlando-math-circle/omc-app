@@ -99,34 +99,6 @@
               >
               </v-text-field-validated>
 
-              <v-checkbox-validated
-                v-model="student"
-                label="Are you a student?"
-              >
-              </v-checkbox-validated>
-
-              <v-expand-transition>
-                <template v-if="student">
-                  <v-select-validated label=""></v-select-validated>
-                </template>
-              </v-expand-transition>
-
-              <v-select-validated
-                label="Occupation"
-                :items="[
-                  {
-                    text: 'Student',
-                    value: 'primary',
-                  },
-                  {
-                    text: 'Workplace Professional',
-                    value: 'professional',
-                  },
-                  { text: 'Other', value: 'other' },
-                ]"
-              >
-              </v-select-validated>
-
               <v-checkbox
                 label="Receive emails about upcoming events"
                 dense
@@ -177,8 +149,6 @@ export default class RegisterPage extends Vue {
     { text: 'November', value: 10 },
     { text: 'December', value: 11 },
   ]
-
-  student = false
 
   birthday = {
     month: null as number | null,

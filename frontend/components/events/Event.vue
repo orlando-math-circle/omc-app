@@ -37,36 +37,36 @@
       </v-list-item-content>
 
       <v-list-item-avatar rounded size="100">
-        <v-img :src="require('~/assets/images/programmer.jpg')"></v-img>
+        <v-img :src="picture"></v-img>
       </v-list-item-avatar>
     </v-list-item>
-
-    <v-card-text>
-      <v-row no-gutters>
-        <v-col>{{ value.description }}</v-col>
-      </v-row>
-    </v-card-text>
   </v-card>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import moment from 'moment'
-// import { Event } from '~/../backend/src/event/event.entity'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { format, parseISO } from 'date-fns'
+import { CalendarEvent } from '~/interfaces/calendar-event.interface'
+import { Event } from '~/../backend/src/event/event.entity'
 
-export default Vue.extend({
-  props: {
-    value: {
-      type: Object as PropType<any>,
-      required: true,
-    },
-  },
-  computed: {
-    start() {
-      if (!this.value) return ''
+@Component
+export default class EventComponent extends Vue {
+  @Prop() value!: CalendarEvent | Event
 
-      return moment(this.value.start).format('ddd, MMM Do, YYYY')
-    },
-  },
-})
+  get date() {
+    if ('start' in this.value) {
+      return parseISO((this.value as CalendarEvent).start)
+    }
+
+    return parseISO(((this.value as Event).dtstart as unknown) as string)
+  }
+
+  get start() {
+    return format(this.date, 'eee, MMM do, yyyy')
+  }
+
+  get picture() {
+    return this.value.picture || require('~/assets/images/programmer.jpg')
+  }
+}
 </script>

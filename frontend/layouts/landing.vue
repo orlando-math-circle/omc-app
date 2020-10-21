@@ -13,7 +13,7 @@ import { Vue, Component } from 'vue-property-decorator'
 
 @Component({
   name: 'landing',
-  middleware: 'guest',
+  // middleware: 'guest',
 })
 export default class LandingLayout extends Vue {}
 </script>

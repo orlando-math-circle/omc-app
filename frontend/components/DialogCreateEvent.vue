@@ -29,14 +29,14 @@
                 <v-list-item-avatar />
 
                 <v-list-item-content>
-                  <ValidationProvider v-slot="{ errors }" rules="required">
-                    <v-text-field
-                      v-model="meta.name"
-                      label="Add title"
-                      :error-messages="errors"
-                      hide-details="auto"
-                    />
-                  </ValidationProvider>
+                  <v-text-field-validated
+                    v-model="meta.name"
+                    label="Add title"
+                    hide-details="auto"
+                    vid="title"
+                    rules="required"
+                  >
+                  </v-text-field-validated>
                 </v-list-item-content>
               </v-list-item>
 
@@ -67,20 +67,20 @@
                         min-width="290px"
                       >
                         <template #activator="{ on, attrs }">
-                          <ValidationProvider
-                            v-slot="{ errors }"
+                          <v-text-field-validated
+                            :value="format(dates.start.date)"
+                            :label="dates.allday ? 'Date' : 'Start Date'"
+                            hide-details="auto"
                             vid="startdate"
-                            rules="required|startdate:@enddate"
-                          >
-                            <v-text-field
-                              :value="format(dates.start.date)"
-                              :label="dates.allday ? 'Date' : 'Start Date'"
-                              :error-messages="errors"
-                              hide-details="auto"
-                              v-bind="attrs"
-                              v-on="on"
-                            />
-                          </ValidationProvider>
+                            :rules="{
+                              required: true,
+                              startdate: dates.allday
+                                ? false
+                                : { target: '@enddate' },
+                            }"
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field-validated>
                         </template>
 
                         <v-date-picker
@@ -93,7 +93,14 @@
                       <ValidationProvider
                         v-slot="{ errors }"
                         vid="starttime"
-                        rules="required|starttime:@endtime"
+                        :rules="
+                          dates.allday
+                            ? undefined
+                            : {
+                                required: true,
+                                starttime: { time: '@endtime' },
+                              }
+                        "
                       >
                         <time-picker
                           v-model="times.start.time"
@@ -116,6 +123,7 @@
                             <ValidationProvider
                               v-slot="{ errors }"
                               vid="enddate"
+                              :rules="{ required: !dates.allday }"
                             >
                               <v-text-field
                                 :value="format(dates.end.date)"
@@ -256,7 +264,7 @@
           <v-card-actions>
             <v-spacer />
             <v-btn text @click="close()">Cancel</v-btn>
-            <v-btn text type="submit">Create Event</v-btn>
+            <v-btn text type="submit" :loading="loading"> Create Event </v-btn>
           </v-card-actions>
         </v-form>
       </ValidationObserver>

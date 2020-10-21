@@ -12,6 +12,15 @@
           <v-btn text>Go to Event</v-btn>
         </v-card-actions>
       </v-card> -->
+      <v-snackbar v-model="registeredMessage">
+        Thank you for registering!
+
+        <template v-slot:action="{ attrs }">
+          <v-btn color="pink" icon v-bind="attrs" @click="snackbar = false">
+            <v-icon>mdi-close-circle</v-icon>
+          </v-btn>
+        </template>
+      </v-snackbar>
 
       <h2 class="headline">Latest News</h2>
 
@@ -62,6 +71,7 @@ import { format } from 'date-fns'
 })
 export default class HomePage extends Vue {
   tweets: any[] = []
+  registeredMessage = false
 
   async fetch() {
     this.tweets = await this.$axios.$get('/twitter')
@@ -75,6 +85,12 @@ export default class HomePage extends Vue {
     const date = new Date(dateString)
 
     return format(date, 'MMMM do, yyyy')
+  }
+
+  mounted() {
+    if (this.$accessor.auth.justRegistered) {
+      this.registeredMessage = true
+    }
   }
 }
 </script>

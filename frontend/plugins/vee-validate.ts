@@ -1,7 +1,15 @@
-import { extend } from 'vee-validate'
+import { extend, setInteractionMode } from 'vee-validate'
 import { email } from 'vee-validate/dist/rules'
 import { parse } from 'date-fns'
 import { getTimeValue } from '../utils/utilities'
+
+/**
+ * Reduces the aggressiveness of vee-validate to not throw errors while the user
+ * is still filling out the field being validated.
+ *
+ * @see https://logaretm.github.io/vee-validate/guide/interaction-and-ux.html#interaction-modes
+ */
+setInteractionMode('lazy')
 
 extend('email', email)
 
@@ -16,12 +24,18 @@ extend('required', {
   message: 'This field is required.',
 })
 
+extend('password', {
+  params: ['target'],
+  validate: (value, { target }: any) => value === target,
+  message: 'Password confirmation does not match.',
+})
+
 extend('startdate', {
-  params: ['date'],
-  validate: (value, { date }: any) => {
+  params: ['target'],
+  validate: (value, { target }: any) => {
     return (
       parse(value, 'EEEE, LLLL do', new Date()) <=
-      parse(date, 'EEEE, LLLL do', new Date())
+      parse(target, 'EEEE, LLLL do', new Date())
     )
   },
   message: 'Start date cannot be after the end date.',

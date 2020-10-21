@@ -27,56 +27,7 @@
         </v-col>
       </v-row>
 
-      <v-card>
-        <v-card-title class="pb-0">Event Details</v-card-title>
-        <v-list-item>
-          <v-list-item-content>
-            <v-row no-gutters class="mb-2">
-              <v-col cols="auto">
-                <v-icon>mdi-clock-outline</v-icon>
-              </v-col>
-
-              <v-col class="pl-5">
-                {{ start }}
-              </v-col>
-            </v-row>
-
-            <v-row no-gutters class="mb-2">
-              <v-col cols="auto">
-                <v-icon>mdi-account-circle-outline</v-icon>
-              </v-col>
-
-              <v-col class="pl-5">
-                {{ event.author.first }} {{ event.author.last }}
-              </v-col>
-            </v-row>
-
-            <v-row no-gutters>
-              <v-col cols="auto">
-                <v-icon>
-                  {{ event.isOnline ? 'mdi-web' : 'mdi-map-marker-outline' }}
-                </v-icon>
-              </v-col>
-
-              <v-col class="pl-5">
-                {{ event.isOnline ? 'Online' : event.location }}
-              </v-col>
-            </v-row>
-          </v-list-item-content>
-
-          <v-list-item-avatar rounded size="100">
-            <v-img src="~/assets/images/programmer.jpg"></v-img>
-          </v-list-item-avatar>
-        </v-list-item>
-
-        <v-card-text>
-          <v-row no-gutters>
-            <v-col>
-              {{ event.description }}
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
+      <event v-model="event" />
 
       <v-stepper v-model="step" vertical class="mt-5">
         <!-- Step: User Selection -->
