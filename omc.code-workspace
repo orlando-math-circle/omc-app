@@ -5,14 +5,16 @@
       "path": "frontend"
     },
     {
-      // Docs and release notes
       "name": "Backend",
       "path": "backend"
     },
     {
-      // Yeoman extension generator
       "name": "Documentation",
       "path": "docs"
+    },
+    {
+      "name": "Root",
+      "path": "."
     }
   ]
 }
