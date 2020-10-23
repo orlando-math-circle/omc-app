@@ -1,0 +1,72 @@
+---
+title: Third Meeting
+subtitle: "Meeting Time: Saturday, October 6th, 2020 at 10:00PM EST."
+description: Third meeting with Sheina, Matt, and Margarita.
+category: Meetings
+position: 12
+---
+
+This meeting held topics such as next steps, registration, permissions, and the student tutorial sequence.
+
+## Registration & Permissions
+
+To ensure that the application behaves properly for all users, the backend will require a strict expectation for how ages and roles play into the overall permissions scheme.
+
+### Registration & User Management
+
+- Shortly into the registration form the user will be asked to provide their date of birth. If the user is younger than 13 years old they will be prompted to have a parent or guardian register in their stead. The parent or guardian can then add a sub-user to the account.
+
+- A checkbox will ask, "Are you a currently a middle school, high school, or college student?". Checking this box will prompt for the following fields to appear:
+
+  - A dropdown will ask if the user is in elementary school, middle school, high school, or college.
+  - Depending on the previous answer, this dropdown will populate with the grade levels for each school level. For example, high school will have 9th through 12th grade options, whereas college will have "Undergraduate", "Graduate", and "Postgraduate" options.
+  - A textfield will ask the user to type out the name of the school they are attending.
+  - If the user selected college, a third field will appear to ask the user their graduating year.
+
+- If the previous checkbox is not checked, another checkbox will ask the user, "Are you an industry professional?". Selecting this option will prompt for the following **optional** fields to appear:
+
+  - A textbox will ask the user what their job title and profession is.
+  - A secondary text box will ask for their workplace.
+
+- Users who are registered but lack a confirmed email address will be able to add other users to the account and view events but not register to them. OMC personnel can register unverified users manually, e.g. if a user is quickly filling out registration on their phone while at the event.
+
+- Secondary account users can add their own emails, though not required.
+
+- Volunteering will be enabled through the volunteer agreement on a user's account page.
+
+- Margarita is investigating the need for a Terms of Service and/or Privacy Policy and the appropriateness of the registration scheme from a legal point of view.
+
+## Permissions
+
+- Event registration can be done only by users who are at least 13 years old on the account.
+
+- Each kind of event will have different permissions.
+  - Minimum and maximum student ages.
+  - Minimum and maximum stugent grade levels.
+  - Student gender.
+
+## Questions & Concerns
+
+## Student Tutorial Sequence
+
+- The students will learn to create a competition tracker timeline. They will learn to use JavaScript and the app technology to create, find, and store competition data and sort the different competitions by date and filter by the student's grade level.
+
+- The projects page will link to the competitions page and will also be available in the hamburger menu.
+
+- The instruction medium will be follow-along videos that teach the technology with the competition tracker being a module introduced at the end for applying the tools taught. The students will have creative freedom on how they want to go about developing the page, and could be made more advanced in the future.
+
+### Registration
+
+1. The school, college, or workplace entered for the occupation field cannot be validated. By COPPA, this information cannot be revealed to other users directly without a screening process, which would complicate things. This also means there is no enforcement of consistency, so the idea of emailing all users going to the same high school is not feasible. For security reasons the field should be given a length limit to prevent users typing paragraphs into the field.
+
+2. If a student transitions to a new occupation (e.g. high school to college) or horizontally in an occupation (e.g. primary school students from middle school to high school) it's highly unlikely that users will update this information. This does not have direct ramifications outside of misleading record keeping.
+
+3. The occupation fields may need to have age limitations. For example, an 18 year old could say they're in 6th grade. However, it's reasonable to assume the expected ages of each grade level could have a standard deviation of 2-3 years in either direction. Similarly, a 13 year old probably shouldn't be able to say they're an industry professional.
+
+4. If a 13-17 year old minor can create an account they also need to be able to register to events and create users, otherwise there is no way to securely allow a 13 year old to create an 18+ parent user that has more permissions.
+
+### Permissions
+
+1. Will events limit the total number of registrations? If so, do volunteers count towards this limit, a separate limit, or can any number of volunteers can register?
+
+2. Will volunteers override the normal event permissions? For example, if an event is for 10th grade girls, can a high schooler boy volunteer for the event?
