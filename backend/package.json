@@ -35,6 +35,8 @@
     "@nestjs/jwt": "7.1.0",
     "@nestjs/passport": "7.1.0",
     "@nestjs/platform-express": "7.4.4",
+    "@nestjs/schedule": "^0.4.1",
+    "@sendgrid/mail": "^7.3.0",
     "@types/lodash": "4.14.162",
     "accesscontrol": "2.2.1",
     "bcrypt": "5.0.0",

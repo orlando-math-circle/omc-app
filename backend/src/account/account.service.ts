@@ -45,6 +45,7 @@ export class AccountService {
     account.users.populated(true);
 
     this.emailService.email(
+      AccountService.name,
       user.email,
       this.authService.signJWT({ email: user.email }, null, {
         expiresIn: '2 days',

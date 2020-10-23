@@ -7,7 +7,7 @@ import {
 import { CreateAccountDto } from '../../account/dtos/create-account.dto';
 import { ADULT_AGE } from '../../app.constants';
 import { birthdayToAge } from '../../app.utils';
-import { CreateUserDto } from '../dtos/create-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { Grades } from '../enums/grades.enum';
 
 @Injectable()

@@ -17,7 +17,7 @@ import { AccessGuard } from '../src/auth/guards/access-control.guard';
 import { CourseModule } from '../src/course/course.module';
 import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
-import { CreateUserDto } from '../src/user/dtos/create-user.dto';
+import { CreateUserDto } from '../src/user/dto/create-user.dto';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { UserService } from '../src/user/user.service';

@@ -6,6 +6,11 @@ export const PORT = 'PORT';
 export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
 
 /**
+ * SendGrid
+ */
+export const SENDGRID_API_KEY = 'SENDGRID_API_KEY';
+
+/**
  * PayPal
  */
 export const PAYPAL_SANDBOXED = 'PAYPAL_SANDBOXED';

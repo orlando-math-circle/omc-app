@@ -1,7 +1,7 @@
 import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Account } from '../account/account.entity';
-import { FindUserDto } from '../user/dtos/find-user.dto';
+import { FindUserDto } from '../user/dto/find-user.dto';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
 import { Acc } from './decorators/account.decorator';
