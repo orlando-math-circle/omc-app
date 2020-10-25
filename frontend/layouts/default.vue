@@ -100,11 +100,6 @@ export default class DefaultLayout extends Vue {
       to: '/projects',
     },
     {
-      icon: 'mdi-puzzle',
-      title: 'Competitions',
-      to: '/competitions',
-    },
-    {
       icon: 'mdi-account-circle',
       title: 'Account',
       to: '/account',
