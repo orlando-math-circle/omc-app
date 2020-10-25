@@ -4,16 +4,7 @@
       <v-col cols="12">
         <v-row>
           <v-col align="center">
-            <v-img
-              v-if="$vuetify.theme.isDark"
-              class="logo"
-              :src="require(`@/assets/images/logo_dark.png`)"
-            />
-            <v-img
-              v-else
-              class="logo"
-              :src="require(`@/assets/images/logo_white.png`)"
-            />
+            <v-img class="logo" :src="logo"></v-img>
           </v-col>
         </v-row>
         <v-row>
@@ -27,12 +18,6 @@
         </v-row>
       </v-col>
     </v-row>
-
-    <!-- <v-row justify="end" align="end" align-self="end">
-      <v-col>
-
-      </v-col>
-    </v-row> -->
   </v-container>
 </template>
 
@@ -41,12 +26,18 @@ import { Vue, Component } from 'nuxt-property-decorator'
 
 @Component({
   layout: 'landing',
-  middleware: 'auth',
+  middleware: 'guest',
   head: {
     title: 'Welcome',
   },
 })
-export default class IndexPage extends Vue {}
+export default class IndexPage extends Vue {
+  get logo() {
+    return this.$vuetify.theme.dark
+      ? require('@/assets/images/logo_white.png')
+      : require('@/assets/images/logo_dark.png')
+  }
+}
 </script>
 
 <style lang="scss" scoped>
