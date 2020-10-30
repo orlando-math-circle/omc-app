@@ -34,7 +34,7 @@
     "@nuxtjs/color-mode": "2.0.0",
     "@nuxtjs/eslint-config-typescript": "4.0.0",
     "@nuxtjs/eslint-module": "3.0.0",
-    "@types/lodash": "4.14.162",
+    "@types/lodash": "4.14.164",
     "babel-eslint": "10.1.0",
     "deepmerge": "4.2.2",
     "eslint": "7.12.1",
@@ -43,9 +43,9 @@
     "eslint-plugin-prettier": "3.1.4",
     "fibers": "5.0.0",
     "prettier": "2.1.2",
-    "sass": "1.27.0",
+    "sass": "1.28.0",
     "sass-loader": "10.0.4",
-    "vuetify": "2.3.15"
+    "vuetify": "2.3.16"
   },
   "prettier": {
     "semi": false,
