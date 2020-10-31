@@ -90,6 +90,7 @@ export default class HomePage extends Vue {
   mounted() {
     if (this.$accessor.auth.justRegistered) {
       this.registeredMessage = true
+      this.$accessor.auth.setJustRegistered(false)
     }
   }
 }

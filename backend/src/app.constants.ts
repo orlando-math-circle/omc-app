@@ -4,6 +4,7 @@
 
 export const PORT = 'PORT';
 export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
+export const FILE_DIRECTORY = 'FILE_DIRECTORY';
 
 /**
  * PayPal

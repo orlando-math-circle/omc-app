@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-navigation-drawer
+      v-if="user != null"
       v-model="drawer"
       :mini-variant.sync="mini"
       permanent
@@ -29,16 +30,18 @@
 
       <v-divider></v-divider>
 
-      <v-list>
+      <v-list nav dense>
         <v-list-item link exact to="/admin/">
           <v-list-item-icon>
-            <v-icon>mdi-home-analytics</v-icon>
+            <v-icon>mdi-view-dashboard</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
             <v-list-item-title>Dashboard</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+
+        <v-subheader>Entities</v-subheader>
 
         <v-list-item link to="/admin/users">
           <v-list-item-icon>
@@ -112,7 +115,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item link @click="$store.dispatch('auth/logout')">
+        <v-list-item link @click="$accessor.auth.logout">
           <v-list-item-icon>
             <v-icon>mdi-logout</v-icon>
           </v-list-item-icon>
@@ -124,50 +127,69 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar flat app color="primary">
+    <v-app-bar app color="#fff" light>
+      <v-app-bar-nav-icon @click="mini = !mini"></v-app-bar-nav-icon>
       <v-toolbar-title class="title">OMC Admin</v-toolbar-title>
+      <v-spacer></v-spacer>
+
+      <v-menu offset-y>
+        <template #activator="{ on, attrs }">
+          <v-btn v-bind="attrs" icon v-on="on">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item @click="$accessor.auth.logout">
+            <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item>
+
+          <v-divider></v-divider>
+
+          <v-list-item @click="isDark = !isDark">
+            <v-list-item-title>{{
+              isDark ? 'Switch to Light' : 'Switch to Dark'
+            }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-app-bar>
 
     <v-main>
-      <v-container>
-        <nuxt />
-      </v-container>
+      <nuxt />
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Roles } from '~/../backend/src/app.roles'
+import { Component, Vue } from 'nuxt-property-decorator'
 
-export default Vue.extend({
+@Component({
   middleware: ['auth', 'admin'],
-  data() {
-    return {
-      drawer: false,
-      mini: false,
-    }
-  },
-  computed: {
-    user() {
-      return this.$store.state.auth.user
-    },
-  },
-  meta: {
-    auth: {
-      roles: [Roles.ADMIN],
-    },
-  },
 })
+export default class AdminLayout extends Vue {
+  drawer = false
+  mini = false
+
+  get user() {
+    return this.$accessor.auth.user
+  }
+
+  get isDark() {
+    return this.$vuetify.theme.dark
+  }
+
+  set isDark(value: boolean) {
+    this.$vuetify.theme.dark = value
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 .title {
-  color: #fff;
   margin: 0 !important;
   padding: 0 !important;
   width: 100%;
-  text-align: center;
   font-size: 1.5em;
   font-weight: 700;
 }

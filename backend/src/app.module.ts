@@ -9,6 +9,7 @@ import { CourseModule } from './course/course.module';
 import { EmailModule } from './email/email.module';
 import { EventRegistrationModule } from './event-registration/event-registration.module';
 import { EventModule } from './event/event.module';
+import { FileModule } from './file/file.module';
 import { PayPalModule } from './paypal/paypal.module';
 import { ProjectModule } from './project/project.module';
 import { TwitterModule } from './twitter/twitter.module';
@@ -32,6 +33,7 @@ import { UserModule } from './user/user.module';
     CourseModule,
     ProjectModule,
     TwitterModule,
+    FileModule,
   ],
 })
 export class AppModule {}

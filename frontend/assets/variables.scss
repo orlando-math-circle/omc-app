@@ -3,14 +3,19 @@
 
 $body-font-family: 'DM Sans', sans-serif;
 $heading-font-family: 'Spartan', sans-serif;
-$border-radius-root: 15px;
+$border-radius-root: 5px;
 $color-pack: false;
+
+// Elevations
+$shadow-key-umbra-opacity: rgba(85, 85, 85, 0.2);
+$shadow-key-penumbra-opacity: rgba(85, 85, 85, 0.14);
+$shadow-key-ambient-opacity: rgba(85, 85, 85, 0.12);
 
 // Light Theme Changes
 $material-light: (
   'app-bar': #44d9e6,
   // 'app-bar': #44d9e6,
-  'background': #fcfff9,
+  'background': #f2f5f8,
   'primary-text-percent': 1,
 );
 

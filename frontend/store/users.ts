@@ -6,6 +6,7 @@ import { State } from '../interfaces/state.interface'
 export const state = () => ({
   status: State.UNLOADED,
   users: [] as User[],
+  user: null as User | null,
 })
 
 export const getters = getterTree(state, {
@@ -18,6 +19,9 @@ export const mutations = mutationTree(state, {
   setStatus(state, status: State) {
     state.status = status
   },
+  setUser(state, user: User) {
+    state.user = user
+  },
   setUsers(state, users: User[]) {
     state.users = users
   },
@@ -26,6 +30,13 @@ export const mutations = mutationTree(state, {
 export const actions = actionTree(
   { state, getters, mutations },
   {
+    async getUser({ commit }, id: number | string) {
+      commit('setStatus', State.BUSY)
+      const user = await this.$axios.$get(`/user/${id}`)
+
+      commit('setUser', user)
+      commit('setStatus', State.WAITING)
+    },
     async fetchUsers({ commit }, findUsersDto: FindUsersDto) {
       commit('setStatus', State.BUSY)
 

@@ -44,6 +44,12 @@ export class UserController {
     return this.userService.findAll(where, limit, offset);
   }
 
+  @UserAuth('user', 'read:any')
+  @Get(':id')
+  findOne(@Param() { id }: FindUserDto) {
+    return this.userService.findOneOrFail(id);
+  }
+
   @UserAuth('user', 'update:any')
   @Patch(':id')
   update(@Param() { id }: FindUserDto, @Body() updateUserDto: UpdateUserDto) {

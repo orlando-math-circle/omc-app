@@ -54,6 +54,9 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ nullable: true })
   avatar?: string;
 
+  @Property({ default: false })
+  locked: boolean = false;
+
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
@@ -63,10 +66,6 @@ export class User extends BaseEntity<User, 'id'> {
   /**
    * Computed Properties
    */
-
-  set grade(grade: Grades) {
-    this.gradeSet = grade;
-  }
 
   @Property({ persist: false })
   get grade() {
@@ -83,6 +82,15 @@ export class User extends BaseEntity<User, 'id'> {
       Grades.GRADUATED,
       this.gradeSet + getYearsDiff(this.gradeSetAt, currentSchoolYear),
     );
+  }
+
+  set grade(grade: Grades) {
+    this.gradeSet = grade;
+  }
+
+  @Property({ persist: false })
+  get name() {
+    return `${this.first} ${this.last}`;
   }
 
   /**

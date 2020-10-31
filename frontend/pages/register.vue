@@ -43,35 +43,7 @@
                 </v-col>
               </v-row>
 
-              <v-row class="pa-0">
-                <v-col cols="6">
-                  <v-select-validated
-                    v-model="birthday.month"
-                    label="Birthday Month"
-                    autocomplete="bday-month"
-                    :items="months"
-                    hide-details
-                  ></v-select-validated>
-                </v-col>
-
-                <v-col cols="3">
-                  <v-text-field-validated
-                    v-model.number="birthday.day"
-                    type="number"
-                    label="Day"
-                    hide-details
-                  ></v-text-field-validated>
-                </v-col>
-
-                <v-col cols="3">
-                  <v-text-field-validated
-                    v-model.number="birthday.year"
-                    type="number"
-                    label="Year"
-                    hide-details
-                  ></v-text-field-validated>
-                </v-col>
-              </v-row>
+              <birthday-picker v-model="dto.dob"></birthday-picker>
 
               <v-text-field-validated
                 v-model="dto.email"
@@ -149,7 +121,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'nuxt-property-decorator'
+import { Vue, Component } from 'nuxt-property-decorator'
 import { ValidationObserver } from 'vee-validate'
 import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.dto'
 
@@ -163,28 +135,7 @@ import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.d
   },
 })
 export default class RegisterPage extends Vue {
-  months = [
-    { text: 'January', value: 0 },
-    { text: 'February', value: 1 },
-    { text: 'March', value: 2 },
-    { text: 'April', value: 3 },
-    { text: 'May', value: 4 },
-    { text: 'June', value: 5 },
-    { text: 'July', value: 6 },
-    { text: 'August', value: 7 },
-    { text: 'September', value: 8 },
-    { text: 'October', value: 9 },
-    { text: 'November', value: 10 },
-    { text: 'December', value: 11 },
-  ]
-
   student = false
-
-  birthday = {
-    month: null as number | null,
-    day: null as number | null,
-    year: null as number | null,
-  }
 
   dto = {
     first: '',
@@ -196,17 +147,6 @@ export default class RegisterPage extends Vue {
   }
 
   passwordConfirm = ''
-
-  @Watch('birthday', { deep: true })
-  setDate(birthday: this['birthday']) {
-    const dob = new Date(
-      birthday.year as number,
-      birthday.month as number,
-      birthday.day as number
-    )
-
-    this.dto.dob = dob
-  }
 
   async onSubmit() {
     try {
