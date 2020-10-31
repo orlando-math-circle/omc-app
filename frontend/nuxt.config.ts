@@ -6,7 +6,7 @@ const config: NuxtConfig = {
   ssr: true,
 
   server: {
-    port: 8000,
+    port: 8080,
   },
   /*
    ** Headers of the page
@@ -53,7 +53,7 @@ const config: NuxtConfig = {
   /*
    ** Customize the progress-bar color
    */
-  loading: { color: '#fff' },
+  loading: { color: '#44d9e6' },
   /*
    ** Global CSS
    */
@@ -80,7 +80,7 @@ const config: NuxtConfig = {
    */
   modules: [
     '@nuxtjs/axios',
-    '@nuxtjs/pwa',
+    // '@nuxtjs/pwa',
     '@nuxtjs/dotenv',
     'cookie-universal-nuxt',
   ],
@@ -95,32 +95,6 @@ const config: NuxtConfig = {
   vue: {
     config: {
       productionTip: false,
-    },
-  },
-
-  auth: {
-    redirect: {
-      home: '/landing',
-    },
-    strategies: {
-      local: {
-        token: {
-          property: 'token',
-        },
-        user: {
-          autoFetch: true,
-          property: false,
-        },
-        endpoints: {
-          login: { url: '/login', method: 'post' },
-          logout: false,
-          user: false,
-        },
-      },
-    },
-
-    vuex: {
-      namespace: 'nuxtauth',
     },
   },
 

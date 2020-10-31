@@ -1,6 +1,20 @@
 import { format, parse } from 'date-fns'
 
 /**
+ * Formats a date or ISO date string as a friendly readable date.
+ *
+ * @see https://date-fns.org/v2.16.1/docs/format
+ *
+ * @param d Date object or ISO date string.
+ * @param formatString Date-fns format string.
+ */
+export const formatDate = (d: string | Date, formatString: string) => {
+  const date = typeof d === 'string' ? new Date(d) : d
+
+  return format(date, formatString)
+}
+
+/**
  * Method for quickly obtaining the ordinal suffix of a number
  * so long as the number isn't negative.
  *

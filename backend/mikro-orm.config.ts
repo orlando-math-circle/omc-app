@@ -11,7 +11,10 @@ export const config: Options = {
   type: 'postgresql',
   entities: [BaseEntity, 'dist/**/*.entity.js'],
   entitiesTs: [BaseEntity, 'src/**/*.entity.ts'],
-  subscribers: [new UserSubscriber()],
+  subscribers: [
+    new UserSubscriber(),
+    // new FileSubscriber() disabled for now.
+  ],
   dbName: process.env.DATABASE_NAME || 'omc',
   user: process.env.DATABASE_USER || 'postgres',
   password: process.env.DATABASE_PASS || 'postgres',

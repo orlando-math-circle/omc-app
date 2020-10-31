@@ -27,14 +27,23 @@ export const actions = actionTree(
     async nuxtServerInit(_vuexContext, nuxtContext: Context): Promise<void> {
       const token = nuxtContext.app.$cookies.get(COOKIE_NAME)
 
-      if (!token) return this.app.$accessor.auth.removeTokenCookie()
+      if (!token) {
+        console.info('No Token Found')
+        return this.app.$accessor.auth.removeTokenCookie()
+      }
 
       this.app.$accessor.auth.setTokenCookie(token)
+
+      console.info(token)
 
       try {
         await this.app.$accessor.auth.getMe()
       } catch (error) {
-        console.error('Error fetching user', error)
+        console.error(
+          'Unable to retrieve user from token',
+          error.message,
+          token.jwt
+        )
 
         this.app.$accessor.auth.removeTokenCookie()
       }

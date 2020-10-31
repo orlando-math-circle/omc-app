@@ -99,7 +99,6 @@ export default Vue.extend({
   },
   watch: {
     search(): void {
-      console.log('[TABLE]: Searching...')
       this.bouncing = true
       this.refresh()
     },

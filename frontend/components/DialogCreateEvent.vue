@@ -447,7 +447,6 @@ export default (Vue as ComponentRefs).extend({
       this.project.id = id
     },
     onProjectCreated(project: Project) {
-      console.log('PROJECT CREATED')
       this.project.id = project.id
     },
     onCourseCreated(course: Course) {

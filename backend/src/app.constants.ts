@@ -4,7 +4,14 @@
 
 export const PORT = 'PORT';
 export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
+
+/**
+ * File Storage
+ */
 export const FILE_DIRECTORY = 'FILE_DIRECTORY';
+export const FORM_SUBDIRECTORY = 'FORM_SUBDIRECTORY';
+export const STORAGE_TOKEN = 'STORAGE_TOKEN';
+export const REDUCED_LUNCH_FIELD = 'REDUCED_LUNCH_FIELD';
 
 /**
  * PayPal

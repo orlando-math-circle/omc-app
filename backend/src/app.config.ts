@@ -7,6 +7,7 @@ const configSchema = Joi.object({
   PAYPAL_CLIENT_ID: Joi.string().required(),
   PAYPAL_SECRET_KEY: Joi.string().required(),
   FILE_DIRECTORY: Joi.string().required(),
+  FORM_SUBDIRECTORY: Joi.string().default('form'),
 });
 
 const testSchema = Joi.object({

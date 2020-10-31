@@ -17,82 +17,68 @@
         <v-spacer></v-spacer>
       </v-toolbar>
 
-      <ValidationObserver v-slot="{ passes, passed }" ref="form">
-        <v-form @submit.prevent="passes(onSubmit)">
-          <v-card-text>
-            <alert-error v-if="error" :error="error" />
+      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
+        <v-card-text>
+          <alert-error v-if="error" :error="error" />
 
-            <ValidationProvider v-slot="{ errors }" rules="required">
-              <v-text-field
-                v-model="dto.name"
-                label="Name"
-                required
-                :error-messages="errors"
-                outlined
-              />
-            </ValidationProvider>
-            <v-textarea
-              v-model="dto.description"
-              label="Description"
-              outlined
-            />
-            <v-text-field v-model="dto.picture" label="Picture" outlined />
-          </v-card-text>
+          <v-text-field-validated
+            v-model="dto.name"
+            label="Name"
+            rules="required"
+            required
+            outlined
+          />
+          <v-textarea v-model="dto.description" label="Description" outlined />
+          <v-text-field v-model="dto.picture" label="Picture" outlined />
+        </v-card-text>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              text
-              type="submit"
-              :disabled="!passed"
-              :loading="$store.getters['projects/isLoading']"
-              >Create</v-btn
-            >
-          </v-card-actions>
-        </v-form>
-      </ValidationObserver>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            type="submit"
+            :disabled="!passes"
+            :loading="$store.getters['projects/isLoading']"
+            >Create</v-btn
+          >
+        </v-card-actions>
+      </v-form-validated>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { Project } from '~/../backend/src/project/project.entity'
+import { Component, Vue } from 'nuxt-property-decorator'
+import { CreateProjectDto } from '~/../backend/src/project/dto/create-project.dto'
+import { Nullable } from '~/interfaces/nullable.type'
 
-export default Vue.extend({
-  components: {
-    ValidationObserver,
-    ValidationProvider,
-  },
-  data() {
-    return {
-      dialog: false,
-      project: null as number | null,
-      dto: {
-        name: null,
-        description: null,
-        picture: null,
-      },
+@Component
+export default class DialogCreateProject extends Vue {
+  dialog = false
+  project: number | null = null
+  dto: Nullable<CreateProjectDto> = {
+    name: null,
+    description: null,
+    picture: null,
+  }
+
+  get projects() {
+    return this.$accessor.projects.projects
+  }
+
+  get error() {
+    return this.$accessor.projects.error
+  }
+
+  async onSubmit() {
+    const project = await this.$accessor.projects.create(
+      this.dto as CreateProjectDto
+    )
+
+    if (!this.error) {
+      this.$emit('create:project', project)
+      this.dialog = false
     }
-  },
-  computed: {
-    projects(): Project[] {
-      return this.$store.state.projects.projects
-    },
-    error(): Error {
-      return this.$store.state.projects.error
-    },
-  },
-  methods: {
-    async onSubmit() {
-      const project = await this.$store.dispatch('projects/create', this.dto)
-
-      if (!this.error) {
-        this.$emit('create:project', project)
-        this.dialog = false
-      }
-    },
-  },
-})
+  }
+}
 </script>

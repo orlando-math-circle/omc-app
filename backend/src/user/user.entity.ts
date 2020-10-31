@@ -13,6 +13,8 @@ import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
 import { birthdayToAge, getYearsDiff } from '../app.utils';
 import { EventRegistration } from '../event-registration/event-registration.entity';
+import { File } from '../file/entities/file.entity';
+import { Form } from '../file/entities/form.entity';
 import { Invoice } from '../invoice/invoice.entity';
 import { Grades } from './enums/grades.enum';
 
@@ -116,4 +118,10 @@ export class User extends BaseEntity<User, 'id'> {
 
   @OneToMany(() => Invoice, (i) => i.user, { eager: false })
   invoices = new Collection<Invoice>(this);
+
+  @OneToMany(() => File, (f) => f.author)
+  files = new Collection<File>(this);
+
+  @OneToMany(() => Form, (f) => f.author)
+  forms = new Collection<Form>(this);
 }

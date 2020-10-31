@@ -7,12 +7,16 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
 import { Account } from '../account/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
+import { FileInterceptor } from '../file/interceptors/file.interceptor';
+import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { FindUserDto } from './dtos/find-user.dto';
 import { FindUsersDto } from './dtos/find-users.dto';
@@ -60,5 +64,16 @@ export class UserController {
   @Delete(':id')
   delete(@Param() { id }: FindUserDto) {
     return this.userService.delete(id);
+  }
+
+  @UserAuth('file', 'create:own')
+  @Post('form')
+  @UseInterceptors(
+    FileInterceptor('form', 'forms', {
+      fileSize: 10000000,
+    }),
+  )
+  uploadForm(@UploadedFile() file: MulterFile, @Usr() user: User) {
+    return this.userService.uploadForm(file, user);
   }
 }

@@ -1,0 +1,88 @@
+<template>
+  <v-dialog
+    v-model="dialog"
+    :fullscreen="$vuetify.breakpoint.mobile"
+    max-width="440"
+  >
+    <template #activator="{ on, attrs }">
+      <slot name="activator" v-bind="{ on, attrs }">
+        <v-btn v-bind="attrs" large text v-on="on">Edit</v-btn>
+      </slot>
+    </template>
+
+    <v-card>
+      <v-toolbar flat>
+        <v-btn icon @click="dialog = false">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+
+        <v-toolbar-title>Update User</v-toolbar-title>
+
+        <v-spacer></v-spacer>
+      </v-toolbar>
+
+      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
+        <v-card-text>
+          <v-row>
+            <v-col>
+              <v-text-field-validated
+                v-model="dto.first"
+                label="First Name"
+                rules="required"
+                required
+                outlined
+              ></v-text-field-validated>
+            </v-col>
+            <v-col>
+              <v-text-field-validated
+                v-model="dto.last"
+                label="Last Name"
+                rules="required"
+                required
+                outlined
+              ></v-text-field-validated>
+            </v-col>
+          </v-row>
+
+          <birthday-picker v-model="dto.dob" outlined></birthday-picker>
+
+          <v-row>
+            <v-col>
+              <v-text-field-validated
+                v-model="dto.email"
+                label="Email"
+                rules="required"
+                required
+                outlined
+              ></v-text-field-validated>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn type="submit" :disabled="!passes">Submit Changes</v-btn>
+        </v-card-actions>
+      </v-form-validated>
+    </v-card>
+  </v-dialog>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
+
+@Component
+export default class DialogUpdateUser extends Vue {
+  dialog = false
+
+  dto = {
+    first: '',
+    last: '',
+    email: '',
+    dob: null as string | null,
+  }
+
+  onSubmit() {
+    console.log('Submitting Form')
+  }
+}
+</script>

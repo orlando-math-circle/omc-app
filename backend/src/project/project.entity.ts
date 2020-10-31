@@ -23,6 +23,12 @@ export class Project extends BaseEntity<Project, 'id'> {
   @Property({ nullable: true })
   picture?: string;
 
+  @Property({ onUpdate: () => new Date() })
+  updatedAt: Date = new Date();
+
+  @Property()
+  createdAt: Date = new Date();
+
   /**
    * Relationships
    */

@@ -20,6 +20,10 @@ const plugin: Plugin = ({ $axios, store }) => {
 
     return config
   })
+
+  $axios.onError((error) => {
+    console.error(`${error.config.url} - ${error.message}`)
+  })
 }
 
 export default plugin

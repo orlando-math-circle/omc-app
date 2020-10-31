@@ -1,8 +1,13 @@
 import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Account } from '../account/account.entity';
+import { REDUCED_LUNCH_FIELD } from '../app.constants';
 import { isNumber, Populate, PopulateFail } from '../app.utils';
+import { File } from '../file/entities/file.entity';
+import { Form } from '../file/entities/form.entity';
+import { FileService } from '../file/file.service';
+import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
@@ -12,6 +17,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: EntityRepository<User>,
+    private readonly fileService: FileService,
   ) {}
 
   /**
@@ -90,5 +96,23 @@ export class UserService {
     const user = await this.userRepository.findOneOrFail(id);
 
     return this.userRepository.remove(user).flush();
+  }
+
+  async uploadForm(metadata: MulterFile, user: User) {
+    if (typeof metadata == null) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    // This field is hardcoded, but others don't need to be.
+    const form = new Form(REDUCED_LUNCH_FIELD);
+    const file = new File(metadata);
+    form.file = file;
+
+    user.files.add(file);
+    user.forms.add(form);
+
+    await this.userRepository.flush();
+
+    return file;
   }
 }

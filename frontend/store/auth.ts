@@ -74,12 +74,13 @@ export const actions = actionTree(
       })
     },
     removeTokenCookie({ commit }): void {
+      console.info('Removing Token')
       commit('setToken', {
         jwt: null,
         complete: false,
         remember: true,
       })
-      this.app.$cookies.remove(COOKIE_NAME)
+      // this.app.$cookies.remove(COOKIE_NAME)
     },
     async login(
       { commit },
@@ -92,10 +93,13 @@ export const actions = actionTree(
         password,
       })
 
+      console.info(`New Token ${token}`)
+
       this.app.$accessor.auth.setTokenCookie({ jwt: token, complete, remember })
       commit('setStatus', State.WAITING)
     },
     async logout({ commit }, everywhere?: boolean): Promise<void> {
+      console.info('Logging Out')
       if (everywhere) {
         commit('setStatus', State.BUSY)
         await this.$axios.$post('/logout')
@@ -111,6 +115,8 @@ export const actions = actionTree(
       commit('setStatus', State.BUSY)
 
       const { token, complete } = await this.$axios.$post(`/switch/${userId}`)
+
+      console.info('Switching User')
 
       this.app.$accessor.auth.setTokenCookie({ jwt: token, complete })
       commit('setStatus', State.WAITING)

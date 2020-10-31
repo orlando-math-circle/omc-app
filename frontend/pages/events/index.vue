@@ -16,7 +16,7 @@
       </v-col>
 
       <!-- Admin Quick Management -->
-      <v-col v-if="$store.getters['auth/loggedIn']">
+      <v-col v-if="$accessor.auth.loggedIn">
         <v-menu offset-y>
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" v-on="on">Admin</v-btn>
