@@ -67,13 +67,27 @@ export class UserController {
   }
 
   @UserAuth('file', 'create:own')
-  @Post('form')
+  @Post('form/:id')
   @UseInterceptors(
     FileInterceptor('form', 'forms', {
       fileSize: 10000000,
     }),
   )
-  uploadForm(@UploadedFile() file: MulterFile, @Usr() user: User) {
-    return this.userService.uploadForm(file, user);
+  uploadForm(@UploadedFile() file: MulterFile, @Param('id') id: number) {
+    return this.userService.uploadForm(file, id);
+  }
+
+  @UserAuth('file', 'read:own')
+  @Get('form/fishy')
+  findForms(@Acc() account: Account) {
+    console.log(account);
+    return this.userService.findForms(
+      {
+        attachments: {
+          user: { id: { $in: account.users.getIdentifiers() as number[] } },
+        },
+      },
+      ['attachments'],
+    );
   }
 }

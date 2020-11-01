@@ -6,7 +6,10 @@ import { Middleware } from '@nuxt/types'
 const middleware: Middleware = (ctx) => {
   const loggedIn = ctx.app.$accessor.auth.loggedIn
 
-  if (!loggedIn) return ctx.redirect('/login')
+  if (!loggedIn) {
+    console.info('Auth Required: Redirecting')
+    return ctx.redirect('/login')
+  }
 }
 
 export default middleware

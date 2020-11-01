@@ -1,6 +1,6 @@
 import { Context } from '@nuxt/types'
 import { actionTree, getAccessorType } from 'nuxt-typed-vuex'
-import { COOKIE_CALENDAR_TYPE, COOKIE_NAME } from '../utils/constants'
+import { COOKIE_CALENDAR_TYPE } from '../utils/constants'
 import * as auth from '~/store/auth'
 import * as courses from '~/store/courses'
 import * as events from '~/store/events'
@@ -9,6 +9,7 @@ import * as paypal from '~/store/paypal'
 import * as projects from '~/store/projects'
 import * as registrations from '~/store/registrations'
 import * as users from '~/store/users'
+import * as files from '~/store/files'
 
 export const state = () => ({})
 
@@ -24,32 +25,28 @@ export const mutations = {}
 export const actions = actionTree(
   { state, getters, mutations },
   {
-    async nuxtServerInit(_vuexContext, nuxtContext: Context): Promise<void> {
-      const token = nuxtContext.app.$cookies.get(COOKIE_NAME)
+    async nuxtServerInit(_vuexContext, { app }: Context): Promise<void> {
+      const token = app.$cookies.get('omc-token')
 
-      if (!token) {
-        console.info('No Token Found')
-        return this.app.$accessor.auth.removeTokenCookie()
-      }
+      if (!token) return
 
-      this.app.$accessor.auth.setTokenCookie(token)
-
-      console.info(token)
+      app.$accessor.auth.setToken(token)
 
       try {
-        await this.app.$accessor.auth.getMe()
+        await app.$accessor.auth.getMe()
       } catch (error) {
         console.error(
           'Unable to retrieve user from token',
           error.message,
-          token.jwt
+          token.substr(-5)
         )
 
-        this.app.$accessor.auth.removeTokenCookie()
+        app.$accessor.auth.setToken(null)
+        app.$cookies.remove('omc-token')
       }
 
       // Parse calendar type setting.
-      const calendarType = nuxtContext.app.$cookies.get(COOKIE_CALENDAR_TYPE)
+      const calendarType = app.$cookies.get(COOKIE_CALENDAR_TYPE)
 
       if (calendarType) {
         this.app.$accessor.auth.setSettings({ calendarType })
@@ -72,5 +69,6 @@ export const accessorType = getAccessorType({
     projects,
     registrations,
     users,
+    files,
   },
 })

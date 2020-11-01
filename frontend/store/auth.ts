@@ -1,10 +1,9 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { Account } from '../../backend/src/account/account.entity'
+import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.dto'
 import { Roles } from '../../backend/src/app.roles'
 import { User } from '../../backend/src/user/user.entity'
-import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.dto'
 import { State } from '../interfaces/state.interface'
-import { COOKIE_NAME } from '../utils/constants'
 
 interface LoginDto {
   email: string
@@ -20,18 +19,22 @@ export const state = () => ({
   settings: {
     calendarType: 'month',
   },
-  token: {
-    jwt: null as string | null,
-    complete: false,
-    remember: true,
-  },
+  // token: {
+  //   jwt: null as string | null,
+  //   complete: false,
+  //   remember: true,
+  // },
+  token: null as string | null,
+  complete: false,
+  remember: true,
   justRegistered: false,
 })
 
 type AuthState = ReturnType<typeof state>
 
 export const getters = getterTree(state, {
-  loggedIn: (state) => state.token.jwt && state.token.complete,
+  loggedIn: (state) => !!state.token,
+  accountUsers: (state) => (state.account?.users as unknown) as User[],
   isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN),
   isValidated: (state) => state.user?.emailVerified,
 })
@@ -43,8 +46,11 @@ export const mutations = mutationTree(state, {
   setError(state, error: Error) {
     state.error = error
   },
-  setToken(state, token: Partial<AuthState['token']>) {
-    state.token = Object.assign({}, state.token, token)
+  setToken(state, token: string | null) {
+    state.token = token
+  },
+  setComplete(state, complete: boolean) {
+    state.complete = complete
   },
   setUser(state, user: User) {
     state.user = user
@@ -55,6 +61,9 @@ export const mutations = mutationTree(state, {
   setSettings(state, settings: Partial<AuthState['settings']>) {
     state.settings = Object.assign({}, state.settings, settings)
   },
+  setRemember(state, remember: boolean) {
+    state.remember = remember
+  },
   setJustRegistered(state, value: boolean) {
     state.justRegistered = value
   },
@@ -63,62 +72,49 @@ export const mutations = mutationTree(state, {
 export const actions = actionTree(
   { state, getters, mutations },
   {
-    setTokenCookie(
-      { commit, state },
-      token: Partial<AuthState['token']>
-    ): void {
-      commit('setToken', token)
-
-      this.app.$cookies.set(COOKIE_NAME, state.token, {
-        maxAge: state.token.remember ? 365 * 24 * 60 * 60 * 1000 : undefined,
+    setCookie({ state }, token: string): void {
+      this.app.$cookies.set('omc-token', token, {
+        maxAge: state.remember ? 365 * 24 * 60 * 60 * 1000 : undefined,
+        sameSite: true,
       })
     },
-    removeTokenCookie({ commit }): void {
-      console.info('Removing Token')
-      commit('setToken', {
-        jwt: null,
-        complete: false,
-        remember: true,
-      })
-      // this.app.$cookies.remove(COOKIE_NAME)
+    removeCookie(_ctx): void {
+      this.app.$cookies.remove('omc-token')
     },
-    async login(
-      { commit },
-      { email, password, remember }: LoginDto
-    ): Promise<void> {
+    async login({ commit }, loginDto: LoginDto): Promise<void> {
       commit('setStatus', State.BUSY)
 
       const { token, complete } = await this.$axios.$post('/login', {
-        email,
-        password,
+        email: loginDto.email,
+        password: loginDto.password,
       })
 
-      console.info(`New Token ${token}`)
-
-      this.app.$accessor.auth.setTokenCookie({ jwt: token, complete, remember })
+      commit('setRemember', loginDto.remember)
+      commit('setToken', token)
+      this.app.$accessor.auth.setCookie(token)
+      commit('setComplete', complete)
       commit('setStatus', State.WAITING)
     },
     async logout({ commit }, everywhere?: boolean): Promise<void> {
-      console.info('Logging Out')
+      commit('setStatus', State.BUSY)
+
       if (everywhere) {
-        commit('setStatus', State.BUSY)
         await this.$axios.$post('/logout')
       }
 
-      this.app.$accessor.auth.removeTokenCookie()
+      commit('setToken', null)
+      this.app.$accessor.auth.removeCookie()
 
-      if (everywhere) {
-        commit('setStatus', State.WAITING)
-      }
+      commit('setStatus', State.WAITING)
     },
     async switchUser({ commit }, userId: number): Promise<void> {
       commit('setStatus', State.BUSY)
 
       const { token, complete } = await this.$axios.$post(`/switch/${userId}`)
 
-      console.info('Switching User')
-
-      this.app.$accessor.auth.setTokenCookie({ jwt: token, complete })
+      commit('setToken', token)
+      this.app.$accessor.auth.setCookie(token)
+      commit('setComplete', complete)
       commit('setStatus', State.WAITING)
     },
     async register(
@@ -127,18 +123,17 @@ export const actions = actionTree(
     ): Promise<void> {
       try {
         commit('setStatus', State.BUSY)
+
         const { token, complete } = await this.$axios.$post(
           '/account/register',
           createAccountDto
         )
 
-        this.app.$accessor.auth.setTokenCookie({
-          jwt: token,
-          complete,
-          remember: true,
-        })
-        commit('setStatus', State.WAITING)
+        commit('setToken', token)
+        this.app.$accessor.auth.setCookie(token)
+        commit('setComplete', complete)
         commit('setJustRegistered', true)
+        commit('setStatus', State.WAITING)
       } catch (error) {
         commit('setStatus', State.ERROR)
         commit('setError', error)

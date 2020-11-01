@@ -1,7 +1,7 @@
 import { Plugin } from '@nuxt/types'
 import { initializeAxios } from '../utils/axios'
 
-const plugin: Plugin = ({ $axios, store }) => {
+const plugin: Plugin = ({ $axios, app }) => {
   /**
    * Attaches $axios to the Nuxt axios instance.
    */
@@ -12,8 +12,8 @@ const plugin: Plugin = ({ $axios, store }) => {
    * in each Axios request, or is removed when gone.
    */
   $axios.onRequest((config) => {
-    if (store.state.auth.token.jwt) {
-      config.headers.common.Authorization = `Bearer ${store.state.auth.token.jwt}`
+    if (app.$accessor.auth.token) {
+      config.headers.common.Authorization = `Bearer ${app.$accessor.auth.token}`
     } else {
       delete config.headers.common.Authorization
     }
@@ -22,7 +22,7 @@ const plugin: Plugin = ({ $axios, store }) => {
   })
 
   $axios.onError((error) => {
-    console.error(`${error.config.url} - ${error.message}`)
+    console.error(`${error.message}`)
   })
 }
 

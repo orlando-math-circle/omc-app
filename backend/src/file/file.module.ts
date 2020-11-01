@@ -1,6 +1,6 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Global, Module } from '@nestjs/common';
-import { File } from './entities/file.entity';
+import { File } from './file.entity';
 import { FileController } from './file.controller';
 import { FileService } from './file.service';
 

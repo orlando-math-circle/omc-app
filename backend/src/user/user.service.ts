@@ -1,12 +1,16 @@
 import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { Account } from '../account/account.entity';
-import { REDUCED_LUNCH_FIELD } from '../app.constants';
 import { isNumber, Populate, PopulateFail } from '../app.utils';
-import { File } from '../file/entities/file.entity';
-import { Form } from '../file/entities/form.entity';
+import { FileAttachment } from '../file-attachment/file-attachment.entity';
+import { File } from '../file/file.entity';
 import { FileService } from '../file/file.service';
+import { ApprovalStatus } from '../file/interfaces/approval-status.enum';
 import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -98,21 +102,38 @@ export class UserService {
     return this.userRepository.remove(user).flush();
   }
 
-  async uploadForm(metadata: MulterFile, user: User) {
+  async uploadForm(metadata: MulterFile, userOrId: User | number) {
     if (typeof metadata == null) {
       throw new BadRequestException('No file uploaded');
     }
 
+    const user =
+      typeof userOrId === 'number'
+        ? await this.userRepository.findOneOrFail(userOrId, ['attachments'])
+        : userOrId;
+
+    if (user.attachments.length > 0) {
+      for (const attachment of user.attachments) {
+        if (attachment.status === ApprovalStatus.PENDING) {
+          throw new ConflictException('Pending form');
+        }
+      }
+    }
+
     // This field is hardcoded, but others don't need to be.
-    const form = new Form(REDUCED_LUNCH_FIELD);
+    const form = new FileAttachment();
     const file = new File(metadata);
     form.file = file;
 
     user.files.add(file);
-    user.forms.add(form);
+    user.attachments.add(form);
 
     await this.userRepository.flush();
 
     return file;
+  }
+
+  findForms(where: FilterQuery<User>, populate: PopulateFail<User>) {
+    return this.userRepository.findOneOrFail(where, ['attachments'], populate);
   }
 }

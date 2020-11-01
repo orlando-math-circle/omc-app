@@ -1,10 +1,10 @@
 <template>
   <ValidationProvider v-slot="{ errors }" :vid="vid" :rules="rules">
-    <v-select
-      v-model="data"
+    <v-file-input
       :error-messages="errors"
       v-bind="$attrs"
       v-on="$listeners"
+      @change="onChange"
     >
       <template
         v-for="(_, scopedSlotName) in $scopedSlots"
@@ -16,12 +16,12 @@
       <template v-for="(_, slotName) in $slots" v-slot:[slotName]>
         <slot :name="slotName" />
       </template>
-    </v-select>
+    </v-file-input>
   </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, PropSync } from 'nuxt-property-decorator'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { ValidationProvider } from 'vee-validate'
 
 @Component({
@@ -29,9 +29,12 @@ import { ValidationProvider } from 'vee-validate'
     ValidationProvider,
   },
 })
-export default class VTextFieldValidated extends Vue {
-  @PropSync('value') data!: string | number | object
+export default class VFileInputValidated extends Vue {
   @Prop({ default: '' }) rules!: string | object
   @Prop() vid?: string
+
+  onChange(value: File) {
+    this.$emit('input', value)
+  }
 }
 </script>

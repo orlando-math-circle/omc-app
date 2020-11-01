@@ -123,8 +123,7 @@ export default class DefaultLayout extends Vue {
   }
 
   logout() {
-    this.$store.dispatch('auth/logout')
-
+    this.$accessor.auth.logout()
     this.$router.push('/')
   }
 }

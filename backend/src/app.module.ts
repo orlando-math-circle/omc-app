@@ -9,6 +9,8 @@ import { CourseModule } from './course/course.module';
 import { EmailModule } from './email/email.module';
 import { EventRegistrationModule } from './event-registration/event-registration.module';
 import { EventModule } from './event/event.module';
+import { FileAttachmentModule } from './file-attachment/file-attachment.module';
+import { FileFieldModule } from './file-fields/file-field.module';
 import { FileModule } from './file/file.module';
 import { PayPalModule } from './paypal/paypal.module';
 import { ProjectModule } from './project/project.module';
@@ -34,6 +36,8 @@ import { UserModule } from './user/user.module';
     ProjectModule,
     TwitterModule,
     FileModule,
+    FileFieldModule,
+    FileAttachmentModule,
   ],
 })
 export class AppModule {}

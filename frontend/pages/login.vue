@@ -77,6 +77,7 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate'
     ValidationObserver,
     ValidationProvider,
   },
+  middleware: 'guest',
   layout: 'landing',
   head: {
     title: 'Login',
@@ -103,7 +104,7 @@ export default class LoginPage extends Vue {
         remember: this.remember,
       })
 
-      if (this.$accessor.auth.token.complete) {
+      if (this.$accessor.auth.complete) {
         this.$router.push('/')
       } else {
         this.$router.push('/switcher')

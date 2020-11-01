@@ -13,8 +13,8 @@ import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
 import { birthdayToAge, getYearsDiff } from '../app.utils';
 import { EventRegistration } from '../event-registration/event-registration.entity';
-import { File } from '../file/entities/file.entity';
-import { Form } from '../file/entities/form.entity';
+import { FileAttachment } from '../file-attachment/file-attachment.entity';
+import { File } from '../file/file.entity';
 import { Invoice } from '../invoice/invoice.entity';
 import { Grades } from './enums/grades.enum';
 
@@ -44,14 +44,14 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ type: ArrayType })
   roles: Roles[] = [];
 
-  @Property({ nullable: true })
-  feeWaived: boolean;
+  @Property({ default: false })
+  feeWaived: boolean = false;
 
   @Enum({ type: () => Grades, nullable: true })
-  gradeSet: Grades;
+  gradeSet?: Grades;
 
   @Property({ nullable: true })
-  gradeSetAt: Date = new Date();
+  gradeSetAt?: Date = new Date();
 
   @Property({ nullable: true })
   avatar?: string;
@@ -122,6 +122,6 @@ export class User extends BaseEntity<User, 'id'> {
   @OneToMany(() => File, (f) => f.author)
   files = new Collection<File>(this);
 
-  @OneToMany(() => Form, (f) => f.author)
-  forms = new Collection<Form>(this);
+  @OneToMany(() => FileAttachment, (a) => a.user)
+  attachments = new Collection<FileAttachment>(this);
 }

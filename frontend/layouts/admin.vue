@@ -93,15 +93,21 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item link to="/admin/volunteers">
-          <v-list-item-icon>
-            <v-icon>mdi-cloud-upload</v-icon>
-          </v-list-item-icon>
+        <v-list-group prepend-icon="mdi-file">
+          <template #activator>
+            <v-list-item-title>Files</v-list-item-title>
+          </template>
 
-          <v-list-item-content>
-            <v-list-item-title>Uploads</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          <v-list-item link to="/admin/files/lunch">
+            <v-list-item-icon>
+              <v-icon>mdi-currency-usd-off</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Reduced Lunch Form</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
 
         <v-divider></v-divider>
 
@@ -115,7 +121,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item link @click="$accessor.auth.logout">
+        <v-list-item link @click="logout">
           <v-list-item-icon>
             <v-icon>mdi-logout</v-icon>
           </v-list-item-icon>
@@ -140,7 +146,7 @@
         </template>
 
         <v-list>
-          <v-list-item @click="$accessor.auth.logout">
+          <v-list-item @click="logout">
             <v-list-item-title>Logout</v-list-item-title>
           </v-list-item>
 
@@ -181,6 +187,11 @@ export default class AdminLayout extends Vue {
 
   set isDark(value: boolean) {
     this.$vuetify.theme.dark = value
+  }
+
+  logout() {
+    this.$accessor.auth.logout()
+    this.$router.push('/')
   }
 }
 </script>

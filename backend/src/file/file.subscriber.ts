@@ -6,7 +6,7 @@ import {
 } from '@mikro-orm/core';
 import { Logger } from '@nestjs/common';
 import fs from 'fs';
-import { File } from './entities/file.entity';
+import { File } from './file.entity';
 
 const { unlink } = fs.promises;
 

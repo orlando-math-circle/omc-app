@@ -1,5 +1,5 @@
 import { extend, setInteractionMode } from 'vee-validate'
-import { email } from 'vee-validate/dist/rules'
+import { email, ext } from 'vee-validate/dist/rules'
 import { parse } from 'date-fns'
 import { getTimeValue } from '../utils/utilities'
 
@@ -12,6 +12,22 @@ import { getTimeValue } from '../utils/utilities'
 setInteractionMode('lazy')
 
 extend('email', email)
+
+extend('ext', {
+  validate: (
+    files: File | File[],
+    extensions: string[] | Record<string, any>
+  ) => {
+    const regex = new RegExp(`.(${extensions.join('|')})$`, 'i')
+
+    if (Array.isArray(files)) {
+      return files.every((file) => regex.test(file.name))
+    }
+
+    return regex.test(files.name)
+  },
+  message: 'This file type is not permitted.',
+})
 
 extend('required', {
   validate(value) {

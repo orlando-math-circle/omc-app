@@ -21,8 +21,6 @@ export class FileStorage {
     } else {
       this.path = this.base;
     }
-
-    console.log(this.base, this.folder, this.path);
   }
 
   async ensureDirectory() {

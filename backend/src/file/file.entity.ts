@@ -6,19 +6,23 @@ import {
   Property,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { User } from '../../user/user.entity';
-import { MulterFile } from '../interfaces/multer-file.interface';
-import { Form } from './form.entity';
+import { FileAttachment } from '../file-attachment/file-attachment.entity';
+import { User } from '../user/user.entity';
+import { MulterFile } from './interfaces/multer-file.interface';
 
 @Entity()
 export class File {
-  constructor(file: MulterFile) {
+  constructor(file: MulterFile, user?: User) {
     this.name = file.filename;
     this.originalName = file.originalname;
     this.size = file.size;
     this.mimetype = file.mimetype;
     this.destination = file.destination;
     this.path = file.path;
+
+    if (user) {
+      this.author = user;
+    }
   }
 
   @PrimaryKey()
@@ -52,6 +56,6 @@ export class File {
   @ManyToOne(() => User, { eager: true })
   author!: User;
 
-  @OneToOne(() => Form, null, { nullable: true })
-  form?: Form;
+  @OneToOne(() => FileAttachment, null, { nullable: true })
+  attachment?: FileAttachment;
 }

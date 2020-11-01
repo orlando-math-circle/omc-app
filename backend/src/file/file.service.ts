@@ -8,7 +8,7 @@ import rimraf from 'rimraf';
 import { promisify } from 'util';
 import { FILE_DIRECTORY } from '../app.constants';
 import { User } from '../user/user.entity';
-import { File } from './entities/file.entity';
+import { File } from './file.entity';
 import { MulterFile } from './interfaces/multer-file.interface';
 
 const { readdir, lstat, mkdir, unlink } = fs.promises;
@@ -27,13 +27,28 @@ export class FileService {
     this.path = resolve(config.get(FILE_DIRECTORY));
   }
 
-  async create(metadata: MulterFile, user: User) {
-    const file = new File(metadata);
-    file.author = user;
+  async create(
+    metadata: MulterFile | MulterFile[],
+    user: User,
+    persist = true,
+  ) {
+    const entities: File[] = [];
 
-    await this.fileRepository.persist(file).flush();
+    if (Array.isArray(metadata)) {
+      entities.push(...metadata.map((data) => new File(data, user)));
+    } else {
+      entities.push(new File(metadata, user));
+    }
 
-    return file;
+    if (persist) {
+      await this.fileRepository.persist(entities).flush();
+    }
+
+    return entities;
+  }
+
+  async findOneOrFail(where: FilterQuery<File>) {
+    return this.fileRepository.findOneOrFail(where);
   }
 
   async getDirectory(path: fs.PathLike) {
