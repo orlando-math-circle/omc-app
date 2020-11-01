@@ -119,6 +119,8 @@ export default class DefaultLayout extends Vue {
   }
 
   async fetch() {
+    if (this.$accessor.auth.user) return
+
     await this.$store.dispatch('auth/getMe')
   }
 

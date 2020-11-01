@@ -7,10 +7,11 @@ import { Middleware } from '@nuxt/types'
  * with this middleware if they are already logged in.
  */
 const middleware: Middleware = (ctx) => {
-  const loggedIn = ctx.app.$accessor.auth.loggedIn
-  const isSwitcher = ctx.route.fullPath === '/switcher'
+  const isOnSwitcher = ctx.route.fullPath === '/switcher'
 
-  if (loggedIn && !isSwitcher) return ctx.redirect('/home')
+  if (ctx.app.$accessor.auth.token && !isOnSwitcher) {
+    return ctx.redirect('/home')
+  }
 }
 
 export default middleware

@@ -4,6 +4,7 @@ import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.
 import { Roles } from '../../backend/src/app.roles'
 import { User } from '../../backend/src/user/user.entity'
 import { State } from '../interfaces/state.interface'
+import { COOKIE_COMPLETE, COOKIE_JWT } from '../utils/constants'
 
 interface LoginDto {
   email: string
@@ -72,14 +73,19 @@ export const mutations = mutationTree(state, {
 export const actions = actionTree(
   { state, getters, mutations },
   {
-    setCookie({ state }, token: string): void {
-      this.app.$cookies.set('omc-token', token, {
+    setCookie(
+      { state },
+      { name, value }: { name: string; value: string | null }
+    ): void {
+      if (value === null) {
+        this.app.$cookies.remove(name)
+        return
+      }
+
+      this.app.$cookies.set(name, value, {
         maxAge: state.remember ? 365 * 24 * 60 * 60 * 1000 : undefined,
         sameSite: true,
       })
-    },
-    removeCookie(_ctx): void {
-      this.app.$cookies.remove('omc-token')
     },
     async login({ commit }, loginDto: LoginDto): Promise<void> {
       commit('setStatus', State.BUSY)
@@ -91,8 +97,13 @@ export const actions = actionTree(
 
       commit('setRemember', loginDto.remember)
       commit('setToken', token)
-      this.app.$accessor.auth.setCookie(token)
       commit('setComplete', complete)
+      this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: token })
+      this.app.$accessor.auth.setCookie({
+        name: COOKIE_COMPLETE,
+        value: complete,
+      })
+
       commit('setStatus', State.WAITING)
     },
     async logout({ commit }, everywhere?: boolean): Promise<void> {
@@ -103,7 +114,8 @@ export const actions = actionTree(
       }
 
       commit('setToken', null)
-      this.app.$accessor.auth.removeCookie()
+      this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: null })
+      this.app.$accessor.auth.setCookie({ name: COOKIE_COMPLETE, value: null })
 
       commit('setStatus', State.WAITING)
     },
@@ -113,8 +125,13 @@ export const actions = actionTree(
       const { token, complete } = await this.$axios.$post(`/switch/${userId}`)
 
       commit('setToken', token)
-      this.app.$accessor.auth.setCookie(token)
       commit('setComplete', complete)
+      this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: token })
+      this.app.$accessor.auth.setCookie({
+        name: COOKIE_COMPLETE,
+        value: complete,
+      })
+
       commit('setStatus', State.WAITING)
     },
     async register(
@@ -130,8 +147,13 @@ export const actions = actionTree(
         )
 
         commit('setToken', token)
-        this.app.$accessor.auth.setCookie(token)
         commit('setComplete', complete)
+        this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: null })
+        this.app.$accessor.auth.setCookie({
+          name: COOKIE_COMPLETE,
+          value: complete,
+        })
+
         commit('setJustRegistered', true)
         commit('setStatus', State.WAITING)
       } catch (error) {

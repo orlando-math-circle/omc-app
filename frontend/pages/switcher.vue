@@ -57,7 +57,9 @@ export default class SwitcherPage extends Vue {
   }
 
   async fetch() {
-    await this.$accessor.auth.getAccount()
+    if (this.account == null || this.account.users.length >= 0) {
+      await this.$accessor.auth.getAccount()
+    }
   }
 
   async switchUser(user: User) {

@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-6"> </v-container>
+  <v-container class="pa-6"> Files </v-container>
 </template>
 
 <script lang="ts">

@@ -16,7 +16,11 @@
             ></v-text-field>
           </v-card-title>
 
-          <v-data-table :headers="headers" :items="attachments"></v-data-table>
+          <v-data-table :headers="headers" :items="attachments">
+            <template #item.status="{ item }">
+              <span class="captialize">{{ item.status }}</span>
+            </template>
+          </v-data-table>
         </v-card>
       </v-col>
     </v-row>
@@ -50,3 +54,9 @@ export default class LunchFilesPage extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+.capitalize {
+  text-transform: captialize;
+}
+</style>
