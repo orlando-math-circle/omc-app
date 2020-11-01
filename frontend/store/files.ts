@@ -67,7 +67,9 @@ export const actions = actionTree(
       try {
         commit('setStatus', { status: State.BUSY })
 
-        const attachments = await this.$axios.$get(`/attachment/${field || ''}`)
+        const attachments = await this.$axios.$get('/attachment', {
+          params: field,
+        })
 
         commit('setAttachments', attachments)
       } catch (error) {

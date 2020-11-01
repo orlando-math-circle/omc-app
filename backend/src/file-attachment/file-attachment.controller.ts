@@ -26,17 +26,17 @@ export class FileAttachmentController {
   }
 
   @UserAuth('file-attachment', 'read:any')
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.attachmentService.findOneOrFail(id, ['file']);
-  }
-
-  @UserAuth('file-attachment', 'read:any')
   @Get()
   findAll(@Query('field') field?: string) {
     const where = field ? { field: { name: field } } : {};
 
     return this.attachmentService.findAll(where, ['file']);
+  }
+
+  @UserAuth('file-attachment', 'read:any')
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.attachmentService.findOneOrFail(id, ['file']);
   }
 
   @UserAuth('file-attachment', 'read:own')

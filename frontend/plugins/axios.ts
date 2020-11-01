@@ -13,7 +13,6 @@ const plugin: Plugin = ({ $axios, app }) => {
    */
   $axios.onRequest((config) => {
     if (app.$accessor.auth.token) {
-      console.log(`URL: ${config.url} - ${app.$accessor.auth.token.substr(-5)}`)
       config.headers.common.Authorization = `Bearer ${app.$accessor.auth.token}`
     } else {
       delete config.headers.common.Authorization
@@ -23,10 +22,15 @@ const plugin: Plugin = ({ $axios, app }) => {
   })
 
   $axios.onError((error) => {
+    if (!error.config) {
+      console.error(error)
+      return
+    }
+
     console.error(
-      `URL: ${error.config.url} - ${app.$accessor.auth.token?.substr(-5)} - ${
-        error.message
-      }`
+      `${error.config.method}: ${
+        error.config.url
+      } - ${app.$accessor.auth.token?.substr(-5)} - ${error.message}`
     )
   })
 }

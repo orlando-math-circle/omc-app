@@ -84,7 +84,6 @@ export const actions = actionTree(
 
       this.app.$cookies.set(name, value, {
         maxAge: state.remember ? 365 * 24 * 60 * 60 * 1000 : undefined,
-        sameSite: true,
       })
     },
     async login({ commit }, loginDto: LoginDto): Promise<void> {

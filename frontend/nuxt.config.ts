@@ -90,6 +90,7 @@ const config: NuxtConfig = {
    */
   axios: {
     baseURL: 'http://localhost:3030/',
+    proxyHeaders: false,
   },
 
   vue: {

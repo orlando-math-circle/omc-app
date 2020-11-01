@@ -35,6 +35,8 @@ export const actions = actionTree(
 
       if (!token) return
 
+      app.$cookies.set(COOKIE_JWT, token)
+      app.$cookies.set(COOKIE_COMPLETE, complete)
       app.$accessor.auth.setToken(token)
       app.$accessor.auth.setComplete(complete)
 
@@ -46,10 +48,8 @@ export const actions = actionTree(
         }
       } catch (error) {
         if (error.response?.status === 401) {
-          if (error.response.status === 401) {
-            app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: null })
-            app.$accessor.auth.setCookie({ name: COOKIE_COMPLETE, value: null })
-          }
+          app.$cookies.remove(COOKIE_JWT)
+          app.$cookies.remove(COOKIE_COMPLETE)
         }
       }
 
