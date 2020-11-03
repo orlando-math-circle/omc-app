@@ -35,6 +35,7 @@ export class ProjectController {
       contains
         ? ({
             $or: [
+              { 'lower(id::text)': { $like: `%${contains}%` } },
               { 'lower(name)': { $like: `%${contains}%` } },
               { 'lower(description)': { $like: `%${contains}%` } },
             ],

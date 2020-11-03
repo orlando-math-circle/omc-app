@@ -350,10 +350,10 @@ export default (Vue as ComponentRefs).extend({
         description: '',
       },
       project: {
-        id: 0,
+        id: null as null | number,
       },
       course: {
-        id: 0,
+        id: null as null | number,
       },
       loading: false,
     }
@@ -427,8 +427,8 @@ export default (Vue as ComponentRefs).extend({
           : toDate(this.dates.end.date, this.times.end.time),
         rrule: this.rrule || undefined,
         isOnline: false, // TODO: Temporary
-        project: this.project?.id,
-        course: this.course?.id,
+        project: this.project.id || undefined,
+        course: this.course.id || undefined,
       }
 
       try {

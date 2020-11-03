@@ -3,6 +3,7 @@ import {
   FindOneOrFailOptions,
   Populate as MikroORMPopulate,
 } from '@mikro-orm/core';
+import { isAfter, isBefore, isSameDay } from 'date-fns';
 import moment from 'moment';
 
 /**
@@ -30,19 +31,23 @@ export const isString = (fn: any): fn is string => typeof fn === 'string';
 /**
  * Determines if two single-dimension arrays of primities are equal.
  */
-export const isEqual = <T extends string | number | boolean | null>(
+export const isEqualArray = <T extends string | number | boolean | null>(
   a: T[],
   b: T[],
 ) => a.length === b.length && a.every((i) => b.includes(i));
 
 /**
- * Moment Library & Date Utilities
+ * Date Utilities
  */
 
-export const birthdayToAge = (date: Date) => moment().diff(date, 'years');
+export const isBetween = (start: Date, end: Date, date: Date) =>
+  isAfter(date, start) && isBefore(date, end);
 
-export const isSameDay = (dt1: Date, dt2: Date) =>
-  moment(dt1).isSame(dt2, 'day');
+export const isBetweenInclusive = (start: Date, end: Date, date: Date) =>
+  (isSameDay(start, date) || isAfter(date, start)) &&
+  (isSameDay(end, date) || isBefore(date, end));
+
+export const birthdayToAge = (date: Date) => moment().diff(date, 'years');
 
 export const isBeforeDay = (dt1: Date, dt2: Date) =>
   moment(dt1).isBefore(dt2, 'day');
@@ -73,3 +78,5 @@ export const getYearsDiff = (start: Date, end: Date) => {
 
   return retval;
 };
+
+export { isSameDay };

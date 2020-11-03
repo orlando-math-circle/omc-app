@@ -14,6 +14,8 @@ import * as projects from '~/store/projects'
 import * as registrations from '~/store/registrations'
 import * as users from '~/store/users'
 import * as files from '~/store/files'
+import * as volunteers from '~/store/volunteers'
+import * as snackbar from '~/store/snackbar'
 
 export const state = () => ({})
 
@@ -78,5 +80,7 @@ export const accessorType = getAccessorType({
     registrations,
     users,
     files,
+    volunteers,
+    snackbar,
   },
 })

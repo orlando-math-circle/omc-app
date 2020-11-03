@@ -29,6 +29,13 @@ export class FileFieldService implements OnModuleInit {
     return this.fileFieldRepository.findOneOrFail(where, populate);
   }
 
+  async findAndCount<P extends Populate<FileField> = any>(
+    where: FilterQuery<FileField> = {},
+    populate?: P,
+  ) {
+    return this.fileFieldRepository.findAndCount(where, populate);
+  }
+
   async onModuleInit() {
     let reducedLunchFormField = await this.fileFieldRepository.findOne({
       name: REDUCED_LUNCH_FIELD,

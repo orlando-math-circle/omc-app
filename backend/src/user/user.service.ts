@@ -1,12 +1,23 @@
-import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
+import {
+  EntityRepository,
+  FilterQuery,
+  QueryOrder,
+  QueryOrderMap,
+} from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   BadRequestException,
   ConflictException,
   Injectable,
 } from '@nestjs/common';
+import { eachWeekOfInterval, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
-import { isNumber, Populate, PopulateFail } from '../app.utils';
+import {
+  isBetweenInclusive,
+  isNumber,
+  Populate,
+  PopulateFail,
+} from '../app.utils';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { FileService } from '../file/file.service';
@@ -70,11 +81,24 @@ export class UserService {
    * matching users and a count of all users matching the query.
    *
    * @param where Primary key or query condition.
+   * @param populate Relationships to populate.
    * @param limit Maximum number of users to return.
    * @param offset Number of users to skip.
+   * @param orderBy Ordering query.
    */
-  findAll(where: FilterQuery<User>, limit: number, offset: number) {
-    return this.userRepository.findAndCount(where, { limit, offset });
+  findAll<P extends Populate<User> = any>(
+    where: FilterQuery<User>,
+    populate?: P,
+    limit?: number,
+    offset?: number,
+    orderBy?: QueryOrderMap,
+  ) {
+    return this.userRepository.findAndCount(where, {
+      limit,
+      offset,
+      populate,
+      orderBy,
+    });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User>;
@@ -135,5 +159,35 @@ export class UserService {
 
   findForms(where: FilterQuery<User>, populate: PopulateFail<User>) {
     return this.userRepository.findOneOrFail(where, ['attachments'], populate);
+  }
+
+  async getUserStatistics() {
+    const retval = {};
+    const now = new Date();
+    const monthAgo = sub(now, { months: 1 });
+    const weeks = eachWeekOfInterval({ start: monthAgo, end: now });
+    const labels = weeks.map(
+      (week) => 'Week of ' + format(week, 'EEE, MMM qo, yyyy'),
+    );
+
+    const [users, count] = await this.userRepository.findAndCount(
+      {
+        createdAt: { $gte: weeks[0] },
+      },
+      { orderBy: { createdAt: QueryOrder.ASC } },
+    );
+
+    // This could be more efficient, but not impacting anything.
+    for (let i = 0; i < weeks.length; i++) {
+      retval[weeks[i].toISOString()] = 0;
+
+      for (let j = 0; j < users.length; j++) {
+        if (isBetweenInclusive(weeks[i], weeks[i + 1], users[j].createdAt)) {
+          retval[weeks[i].toISOString()] += 1;
+        }
+      }
+    }
+
+    return { month: retval, count, labels };
   }
 }

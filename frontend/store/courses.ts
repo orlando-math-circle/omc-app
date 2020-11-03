@@ -7,6 +7,7 @@ import { State, StatePayload } from '../interfaces/state.interface'
 export const state = () => ({
   status: State.UNLOADED,
   error: null as Error | null,
+  course: null as Course | null,
   courses: [] as Course[],
   total: 0,
 })
@@ -22,6 +23,9 @@ export const mutations = mutationTree(state, {
   },
   setCourses(state, courses: Course[]) {
     state.courses = courses
+  },
+  setCourse(state, course: Course) {
+    state.course = course
   },
   setTotal(state, total: number) {
     state.total = total
@@ -44,15 +48,32 @@ export const actions = actionTree(
         commit('setStatus', { status: State.ERROR, error })
       }
     },
-    async findAll({ commit }, dto: FindAllCoursesDto) {
-      commit('setStatus', { status: State.BUSY })
-      const [courses, total] = await this.$axios.$get('/course', {
-        params: dto,
-      })
+    async findOne({ commit }, id: number | string) {
+      try {
+        commit('setStatus', { status: State.BUSY })
 
-      commit('setCourses', courses)
-      commit('setTotal', total)
-      commit('setStatus', { status: State.WAITING })
+        const course = await this.$axios.$get(`/course/${id}`)
+
+        commit('setCourse', course)
+        commit('setStatus', { status: State.WAITING })
+      } catch (error) {
+        commit('setStatus', { status: State.WAITING, error })
+      }
+    },
+    async findAll({ commit }, findAllCoursesDto?: FindAllCoursesDto) {
+      try {
+        commit('setStatus', { status: State.BUSY })
+
+        const [courses, total] = await this.$axios.$get('/course', {
+          params: findAllCoursesDto,
+        })
+
+        commit('setCourses', courses)
+        commit('setTotal', total)
+        commit('setStatus', { status: State.WAITING })
+      } catch (error) {
+        commit('setStatus', { status: State.WAITING, error })
+      }
     },
   }
 )

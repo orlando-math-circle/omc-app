@@ -46,6 +46,8 @@ export class EventService {
   async create(createEventDto: CreateEventDto, author: User) {
     const { dtstart, dtend, rrule, ...meta } = createEventDto;
 
+    console.log(meta);
+
     if (!rrule) {
       const event = this.eventRepository.create({
         dtstart,

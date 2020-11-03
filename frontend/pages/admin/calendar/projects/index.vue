@@ -16,9 +16,11 @@
       </v-col>
 
       <v-col cols="auto" align-self="center">
-        <dialog-create-project
-          @create:project="onCreate"
-        ></dialog-create-project>
+        <dialog-create-project @create:project="onCreate">
+          <template #activator="{ on, attrs }">
+            <v-btn v-bind="attrs" v-on="on">Create Project</v-btn>
+          </template>
+        </dialog-create-project>
       </v-col>
     </v-row>
 
@@ -39,10 +41,14 @@
             ></v-text-field>
           </v-card-title>
 
-          <v-data-table :headers="headers" :items="projects" :search="search">
-            <template v-slot:[`item.id`]="{ item }">
-              <v-chip>#{{ item.id }}</v-chip>
-            </template>
+          <v-data-table-paginated
+            :headers="headers"
+            :items="projects"
+            :search="search"
+            :loading="isLoading"
+            @refresh="onRefresh"
+          >
+            <template v-slot:[`item.id`]="{ item }"> #{{ item.id }} </template>
 
             <template v-slot:[`item.createdAt`]="{ item }">
               {{ format(item.createdAt, 'MMM d, yyyy') }}
@@ -53,13 +59,11 @@
             </template>
 
             <template v-slot:[`item.edit`]="{ item }">
-              <v-btn icon :to="`/admin/users/${item.id}`">
+              <v-btn icon :to="`/admin/calendar/projects/${item.id}`">
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>
             </template>
-
-            // eslint-enable
-          </v-data-table>
+          </v-data-table-paginated>
         </v-card>
       </v-col>
     </v-row>
@@ -91,9 +95,14 @@ export default class ProjectsPage extends Vue {
 
   headers = [
     { text: 'Id', value: 'id' },
-    { text: 'name', value: 'name' },
+    { text: 'Name', value: 'name' },
     { text: 'Description', value: 'description' },
+    { text: 'Edit', value: 'edit' },
   ]
+
+  get isLoading() {
+    return this.$accessor.projects.isLoading
+  }
 
   get projects() {
     return this.$accessor.projects.projects
@@ -103,12 +112,10 @@ export default class ProjectsPage extends Vue {
     return formatDate(date, formatString)
   }
 
-  async onCreate() {
-    await this.$fetch()
+  async onRefresh(options: any) {
+    await this.$accessor.projects.findAll(options)
   }
 
-  async fetch() {
-    await this.$accessor.projects.findAll({ limit: 40, offset: 0 })
-  }
+  async onCreate() {}
 }
 </script>

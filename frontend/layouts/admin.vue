@@ -1,13 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer
-      v-if="user != null"
-      v-model="drawer"
-      :mini-variant.sync="mini"
-      permanent
-      dark
-      app
-    >
+    <v-navigation-drawer v-if="user != null" v-model="drawer" app>
       <v-list-item class="px-2">
         <v-list-item-avatar>
           <v-img :src="user.avatar"></v-img>
@@ -22,18 +15,14 @@
             {{ user.email }}
           </v-list-item-subtitle>
         </v-list-item-content>
-
-        <v-btn icon @click.stop="mini = !mini">
-          <v-icon>mdi-chevron-left</v-icon>
-        </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
 
       <v-list nav dense>
-        <v-list-item link exact to="/admin/">
+        <v-list-item link exact to="/admin/" active-class="primary--text">
           <v-list-item-icon>
-            <v-icon>mdi-view-dashboard</v-icon>
+            <v-icon>mdi-view-dashboard-outline</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
@@ -41,11 +30,9 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-subheader>Entities</v-subheader>
-
-        <v-list-item link to="/admin/users">
+        <v-list-item nuxt to="/admin/users" active-class="primary--text">
           <v-list-item-icon>
-            <v-icon>mdi-account-box</v-icon>
+            <v-icon>mdi-account-multiple-outline</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
@@ -53,54 +40,86 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item link to="/admin/events">
-          <v-list-item-icon>
-            <v-icon>mdi-calendar</v-icon>
-          </v-list-item-icon>
+        <v-list-group prepend-icon="mdi-calendar-month">
+          <template #activator>
+            <v-list-item-title>Calendar</v-list-item-title>
+          </template>
 
-          <v-list-item-content>
-            <v-list-item-title>Events</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          <v-list-item link to="/admin/calendar/events">
+            <v-list-item-icon>
+              <v-icon>mdi-circle-medium</v-icon>
+            </v-list-item-icon>
 
-        <v-list-item link to="/admin/courses">
-          <v-list-item-icon>
-            <v-icon>mdi-school</v-icon>
-          </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Events</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
 
-          <v-list-item-content>
-            <v-list-item-title>Courses</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          <v-list-item link to="/admin/calendar/courses">
+            <v-list-item-icon>
+              <v-icon>mdi-circle-medium</v-icon>
+            </v-list-item-icon>
 
-        <v-list-item link to="/admin/projects">
-          <v-list-item-icon>
-            <v-icon>mdi-palette</v-icon>
-          </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Courses</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
 
-          <v-list-item-content>
-            <v-list-item-title>Projects</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          <v-list-item link to="/admin/calendar/projects">
+            <v-list-item-icon>
+              <v-icon>mdi-circle-medium</v-icon>
+            </v-list-item-icon>
 
-        <v-list-item link to="/admin/volunteers">
-          <v-list-item-icon>
-            <v-icon>mdi-hand-heart</v-icon>
-          </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Projects</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
 
-          <v-list-item-content>
+        <v-list-group prepend-icon="mdi-food-apple-outline">
+          <template #activator>
             <v-list-item-title>Volunteers</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          </template>
 
-        <v-list-group prepend-icon="mdi-file">
+          <v-list-item link to="/admin/volunteers/jobs">
+            <v-list-item-icon>
+              <v-icon>mdi-circle-medium</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Jobs</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item link to="/admin/volunteers/work">
+            <v-list-item-icon>
+              <v-icon>mdi-circle-medium</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Work</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
+
+        <v-list-group prepend-icon="mdi-paperclip">
           <template #activator>
             <v-list-item-title>Files</v-list-item-title>
           </template>
 
+          <v-list-item link to="/admin/files/attachments">
+            <v-list-item-icon>
+              <v-icon>mdi-circle-medium</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Attachments</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
           <v-list-item link to="/admin/files/lunch">
             <v-list-item-icon>
-              <v-icon>mdi-currency-usd-off</v-icon>
+              <v-icon>mdi-circle-medium</v-icon>
             </v-list-item-icon>
 
             <v-list-item-content>
@@ -133,29 +152,43 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app color="#fff" light>
-      <v-app-bar-nav-icon @click="mini = !mini"></v-app-bar-nav-icon>
+    <v-app-bar app>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+
       <v-toolbar-title class="title">OMC Admin</v-toolbar-title>
+
       <v-spacer></v-spacer>
 
-      <v-menu offset-y>
+      <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
-          <v-btn v-bind="attrs" icon v-on="on">
-            <v-icon>mdi-dots-vertical</v-icon>
+          <v-btn v-bind="attrs" icon elevation="2" v-on="on">
+            <v-avatar>
+              <v-img :src="avatar"></v-img>
+            </v-avatar>
           </v-btn>
         </template>
 
-        <v-list>
-          <v-list-item @click="logout">
-            <v-list-item-title>Logout</v-list-item-title>
+        <v-list dense nav>
+          <v-list-item link to="/account">
+            <v-list-item-icon>
+              <v-icon>mdi-account-box-outline</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Profile</v-list-item-title>
+            </v-list-item-content>
           </v-list-item>
 
           <v-divider></v-divider>
 
-          <v-list-item @click="isDark = !isDark">
-            <v-list-item-title>{{
-              isDark ? 'Switch to Light' : 'Switch to Dark'
-            }}</v-list-item-title>
+          <v-list-item link @click="logout">
+            <v-list-item-icon>
+              <v-icon>mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -164,6 +197,8 @@
     <v-main>
       <nuxt />
     </v-main>
+
+    <snackbar></snackbar>
   </v-app>
 </template>
 
@@ -172,6 +207,9 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 @Component({
   middleware: ['auth', 'admin'],
+  head: {
+    title: 'Admin Dashboard',
+  },
 })
 export default class AdminLayout extends Vue {
   drawer = false
@@ -179,6 +217,10 @@ export default class AdminLayout extends Vue {
 
   get user() {
     return this.$accessor.auth.user
+  }
+
+  get avatar() {
+    return this.$accessor.auth.avatar
   }
 
   get isDark() {
@@ -196,6 +238,32 @@ export default class AdminLayout extends Vue {
 }
 </script>
 
+<style lang="scss">
+// VList
+.v-list-item__action:first-child,
+.v-list-item__icon:first-child {
+  margin-right: 14px !important;
+}
+
+// VDataTable
+.v-data-table table tbody tr {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.v-data-table table tbody tr:not(.v-data-table__selected):hover {
+  box-shadow: 0 3px 15px -2px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.theme--light.v-data-table
+  > .v-data-table__wrapper
+  > table
+  > tbody
+  > tr:hover:not(.v-data-table__expanded__content):not(.v-data-table__empty-wrapper) {
+  background: #fff !important;
+}
+</style>
+
 <style lang="scss" scoped>
 .title {
   margin: 0 !important;
@@ -203,5 +271,14 @@ export default class AdminLayout extends Vue {
   width: 100%;
   font-size: 1.5em;
   font-weight: 700;
+}
+
+.admin-enter-active,
+.admin-leave-active {
+  transition: opacity 0.005s;
+}
+.admin-enter,
+.admin-leave-active {
+  opacity: 0;
 }
 </style>

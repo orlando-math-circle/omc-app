@@ -5,6 +5,8 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-@Component
+@Component({
+  layout: 'admin',
+})
 export default class FilesPage extends Vue {}
 </script>

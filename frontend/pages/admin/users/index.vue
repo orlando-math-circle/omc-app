@@ -16,7 +16,7 @@
       </v-col>
 
       <v-col cols="auto" align-self="center">
-        <v-btn>Create User</v-btn>
+        <v-btn color="primary">Create User</v-btn>
       </v-col>
     </v-row>
 
@@ -50,29 +50,38 @@
               solo
               hide-details
             ></v-text-field>
+
+            <v-btn class="ml-3" icon large @click="onRefresh(options)">
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
           </v-card-title>
 
-          <v-data-table
+          <v-data-table-paginated
             v-model="selected"
             :headers="headers"
             :items="$store.state.users.users"
             :search="search"
+            :loading="isLoading"
             show-select
+            @refresh="onRefresh"
           >
             <template v-slot:[`item.id`]="{ item }">
-              <v-chip>#{{ item.id }}</v-chip>
+              # <link-copy :text="item.id"></link-copy>
             </template>
 
-            <template #item.email="{ item }">
+            <template v-slot:[`item.email`]="{ item }">
               <div class="d-flex align-center py-1">
                 <v-avatar size="32px" class="elevation-1">
                   <v-img :src="item.avatar"></v-img>
                 </v-avatar>
-                <div class="ml-2">{{ item.email }}</div>
+
+                <div class="ml-2">
+                  <link-copy :text="item.email"></link-copy>
+                </div>
               </div>
             </template>
 
-            <template #item.roles="{ item }">
+            <template v-slot:[`item.roles`]="{ item }">
               <v-chip
                 v-for="role in item.roles"
                 :key="role"
@@ -99,23 +108,29 @@
               </v-icon>
             </template>
 
-            <template v-slot:[`item.createdAt`]="{ item }">
-              {{ parseDate(item.createdAt) }}
-            </template>
-
-            <template v-slot:[`item.updatedAt`]="{ item }">
-              {{ parseDateTime(item.updatedAt) }}
-            </template>
-
             <template v-slot:[`item.edit`]="{ item }">
               <v-btn icon :to="`/admin/users/${item.id}`">
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>
             </template>
-
-            // eslint-enable
-          </v-data-table>
+          </v-data-table-paginated>
         </v-card>
+      </v-col>
+
+      <v-col cols="3">
+        <div class="text-h6 mb-3">Filters</div>
+        <div class="font-weight-bold mt-3">Age Range</div>
+        <v-range-slider
+          hide-details
+          thumb-label
+          max="100"
+          min="1"
+        ></v-range-slider>
+
+        <div class="font-weight-bold mt-3">Roles</div>
+
+        <v-checkbox label="Admin" hide-details></v-checkbox>
+        <v-checkbox label="Volunteer" hide-details></v-checkbox>
       </v-col>
     </v-row>
   </v-container>
@@ -123,18 +138,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { format } from 'date-fns'
-import { FindUsersDto } from '~/../backend/src/user/dtos/find-users.dto'
+import { formatDate } from '~/utils/utilities'
 
 @Component({
   layout: 'admin',
   head: {
     title: 'Users',
   },
+  transition: 'admin',
 })
-export default class UsersPage extends Vue {
+export default class AdminUsersPage extends Vue {
   search = ''
   selected = []
+  options = null
 
   headers = [
     { text: 'ID', value: 'id' },
@@ -143,8 +159,6 @@ export default class UsersPage extends Vue {
     { text: 'Verified', value: 'emailVerified' },
     { text: 'Roles', value: 'roles' },
     { text: 'Fee Waived', value: 'feeWaived' },
-    { text: 'Created', value: 'createdAt' },
-    { text: 'Last Updated', value: 'updatedAt' },
     {
       text: 'Edit',
       value: 'edit',
@@ -162,6 +176,10 @@ export default class UsersPage extends Vue {
     },
   ]
 
+  get isLoading() {
+    return this.$accessor.users.isLoading
+  }
+
   getRoleColor(role: string) {
     switch (role) {
       case 'admin':
@@ -174,21 +192,25 @@ export default class UsersPage extends Vue {
   }
 
   parseDate(date: string) {
-    return format(new Date(date), 'MMM d, yyyy')
+    return formatDate(new Date(date), 'MMM d, yyyy')
   }
 
   parseDateTime(date: string) {
-    return format(new Date(date), 'MMM d, yyyy h:mm a')
+    return formatDate(new Date(date), 'MMM d, yyyy h:mm a')
+  }
+
+  async onRefresh(options: any) {
+    if (this.options === null) {
+      this.options = options
+
+      return // Prevent fetching twice on first page load.
+    }
+
+    await this.$accessor.users.findAll(options)
   }
 
   async fetch() {
-    const payload: FindUsersDto = { limit: 10, offset: 0 }
-
-    try {
-      await this.$store.dispatch('users/fetchUsers', payload)
-    } catch (error) {
-      console.error(error)
-    }
+    await this.$accessor.users.findAll()
   }
 }
 </script>

@@ -43,9 +43,41 @@ export class UserController {
   }
 
   @UserAuth('user', 'read:any')
+  @Get('statistics')
+  findUserStatistics() {
+    return this.userService.getUserStatistics();
+  }
+
+  @UserAuth('user', 'read:any')
   @Get()
-  findAll(@Query() { limit, offset, ...where }: FindUsersDto) {
-    return this.userService.findAll(where, limit, offset);
+  findAll(@Query() { limit, offset, contains, orderBy }: FindUsersDto) {
+    // Prevent sorting by computed property.
+    if (orderBy && 'name' in orderBy) {
+      orderBy['first'] = orderBy.name;
+      orderBy['last'] = orderBy.name;
+
+      delete orderBy.name;
+    }
+
+    return this.userService.findAll(
+      contains
+        ? ({
+            $or: [
+              { 'lower(id::text)': { $like: `%${contains}%` } },
+              { 'lower(first)': { $like: `%${contains}%` } },
+              { 'lower(last)': { $like: `%${contains}%` } },
+              { 'lower(roles::text)': { $like: `%${contains}%` } },
+              { 'lower(fee_waived::text)': { $like: `%${contains}%` } },
+              { 'lower(email_verified::text)': { $like: `%${contains}%` } },
+              { 'lower(email_verified::text)': { $like: `%${contains}%` } },
+            ],
+          } as any)
+        : {},
+      {},
+      limit,
+      offset,
+      orderBy,
+    );
   }
 
   @UserAuth('user', 'read:any')

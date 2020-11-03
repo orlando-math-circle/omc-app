@@ -12,8 +12,10 @@ export default (ctx: Context) => {
     theme: {
       themes: {
         light: {
-          primary: '#1B1E23',
-          accent: '#44D9E6',
+          primary: '#44D9E6',
+          accent: '#1B1E23',
+          // primary: '#1B1E23',
+          // accent: '#44D9E6',
           secondary: '#FF4299',
           // secondary: '#1B1E23',
           // accent: '#FF4299',

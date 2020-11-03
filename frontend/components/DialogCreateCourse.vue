@@ -17,152 +17,142 @@
         <v-spacer></v-spacer>
       </v-toolbar>
 
-      <ValidationObserver v-slot="{ passes, passed }" ref="form">
-        <v-form @submit.prevent="passes(onSubmit)">
-          <v-card-text>
-            <alert-error v-if="error" :error="error" />
+      <v-form-validated v-slot="{ passes }">
+        <v-card-text>
+          <alert-error v-if="error" :error="error" />
 
-            <ValidationProvider v-slot="{ errors }" rules="required">
-              <v-text-field
-                v-model="dto.name"
-                label="Course Name"
-                required
-                :error-messages="errors"
+          <v-text-field-validated
+            v-model="dto.name"
+            label="Course Name"
+            rules="required"
+            required
+            outlined
+          ></v-text-field-validated>
+
+          <v-textarea
+            v-model="dto.description"
+            label="Course Description"
+            outlined
+          ></v-textarea>
+
+          <v-row>
+            <v-col>
+              <v-select
+                v-model="dto.paymentType"
+                :items="paymentTypes"
+                label="Payment Mode"
                 outlined
               />
-            </ValidationProvider>
+            </v-col>
 
-            <v-textarea
-              v-model="dto.description"
-              label="Course Description"
-              outlined
-            />
+            <v-col v-if="dto.paymentType !== 'free'">
+              <v-text-field-validated
+                v-model.number="dto.fee"
+                label="Fee"
+                type="number"
+                :rules="{
+                  required: dto.paymentType !== 'free',
+                  positive: true,
+                }"
+                prefix="$"
+                outlined
+              ></v-text-field-validated>
+            </v-col>
+          </v-row>
 
-            <v-row>
-              <v-col>
-                <v-select
-                  v-model="dto.paymentType"
-                  :items="paymentTypes"
-                  label="Payment Mode"
-                  outlined
-                />
-              </v-col>
+          <v-row v-if="dto.paymentType !== 'free'">
+            <v-col>
+              <v-select
+                v-model="dto.latePaymentType"
+                :items="latePaymentTypes"
+                label="Late Payment Mode"
+                outlined
+              />
+            </v-col>
 
-              <v-col v-if="dto.paymentType !== 'free'">
-                <v-text-field
-                  v-model.number="dto.fee"
-                  label="Fee"
-                  type="number"
-                  prefix="$"
-                  outlined
-                ></v-text-field>
-              </v-col>
-            </v-row>
+            <v-col v-if="dto.latePaymentType === 'latefee'">
+              <v-text-field-validated
+                v-model.number="dto.lateFee"
+                label="Late Fee"
+                type="number"
+                :rules="{
+                  required: dto.latePaymentType === 'latefee',
+                  positive: true,
+                }"
+                prefix="$"
+                outlined
+              ></v-text-field-validated>
+            </v-col>
+          </v-row>
+        </v-card-text>
 
-            <v-row v-if="dto.paymentType !== 'free'">
-              <v-col>
-                <v-select
-                  v-model="dto.latePaymentType"
-                  :items="latePaymentTypes"
-                  label="Late Payment Mode"
-                  outlined
-                />
-              </v-col>
+        <v-card-actions>
+          <v-spacer></v-spacer>
 
-              <v-col v-if="dto.latePaymentType === 'latefee'">
-                <v-text-field
-                  v-model.number="dto.lateFee"
-                  label="Late Fee"
-                  type="number"
-                  prefix="$"
-                  outlined
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-
-            <v-btn
-              text
-              type="submit"
-              :disabled="!passed"
-              :loading="$store.getters['courses/isLoading']"
-              >Create</v-btn
-            >
-          </v-card-actions>
-        </v-form>
-      </ValidationObserver>
+          <v-btn
+            text
+            type="submit"
+            :disabled="!passes"
+            :loading="$store.getters['courses/isLoading']"
+            >Create</v-btn
+          >
+        </v-card-actions>
+      </v-form-validated>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { CreateCourseDto } from '~/../backend/src/course/dto/create-course.dto'
-import { PaymentType } from '~/../backend/src/course/enums/payment-type.enum'
-import { LatePaymentType } from '~/../backend/src/course/enums/late-payment-type.enum'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-export default Vue.extend({
-  components: {
-    ValidationObserver,
-    ValidationProvider,
-  },
-  props: {
-    project: {
-      type: Number,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      dialog: false,
-      paymentTypes: [
-        { text: 'Free', value: 'free' },
-        { text: 'Per-Event', value: 'single' },
-        { text: 'All', value: 'all' },
-      ],
-      latePaymentTypes: [
-        { text: 'Forbid Registration', value: 'deny' },
-        { text: 'Normal Payment', value: 'default' },
-        { text: 'Late Fee', value: 'latefee' },
-      ] as Array<{ text: string; value: LatePaymentType }>,
-      dto: {
-        name: '',
-        description: '',
-        paymentType: 'free' as PaymentType,
-        latePaymentType: 'default' as LatePaymentType,
-        fee: 0,
-        lateFee: 0,
-      },
+@Component
+export default class DialogCreateCourse extends Vue {
+  @Prop() project!: number | null
+
+  dialog = false
+
+  paymentTypes = [
+    { text: 'Free', value: 'free' },
+    { text: 'Per-Event', value: 'single' },
+    { text: 'All', value: 'all' },
+  ]
+
+  latePaymentTypes = [
+    { text: 'Forbid Registration', value: 'deny' },
+    { text: 'Normal Payment', value: 'default' },
+    { text: 'Late Fee', value: 'latefee' },
+  ]
+
+  dto = {
+    name: '',
+    description: '',
+    paymentType: 'free',
+    latePaymentType: 'default',
+    fee: 0,
+    lateFee: 0,
+  }
+
+  get error() {
+    return this.$accessor.courses.error
+  }
+
+  async onSubmit() {
+    const dto = {
+      name: this.dto.name,
+      description: this.dto.description,
+      paymentType: this.dto.paymentType,
+      latePaymentType: this.dto.latePaymentType,
+      project: this.project,
+      fee: this.dto.fee.toString(),
+      lateFee: this.dto.lateFee.toString(),
     }
-  },
-  computed: {
-    error(): Error {
-      return this.$store.state.courses.error
-    },
-  },
-  methods: {
-    async onSubmit() {
-      const dto: CreateCourseDto = {
-        name: this.dto.name,
-        description: this.dto.description,
-        paymentType: this.dto.paymentType,
-        latePaymentType: this.dto.latePaymentType,
-        project: this.project,
-        fee: this.dto.fee.toString(),
-        lateFee: this.dto.lateFee.toString(),
-      }
 
-      const course = await this.$store.dispatch('courses/create', dto)
+    const course = await this.$store.dispatch('courses/create', dto)
 
-      if (!this.error) {
-        this.$emit('create:course', course)
-        this.dialog = false
-      }
-    },
-  },
-})
+    if (!this.error) {
+      this.$emit('create:course', course)
+      this.dialog = false
+    }
+  }
+}
 </script>

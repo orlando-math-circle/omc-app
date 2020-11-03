@@ -20,11 +20,6 @@ export const state = () => ({
   settings: {
     calendarType: 'month',
   },
-  // token: {
-  //   jwt: null as string | null,
-  //   complete: false,
-  //   remember: true,
-  // },
   token: null as string | null,
   complete: false,
   remember: true,
@@ -38,6 +33,8 @@ export const getters = getterTree(state, {
   accountUsers: (state) => (state.account?.users as unknown) as User[],
   isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN),
   isValidated: (state) => state.user?.emailVerified,
+  avatar: (state) =>
+    state.user?.avatar || '../images/default_avatars/default.svg',
 })
 
 export const mutations = mutationTree(state, {

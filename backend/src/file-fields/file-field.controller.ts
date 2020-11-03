@@ -31,4 +31,10 @@ export class FileFieldController {
   findOne(@Param('name') name: string) {
     return this.fileFieldService.findOneOrFail({ name });
   }
+
+  @UserAuth('file-field', 'read:any')
+  @Get()
+  findAll() {
+    return this.fileFieldService.findAndCount();
+  }
 }

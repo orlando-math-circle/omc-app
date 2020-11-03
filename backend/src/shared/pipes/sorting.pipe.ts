@@ -12,8 +12,7 @@ import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 @Injectable()
 export class SortingPipe implements PipeTransform {
   transform(value: any, { type }: ArgumentMetadata) {
-    if (type !== 'query' || !value || !value.sort || !value.sort.length)
-      return value;
+    if (type !== 'query' || !value || !value.sort) return value;
 
     const parameters = Array.isArray(value.sort) ? value.sort : [value.sort];
 
@@ -31,6 +30,8 @@ export class SortingPipe implements PipeTransform {
     }
 
     value.orderBy = orderBy;
+
+    delete value.sort;
 
     return value;
   }

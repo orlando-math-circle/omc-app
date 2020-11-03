@@ -14,8 +14,10 @@ import { FileFieldModule } from './file-fields/file-field.module';
 import { FileModule } from './file/file.module';
 import { PayPalModule } from './paypal/paypal.module';
 import { ProjectModule } from './project/project.module';
+import { SystemModule } from './system/system.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { UserModule } from './user/user.module';
+import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { UserModule } from './user/user.module';
     FileModule,
     FileFieldModule,
     FileAttachmentModule,
+    SystemModule,
+    VolunteerJobModule,
   ],
 })
 export class AppModule {}

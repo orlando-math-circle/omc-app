@@ -1,5 +1,6 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { FileAttachment } from '../../backend/src/file-attachment/file-attachment.entity'
+import { FileField } from '../../backend/src/file-fields/file-field.entity'
 import { State, StatePayload } from '../interfaces/state.interface'
 
 export const state = () => ({
@@ -7,6 +8,7 @@ export const state = () => ({
   error: null as Error | null,
   attachment: null as FileAttachment | null,
   attachments: [] as FileAttachment[],
+  fields: [] as FileField[],
 })
 
 export const getters = getterTree(state, {
@@ -23,6 +25,9 @@ export const mutations = mutationTree(state, {
   },
   setAttachments(state, attachments: FileAttachment[]) {
     state.attachments = attachments
+  },
+  setFields(state, fields: FileField[]) {
+    state.fields = fields
   },
 })
 
@@ -72,6 +77,17 @@ export const actions = actionTree(
         })
 
         commit('setAttachments', attachments)
+      } catch (error) {
+        commit('setStatus', { status: State.ERROR, error })
+      }
+    },
+    async findAllFields({ commit }) {
+      try {
+        commit('setStatus', { status: State.BUSY })
+
+        const [fields] = await this.$axios.$get('/file-field')
+
+        commit('setFields', fields)
       } catch (error) {
         commit('setStatus', { status: State.ERROR, error })
       }

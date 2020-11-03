@@ -36,12 +36,17 @@ const config: NuxtConfig = {
       {
         rel: 'stylesheet',
         href:
-          'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Spartan:wght@700&display=swap',
+          'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Spartan:wght@700&family=Quicksand:wght@400;500;600;700&display=swap',
       },
       {
         rel: 'stylesheet',
         href:
           'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css',
+      },
+      {
+        rel: 'stylesheet',
+        href:
+          'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
       },
     ],
   },
@@ -61,7 +66,15 @@ const config: NuxtConfig = {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['~/plugins/vuetify', '~/plugins/vee-validate', '~/plugins/axios'],
+  plugins: [
+    '~/plugins/vuetify',
+    '~/plugins/vee-validate',
+    '~/plugins/axios',
+    {
+      src: '~/plugins/apex-charts',
+      ssr: false,
+    },
+  ],
   /**
    * Automatic importing of components
    */
@@ -74,6 +87,7 @@ const config: NuxtConfig = {
     '@nuxtjs/eslint-module',
     '@nuxtjs/color-mode',
     'nuxt-typed-vuex',
+    // '@nuxtjs/html-validator',
   ],
   /*
    ** Nuxt.js modules
@@ -110,7 +124,7 @@ const config: NuxtConfig = {
           fiber: require('fibers'),
           indentedSyntax: true,
         },
-        additionalData: "@import '@/assets/variables.scss'",
+        additionalData: "@import '@/assets/styles/variables.scss'",
       },
     },
   },

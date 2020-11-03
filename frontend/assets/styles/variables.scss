@@ -1,0 +1,24 @@
+// Vuetify SCSS Variable Overrides
+// https://github.com/vuetifyjs/vuetify/tree/master/packages/vuetify/src/styles/settings
+
+@import './elevations.scss';
+
+// Basic Overrides
+// An alternative font that's quite nice is "DM Sans"
+$body-font-family: 'Quicksand', sans-serif;
+$heading-font-family: 'Quicksand', sans-serif;
+$border-radius-root: 6px;
+$color-pack: false;
+
+// Light Theme
+$material-light: (
+  // 'app-bar': #44d9e6,
+  // 'app-bar': #44d9e6,
+  'background': #f2f5f8,
+  'primary-text-percent': 1
+);
+
+// Dark Theme
+$material-dark: (
+  'background': #1b1e23,
+);
