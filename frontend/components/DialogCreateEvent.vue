@@ -241,11 +241,17 @@
                 <v-list-item-content>
                   <v-row>
                     <v-col>
-                      <auto-complete-course v-model="course.id" />
+                      <auto-complete-course
+                        v-model="course.id"
+                        :project="project.id"
+                      ></auto-complete-course>
                     </v-col>
 
                     <v-col cols="auto">
-                      <dialog-select-course v-model="course.id" />
+                      <dialog-select-course
+                        v-model="course.id"
+                        :project="project.id"
+                      ></dialog-select-course>
                     </v-col>
 
                     <v-col cols="auto">

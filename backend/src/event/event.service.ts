@@ -21,6 +21,7 @@ import {
 } from '../app.utils';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
+import { FindAllEventsDto } from './dtos/find-all-events.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
 import { UpdateEventsDto } from './dtos/update-events.dto';
 import { EventRecurrence } from './event-recurrence.entity';
@@ -126,27 +127,33 @@ export class EventService {
    * @param start Start of the range
    * @param end End of the range
    */
-  async findAll(start: Date, end: Date) {
-    const events = await this.eventRepository.find(
-      {
-        dtend: { $gte: start },
-        dtstart: { $lte: end },
-        recurrence: null,
-      },
-      ['course', 'author'],
-    );
+  async findAll({ start, end, projects }: FindAllEventsDto) {
+    const eventQuery: FilterQuery<Event> = {
+      dtend: { $gte: start },
+      dtstart: { $lte: end },
+      recurrence: null,
+    };
 
-    const recurrences = await this.recurrenceRepository.find(
-      {
+    const recurrenceQuery: FilterQuery<EventRecurrence> = {
+      dtstart: { $lte: end },
+      $or: [{ dtend: { $gte: start } }, { dtend: null }],
+      events: {
         dtstart: { $lte: end },
         $or: [{ dtend: { $gte: start } }, { dtend: null }],
-        events: {
-          dtstart: { $lte: end },
-          $or: [{ dtend: { $gte: start } }, { dtend: null }],
-        },
       },
-      ['events.course'],
-    );
+    };
+
+    // This separation is necessary as undefined is translated
+    // to null in the query, which is uncorrect.
+    if (projects) {
+      eventQuery['project'] = { id: projects };
+      recurrenceQuery['events']['project'] = { id: projects };
+    }
+
+    const [events, recurrences] = await Promise.all([
+      this.eventRepository.find(eventQuery, ['course', 'author']),
+      this.recurrenceRepository.find(recurrenceQuery, ['events.course']),
+    ]);
 
     for (const recurrence of recurrences) {
       events.push(...(await this.getRecurrenceEvents(recurrence, start, end)));

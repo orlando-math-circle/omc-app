@@ -74,40 +74,61 @@
               <v-checkbox-validated
                 v-model="student"
                 label="Are you a student?"
+                hide-details
               >
               </v-checkbox-validated>
 
               <v-expand-transition>
-                <template v-if="student">
-                  <v-select-validated label=""></v-select-validated>
-                </template>
+                <div v-show="student">
+                  <v-select-validated
+                    v-model="education"
+                    label="Education Level"
+                    :items="Object.keys(educationLevels)"
+                  ></v-select-validated>
+
+                  <v-select-validated
+                    :label="
+                      education === 'College' ? 'Level of Study' : 'Grade Level'
+                    "
+                    :items="educationLevels[education]"
+                  ></v-select-validated>
+
+                  <v-text-field-validated
+                    label="School Name"
+                    hint="Enter the name of your school or institution."
+                  ></v-text-field-validated>
+                </div>
               </v-expand-transition>
 
-              <v-select-validated
-                label="Occupation"
-                :items="[
-                  {
-                    text: 'Student',
-                    value: 'primary',
-                  },
-                  {
-                    text: 'Workplace Professional',
-                    value: 'professional',
-                  },
-                  { text: 'Other', value: 'other' },
-                ]"
-              >
-              </v-select-validated>
+              <v-checkbox-validated
+                v-model="professional"
+                label="Are you an industry professional?"
+                hide-details
+              ></v-checkbox-validated>
+
+              <v-expand-transition>
+                <div v-show="professional">
+                  <v-text-field-validated
+                    label="Profession (Optional)"
+                  ></v-text-field-validated>
+
+                  <v-text-field-validated
+                    label="Job Title (Optional)"
+                  ></v-text-field-validated>
+
+                  <v-text-field-validated
+                    label="Company or Workplace (Optional)"
+                  ></v-text-field-validated>
+                </div>
+              </v-expand-transition>
 
               <v-checkbox
                 label="Receive emails about upcoming events"
-                dense
                 hide-details
               ></v-checkbox>
 
               <v-checkbox
                 label="Receive emails reminding me of registered events"
-                dense
                 hide-details
               ></v-checkbox>
 
@@ -136,6 +157,28 @@ import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.d
 })
 export default class RegisterPage extends Vue {
   student = false
+
+  educationLevels = {
+    'Middle School': [
+      { text: '6th Grade', value: 6 },
+      { text: '7th Grade', value: 7 },
+      { text: '8th Grade', value: 8 },
+    ],
+    'High School': [
+      { text: '9th Grade', value: 9 },
+      { text: '10th Grade', value: 10 },
+      { text: '11th Grade', value: 11 },
+      { text: '12th Grade', value: 12 },
+    ],
+    College: [
+      { text: 'Undergraduate', value: 'Undergrad' },
+      { text: 'Postgraduate', value: 'Postgrad' },
+    ],
+  }
+
+  education: keyof this['educationLevels'] = 'Middle School'
+
+  professional = false
 
   dto = {
     first: '',

@@ -6,7 +6,7 @@ const config: NuxtConfig = {
   ssr: true,
 
   server: {
-    port: 8080,
+    port: 8000,
   },
   /*
    ** Headers of the page

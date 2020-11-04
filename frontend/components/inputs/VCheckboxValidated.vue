@@ -1,7 +1,7 @@
 <template>
   <ValidationProvider v-slot="{ errors }" :vid="vid" :rules="rules">
     <v-checkbox
-      v-model="data"
+      v-model="val"
       :error-messages="errors"
       v-bind="$attrs"
       v-on="$listeners"
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, PropSync } from 'nuxt-property-decorator'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { ValidationProvider } from 'vee-validate'
 
 @Component({
@@ -19,9 +19,17 @@ import { ValidationProvider } from 'vee-validate'
     ValidationProvider,
   },
 })
-export default class VTextFieldValidated extends Vue {
-  @PropSync('value') data!: string | number | object
+export default class VCheckboxValidated extends Vue {
+  @Prop() value!: boolean
   @Prop({ default: '' }) rules!: string | object
   @Prop() vid?: string
+
+  get val() {
+    return this.value
+  }
+
+  set val(value: boolean) {
+    this.$emit('input', value)
+  }
 }
 </script>

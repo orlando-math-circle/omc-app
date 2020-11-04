@@ -44,7 +44,7 @@ export const actions = actionTree(
         commit('setStatus', { status: State.ERROR, error })
       }
     },
-    async findAll({ commit }, findAllProjectsDto: FindAllProjectsDto) {
+    async findAll({ commit }, findAllProjectsDto?: FindAllProjectsDto) {
       commit('setStatus', { status: State.BUSY })
 
       const [projects, count] = await this.$axios.$get('/project', {

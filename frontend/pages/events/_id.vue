@@ -104,11 +104,12 @@
 
         <!-- Step: Payment -->
         <v-stepper-step
+          v-if="fee"
           :completed="statusesSelectedUnpaid.length === 0"
           step="2"
           >Payment</v-stepper-step
         >
-        <v-stepper-content step="2">
+        <v-stepper-content v-if="fee" step="2">
           <v-card-title>Payment Due: ${{ sumFee }}</v-card-title>
 
           <v-card-text>
@@ -130,16 +131,22 @@
         </v-stepper-content>
 
         <!-- Step: Event Registration -->
-        <v-stepper-step step="3">Complete Registration</v-stepper-step>
-        <v-stepper-content step="3">
-          <v-btn :loading="loading" @click="onSubmit">
+        <v-stepper-step :step="fee ? 3 : 2">
+          Complete Registration
+        </v-stepper-step>
+        <v-stepper-content :step="fee ? 3 : 2">
+          <v-btn
+            :loading="isLoadingRegistrations"
+            color="primary"
+            @click="onSubmit"
+          >
             Complete Registration
           </v-btn>
         </v-stepper-content>
 
         <!-- Step: Confirmation -->
-        <v-stepper-step step="4">Confirmation</v-stepper-step>
-        <v-stepper-content step="4">
+        <v-stepper-step :step="fee ? 4 : 3">Confirmation</v-stepper-step>
+        <v-stepper-content :step="fee ? 4 : 3">
           Registrations Completed
         </v-stepper-content>
       </v-stepper>
@@ -185,14 +192,16 @@ export default class EventIdPage extends Vue {
     },
   ]
 
-  loading = false
-
   get event() {
     return this.$accessor.events.event
   }
 
   get statuses() {
     return this.$accessor.registrations.registrationStatuses
+  }
+
+  get isLoadingRegistrations() {
+    return this.$accessor.registrations.isLoading
   }
 
   get start(): string {
@@ -239,19 +248,12 @@ export default class EventIdPage extends Vue {
   }
 
   async onSubmit() {
-    try {
-      this.loading = true
-      await this.$accessor.registrations.create({
-        eventId: +this.$route.params.id,
-        users: this.statusesSelected.map((status) => status.user.id),
-      })
-      await this.$accessor.registrations.getStatuses(this.$route.params.id)
-      this.step = 4
-    } catch (error) {
-      console.error(error)
-    } finally {
-      this.loading = false
-    }
+    await this.$accessor.registrations.create({
+      eventId: +this.$route.params.id,
+      users: this.statusesSelected.map((status) => status.user.id),
+    })
+    await this.$accessor.registrations.getStatuses(this.$route.params.id)
+    this.step++
   }
 
   onPaymentComplete() {

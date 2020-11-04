@@ -33,6 +33,12 @@
         />
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-col>
+        <v-data-table-paginated :items="eventsForDate"></v-data-table-paginated>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

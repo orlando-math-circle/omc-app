@@ -14,7 +14,6 @@ import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { FindAllEventsDto } from './dtos/find-all-events.dto';
-import { FindEventDto } from './dtos/find-one-event.dto';
 import { UpdateEventDto } from './dtos/update-event.dto';
 import { UpdateEventsDto } from './dtos/update-events.dto';
 import { EventService } from './event.service';
@@ -32,19 +31,19 @@ export class EventController {
   }
 
   @Get()
-  findAll(@Query() { start, end }: FindAllEventsDto) {
-    return this.eventService.findAll(start, end);
+  findAll(@Query() findAllEventsDto: FindAllEventsDto) {
+    return this.eventService.findAll(findAllEventsDto);
   }
 
   @Get(':id')
-  findOne(@Param() { id }: FindEventDto) {
+  findOne(@Param('id') id: number) {
     return this.eventService.findOneOrFail(id, ['author', 'course']);
   }
 
   @UserAuth('event', 'update:any')
   @Patch(':id/single')
   updateSingleEvent(
-    @Param() { id }: FindEventDto,
+    @Param('id') id: number,
     @Body() updateEventDto: UpdateEventDto,
   ) {
     return this.eventService.updateSingleEvent(id, updateEventDto);
@@ -53,7 +52,7 @@ export class EventController {
   @UserAuth('event', 'update:any')
   @Patch(':id/future')
   updateFutureEvents(
-    @Param() { id }: FindEventDto,
+    @Param('id') id: number,
     @Body() updateEventsDto: UpdateEventsDto,
   ) {
     return this.eventService.updateFutureEvents(id, updateEventsDto);
@@ -62,7 +61,7 @@ export class EventController {
   @UserAuth('event', 'update:any')
   @Patch(':id/all')
   updateAllEvents(
-    @Param() { id }: FindEventDto,
+    @Param('id') id: number,
     @Body() updateEventsDto: UpdateEventsDto,
   ) {
     return this.eventService.updateAllEvents(id, updateEventsDto);
@@ -70,19 +69,19 @@ export class EventController {
 
   @UserAuth('event', 'delete:any')
   @Delete(':id/single')
-  delete(@Param() { id }: FindEventDto) {
+  delete(@Param('id') id: number) {
     return this.eventService.deleteSingleEvent(id);
   }
 
   @UserAuth('event', 'delete:any')
   @Delete(':id/future')
-  deleteFutureEvents(@Param() { id }: FindEventDto) {
+  deleteFutureEvents(@Param('id') id: number) {
     return this.eventService.deleteFutureEvents(id);
   }
 
   @UserAuth('event', 'delete:any')
   @Delete(':id/all')
-  deleteAllEvents(@Param() { id }: FindEventDto) {
+  deleteAllEvents(@Param('id') id: number) {
     return this.eventService.deleteAllEvents(id);
   }
 }

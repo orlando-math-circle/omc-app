@@ -1,3 +1,4 @@
+import { FilterQuery } from '@mikro-orm/core';
 import {
   Body,
   Controller,
@@ -12,6 +13,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { FindAllProjectsDto } from './dto/find-all-projects.dto';
 import { FindProjectDto } from './dto/find-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { Project } from './project.entity';
 import { ProjectService } from './project.service';
 
 @Controller('/project')
@@ -31,21 +33,17 @@ export class ProjectController {
 
   @Get()
   findAll(@Query() { limit, offset, contains, orderBy }: FindAllProjectsDto) {
-    return this.projectService.findAll(
-      contains
-        ? ({
-            $or: [
-              { 'lower(id::text)': { $like: `%${contains}%` } },
-              { 'lower(name)': { $like: `%${contains}%` } },
-              { 'lower(description)': { $like: `%${contains}%` } },
-            ],
-          } as any)
-        : {},
-      {},
-      limit,
-      offset,
-      orderBy,
-    );
+    const where: FilterQuery<Project> = {};
+
+    if (contains) {
+      where['$or'] = [
+        { 'lower(id::text)': { $like: `%${contains}%` } },
+        { 'lower(name)': { $like: `%${contains}%` } },
+        { 'lower(description)': { $like: `%${contains}%` } },
+      ];
+    }
+
+    return this.projectService.findAll(where, {}, limit, offset, orderBy);
   }
 
   @UserAuth('project', 'update:any')

@@ -41,7 +41,34 @@
           ref="calendar"
           v-model="calendar.date"
           :type.sync="calendar.type"
+          :project-filter-ids="projectFilterIds"
         />
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col>
+        <v-slide-group
+          v-model="projectFilter"
+          multiple
+          show-arrows
+          @change="onFilterChange"
+        >
+          <v-slide-item
+            v-for="project in projects"
+            :key="project.id"
+            v-slot="{ active, toggle }"
+          >
+            <v-btn
+              class="mr-4"
+              active-class="secondary--text"
+              :input-value="active"
+              depressed
+              @click="toggle"
+              >{{ project.name }}</v-btn
+            >
+          </v-slide-item>
+        </v-slide-group>
       </v-col>
     </v-row>
 
@@ -53,9 +80,19 @@
 
     <v-row>
       <v-col>
-        <template v-for="event in eventsForDate">
+        <v-slide-group class="mb-4">
+          <v-slide-item v-for="event in eventsForDate" :key="event.id">
+            <event-block
+              :event="event"
+              :link="`/events/${event.id}`"
+              class="mr-4"
+            ></event-block>
+          </v-slide-item>
+        </v-slide-group>
+
+        <!-- <template v-for="event in eventsForDate">
           <event :key="event.id" class="mb-3" :value="event" />
-        </template>
+        </template> -->
       </v-col>
     </v-row>
   </div>
@@ -90,6 +127,9 @@ export default class EventsPage extends Vue {
     date: new Date().toISOString().substr(0, 10),
   }
 
+  projectFilter = []
+  projectFilterIds: number[] = []
+
   get dateNative() {
     return parseISO(this.calendar.date)
   }
@@ -114,8 +154,20 @@ export default class EventsPage extends Vue {
     return `Events on ${date}`
   }
 
+  get projects() {
+    return this.$accessor.projects.projects
+  }
+
+  onFilterChange(indices: number[]) {
+    this.projectFilterIds = indices.map((i) => this.projects[i].id)
+  }
+
   async onEventCreated() {
     await this.$refs.calendar.refresh()
+  }
+
+  async fetch() {
+    await this.$accessor.projects.findAll()
   }
 }
 </script>

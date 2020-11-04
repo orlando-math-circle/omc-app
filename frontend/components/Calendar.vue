@@ -3,7 +3,7 @@
     <!-- Simple Date-Picker Calendar -->
     <!-- :allowed-dates="(date) => dates.includes(date)" -->
     <v-date-picker
-      v-if="type === 'simple'"
+      v-if="internalType === 'simple'"
       v-model="date"
       :events="dates"
       :event-color="
@@ -37,7 +37,7 @@
           ref="calendar"
           v-model="date"
           class="calendar"
-          :type="type"
+          :type="internalType"
           :events="events"
           :loading="$store.getters['events/isLoading']"
           :short-weekdays="false"
@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue'
+import { Vue, Component, Prop, PropSync, Watch } from 'nuxt-property-decorator'
 import {
   parseISO,
   startOfWeek,
@@ -58,127 +58,122 @@ import {
   startOfMonth,
   endOfMonth,
 } from 'date-fns'
-import { CalendarEvent, CalendarTimestamp } from 'vuetify'
 import { VCalendar } from 'vuetify/src/components/VCalendar'
-import { CalendarType, VCalendarChange } from '../interfaces/calendar.interface'
+import { VCalendarChange } from '../interfaces/calendar.interface'
 import { months } from '../utils/constants'
 
-export type ComponentRefs = VueConstructor<
-  Vue & {
-    $refs: {
-      calendar: InstanceType<typeof VCalendar>
-    }
+@Component
+export default class Calendar extends Vue {
+  @Prop({ required: true }) value!: string
+  @PropSync('type', { default: 'simple' }) internalType!: string
+  @Prop() projectFilterIds?: number[]
+
+  $refs!: {
+    calendar: InstanceType<typeof VCalendar>
   }
->
 
-export default (Vue as ComponentRefs).extend({
-  props: {
-    value: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String as PropType<CalendarType>,
-      default: 'simple',
-    },
-  },
-  async fetch() {
+  today = new Date()
+  range = {
+    start: null as Date | null,
+    end: null as Date | null,
+    moved: false,
+  }
+
+  get date() {
+    return this.value
+  }
+
+  set date(value: string) {
+    this.$emit('input', value)
+  }
+
+  get events() {
+    return this.$accessor.events.events
+  }
+
+  get dates() {
+    return this.$accessor.events.dates
+  }
+
+  get header() {
+    if (this.range.start) {
+      return `${
+        months[this.range.start.getMonth()]
+      }, ${this.range.start.getFullYear()}`
+    }
+
+    return `${months[this.today.getMonth()]}, ${this.today.getFullYear()}`
+  }
+
+  @Watch('projectFilterIds')
+  async onChangeProjectFilterIds() {
+    await this.$fetch()
+  }
+
+  /**
+   * Setup the calendar start and end date ranges before the
+   * calendar is completely initialized.
+   */
+  created() {
     const date = parseISO(this.value)
-    let start: Date, end: Date
 
-    switch (this.type) {
+    switch (this.internalType) {
       case 'week':
-        start = startOfWeek(date)
-        end = endOfWeek(date)
+        this.range.start = startOfWeek(date)
+        this.range.end = endOfWeek(date)
         break
       case 'simple':
       case 'month':
-      default:
-        start = startOfMonth(date)
-        end = endOfMonth(date)
+        this.range.start = startOfMonth(date)
+        this.range.end = endOfMonth(date)
         break
     }
+  }
 
-    await this.$accessor.events.findAll({ start, end })
-  },
-  data() {
-    return {
-      today: new Date(),
-      range: {
-        start: null as CalendarTimestamp | null,
-        end: null as CalendarTimestamp | null,
-        moved: false,
-      },
+  async fetch() {
+    await this.$accessor.events.findAll({
+      start: this.range.start as Date,
+      end: this.range!.end as Date,
+      projects: this.projectFilterIds?.length
+        ? this.projectFilterIds
+        : undefined,
+    })
+  }
+
+  async onChange({ start, end }: VCalendarChange) {
+    this.range.start = parseISO(start.date)
+    this.range.end = parseISO(end.date)
+
+    // The first change occurs on initialization,
+    // don't retieve data twice (from fetch)
+    if (!this.range.moved) {
+      this.range.moved = true
+      return
     }
-  },
-  computed: {
-    date: {
-      get(): string {
-        return this.value
-      },
-      set(value: string) {
-        this.$emit('input', value)
-      },
-    },
-    view: {
-      get(): string {
-        return this.type
-      },
-      set(type: string) {
-        this.$emit('update:type', type)
-      },
-    },
-    events(): CalendarEvent[] {
-      return this.$store.getters['events/events']
-    },
-    dates(): string[] {
-      return this.$store.getters['events/dates']
-    },
-    header(): string {
-      if (this.range.start) {
-        return `${months[this.range.start.month - 1]}, ${this.range.start.year}`
-      }
 
-      return `${months[this.today.getMonth()]}, ${this.today.getFullYear()}`
-    },
-  },
-  methods: {
-    async onChange({ start, end }: VCalendarChange) {
-      this.range.start = start
-      this.range.end = end
+    await this.$fetch()
+  }
 
-      // The first change occurs on initialization,
-      // don't retieve data twice (from fetch)
-      if (!this.range.moved) {
-        this.range.moved = true
-        return
-      }
+  async onPickerChange(dateString: string) {
+    const now = parseISO(dateString)
 
-      await this.$accessor.events.findAll({
-        start: parseISO(start.date),
-        end: parseISO(end.date),
-      })
-    },
-    async onPickerChange(dateString: string) {
-      const now = parseISO(dateString)
+    await this.$accessor.events.findAll({
+      start: startOfMonth(now),
+      end: endOfMonth(now),
+    })
+  }
+
+  async refresh() {
+    if (this.internalType === 'simple') {
+      const now = new Date()
 
       await this.$accessor.events.findAll({
         start: startOfMonth(now),
         end: endOfMonth(now),
       })
-    },
-    async refresh() {
-      if (this.type === 'simple') {
-        const now = new Date()
-
-        await this.$accessor.events.findAll({
-          start: startOfMonth(now),
-          end: endOfMonth(now),
-        })
-      }
-    },
-  },
-})
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

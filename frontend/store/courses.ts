@@ -75,5 +75,26 @@ export const actions = actionTree(
         commit('setStatus', { status: State.WAITING, error })
       }
     },
+    async findAllByCourse(
+      { commit },
+      {
+        project,
+        findallCoursesDto,
+      }: { project: number; findallCoursesDto?: FindAllCoursesDto }
+    ) {
+      try {
+        commit('setStatus', { status: State.BUSY })
+
+        const [courses, total] = await this.$axios.$get(`/course/${project}`, {
+          params: findallCoursesDto,
+        })
+
+        commit('setCourses', courses)
+        commit('setTotal', total)
+        commit('setStatus', { status: State.WAITING })
+      } catch (error) {
+        commit('setStatus', { status: State.WAITING, error })
+      }
+    },
   }
 )

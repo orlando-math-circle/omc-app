@@ -24,6 +24,29 @@ export class CourseController {
     return this.courseService.create(createCourseDto);
   }
 
+  @Get(':project')
+  findAllByCourse(
+    @Param('project') projectId: number,
+    @Query() { contains, limit, offset, orderBy }: FindAllCoursesDto,
+  ) {
+    return this.courseService.findAll(
+      contains
+        ? {
+            $or: [
+              { 'lower(name)': { $like: `%${contains}%` } },
+              { 'lower(description)': { $like: `%${contains}%` } },
+            ] as any,
+            project: { id: projectId },
+          }
+        : {
+            project: { id: projectId },
+          },
+      limit,
+      offset,
+      orderBy,
+    );
+  }
+
   @Get()
   findAll(@Query() { contains, limit, offset, orderBy }: FindAllCoursesDto) {
     return this.courseService.findAll(

@@ -2,7 +2,7 @@ import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { CreateEventDto } from '../../backend/src/event/dtos/create-event.dto'
 import { Event } from '../../backend/src/event/event.entity'
 import { CalendarEvent } from '../interfaces/calendar-event.interface'
-import { GetEventsDto } from '../interfaces/events/get-events.interface'
+import { FindAllEventsDto } from '../../backend/src/event/dtos/find-all-events.dto'
 import { State } from '../interfaces/state.interface'
 import { toLocalISO } from '../utils/utilities'
 
@@ -51,11 +51,11 @@ export const actions = actionTree(
 
       commit('setStatus', State.WAITING)
     },
-    async findAll({ commit }, { start, end }: GetEventsDto) {
+    async findAll({ commit }, findAllEventsDto?: FindAllEventsDto) {
       commit('setStatus', State.BUSY)
 
       const events = await this.$axios.$get('/event', {
-        params: { start, end },
+        params: findAllEventsDto,
       })
 
       commit('setEvents', events)
