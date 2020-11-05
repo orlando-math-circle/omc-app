@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Entity,
   ManyToOne,
   OneToOne,
@@ -11,8 +12,9 @@ import { User } from '../user/user.entity';
 import { MulterFile } from './interfaces/multer-file.interface';
 
 @Entity()
-export class File {
+export class File extends BaseEntity<File, 'id'> {
   constructor(file: MulterFile, user?: User) {
+    super();
     this.name = file.filename;
     this.originalName = file.originalname;
     this.size = file.size;

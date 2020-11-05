@@ -3,7 +3,7 @@ import {
   FindOneOrFailOptions,
   Populate as MikroORMPopulate,
 } from '@mikro-orm/core';
-import { isAfter, isBefore, isSameDay } from 'date-fns';
+import { isAfter, isBefore, isSameDay, differenceInYears } from 'date-fns';
 import moment from 'moment';
 
 /**
@@ -47,7 +47,10 @@ export const isBetweenInclusive = (start: Date, end: Date, date: Date) =>
   (isSameDay(start, date) || isAfter(date, start)) &&
   (isSameDay(end, date) || isBefore(date, end));
 
-export const birthdayToAge = (date: Date) => moment().diff(date, 'years');
+export const birthdayToAge = (date: Date | string) =>
+  typeof date === 'string'
+    ? differenceInYears(new Date(), new Date(date))
+    : differenceInYears(new Date(), date);
 
 export const isBeforeDay = (dt1: Date, dt2: Date) =>
   moment(dt1).isBefore(dt2, 'day');

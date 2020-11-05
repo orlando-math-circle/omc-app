@@ -102,12 +102,12 @@ export default class DefaultLayout extends Vue {
     {
       icon: 'mdi-account-circle',
       title: 'Account',
-      to: '/account',
+      to: '/account/settings',
     },
   ]
 
   get isAdmin() {
-    return this.$store.getters['auth/isAdmin']
+    return this.$accessor.auth.isAdmin
   }
 
   get isDark() {

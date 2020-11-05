@@ -95,7 +95,7 @@
             </v-list-item-content>
           </v-list-item>
 
-          <v-divider v-if="options.frequency !== 3" />
+          <v-divider v-if="options.freq !== 3" />
 
           <v-list-item>
             <v-list-item-content>
@@ -183,6 +183,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { Frequency, ByWeekday } from 'rrule'
 import moment from 'moment'
+import { parseISO } from 'date-fns/fp'
 
 export interface RecurrenceOpts {
   interval: number
@@ -215,7 +216,7 @@ export enum MonthType {
 @Component
 export default class RecurrenceDialog extends Vue {
   @Prop() value?: any
-  @Prop({ type: Date, required: true }) date!: Date
+  @Prop({ required: true }) date!: string
 
   dialog = false
   dateDialog = false
@@ -272,13 +273,13 @@ export default class RecurrenceDialog extends Vue {
   ]
 
   weekdays = [
-    { text: 'S', value: 'SU', short: 'Sun' },
-    { text: 'M', value: 'MO', short: 'Mon' },
-    { text: 'T', value: 'TU', short: 'Tue' },
-    { text: 'W', value: 'WE', short: 'Wed' },
-    { text: 'T', value: 'TH', short: 'Thu' },
-    { text: 'F', value: 'FR', short: 'Fri' },
-    { text: 'S', value: 'SA', short: 'Sat' },
+    { text: 'S', value: 6, short: 'Sun' },
+    { text: 'M', value: 0, short: 'Mon' },
+    { text: 'T', value: 1, short: 'Tue' },
+    { text: 'W', value: 2, short: 'Wed' },
+    { text: 'T', value: 3, short: 'Thu' },
+    { text: 'F', value: 4, short: 'Fri' },
+    { text: 'S', value: 5, short: 'Sat' },
   ] as Weekdays[]
 
   type: RecurrenceTerminator = RecurrenceTerminator.NEVER
@@ -290,7 +291,7 @@ export default class RecurrenceDialog extends Vue {
   options: RecurrenceOpts = {
     interval: 1,
     freq: Frequency.DAILY,
-    dtstart: this.date,
+    dtstart: parseISO(this.date),
     until: null,
     count: 10,
     byweekday: null,
@@ -299,6 +300,10 @@ export default class RecurrenceDialog extends Vue {
   }
 
   defaults: RecurrenceOpts | null = null
+
+  get nativeDate() {
+    return parseISO(this.date)
+  }
 
   get untilISO(): string {
     return this.options.until!.toISOString().substring(0, 10)
@@ -317,19 +322,22 @@ export default class RecurrenceDialog extends Vue {
   get monthTypes() {
     return [
       {
-        text: `Monthly on day ${this.date.getDate()}`,
+        text: `Monthly on day ${this.nativeDate.getDate()}`,
         value: MonthType.ABSOLUTE,
       },
       {
         text: `Monthly on the ${
           this.occurance[this.options.bysetpos as number]
-        } ${this.weekday[this.date.getDay()]}`,
+        } ${this.weekday[this.nativeDate.getDay()]}`,
       },
     ]
   }
 
   onChange(type: number | null) {
-    if (type === null) return
+    if (type === null) {
+      this.$emit('input', null)
+      return
+    }
 
     // The user selected "Custom..."
     if (type === -1) {
@@ -341,7 +349,7 @@ export default class RecurrenceDialog extends Vue {
     // set the rrule preset.
     this.rule.options = {
       freq: type,
-      dtstart: this.date,
+      dtstart: this.nativeDate,
     }
 
     if (this.rule.labels[0].value !== null) {
@@ -395,14 +403,14 @@ export default class RecurrenceDialog extends Vue {
 
     this.options.until = nextMonth
 
-    const weekday = this.weekdays[this.date.getDay()].value
+    const weekday = this.weekdays[this.nativeDate.getDay()].value
 
     // Set the byweekday value to the selected day
     this.options.byweekday = [weekday]
 
     // Set bymonthday and bysetpos for month-based intervals.
-    this.options.bysetpos = this.getWeekdayOccurance(this.date)
-    this.options.bymonthday = this.date.getDate()
+    this.options.bysetpos = this.getWeekdayOccurance(this.nativeDate)
+    this.options.bymonthday = this.nativeDate.getDate()
 
     // Copy the default options to reset the component.
     this.defaults = Object.assign({}, this.options)
@@ -439,7 +447,7 @@ export default class RecurrenceDialog extends Vue {
   setCustomRRule() {
     const retval: Partial<RecurrenceOpts> = {
       freq: this.options.freq,
-      dtstart: this.date,
+      dtstart: this.nativeDate,
     }
 
     if (this.type === RecurrenceTerminator.UNTIL) {

@@ -1,17 +1,22 @@
 <template>
   <v-row>
     <v-col>
-      <!-- <h2 class="headline">Registered Events</h2> -->
+      <h2 class="headline">Upcoming Events</h2>
 
-      <!-- <v-card class="mb-4">
-        <v-card-title>Event Title</v-card-title>
-        <v-card-subtitle>Event description</v-card-subtitle>
+      <v-row>
+        <v-col>
+          <v-slide-group class="mb-4">
+            <v-slide-item v-for="event in events.slice(0, 10)" :key="event.id">
+              <event-block
+                :event="event"
+                :link="`/events/${event.id}`"
+                class="mr-4"
+              ></event-block>
+            </v-slide-item>
+          </v-slide-group>
+        </v-col>
+      </v-row>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text>Go to Event</v-btn>
-        </v-card-actions>
-      </v-card> -->
       <v-snackbar v-model="registeredMessage">
         Thank you for registering!
 
@@ -60,7 +65,8 @@
 
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
-import { format } from 'date-fns'
+import { addDays, format } from 'date-fns'
+import { Event } from '@backend/event/event.entity'
 
 @Component({
   head() {
@@ -72,9 +78,14 @@ import { format } from 'date-fns'
 export default class HomePage extends Vue {
   tweets: any[] = []
   registeredMessage = false
+  events: Event[] = []
 
   async fetch() {
     this.tweets = await this.$axios.$get('/twitter')
+    this.events = await this.$accessor.events.findAll({
+      start: new Date(),
+      end: addDays(new Date(), 30),
+    })
   }
 
   get nonReplyTweets() {
@@ -95,3 +106,9 @@ export default class HomePage extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.headline {
+  font-weight: 700 !important;
+}
+</style>

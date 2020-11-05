@@ -60,6 +60,7 @@ export const actions = actionTree(
 
       commit('setEvents', events)
       commit('setStatus', State.WAITING)
+      return events
     },
     async findOne({ commit }, eventId: number | string) {
       commit('setStatus', State.BUSY)

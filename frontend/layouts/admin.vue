@@ -169,7 +169,7 @@
         </template>
 
         <v-list dense nav>
-          <v-list-item link to="/account">
+          <v-list-item link to="/account/settings">
             <v-list-item-icon>
               <v-icon>mdi-account-box-outline</v-icon>
             </v-list-item-icon>

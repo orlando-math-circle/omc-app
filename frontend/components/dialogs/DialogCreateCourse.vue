@@ -17,7 +17,7 @@
         <v-spacer></v-spacer>
       </v-toolbar>
 
-      <v-form-validated v-slot="{ passes }">
+      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
         <v-card-text>
           <alert-error v-if="error" :error="error" />
 
@@ -93,7 +93,7 @@
             text
             type="submit"
             :disabled="!passes"
-            :loading="$store.getters['courses/isLoading']"
+            :loading="$accessor.courses.isLoading"
             >Create</v-btn
           >
         </v-card-actions>
@@ -147,7 +147,7 @@ export default class DialogCreateCourse extends Vue {
       lateFee: this.dto.lateFee.toString(),
     }
 
-    const course = await this.$store.dispatch('courses/create', dto)
+    const course = await this.$accessor.courses.create(dto as any)
 
     if (!this.error) {
       this.$emit('create:course', course)

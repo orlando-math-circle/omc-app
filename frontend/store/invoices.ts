@@ -34,5 +34,13 @@ export const actions = actionTree(
       commit('setInvoices', invoices)
       commit('setStatus', State.WAITING)
     },
+    async findByAccount({ commit }) {
+      commit('setStatus', State.BUSY)
+
+      const invoices = await this.$axios.$get('/invoice/account')
+
+      commit('setInvoices', invoices)
+      commit('setStatus', State.WAITING)
+    },
   }
 )

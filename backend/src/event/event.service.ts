@@ -529,9 +529,9 @@ export class EventService {
         this.eventRepository.create({
           name: events[0].name,
           description: events[0].description,
+          location: events[0].location,
           picture: events[0].picture,
           color: events[0].color,
-          isOnline: events[0].isOnline,
           dtstart: date,
           dtend: duration
             ? moment(date).add(duration, 'minutes').toDate()
