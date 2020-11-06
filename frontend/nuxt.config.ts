@@ -6,7 +6,7 @@ const config: NuxtConfig = {
   ssr: true,
 
   server: {
-    port: 8000,
+    port: 8080,
   },
   /*
    ** Headers of the page
@@ -85,7 +85,6 @@ const config: NuxtConfig = {
   buildModules: [
     '@nuxt/typescript-build',
     '@nuxtjs/eslint-module',
-    '@nuxtjs/color-mode',
     'nuxt-typed-vuex',
     // '@nuxtjs/html-validator',
   ],
@@ -104,6 +103,7 @@ const config: NuxtConfig = {
    */
   axios: {
     baseURL: 'http://localhost:3030/',
+    browserBaseURL: 'http://99.128.6.82:3000/',
     proxyHeaders: false,
   },
 

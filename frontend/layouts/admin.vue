@@ -179,6 +179,22 @@
             </v-list-item-content>
           </v-list-item>
 
+          <v-list-item @click="isDark = !isDark">
+            <v-list-item-icon>
+              <v-icon>{{
+                isDark
+                  ? 'mdi-lightbulb-on-outline'
+                  : 'mdi-lightbulb-off-outline'
+              }}</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>{{
+                isDark ? 'Light Mode' : 'Dark Mode'
+              }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
           <v-divider></v-divider>
 
           <v-list-item link @click="logout">
@@ -229,6 +245,7 @@ export default class AdminLayout extends Vue {
 
   set isDark(value: boolean) {
     this.$vuetify.theme.dark = value
+    this.$cookies.set('omc-theme-dark', value)
   }
 
   logout() {

@@ -1,15 +1,19 @@
-import { Context } from '@nuxt/types'
+import { Context, Plugin } from '@nuxt/types'
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 
 Vue.use(Vuetify)
 
-export default (ctx: Context) => {
+const plugin: Plugin = (ctx: Context) => {
+  // Check if the user has a previously set dark theme token.
+  const isDark = ctx.$cookies.get('omc-theme-dark')
+
   const vuetify = new Vuetify({
     icons: {
       iconfont: 'mdi',
     },
     theme: {
+      dark: !!isDark,
       themes: {
         light: {
           primary: '#44D9E6',
@@ -20,13 +24,13 @@ export default (ctx: Context) => {
           // secondary: '#1B1E23',
           // accent: '#FF4299',
         },
+        dark: {},
       },
     },
   })
 
-  // Investigating adding types for these.
-  // @ts-ignore
   ctx.app.vuetify = vuetify
-  // @ts-ignore
   ctx.$vuetify = vuetify.framework
 }
+
+export default plugin

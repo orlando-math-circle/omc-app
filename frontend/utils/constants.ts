@@ -27,6 +27,7 @@ export const weekdays = [
  * Authentication
  */
 
+export const COOKIE_THEME = 'omc-theme'
 export const COOKIE_JWT = 'omc-token'
 export const COOKIE_COMPLETE = 'omc-complete'
 export const COOKIE_NAME = 'omc_token'

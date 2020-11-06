@@ -1,14 +1,39 @@
-version: '3.4'
+version: "3.4"
 
 services:
-  postgre:
+  # NGINX Server
+  webserver:
+    image: nginx:alpine
+    container_name: NGINX
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  # PostgreSQL Service
+  database:
     image: postgres:12
+    container_name: PostgreSQL
+    restart: unless-stopped
+    tty: true
     ports:
       - 5432:5432
     volumes:
       - postgre:/var/lib/postgresql/data
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      - app-network
 
 volumes:
   postgre:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

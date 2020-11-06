@@ -26,32 +26,58 @@
 
       <v-spacer />
 
-      <v-menu offset-y>
+      <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" icon v-on="on">
             <v-icon>mdi-dots-vertical</v-icon>
           </v-btn>
         </template>
 
-        <v-list>
-          <v-list-item @click="logout">
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
+        <v-list dense nav>
+          <v-list-item link to="/switcher">
+            <v-list-item-icon>
+              <v-icon>mdi-account-switch-outline</v-icon>
+            </v-list-item-icon>
 
-          <v-list-item v-if="isAdmin" link to="/admin">
-            <v-list-item-title>Admin Panel</v-list-item-title>
-          </v-list-item>
-
-          <v-divider></v-divider>
-
-          <v-list-item @click="$router.push('/switcher')">
             <v-list-item-title>Switch User</v-list-item-title>
           </v-list-item>
 
           <v-list-item @click="isDark = !isDark">
-            <v-list-item-title>{{
-              isDark ? 'Switch to Light' : 'Switch to Dark'
-            }}</v-list-item-title>
+            <v-list-item-icon>
+              <v-icon>{{
+                isDark
+                  ? 'mdi-lightbulb-on-outline'
+                  : 'mdi-lightbulb-off-outline'
+              }}</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>{{
+                isDark ? 'Light Mode' : 'Dark Mode'
+              }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <template v-if="isAdmin">
+            <v-divider></v-divider>
+
+            <v-list-item v-if="isAdmin" link to="/admin">
+              <v-list-item-icon>
+                <v-icon>mdi-view-dashboard-outline</v-icon>
+              </v-list-item-icon>
+
+              <v-list-item-title>Admin Panel</v-list-item-title>
+            </v-list-item>
+          </template>
+
+          <v-divider></v-divider>
+
+          <v-list-item @click="logout">
+            <v-list-item-icon>
+              <v-icon>mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-title>Logout</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -131,6 +157,7 @@ export default class DefaultLayout extends Vue {
 
   set isDark(value: boolean) {
     this.$vuetify.theme.dark = value
+    this.$cookies.set('omc-theme-dark', value)
   }
 
   get user() {

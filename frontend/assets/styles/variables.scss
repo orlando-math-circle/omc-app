@@ -21,6 +21,19 @@ $material-light: (
 );
 
 // Dark Theme
+$dark-component-background: #23232d;
+
 $material-dark: (
-  'background': #1b1e23,
+  'background': #13131a,
+  'cards': $dark-component-background,
+  'app-bar': $dark-component-background,
+  'calendar': (
+    'background-color': $dark-component-background,
+  ),
+  'navigation-drawer': $dark-component-background,
+  'bottom-navigation': $dark-component-background,
+  'picker': (
+    'body': $dark-component-background,
+  ),
+  'bg-color': $dark-component-background,
 );
