@@ -137,13 +137,16 @@ export default class DialogCreateCourse extends Vue {
   }
 
   async onSubmit() {
+    const fee =
+      this.dto.fee % 1 === 0 ? `${this.dto.fee}.00` : this.dto.fee.toString()
+
     const dto = {
       name: this.dto.name,
       description: this.dto.description,
       paymentType: this.dto.paymentType,
       latePaymentType: this.dto.latePaymentType,
       project: this.project,
-      fee: this.dto.fee.toString(),
+      fee,
       lateFee: this.dto.lateFee.toString(),
     }
 

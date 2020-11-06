@@ -174,5 +174,12 @@ export const actions = actionTree(
       commit('setAccount', account)
       commit('setStatus', State.WAITING)
     },
+    async verify({ commit }, token: string) {
+      commit('setStatus', State.BUSY)
+
+      await this.$axios.$post('/verify/email', { token })
+
+      commit('setStatus', State.WAITING)
+    },
   }
 )

@@ -44,7 +44,7 @@
             @refresh="onRefresh"
           >
             <template v-slot:[`item.id`]="{ item }">
-              <v-chip>#{{ item.id }}</v-chip>
+              # <link-copy :text="item.id"></link-copy>
             </template>
 
             <template v-slot:[`item.createdAt`]="{ item }">

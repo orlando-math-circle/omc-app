@@ -60,6 +60,21 @@
     <v-main app>
       <v-container>
         <div class="wave-after">
+          <v-alert
+            v-if="user && user.email && !user.emailVerified"
+            type="info"
+            elevation="2"
+          >
+            Thank you for registering! Please click the link in the verification
+            email to confirm your account.
+            <a href="#">Resend the verification email</a>.<br /><br />
+            You will need to confirm your email address before you'll be able to
+            register to events. In the meantime you may
+            <nuxt-link to="/account/settings"
+              >add users to your account</nuxt-link
+            >
+            and register manually in person at events.
+          </v-alert>
           <nuxt />
         </div>
       </v-container>
@@ -116,6 +131,10 @@ export default class DefaultLayout extends Vue {
 
   set isDark(value: boolean) {
     this.$vuetify.theme.dark = value
+  }
+
+  get user() {
+    return this.$accessor.auth.user
   }
 
   async fetch() {

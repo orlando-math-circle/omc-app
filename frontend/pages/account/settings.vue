@@ -131,6 +131,10 @@ export default class AccountSettingsPage extends Vue {
     return this.$accessor.auth.account?.users || []
   }
 
+  // isPrimaryUser(user: User) {
+  //   return user.id === this.$accessor.auth.account?.primaryUser.id
+  // }
+
   async onDeleteConfirm(user: User) {
     await this.$accessor.users.delete(user.id)
     await this.$accessor.auth.getAccount()

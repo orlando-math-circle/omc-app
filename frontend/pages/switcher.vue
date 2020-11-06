@@ -64,6 +64,8 @@ export default class SwitcherPage extends Vue {
 
   async switchUser(user: User) {
     await this.$accessor.auth.switchUser(user.id)
+    await this.$accessor.auth.getMe()
+
     this.$router.push('/home')
   }
 }

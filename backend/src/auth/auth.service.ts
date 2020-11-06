@@ -201,7 +201,7 @@ export class AuthService {
       `${user.password}${this.config.get('SECRET')}`,
     );
 
-    this.emailService.email(email, token);
+    this.emailService.email(user, 'Forgot Password', token);
   }
 
   /**

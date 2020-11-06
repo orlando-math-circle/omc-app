@@ -15,9 +15,8 @@
     <template v-else>
       <v-row>
         <v-col>
-          <avatar-picker :url="$accessor.auth.avatar"></avatar-picker>
-
           <v-card class="avatar--offset">
+            <avatar-picker :url="$accessor.auth.avatar"></avatar-picker>
             <div class="d-flex flex-row">
               <v-card-title>User Settings</v-card-title>
 

@@ -36,7 +36,25 @@
 
     <v-row>
       <v-col>
-        <v-data-table-paginated :items="eventsForDate"></v-data-table-paginated>
+        <v-data-table-paginated :items="eventsForDate" :headers="headers">
+          <template v-slot:[`item.id`]="{ item }">
+            # <link-copy :text="item.id"></link-copy>
+          </template>
+
+          <template v-slot:[`item.start`]="{ item }">
+            {{ format(item.dtstart, 'EEE, MMM do, yyyy') }}
+          </template>
+
+          <template v-slot:[`item.end`]="{ item }">
+            {{ format(item.dtend, 'EEE, MMM do, yyyy') }}
+          </template>
+
+          <template v-slot:[`item.edit`]="{ item }">
+            <v-btn icon :to="`/admin/calendar/events/${item.id}`">
+              <v-icon>mdi-open-in-new</v-icon>
+            </v-btn>
+          </template>
+        </v-data-table-paginated>
       </v-col>
     </v-row>
   </v-container>
@@ -45,6 +63,7 @@
 <script lang="ts">
 import { format, isSameDay, parseISO } from 'date-fns'
 import { Component, Vue } from 'nuxt-property-decorator'
+import { formatDate } from '../../../../utils/utilities'
 import Calendar from '~/components/Calendar.vue'
 
 @Component({
@@ -55,6 +74,15 @@ export default class CalendarAdminPage extends Vue {
   $refs!: {
     calendar: InstanceType<typeof Calendar>
   }
+
+  headers = [
+    { text: 'Id', value: 'id' },
+    { text: 'Name', value: 'name' },
+    { text: 'Description', value: 'description' },
+    { text: 'Start', value: 'start' },
+    { text: 'End', value: 'end' },
+    { text: 'Edit', value: 'edit' },
+  ]
 
   calendar = {
     type: 'simple',
@@ -90,6 +118,10 @@ export default class CalendarAdminPage extends Vue {
     }
 
     return `Events on ${date}`
+  }
+
+  format(date: Date | string, formatString: string) {
+    return formatDate(date, formatString)
   }
 
   async onEventCreated() {

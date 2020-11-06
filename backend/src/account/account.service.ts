@@ -44,11 +44,15 @@ export class AccountService {
     await this.accountRepository.persistAndFlush(account);
     account.users.populated(true);
 
+    const token = this.authService.signJWT({ email: user.email }, null, {
+      expiresIn: '2 days',
+    });
+
     this.emailService.email(
-      user.email,
-      this.authService.signJWT({ email: user.email }, null, {
-        expiresIn: '2 days',
-      }),
+      user,
+      'Email Verification',
+      `Please visit click <a href="http://localhost:8000/verify?token=${token}">here</a> or copy the following link to verify your email address.<br/>
+      <a href="http://localhost:8000/verify?token=${token}">http://localhost:8000/verify?token=${token}</a>`,
     );
 
     return this.authService.login(account, user);
