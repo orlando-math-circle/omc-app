@@ -167,11 +167,11 @@
                 <v-list-item-content>
                   <v-row>
                     <v-col>
-                      <!-- <recurrence-dialog
-                    ref="recurrenceDialog"
-                    v-model="rrule"
-                    :date="dates.start.date"
-                  /> -->
+                      <recurrence-dialog
+                        ref="recurrenceDialog"
+                        v-model="rrule"
+                        :date="dates.start.date"
+                      ></recurrence-dialog>
                     </v-col>
                   </v-row>
                 </v-list-item-content>
@@ -185,7 +185,7 @@
                 </v-list-item-avatar>
 
                 <v-list-item-content>
-                  <v-text-field label="Location" />
+                  <v-text-field v-model="meta.location" label="Location" />
                 </v-list-item-content>
               </v-list-item>
 
@@ -283,9 +283,9 @@ import Vue, { VueConstructor } from 'vue'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 import { format } from 'date-fns'
 import { Options } from 'rrule'
-import { CreateEventDto } from '../../backend/src/event/dtos/create-event.dto'
-import { Project } from '../../backend/src/project/project.entity'
-import RecurrenceDialog from './events/RecurrenceDialog.vue'
+import { CreateEventDto } from '../../../backend/src/event/dtos/create-event.dto'
+import { Project } from '../../../backend/src/project/project.entity'
+import RecurrenceDialog from '../events/RecurrenceDialog.vue'
 import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
 import { Course } from '~/../backend/src/course/course.entity'
@@ -354,6 +354,7 @@ export default (Vue as ComponentRefs).extend({
       meta: {
         name: '',
         description: '',
+        location: '',
       },
       project: {
         id: null as null | number,
@@ -432,7 +433,6 @@ export default (Vue as ComponentRefs).extend({
           ? undefined
           : toDate(this.dates.end.date, this.times.end.time),
         rrule: this.rrule || undefined,
-        isOnline: false, // TODO: Temporary
         project: this.project.id || undefined,
         course: this.course.id || undefined,
       }

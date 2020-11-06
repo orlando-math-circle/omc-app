@@ -29,6 +29,7 @@ export const state = () => ({
 type AuthState = ReturnType<typeof state>
 
 export const getters = getterTree(state, {
+  isLoading: (state) => state.status === State.BUSY,
   loggedIn: (state) => !!state.token,
   accountUsers: (state) => (state.account?.users as unknown) as User[],
   isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN),
@@ -171,6 +172,13 @@ export const actions = actionTree(
       const account = await this.$axios.$get('/account/me')
 
       commit('setAccount', account)
+      commit('setStatus', State.WAITING)
+    },
+    async verify({ commit }, token: string) {
+      commit('setStatus', State.BUSY)
+
+      await this.$axios.$post('/verify/email', { token })
+
       commit('setStatus', State.WAITING)
     },
   }

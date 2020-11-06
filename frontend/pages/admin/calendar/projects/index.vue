@@ -48,7 +48,9 @@
             :loading="isLoading"
             @refresh="onRefresh"
           >
-            <template v-slot:[`item.id`]="{ item }"> #{{ item.id }} </template>
+            <template v-slot:[`item.id`]="{ item }">
+              # <link-copy :text="item.id"></link-copy>
+            </template>
 
             <template v-slot:[`item.createdAt`]="{ item }">
               {{ format(item.createdAt, 'MMM d, yyyy') }}

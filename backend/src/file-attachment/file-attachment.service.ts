@@ -26,6 +26,9 @@ export class FileAttachmentService {
       user,
     });
 
+    attachment.user.populated();
+    attachment.file.populated();
+
     await this.attachmentRepository.persist(attachment).flush();
 
     return attachment;

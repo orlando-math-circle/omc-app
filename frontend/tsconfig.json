@@ -10,12 +10,16 @@
     "strict": true,
     "noEmit": true,
     "experimentalDecorators": true,
-    "baseUrl": ".",
+    "baseUrl": "../",
     "paths": {
-      "~/*": ["./*"],
-      "@/*": ["./*"]
+      "~/*": ["./frontend/*"],
+      "@/*": ["./frontend/*"],
+      "@backend/*": ["./backend/src/*"]
     },
-    "typeRoots": ["./node_modules/@types", "./node_modules/vuetify/types"],
+    "typeRoots": [
+      "./frontend/node_modules/@types",
+      "./frontend/node_modules/vuetify/types"
+    ],
     "types": [
       "@types/node",
       "@nuxt/types",
@@ -24,5 +28,12 @@
       "vuetify"
     ]
   },
-  "exclude": ["node_modules", "assets/.nuxt", ".nuxt", "dist"]
+  "exclude": [
+    "node_modules",
+    "assets/.nuxt",
+    ".nuxt",
+    "dist",
+    "docs",
+    "backend"
+  ]
 }

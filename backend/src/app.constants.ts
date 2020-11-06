@@ -6,6 +6,11 @@ export const PORT = 'PORT';
 export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
 
 /**
+ * SendGrid API
+ */
+export const SENDGRID_API_KEY = 'SENDGRID_API_KEY';
+
+/**
  * File Storage
  */
 export const FILE_DIRECTORY = 'FILE_DIRECTORY';

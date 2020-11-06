@@ -1,6 +1,7 @@
-import { extend, setInteractionMode } from 'vee-validate'
-import { email, ext } from 'vee-validate/dist/rules'
 import { parse } from 'date-fns'
+import { isNumber } from 'lodash'
+import { extend, setInteractionMode } from 'vee-validate'
+import { email } from 'vee-validate/dist/rules'
 import { getTimeValue } from '../utils/utilities'
 
 /**
@@ -10,6 +11,11 @@ import { getTimeValue } from '../utils/utilities'
  * @see https://logaretm.github.io/vee-validate/guide/interaction-and-ux.html#interaction-modes
  */
 setInteractionMode('lazy')
+
+extend('positive', {
+  validate: (value) => isNumber(value) && value > 0,
+  message: 'Value must be positive.',
+})
 
 extend('email', email)
 

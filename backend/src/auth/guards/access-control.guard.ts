@@ -30,7 +30,7 @@ export class AccessGuard {
 
     const roles: Roles[] = this.getUserRoles(ctx);
 
-    if (!roles.length) roles.push(Roles.GUEST);
+    if (!roles.length) roles.push(Roles.DEFAULT);
 
     const grants: IQueryInfo[] = grant.permissions.map((permission) => ({
       role: roles,

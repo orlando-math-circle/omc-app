@@ -52,7 +52,7 @@
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 import { throttle } from 'lodash'
-import { DataTableOptions } from '../interfaces/data-table.interface'
+import { DataTableOptions } from '../../interfaces/data-table.interface'
 
 @Component
 export default class DialogSelectCourse extends Vue {

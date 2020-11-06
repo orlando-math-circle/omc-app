@@ -121,7 +121,7 @@ export class UserService {
    * @param id Priamry key of the user.
    */
   async delete(id: number) {
-    const user = await this.userRepository.findOneOrFail(id);
+    const user = await this.userRepository.findOneOrFail(id, true);
 
     return this.userRepository.remove(user).flush();
   }

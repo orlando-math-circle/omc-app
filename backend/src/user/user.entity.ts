@@ -41,8 +41,8 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ nullable: true, hidden: true })
   password?: string;
 
-  @Property({ type: ArrayType })
-  roles: Roles[] = [];
+  @Property({ type: ArrayType, default: [Roles.ADMIN] })
+  roles: Roles[] = [Roles.ADMIN];
 
   @Property({ default: false })
   feeWaived: boolean = false;
@@ -113,15 +113,18 @@ export class User extends BaseEntity<User, 'id'> {
   @ManyToOne(() => Account, { hidden: true })
   account!: Account;
 
-  @OneToMany(() => EventRegistration, (r) => r.user, { eager: false })
+  @OneToMany(() => EventRegistration, (r) => r.user, {
+    eager: false,
+    orphanRemoval: true,
+  })
   registrations = new Collection<EventRegistration>(this);
 
   @OneToMany(() => Invoice, (i) => i.user, { eager: false })
   invoices = new Collection<Invoice>(this);
 
-  @OneToMany(() => File, (f) => f.author)
+  @OneToMany(() => File, (f) => f.author, { orphanRemoval: true })
   files = new Collection<File>(this);
 
-  @OneToMany(() => FileAttachment, (a) => a.user)
+  @OneToMany(() => FileAttachment, (a) => a.user, { orphanRemoval: true })
   attachments = new Collection<FileAttachment>(this);
 }

@@ -1,21 +1,23 @@
-import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Grades } from '../enums/grades.enum';
 
 export class CreateUserDto {
   @IsString()
-  first!: string;
+  readonly first!: string;
 
   @IsString()
-  last!: string;
+  readonly last!: string;
 
   @IsOptional()
   @IsEnum(Grades)
-  grade?: Grades;
+  readonly grade?: Grades;
 
   @IsOptional()
   @IsString()
-  email?: string;
+  readonly email?: string;
 
-  @IsDateString()
-  dob!: Date;
+  @Type(() => Date)
+  @IsDate()
+  readonly dob!: Date | string;
 }

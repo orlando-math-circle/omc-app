@@ -49,8 +49,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import { throttle } from 'lodash'
-import { DataTableOptions } from '../interfaces/data-table.interface'
-import { FindAllProjectsDto } from '../../backend/src/project/dto/find-all-projects.dto'
+import { FindAllProjectsDto } from '@backend/project/dto/find-all-projects.dto'
+import { DataTableOptions } from '../../interfaces/data-table.interface'
 
 export default Vue.extend({
   props: {

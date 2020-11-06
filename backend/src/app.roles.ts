@@ -2,20 +2,18 @@ import { AccessControl } from 'accesscontrol';
 
 export enum Roles {
   ADMIN = 'admin',
-  PARENT = 'parent',
-  GUEST = 'guest',
+  VOLUNTEER = 'volunteer',
+  DEFAULT = 'default',
 }
 
 const ac = new AccessControl();
 
-ac.grant(Roles.GUEST)
+ac.grant(Roles.DEFAULT)
   .createOwn('user')
   .readAny('course')
   .readAny('project')
   .readAny('event')
   .readOwn('user')
-  .grant(Roles.PARENT)
-  .extend(Roles.GUEST)
   .readOwn('file')
   .readAny('file-field')
   .createOwn('file-attachment')
@@ -26,7 +24,7 @@ ac.grant(Roles.GUEST)
   .createOwn('file')
   .readOwn('file')
   .grant(Roles.ADMIN)
-  .extend(Roles.PARENT)
+  .extend(Roles.DEFAULT)
   .createAny('system')
   .readAny('system')
   .updateAny('system')

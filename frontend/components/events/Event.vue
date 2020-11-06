@@ -1,45 +1,32 @@
 <template>
   <v-card :to="`/events/${value.id}`">
-    <v-card-title>{{ value.name }}</v-card-title>
-    <v-card-subtitle>{{ value.description }}</v-card-subtitle>
+    <div class="d-flex flex-row">
+      <div class="d-flex flex-column" style="width: 100%">
+        <v-card-title>{{ value.name }}</v-card-title>
+        <v-card-subtitle>{{ value.description }}</v-card-subtitle>
 
-    <v-list-item>
-      <v-list-item-content>
-        <v-row no-gutters class="mb-2">
+        <v-row class="pa-5">
           <v-col cols="auto">
-            <v-icon>mdi-clock-outline</v-icon>
+            <v-icon>mdi-clock-outline</v-icon> {{ start }}
           </v-col>
 
-          <v-col class="pl-5">{{ start }}</v-col>
-        </v-row>
-
-        <v-row no-gutters class="mb-2">
           <v-col cols="auto">
-            <v-icon>mdi-account-circle-outline</v-icon>
-          </v-col>
-
-          <v-col class="pl-5">
-            {{ value.author.first }} {{ value.author.last }}
-          </v-col>
+            <v-icon>
+              {{
+                value.location === 'Online'
+                  ? 'mdi-web'
+                  : 'mdi-map-marker-outline'
+              }}</v-icon
+            >
+            {{ value.location }}</v-col
+          >
         </v-row>
+      </div>
 
-        <v-row no-gutters>
-          <v-col cols="auto">
-            <v-icon>{{
-              value.isOnline ? 'mdi-web' : 'mdi-map-marker-outline'
-            }}</v-icon>
-          </v-col>
-
-          <v-col class="pl-5">
-            {{ value.isOnline ? 'Online' : value.location }}
-          </v-col>
-        </v-row>
-      </v-list-item-content>
-
-      <v-list-item-avatar rounded size="100">
-        <v-img :src="picture"></v-img>
-      </v-list-item-avatar>
-    </v-list-item>
+      <div class="d-flex align-self-end pa-4">
+        <v-img :src="picture" width="200px" class="rounded"></v-img>
+      </div>
+    </div>
   </v-card>
 </template>
 

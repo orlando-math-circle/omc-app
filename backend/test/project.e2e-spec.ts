@@ -302,7 +302,7 @@ describe('Projects', () => {
     });
 
     it('should throw 403 on unauthorized', async () => {
-      await userFixtures.setUserRoles(1, [Roles.GUEST]);
+      await userFixtures.setUserRoles(1, [Roles.DEFAULT]);
 
       await request(app.getHttpServer())
         .patch('/project/2')
