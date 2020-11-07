@@ -11,9 +11,11 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/templates/:/etc/nginx/templates/
     networks:
       - app-network
+    environment:
+      - NGINX_SERVER_NAME=omc.johng.dev
 
   # PostgreSQL Service
   database:
