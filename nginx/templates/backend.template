@@ -1,0 +1,33 @@
+server {
+  listen [::]:443 ssl http2;
+  listen 443 ssl http2;
+  
+  server_name omc-api.johng.dev;
+  
+  ssl_certificate /etc/letsencrypt/live/omc-api.johng.dev/fullchain.pem; 
+  ssl_certificate_key /etc/letsencrypt/live/omc-api.johng.dev/privkey.pem;
+  include /etc/letsencrypt/options-ssl-nginx.conf;
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+  gzip            on;
+  gzip_types      text/plain application/xml text/css application/javascript;
+  gzip_min_length 1000;
+
+  location / {
+    expires $expires;
+
+    proxy_redirect                      off;
+    proxy_set_header Host               $host;
+    proxy_set_header X-Real-IP          $remote_addr;
+    proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto  $scheme;
+    proxy_read_timeout                  1m;
+    proxy_connect_timeout               1m;
+    proxy_pass                          http://127.0.0.1:3000;
+  }
+
+  # Certbot renewal
+  location ^~ /.well-known/acme-challenge/ {
+    alias /var/www/acme-challenge/;
+  }
+}

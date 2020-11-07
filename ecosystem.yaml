@@ -1,0 +1,9 @@
+apps:
+  - script: npm
+    args: start
+    name: "OMC Frontend"
+    cwd: "./frontend"
+  - script: npm
+    args: start
+    name: "OMC Backend"
+    cwd: "./backend"
