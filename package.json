@@ -1,0 +1,15 @@
+{
+  "name": "omc-app",
+  "version": "1.0.0",
+  "description": "Orlando Math Circle event calendar app",
+  "author": "John Gilbert",
+  "private": true,
+  "scripts": {
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:start": "cd frontend && npm run start",
+    "backend:dev": "cd backend && npm run start:dev",
+    "backend:build": "cd backend && npm run build",
+    "backend:start": "cd backend && npm run start:prod"
+  }
+}
