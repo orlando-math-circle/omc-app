@@ -1,25 +1,34 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
-import { FindUsersDto } from '@backend/user/dtos/find-users.dto'
-import { User } from '@backend/user/user.entity'
 import { CreateUserDto } from '@backend/user/dtos/create-user.dto'
+import { FindUsersDto } from '@backend/user/dtos/find-users.dto'
 import { UpdateUserDto } from '@backend/user/dtos/update-user.dto'
-import { State, StatePayload } from '../interfaces/state.interface'
+import { User } from '@backend/user/user.entity'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { StateError } from '../interfaces/state-error.interface'
+import { StateStatus } from '../interfaces/state.interface'
+import { parseAxiosError } from '../utils/utilities'
 
 export const state = () => ({
-  status: State.UNLOADED,
-  error: null as Error | null,
+  status: StateStatus.UNLOADED,
+  error: null as StateError | null,
   users: [] as User[],
   user: null as User | null,
 })
 
 export const getters = getterTree(state, {
-  isLoading: (state) => state.status === State.BUSY,
+  isLoading: (state) => state.status === StateStatus.BUSY,
 })
 
 export const mutations = mutationTree(state, {
-  setStatus(state, { status, error }: StatePayload) {
+  setStatus(state, status: StateStatus) {
     state.status = status
-    state.error = error || null
+
+    if (status === StateStatus.BUSY) {
+      state.error = null
+    }
+  },
+  setError(state, error: any) {
+    state.status = StateStatus.ERROR
+    state.error = parseAxiosError(error)
   },
   setUser(state, user: User) {
     state.user = user
@@ -39,40 +48,38 @@ export const actions = actionTree(
   {
     async create({ commit }, createUserDto: CreateUserDto) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const user = await this.$axios.$post('/user', createUserDto)
 
         commit('setUser', user)
-        commit('setStatus', { status: State.WAITING })
-
-        return user
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async getUser({ commit }, id: number | string) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const user = await this.$axios.$get(`/user/${id}`)
 
         commit('setUser', user)
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async findAll({ commit }, findUsersDto?: FindUsersDto) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const users = await this.$axios.$get('/user', { params: findUsersDto })
 
         commit('setUsers', users[0])
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async update(
@@ -80,25 +87,25 @@ export const actions = actionTree(
       { id, updateUserDto }: { id: number; updateUserDto: UpdateUserDto }
     ) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const user = await this.$axios.$patch(`/user/${id}`, updateUserDto)
 
         commit('setUserById', { id, user })
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async delete({ commit }, id: number) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         await this.$axios.$delete(`/user/${id}`)
 
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
   }

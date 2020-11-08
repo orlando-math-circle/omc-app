@@ -1,20 +1,21 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { CreateEventDto } from '../../backend/src/event/dtos/create-event.dto'
+import { FindAllEventsDto } from '../../backend/src/event/dtos/find-all-events.dto'
 import { Event } from '../../backend/src/event/event.entity'
 import { CalendarEvent } from '../interfaces/calendar-event.interface'
-import { FindAllEventsDto } from '../../backend/src/event/dtos/find-all-events.dto'
-import { State } from '../interfaces/state.interface'
-import { toLocalISO } from '../utils/utilities'
+import { StateError } from '../interfaces/state-error.interface'
+import { StateStatus } from '../interfaces/state.interface'
+import { parseAxiosError, toLocalISO } from '../utils/utilities'
 
 export const state = () => ({
-  status: State.UNLOADED,
-  error: null as Error | null,
+  status: StateStatus.UNLOADED,
+  error: null as StateError | null,
   events: [] as Event[],
   event: null as Event | null,
 })
 
 export const getters = getterTree(state, {
-  isLoading: (state) => state.status === State.BUSY,
+  isLoading: (state) => state.status === StateStatus.BUSY,
   calendarEvents: (state): CalendarEvent[] =>
     state.events.map((event) =>
       Object.assign(event, {
@@ -27,11 +28,16 @@ export const getters = getterTree(state, {
 })
 
 export const mutations = mutationTree(state, {
-  setStatus(state, status: State) {
+  setStatus(state, status: StateStatus) {
     state.status = status
+
+    if (status === StateStatus.BUSY) {
+      state.error = null
+    }
   },
-  setError(state, error: Error) {
-    state.error = error
+  setError(state, error: any) {
+    state.status = StateStatus.ERROR
+    state.error = parseAxiosError(error)
   },
   setEvents(state, events: Event[]) {
     state.events = events
@@ -45,30 +51,43 @@ export const actions = actionTree(
   { state, getters, mutations },
   {
     async create({ commit }, createEventDto: CreateEventDto) {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      await this.$axios.$post('/event', createEventDto)
+        await this.$axios.$post('/event', createEventDto)
 
-      commit('setStatus', State.WAITING)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
     async findAll({ commit }, findAllEventsDto?: FindAllEventsDto) {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
+        const events = await this.$axios.$get('/event', {
+          params: findAllEventsDto,
+        })
 
-      const events = await this.$axios.$get('/event', {
-        params: findAllEventsDto,
-      })
+        commit('setEvents', events)
+        commit('setStatus', StateStatus.WAITING)
 
-      commit('setEvents', events)
-      commit('setStatus', State.WAITING)
-      return events
+        return events
+      } catch (error) {
+        console.error(`Error: ${error}`)
+        // commit('setError', error)
+      }
     },
     async findOne({ commit }, eventId: number | string) {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      const event = await this.$axios.$get(`/event/${eventId}`)
+        const event = await this.$axios.$get(`/event/${eventId}`)
 
-      commit('setEvent', event)
-      commit('setStatus', State.WAITING)
+        commit('setEvent', event)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
   }
 )

@@ -1,5 +1,4 @@
-import { actionTree, mutationTree } from 'nuxt-typed-vuex'
-import { Invoice } from '../../backend/src/invoice/invoice.entity'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { parseAxiosError } from '../utils/utilities'
@@ -7,6 +6,11 @@ import { parseAxiosError } from '../utils/utilities'
 export const state = () => ({
   status: StateStatus.UNLOADED,
   error: null as StateError | null,
+  tweets: [] as any[],
+})
+
+export const getters = getterTree(state, {
+  isLoading: (state) => state.status === StateStatus.BUSY,
 })
 
 export const mutations = mutationTree(state, {
@@ -21,26 +25,25 @@ export const mutations = mutationTree(state, {
     state.status = StateStatus.ERROR
     state.error = parseAxiosError(error)
   },
+  setTweets(state, tweets: any[]) {
+    state.tweets = tweets
+  },
 })
 
 export const actions = actionTree(
-  { state },
+  { state, mutations },
   {
-    create(
-      _actionTree,
-      { eventId, users }: { eventId: number; users: number[] }
-    ) {
-      return this.$axios.$post(`/registration/order/create/${eventId}`, {
-        users,
-      })
-    },
-    capture(
-      _actionTree,
-      { eventId, orderId }: { eventId: number; orderId: number }
-    ) {
-      return this.$axios.$post<Invoice[]>(
-        `/registration/order/capture/${eventId}/${orderId}`
-      )
+    async findAll({ commit }) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const tweets = await this.$axios.$get('/twitter')
+
+        commit('setTweets', tweets)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
   }
 )

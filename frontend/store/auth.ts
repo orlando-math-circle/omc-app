@@ -3,8 +3,10 @@ import { Account } from '../../backend/src/account/account.entity'
 import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.dto'
 import { Roles } from '../../backend/src/app.roles'
 import { User } from '../../backend/src/user/user.entity'
-import { State } from '../interfaces/state.interface'
+import { StateError } from '../interfaces/state-error.interface'
+import { StateStatus } from '../interfaces/state.interface'
 import { COOKIE_COMPLETE, COOKIE_JWT } from '../utils/constants'
+import { parseAxiosError } from '../utils/utilities'
 
 interface LoginDto {
   email: string
@@ -13,8 +15,8 @@ interface LoginDto {
 }
 
 export const state = () => ({
-  status: State.UNLOADED,
-  error: null as Error | null,
+  status: StateStatus.UNLOADED,
+  error: null as StateError | null,
   user: null as User | null,
   account: null as Account | null,
   settings: {
@@ -26,10 +28,10 @@ export const state = () => ({
   justRegistered: false,
 })
 
-type AuthState = ReturnType<typeof state>
+// type AuthState = ReturnType<typeof state>
 
 export const getters = getterTree(state, {
-  isLoading: (state) => state.status === State.BUSY,
+  isLoading: (state) => state.status === StateStatus.BUSY,
   loggedIn: (state) => !!state.token,
   accountUsers: (state) => (state.account?.users as unknown) as User[],
   isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN),
@@ -39,11 +41,16 @@ export const getters = getterTree(state, {
 })
 
 export const mutations = mutationTree(state, {
-  setStatus(state, status: State) {
+  setStatus(state, status: StateStatus) {
     state.status = status
+
+    if (status === StateStatus.BUSY) {
+      state.error = null
+    }
   },
-  setError(state, error: Error) {
-    state.error = error
+  setError(state, error: any) {
+    state.status = StateStatus.ERROR
+    state.error = parseAxiosError(error)
   },
   setToken(state, token: string | null) {
     state.token = token
@@ -57,7 +64,7 @@ export const mutations = mutationTree(state, {
   setAccount(state, account: Account) {
     state.account = account
   },
-  setSettings(state, settings: Partial<AuthState['settings']>) {
+  setSettings(state, settings: any) {
     state.settings = Object.assign({}, state.settings, settings)
   },
   setRemember(state, remember: boolean) {
@@ -85,58 +92,73 @@ export const actions = actionTree(
       })
     },
     async login({ commit }, loginDto: LoginDto): Promise<void> {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      const { token, complete } = await this.$axios.$post('/login', {
-        email: loginDto.email,
-        password: loginDto.password,
-      })
+        const { token, complete } = await this.$axios.$post('/login', {
+          email: loginDto.email,
+          password: loginDto.password,
+        })
 
-      commit('setRemember', loginDto.remember)
-      commit('setToken', token)
-      commit('setComplete', complete)
-      this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: token })
-      this.app.$accessor.auth.setCookie({
-        name: COOKIE_COMPLETE,
-        value: complete,
-      })
+        commit('setRemember', loginDto.remember)
+        commit('setToken', token)
+        commit('setComplete', complete)
+        this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: token })
+        this.app.$accessor.auth.setCookie({
+          name: COOKIE_COMPLETE,
+          value: complete,
+        })
 
-      commit('setStatus', State.WAITING)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
     async logout({ commit }, everywhere?: boolean): Promise<void> {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      if (everywhere) {
-        await this.$axios.$post('/logout')
+        if (everywhere) {
+          await this.$axios.$post('/logout')
+        }
+
+        commit('setToken', null)
+        this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: null })
+        this.app.$accessor.auth.setCookie({
+          name: COOKIE_COMPLETE,
+          value: null,
+        })
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
       }
-
-      commit('setToken', null)
-      this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: null })
-      this.app.$accessor.auth.setCookie({ name: COOKIE_COMPLETE, value: null })
-
-      commit('setStatus', State.WAITING)
     },
     async switchUser({ commit }, userId: number): Promise<void> {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      const { token, complete } = await this.$axios.$post(`/switch/${userId}`)
+        const { token, complete } = await this.$axios.$post(`/switch/${userId}`)
 
-      commit('setToken', token)
-      commit('setComplete', complete)
-      this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: token })
-      this.app.$accessor.auth.setCookie({
-        name: COOKIE_COMPLETE,
-        value: complete,
-      })
+        commit('setToken', token)
+        commit('setComplete', complete)
+        this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: token })
+        this.app.$accessor.auth.setCookie({
+          name: COOKIE_COMPLETE,
+          value: complete,
+        })
 
-      commit('setStatus', State.WAITING)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
     async register(
       { commit },
       createAccountDto: CreateAccountDto
     ): Promise<void> {
       try {
-        commit('setStatus', State.BUSY)
+        commit('setStatus', StateStatus.BUSY)
 
         const { token, complete } = await this.$axios.$post(
           '/account/register',
@@ -152,34 +174,45 @@ export const actions = actionTree(
         })
 
         commit('setJustRegistered', true)
-        commit('setStatus', State.WAITING)
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', State.ERROR)
         commit('setError', error)
       }
     },
     async getMe({ commit }): Promise<void> {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      const user = await this.$axios.$get('/user/me')
+        const user = await this.$axios.$get('/user/me')
 
-      commit('setUser', user)
-      commit('setStatus', State.WAITING)
+        commit('setUser', user)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
     async getAccount({ commit }): Promise<void> {
-      commit('setStatus', State.BUSY)
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      const account = await this.$axios.$get('/account/me')
+        const account = await this.$axios.$get('/account/me')
 
-      commit('setAccount', account)
-      commit('setStatus', State.WAITING)
+        commit('setAccount', account)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
-    async verify({ commit }, token: string) {
-      commit('setStatus', State.BUSY)
+    async verify({ commit }, token: string): Promise<void> {
+      try {
+        commit('setStatus', StateStatus.BUSY)
 
-      await this.$axios.$post('/verify/email', { token })
+        await this.$axios.$post('/verify/email', { token })
 
-      commit('setStatus', State.WAITING)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
     },
   }
 )

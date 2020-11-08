@@ -43,9 +43,7 @@
               <v-icon large left color="accent">mdi-twitter</v-icon>
               <span>{{ tweet.user.name }}</span>
             </v-card-title>
-            <v-card-subtitle>{{
-              formatDate(tweet.created_at)
-            }}</v-card-subtitle>
+            <v-card-subtitle>{{ format(tweet.created_at) }}</v-card-subtitle>
 
             <v-card-text>
               {{ tweet.text }}
@@ -65,8 +63,8 @@
 
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
-import { addDays, format } from 'date-fns'
-import { Event } from '@backend/event/event.entity'
+import { addDays } from 'date-fns'
+import { formatDate } from '../utils/utilities'
 
 @Component({
   head() {
@@ -76,26 +74,34 @@ import { Event } from '@backend/event/event.entity'
   },
 })
 export default class HomePage extends Vue {
-  tweets: any[] = []
   registeredMessage = false
-  events: Event[] = []
 
   async fetch() {
-    this.tweets = await this.$axios.$get('/twitter')
-    this.events = await this.$accessor.events.findAll({
-      start: new Date(),
-      end: addDays(new Date(), 30),
-    })
+    const now = new Date()
+
+    await Promise.all([
+      this.$accessor.twitter.findAll(),
+      this.$accessor.events.findAll({
+        start: now,
+        end: addDays(now, 30),
+      }),
+    ])
+  }
+
+  get tweets() {
+    return this.$accessor.twitter.tweets
+  }
+
+  get events() {
+    return this.$accessor.events.events
   }
 
   get nonReplyTweets() {
     return this.tweets.filter((tweet: any) => !tweet.in_reply_to_status_id)
   }
 
-  formatDate(dateString: string) {
-    const date = new Date(dateString)
-
-    return format(date, 'MMMM do, yyyy')
+  format(date: string) {
+    return formatDate(date, 'MMMM do, yyyy')
   }
 
   mounted() {

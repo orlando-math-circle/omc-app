@@ -16,6 +16,7 @@ import * as users from '~/store/users'
 import * as files from '~/store/files'
 import * as volunteers from '~/store/volunteers'
 import * as snackbar from '~/store/snackbar'
+import * as twitter from '~/store/twitter'
 
 export const state = () => ({})
 
@@ -82,5 +83,6 @@ export const accessorType = getAccessorType({
     files,
     volunteers,
     snackbar,
+    twitter,
   },
 })

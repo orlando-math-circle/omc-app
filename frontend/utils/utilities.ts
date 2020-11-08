@@ -1,4 +1,24 @@
+import { AxiosError } from 'axios'
 import { format, parse } from 'date-fns'
+import { StateError } from '../interfaces/state-error.interface'
+
+/**
+ * Parses an Axios error to avoid cyclic dependency
+ * errors in Vuex.
+ *
+ * @param error Axios error.
+ */
+export const parseAxiosError = (error: AxiosError): StateError => {
+  if (error.response) {
+    return {
+      url: error.config.url,
+      status: error.response.status,
+      message: error.message,
+    }
+  }
+
+  return { message: error.message }
+}
 
 /**
  * Formats a date or ISO date string as a friendly readable date.

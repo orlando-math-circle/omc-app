@@ -1,25 +1,34 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
-import { State, StatePayload } from '../interfaces/state.interface'
-import { VolunteerJob } from '../../backend/src/volunteer-job/volunteer-job.entity'
 import { CreateJobDto } from '../../backend/src/volunteer-job/dto/create-job.dto'
 import { FindAllJobsDto } from '../../backend/src/volunteer-job/dto/find-all-jobs.dto'
+import { VolunteerJob } from '../../backend/src/volunteer-job/volunteer-job.entity'
+import { StateError } from '../interfaces/state-error.interface'
+import { StateStatus } from '../interfaces/state.interface'
+import { parseAxiosError } from '../utils/utilities'
 
 export const state = () => ({
-  status: State.UNLOADED,
-  error: null as Error | null,
+  status: StateStatus.UNLOADED,
+  error: null as StateError | null,
   job: null as VolunteerJob | null,
   jobs: [] as VolunteerJob[],
   total: 0,
 })
 
 export const getters = getterTree(state, {
-  isLoading: (state) => state.status === State.BUSY,
+  isLoading: (state) => state.status === StateStatus.BUSY,
 })
 
 export const mutations = mutationTree(state, {
-  setStatus(state, { status, error }: StatePayload) {
+  setStatus(state, status: StateStatus) {
     state.status = status
-    state.error = error || null
+
+    if (status === StateStatus.BUSY) {
+      state.error = null
+    }
+  },
+  setError(state, error: any) {
+    state.status = StateStatus.ERROR
+    state.error = parseAxiosError(error)
   },
   setJobs(state, jobs: VolunteerJob[]) {
     state.jobs = jobs
@@ -37,21 +46,21 @@ export const actions = actionTree(
   {
     async create({ commit, state }, createJobDto: CreateJobDto) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const job = await this.$axios.$post('/volunteer-job', createJobDto)
 
         commit('setJobs', [...state.jobs, job])
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
 
         return job
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async findAll({ commit }, findAllJobsDto?: FindAllJobsDto) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const [jobs, count] = await this.$axios.$get('/volunteer-job', {
           params: findAllJobsDto,
@@ -59,11 +68,11 @@ export const actions = actionTree(
 
         commit('setJobs', jobs)
         commit('setTotal', count)
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
 
         return jobs
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
   }

@@ -1,25 +1,34 @@
-import { getterTree, mutationTree, actionTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { Course } from '../../backend/src/course/course.entity'
 import { CreateCourseDto } from '../../backend/src/course/dto/create-course.dto'
 import { FindAllCoursesDto } from '../../backend/src/course/dto/find-all-courses.dto'
-import { State, StatePayload } from '../interfaces/state.interface'
+import { StateError } from '../interfaces/state-error.interface'
+import { StateStatus } from '../interfaces/state.interface'
+import { parseAxiosError } from '../utils/utilities'
 
 export const state = () => ({
-  status: State.UNLOADED,
-  error: null as Error | null,
+  status: StateStatus.UNLOADED,
+  error: null as StateError | null,
   course: null as Course | null,
   courses: [] as Course[],
   total: 0,
 })
 
 export const getters = getterTree(state, {
-  isLoading: (state) => state.status === State.BUSY,
+  isLoading: (state) => state.status === StateStatus.BUSY,
 })
 
 export const mutations = mutationTree(state, {
-  setStatus(state, { status, error }: StatePayload) {
+  setStatus(state, status: StateStatus) {
     state.status = status
-    state.error = error || null
+
+    if (status === StateStatus.BUSY) {
+      state.error = null
+    }
+  },
+  setError(state, error: any) {
+    state.status = StateStatus.ERROR
+    state.error = parseAxiosError(error)
   },
   setCourses(state, courses: Course[]) {
     state.courses = courses
@@ -37,32 +46,31 @@ export const actions = actionTree(
   {
     async create({ commit, state }, createCourseDto: CreateCourseDto) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
+
         const course = await this.$axios.$post('/course', createCourseDto)
 
         commit('setCourses', [...state.courses, course])
-        commit('setStatus', { status: State.WAITING })
-
-        return course
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async findOne({ commit }, id: number | string) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const course = await this.$axios.$get(`/course/${id}`)
 
         commit('setCourse', course)
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.WAITING, error })
+        commit('setError', error)
       }
     },
     async findAll({ commit }, findAllCoursesDto?: FindAllCoursesDto) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const [courses, total] = await this.$axios.$get('/course', {
           params: findAllCoursesDto,
@@ -70,9 +78,9 @@ export const actions = actionTree(
 
         commit('setCourses', courses)
         commit('setTotal', total)
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.WAITING, error })
+        commit('setError', error)
       }
     },
     async findAllByCourse(
@@ -83,7 +91,7 @@ export const actions = actionTree(
       }: { project: number; findallCoursesDto?: FindAllCoursesDto }
     ) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const [courses, total] = await this.$axios.$get(`/course/${project}`, {
           params: findallCoursesDto,
@@ -91,9 +99,9 @@ export const actions = actionTree(
 
         commit('setCourses', courses)
         commit('setTotal', total)
-        commit('setStatus', { status: State.WAITING })
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.WAITING, error })
+        commit('setError', error)
       }
     },
   }

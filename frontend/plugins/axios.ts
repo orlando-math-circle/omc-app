@@ -27,6 +27,8 @@ const plugin: Plugin = ({ $axios, app }) => {
       return
     }
 
+    console.log(error.config)
+
     console.error(
       `${error.config.method}: ${
         error.config.url

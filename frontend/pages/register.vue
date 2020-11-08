@@ -16,125 +16,123 @@
             <nuxt-link class="pl-2" to="/login">Log in</nuxt-link></span
           >
 
-          <ValidationObserver ref="form" v-slot="{ passes }">
-            <v-form @submit.prevent="passes(onSubmit)">
-              <v-row>
-                <alert-error
-                  v-if="$accessor.auth.error"
-                  :error="$accessor.auth.error"
-                >
-                </alert-error>
-
-                <v-col>
-                  <v-text-field-validated
-                    v-model="dto.first"
-                    label="First Name"
-                    rules="required"
-                    hide-details
-                  ></v-text-field-validated>
-                </v-col>
-
-                <v-col>
-                  <v-text-field-validated
-                    v-model="dto.last"
-                    label="Last Name"
-                    hide-details
-                  ></v-text-field-validated>
-                </v-col>
-              </v-row>
-
-              <birthday-picker v-model="dto.dob"></birthday-picker>
-
-              <v-text-field-validated
-                v-model="dto.email"
-                rules="required|email"
-                autocomplete="email"
-                label="Email"
+          <v-form-validated @submit:form="onSubmit">
+            <v-row>
+              <alert-error
+                v-if="$accessor.auth.error"
+                :error="$accessor.auth.error"
               >
-              </v-text-field-validated>
+              </alert-error>
 
-              <v-text-field-validated
-                v-model="dto.password"
-                label="Password"
-                type="password"
-                autocomplete="new-password"
-                vid="password"
-              >
-              </v-text-field-validated>
+              <v-col>
+                <v-text-field-validated
+                  v-model="dto.first"
+                  label="First Name"
+                  rules="required"
+                  hide-details
+                ></v-text-field-validated>
+              </v-col>
 
-              <v-text-field-validated
-                v-model="passwordConfirm"
-                label="Confirm Password"
-                type="password"
-                autocomplete="new-password"
-                rules="required|password:@password"
-              >
-              </v-text-field-validated>
+              <v-col>
+                <v-text-field-validated
+                  v-model="dto.last"
+                  label="Last Name"
+                  hide-details
+                ></v-text-field-validated>
+              </v-col>
+            </v-row>
 
-              <v-checkbox-validated
-                v-model="student"
-                label="Are you a student?"
-                hide-details
-              >
-              </v-checkbox-validated>
+            <birthday-picker v-model="dto.dob"></birthday-picker>
 
-              <v-expand-transition>
-                <div v-show="student">
-                  <v-select-validated
-                    v-model="education"
-                    label="Education Level"
-                    :items="Object.keys(educationLevels)"
-                  ></v-select-validated>
+            <v-text-field-validated
+              v-model="dto.email"
+              rules="required|email"
+              autocomplete="email"
+              label="Email"
+            >
+            </v-text-field-validated>
 
-                  <v-select-validated
-                    :label="
-                      education === 'College' ? 'Level of Study' : 'Grade Level'
-                    "
-                    :items="educationLevels[education]"
-                  ></v-select-validated>
+            <v-text-field-validated
+              v-model="dto.password"
+              label="Password"
+              type="password"
+              autocomplete="new-password"
+              vid="password"
+            >
+            </v-text-field-validated>
 
-                  <v-text-field-validated
-                    label="School Name"
-                    hint="Enter the name of your school or institution."
-                  ></v-text-field-validated>
-                </div>
-              </v-expand-transition>
+            <v-text-field-validated
+              v-model="passwordConfirm"
+              label="Confirm Password"
+              type="password"
+              autocomplete="new-password"
+              rules="required|password:@password"
+            >
+            </v-text-field-validated>
 
-              <v-checkbox-validated
-                v-model="professional"
-                label="Are you an industry professional?"
-                hide-details
-              ></v-checkbox-validated>
+            <v-checkbox-validated
+              v-model="student"
+              label="Are you a student?"
+              hide-details
+            >
+            </v-checkbox-validated>
 
-              <v-expand-transition>
-                <div v-show="professional">
-                  <v-text-field-validated
-                    label="Profession (Optional)"
-                  ></v-text-field-validated>
+            <v-expand-transition>
+              <div v-show="student">
+                <v-select-validated
+                  v-model="education"
+                  label="Education Level"
+                  :items="Object.keys(educationLevels)"
+                ></v-select-validated>
 
-                  <v-text-field-validated
-                    label="Job Title (Optional)"
-                  ></v-text-field-validated>
+                <v-select-validated
+                  :label="
+                    education === 'College' ? 'Level of Study' : 'Grade Level'
+                  "
+                  :items="educationLevels[education]"
+                ></v-select-validated>
 
-                  <v-text-field-validated
-                    label="Company or Workplace (Optional)"
-                  ></v-text-field-validated>
-                </div>
-              </v-expand-transition>
+                <v-text-field-validated
+                  label="School Name"
+                  hint="Enter the name of your school or institution."
+                ></v-text-field-validated>
+              </div>
+            </v-expand-transition>
 
-              <v-checkbox
-                label="Receive emails about upcoming events"
-                hide-details
-              ></v-checkbox>
+            <v-checkbox-validated
+              v-model="professional"
+              label="Are you an industry professional?"
+              hide-details
+            ></v-checkbox-validated>
 
-              <v-checkbox
-                label="Receive emails reminding me of registered events"
-                hide-details
-              ></v-checkbox>
+            <v-expand-transition>
+              <div v-show="professional">
+                <v-text-field-validated
+                  label="Profession (Optional)"
+                ></v-text-field-validated>
 
-              <v-btn block class="mt-4" type="submit">Sign up</v-btn>
-            </v-form>
-          </ValidationObserver>
+                <v-text-field-validated
+                  label="Job Title (Optional)"
+                ></v-text-field-validated>
+
+                <v-text-field-validated
+                  label="Company or Workplace (Optional)"
+                ></v-text-field-validated>
+              </div>
+            </v-expand-transition>
+
+            <v-checkbox
+              label="Receive emails about upcoming events"
+              hide-details
+            ></v-checkbox>
+
+            <v-checkbox
+              label="Receive emails reminding me of registered events"
+              hide-details
+            ></v-checkbox>
+
+            <v-btn block class="mt-4" type="submit">Sign up</v-btn>
+          </v-form-validated>
         </v-col>
       </v-row>
     </v-container>

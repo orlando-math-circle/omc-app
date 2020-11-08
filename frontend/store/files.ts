@@ -1,24 +1,33 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { FileAttachment } from '../../backend/src/file-attachment/file-attachment.entity'
 import { FileField } from '../../backend/src/file-fields/file-field.entity'
-import { State, StatePayload } from '../interfaces/state.interface'
+import { StateError } from '../interfaces/state-error.interface'
+import { StateStatus } from '../interfaces/state.interface'
+import { parseAxiosError } from '../utils/utilities'
 
 export const state = () => ({
-  status: State.UNLOADED,
-  error: null as Error | null,
+  status: StateStatus.UNLOADED,
+  error: null as StateError | null,
   attachment: null as FileAttachment | null,
   attachments: [] as FileAttachment[],
   fields: [] as FileField[],
 })
 
 export const getters = getterTree(state, {
-  isLoading: (state) => state.status === State.BUSY,
+  isLoading: (state) => state.status === StateStatus.BUSY,
 })
 
 export const mutations = mutationTree(state, {
-  setStatus(state, { status, error }: StatePayload) {
+  setStatus(state, status: StateStatus) {
     state.status = status
-    state.error = error || null
+
+    if (status === StateStatus.BUSY) {
+      state.error = null
+    }
+  },
+  setError(state, error: any) {
+    state.status = StateStatus.ERROR
+    state.error = parseAxiosError(error)
   },
   setAttachment(state, attachment: FileAttachment) {
     state.attachment = attachment
@@ -39,7 +48,7 @@ export const actions = actionTree(
       { file, field }: { file: File; field: string }
     ) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const formData = new FormData()
         formData.append(field, file)
@@ -51,45 +60,49 @@ export const actions = actionTree(
 
         commit('setAttachment', attachment)
         commit('setAttachments', [...state.attachments, attachment])
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async findMyAttachments({ commit }, field: string) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const attachments = await this.$axios.$get(
           `/attachment/user/me/${field}`
         )
 
         commit('setAttachments', attachments)
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async findAllAttachments({ commit }, field?: string) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const attachments = await this.$axios.$get('/attachment', {
           params: field,
         })
 
         commit('setAttachments', attachments)
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
     async findAllFields({ commit }) {
       try {
-        commit('setStatus', { status: State.BUSY })
+        commit('setStatus', StateStatus.BUSY)
 
         const [fields] = await this.$axios.$get('/file-field')
 
         commit('setFields', fields)
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
-        commit('setStatus', { status: State.ERROR, error })
+        commit('setError', error)
       }
     },
   }
