@@ -327,7 +327,7 @@ export default class RecurrenceDialog extends Vue {
       },
       {
         text: `Monthly on the ${
-          this.occurance[this.options.bysetpos as number]
+          this.occurance[(this.options.bysetpos as number) - 1]
         } ${this.weekday[this.nativeDate.getDay()]}`,
       },
     ]
@@ -416,24 +416,15 @@ export default class RecurrenceDialog extends Vue {
     this.defaults = Object.assign({}, this.options)
   }
 
-  getWeekdayOccurance(date: Date) {
-    const d = new Date(date.getTime())
-    const day = d.getDay()
-    const count = 1
+  /**
+   * Calculates the occurrance of a weekday given a date.
+   * For example, Thanksgiving is always the 4th Thursday of November.
+   */
+  getWeekdayOccurance(dateOrString: Date | string) {
+    const date =
+      typeof dateOrString === 'string' ? new Date(dateOrString) : dateOrString
 
-    d.setDate(1)
-
-    // Get the first weekday matching the original date.
-    while (d.getDay() !== day) {
-      d.setDate(d.getDate() + 1)
-    }
-
-    // Get all of the matching weekdays.
-    while (d.getDate() > date.getDay()) {
-      d.setDate(d.getDate() + 7)
-    }
-
-    return count
+    return Math.ceil(date.getDate() / 7)
   }
 
   reset() {
