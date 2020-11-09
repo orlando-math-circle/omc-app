@@ -1,36 +1,56 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { Course } from '../../course/course.entity';
+import { Project } from '../../project/project.entity';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
 export class UpdateEventDto {
   @IsOptional()
   @IsString()
-  readonly name?: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
-  readonly description?: string;
+  description?: string;
 
   @IsOptional()
   @IsString()
-  readonly picture?: string;
+  location?: string;
 
   @IsOptional()
   @IsString()
-  readonly color?: string;
+  picture?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
 
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  readonly dtstart?: Date;
+  dtstart?: Date;
 
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  readonly dtend?: Date;
+  dtend?: Date;
+
+  @IsOptional()
+  @IsNumber()
+  project?: number | Project;
+
+  @IsOptional()
+  @IsNumber()
+  course?: number | Course;
 
   @IsOptional()
   @Type(() => EventRecurrenceDto)
   @ValidateNested()
-  readonly rrule?: EventRecurrenceDto;
+  rrule?: EventRecurrenceDto;
 }

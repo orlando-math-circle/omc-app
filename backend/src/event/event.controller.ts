@@ -37,7 +37,11 @@ export class EventController {
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.eventService.findOneOrFail(id, ['author', 'course']);
+    return this.eventService.findOneOrFail(id, [
+      'author',
+      'course',
+      'recurrence',
+    ]);
   }
 
   @UserAuth('event', 'update:any')

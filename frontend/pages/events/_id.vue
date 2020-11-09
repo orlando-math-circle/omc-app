@@ -13,6 +13,29 @@
             <v-col>
               <h2 class="d-inline-flex">{{ event.name }}</h2>
             </v-col>
+
+            <v-col>
+              <v-menu offset-y transition="slide-y-transition">
+                <template #activator="{ on, attrs }">
+                  <v-btn v-if="$accessor.auth.isAdmin" v-bind="attrs" v-on="on"
+                    >Admin</v-btn
+                  >
+                </template>
+
+                <v-list dense nav>
+                  <v-list-item
+                    link
+                    :to="`/admin/calendar/events/${$route.params.id}`"
+                  >
+                    <v-list-item-icon>
+                      <v-icon>mdi-calendar-month</v-icon>
+                    </v-list-item-icon>
+
+                    <v-list-item-title>Edit Event</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-col>
           </v-row>
 
           <v-row no-gutters>
@@ -27,7 +50,14 @@
         </v-col>
       </v-row>
 
-      <event v-model="event" />
+      <v-card>
+        <v-card-title>{{ event.name }}</v-card-title>
+        <v-card-subtitle>{{ event.description }}</v-card-subtitle>
+
+        <v-card-text></v-card-text>
+      </v-card>
+
+      <dialog-update-event :event="event"></dialog-update-event>
 
       <v-stepper v-model="step" vertical class="mt-5">
         <!-- Step: User Selection -->

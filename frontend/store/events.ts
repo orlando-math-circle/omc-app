@@ -1,4 +1,6 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { UpdateEventDto } from '@backend/event/dtos/update-event.dto'
+import { UpdateEventsDto } from '@backend/event/dtos/update-events.dto'
 import { CreateEventDto } from '../../backend/src/event/dtos/create-event.dto'
 import { FindAllEventsDto } from '../../backend/src/event/dtos/find-all-events.dto'
 import { Event } from '../../backend/src/event/event.entity'
@@ -84,6 +86,28 @@ export const actions = actionTree(
         const event = await this.$axios.$get(`/event/${eventId}`)
 
         commit('setEvent', event)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async update(
+      { commit },
+      {
+        id,
+        dto,
+        type,
+      }: {
+        id: number | string
+        dto: UpdateEventDto | UpdateEventsDto
+        type: 'single' | 'future' | 'all'
+      }
+    ) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$patch(`/event/${id}/${type}`, dto)
+
         commit('setStatus', StateStatus.WAITING)
       } catch (error) {
         commit('setError', error)

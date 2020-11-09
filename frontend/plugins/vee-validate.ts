@@ -2,7 +2,6 @@ import { parse } from 'date-fns'
 import { isNumber } from 'lodash'
 import { extend, setInteractionMode } from 'vee-validate'
 import { email } from 'vee-validate/dist/rules'
-import { getTimeValue } from '../utils/utilities'
 
 /**
  * Reduces the aggressiveness of vee-validate to not throw errors while the user
@@ -65,6 +64,9 @@ extend('startdate', {
 
 extend('starttime', {
   params: ['time'],
-  validate: (value, { time }: any) => getTimeValue(value) <= getTimeValue(time),
+  validate: (value, { time }: any) => {
+    const now = new Date()
+    return parse(value, 'h:mm aaa', now) <= parse(time, 'h:mm aaa', now)
+  },
   message: 'Start time cannot be after end time',
 })

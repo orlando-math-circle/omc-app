@@ -17,8 +17,6 @@ export class MikroORMConstraintExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    console.log(exception);
-
     response
       .status(400)
       .json({ statusCode: 400, message: this.getMessage(exception.code) });

@@ -17,16 +17,6 @@
         </v-col>
       </v-row>
 
-      <v-snackbar v-model="registeredMessage">
-        Thank you for registering!
-
-        <template v-slot:action="{ attrs }">
-          <v-btn color="pink" icon v-bind="attrs" @click="snackbar = false">
-            <v-icon>mdi-close-circle</v-icon>
-          </v-btn>
-        </template>
-      </v-snackbar>
-
       <h2 class="headline">Latest News</h2>
 
       <v-card
@@ -49,12 +39,6 @@
               {{ tweet.text }}
             </v-card-text>
           </div>
-
-          <v-avatar rounded size="80" class="mb-0 pt-2 pr-2">
-            <v-img
-              :src="tweet.user.profile_image_url_https.replace('_normal', '')"
-            ></v-img>
-          </v-avatar>
         </div>
       </v-card>
     </v-col>
@@ -67,15 +51,11 @@ import { addDays } from 'date-fns'
 import { formatDate } from '../utils/utilities'
 
 @Component({
-  head() {
-    return {
-      title: 'Home',
-    }
+  head: {
+    title: 'Home',
   },
 })
 export default class HomePage extends Vue {
-  registeredMessage = false
-
   async fetch() {
     const now = new Date()
 
@@ -106,7 +86,10 @@ export default class HomePage extends Vue {
 
   mounted() {
     if (this.$accessor.auth.justRegistered) {
-      this.registeredMessage = true
+      this.$accessor.snackbar.show({
+        text: 'Thank you for registering!',
+        timeout: 5000,
+      })
       this.$accessor.auth.setJustRegistered(false)
     }
   }

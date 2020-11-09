@@ -8,6 +8,7 @@ import {
   Property,
 } from '@mikro-orm/core';
 import { BadRequestException } from '@nestjs/common';
+import { differenceInMinutes } from 'date-fns';
 import moment from 'moment';
 import { getMinutesDiff } from '../app.utils';
 import { Course } from '../course/course.entity';
@@ -67,7 +68,7 @@ export class Event extends BaseEntity<Event, 'id'> {
    * Relationships
    */
 
-  @ManyToOne(() => EventRecurrence, { nullable: true, hidden: true })
+  @ManyToOne(() => EventRecurrence, { nullable: true })
   recurrence?: EventRecurrence;
 
   @OneToMany(() => Invoice, (i) => i.event)
@@ -97,6 +98,12 @@ export class Event extends BaseEntity<Event, 'id'> {
     return moment(new Date()).isAfter(
       this.dtend ? this.dtend : moment(this.dtstart).add('1', 'day'),
     );
+  }
+
+  get duration() {
+    if (!this.dtend) return null;
+
+    return differenceInMinutes(this.dtend, this.dtstart);
   }
 
   /**

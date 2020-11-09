@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="6" sm="5" md="3">
         <v-select
           v-model="calendar.type"
           class="filled--bright type-selector elevation-2"

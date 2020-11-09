@@ -52,6 +52,8 @@ export const actions = actionTree(
 
         commit('setCourses', [...state.courses, course])
         commit('setStatus', StateStatus.WAITING)
+
+        return course
       } catch (error) {
         commit('setError', error)
       }

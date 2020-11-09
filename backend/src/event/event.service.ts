@@ -47,8 +47,6 @@ export class EventService {
   async create(createEventDto: CreateEventDto, author: User) {
     const { dtstart, dtend, rrule, ...meta } = createEventDto;
 
-    console.log(meta);
-
     if (!rrule) {
       const event = this.eventRepository.create({
         dtstart,
@@ -158,6 +156,8 @@ export class EventService {
     for (const recurrence of recurrences) {
       events.push(...(await this.getRecurrenceEvents(recurrence, start, end)));
     }
+
+    console.log(events);
 
     return events.sort((a, b) => +a.dtstart - +b.dtstart);
   }
@@ -504,43 +504,43 @@ export class EventService {
     const events = recurrence.events.getItems();
     const newEvents = [];
 
-    // Recurring event metadata is obtained from the first event
-    // instance. If it is deleted manually this event recurrence
-    // is no longer valid. This could be a silent warning.
-
     if (!events[0]) {
+      // Recurring event metadata is obtained from the first event
+      // instance. If it is deleted manually this event recurrence
+      // is no longer valid. This could be a silent warning.
       throw new InternalServerErrorException('Event recurrence has no events');
     }
 
-    const duration = events[0].dtend
-      ? moment(events[0].dtend).diff(events[0].dtstart, 'minutes')
-      : null;
+    const durationInMinutes = events[0].duration;
 
     for (const date of dates) {
       const event = events.find(
         (e) => +e.dtstart === +date || +e.originalStart === +date,
       );
 
-      if (event) continue;
+      if (event) {
+        event.recurrence.populated();
+        continue;
+      }
 
       // TODO: Split this into an event factory function.
       // This has to be manually updated whenever the event structure is changed.
-      newEvents.push(
-        this.eventRepository.create({
-          name: events[0].name,
-          description: events[0].description,
-          location: events[0].location,
-          picture: events[0].picture,
-          color: events[0].color,
-          dtstart: date,
-          dtend: duration
-            ? moment(date).add(duration, 'minutes').toDate()
-            : null,
-          author: events[0].author,
-          course: events[0].course,
-          recurrence,
-        }),
-      );
+      const builtEvent = this.eventRepository.create({
+        name: events[0].name,
+        description: events[0].description,
+        location: events[0].location,
+        picture: events[0].picture,
+        color: events[0].color,
+        dtstart: date,
+        dtend: durationInMinutes ? addMinutes(date, durationInMinutes) : null,
+        author: events[0].author,
+        course: events[0].course,
+        recurrence,
+      });
+
+      builtEvent.recurrence.populated();
+
+      newEvents.push(builtEvent);
     }
 
     if (newEvents.length) {

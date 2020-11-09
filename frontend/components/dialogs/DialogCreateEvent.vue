@@ -15,7 +15,7 @@
       <v-toolbar flat>
         <v-toolbar-title>Add New Event</v-toolbar-title>
 
-        <v-btn small absolute right fab icon @click="close()">
+        <v-btn small absolute right fab icon @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -89,24 +89,19 @@
                     </v-menu>
                   </v-col>
                   <v-col v-if="!dates.allday" cols="4">
-                    <ValidationProvider
-                      v-slot="{ errors }"
+                    <time-picker
+                      v-model="times.start.time"
                       vid="starttime"
-                      :rules="
-                        dates.allday
-                          ? undefined
-                          : {
-                              required: true,
-                              starttime: { time: '@endtime' },
-                            }
-                      "
-                    >
-                      <time-picker
-                        v-model="times.start.time"
-                        :errors="errors"
-                        label="Start Time"
-                      />
-                    </ValidationProvider>
+                      :rules="{
+                        required: dates.allday,
+                        starttime:
+                          dates.allday ||
+                          !isSameDay(dates.start.date, dates.end.date)
+                            ? false
+                            : { time: '@endtime' },
+                      }"
+                      label="Start Time"
+                    ></time-picker>
                   </v-col>
                 </v-row>
 
@@ -138,13 +133,11 @@
                       </v-menu>
                     </v-col>
                     <v-col cols="4">
-                      <ValidationProvider v-slot="{ errors }" vid="endtime">
-                        <time-picker
-                          v-model="times.end.time"
-                          :error-messages="errors"
-                          label="End Time"
-                        ></time-picker>
-                      </ValidationProvider>
+                      <time-picker
+                        v-model="times.end.time"
+                        vid="endtime"
+                        label="End Time"
+                      ></time-picker>
                     </v-col>
                   </v-row>
                 </v-expand-transition>
@@ -153,6 +146,7 @@
 
             <v-divider></v-divider>
 
+            <!-- Recurrence -->
             <v-list-item>
               <v-list-item-avatar>
                 <v-icon>mdi-update</v-icon>
@@ -267,8 +261,16 @@
         <v-card-actions>
           <v-spacer></v-spacer>
 
-          <v-btn text @click="close()">Cancel</v-btn>
-          <v-btn text type="submit" :loading="loading"> Create Event </v-btn>
+          <v-btn text @click="dialog = false">Cancel</v-btn>
+          <v-btn text type="submit" :loading="loading">
+            <v-scroll-x-transition>
+              <v-icon v-if="success" class="mr-2" color="success">
+                mdi-check
+              </v-icon>
+            </v-scroll-x-transition>
+
+            Create Event
+          </v-btn>
         </v-card-actions>
       </v-form-validated>
     </v-card>
@@ -277,8 +279,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { ValidationProvider } from 'vee-validate'
-import { format } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { Options } from 'rrule'
 import { CreateEventDto } from '../../../backend/src/event/dtos/create-event.dto'
 import { Project } from '../../../backend/src/project/project.entity'
@@ -295,11 +296,7 @@ export type RepeatingTypes = {
   rrule?: RRuleOptions
 }
 
-@Component({
-  components: {
-    ValidationProvider,
-  },
-})
+@Component
 export default class DialogCreateEvent extends Vue {
   @Prop({ default: new Date().toISOString().substr(0, 10) }) date!: string
   @Prop({ default: format(roundDate(new Date(), 30), 'HH:mm') }) time!: string
@@ -310,6 +307,7 @@ export default class DialogCreateEvent extends Vue {
   }
 
   dialog = false
+  success = false
 
   dates = {
     allday: false,
@@ -359,34 +357,34 @@ export default class DialogCreateEvent extends Vue {
     this.times.start.time = this.time
     this.times.end.time = addTime(this.time, 1, 30)
 
-    // const hours = [
-    //   '12',
-    //   '1',
-    //   '2',
-    //   '3',
-    //   '4',
-    //   '5',
-    //   '6',
-    //   '7',
-    //   '8',
-    //   '9',
-    //   '10',
-    //   '11',
-    // ]
-    // const minutes = ['00', '15', '30', '45']
-    // const times: string[] = []
+    const hours = [
+      '12',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+    ]
+    const minutes = ['00', '15', '30', '45']
+    const times: string[] = []
 
-    // for (let i = 0; i <= 23; i++) {
-    //   for (let j = 0; j < minutes.length; j++) {
-    //     times.push(`${hours[i % 12]}:${minutes[j]}${i < 12 ? 'am' : 'pm'}`)
-    //   }
-    // }
+    for (let i = 0; i <= 23; i++) {
+      for (let j = 0; j < minutes.length; j++) {
+        times.push(`${hours[i % 12]}:${minutes[j]}${i < 12 ? 'am' : 'pm'}`)
+      }
+    }
 
-    // this.times.times = times
+    this.times.times = times
   }
 
-  close() {
-    this.dialog = false
+  isSameDay(dateA: string, dateB: string) {
+    return isSameDay(new Date(dateA), new Date(dateB))
   }
 
   format(dateString: string) {
@@ -429,7 +427,8 @@ export default class DialogCreateEvent extends Vue {
       await this.$accessor.events.create(createEventDto)
 
       this.$emit('created')
-      this.close()
+      this.success = true
+      setTimeout(() => (this.dialog = false), 1500)
     } catch (error) {
       console.error(error)
     } finally {
@@ -446,6 +445,7 @@ export default class DialogCreateEvent extends Vue {
   }
 
   onCourseCreated(course: Course) {
+    console.log(course)
     this.course.id = course.id
   }
 }

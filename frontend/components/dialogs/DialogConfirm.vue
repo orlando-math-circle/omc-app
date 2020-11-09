@@ -1,5 +1,9 @@
 <template>
   <v-dialog v-model="dialog" max-width="440px">
+    <template #activator="activator">
+      <slot name="activator" v-bind="activator"></slot>
+    </template>
+
     <v-card>
       <v-card-title>{{ title }}</v-card-title>
 

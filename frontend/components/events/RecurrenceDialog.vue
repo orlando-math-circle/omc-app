@@ -39,7 +39,7 @@
 
                 <v-col>
                   <v-text-field
-                    v-model="options.interval"
+                    v-model.number="options.interval"
                     class="discrete"
                     type="number"
                     filled
@@ -154,7 +154,7 @@
                       <v-col class="d-flex">
                         <v-text-field
                           ref="occurrences"
-                          v-model="options.count"
+                          v-model.number="options.count"
                           class="discrete occurrence-field"
                           type="number"
                           hide-details

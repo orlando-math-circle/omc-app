@@ -1,6 +1,33 @@
 import { AxiosError } from 'axios'
 import { format, parse } from 'date-fns'
+import { isArray, isEqual, isObject, transform } from 'lodash'
 import { StateError } from '../interfaces/state-error.interface'
+
+/**
+ * Find difference between two objects.
+ * Source: https://davidwells.io/snippets/get-difference-between-two-objects-javascript
+ *
+ * @param origObj Source object to compare newObj against
+ * @param newObj New object with potential changes
+ * @return differences
+ */
+export const difference = (origObj: object, newObj: object) => {
+  const changes = (newObj: any, origObj: any) => {
+    let index = 0
+
+    return transform(newObj, (result: any[], value, key) => {
+      if (!isEqual(value, origObj[key])) {
+        const resultKey = isArray(origObj) ? index++ : key
+        result[resultKey] =
+          isObject(value) && isObject(origObj[key])
+            ? changes(value, origObj[key])
+            : value
+      }
+    })
+  }
+
+  return changes(newObj, origObj)
+}
 
 /**
  * Parses an Axios error to avoid cyclic dependency
@@ -129,7 +156,7 @@ export const addTime = (time: string, hours = 0, minutes = 0) => {
 export const getTimeValue = (time: string) => {
   const now = new Date()
 
-  return parse(time, 'HH:mm', now).getTime() - now.getTime()
+  return parse(time, 'HH:mm aaa', now).getTime() - now.getTime()
 }
 
 /**
