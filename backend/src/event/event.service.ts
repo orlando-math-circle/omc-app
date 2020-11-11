@@ -1,6 +1,7 @@
 import {
   EntityRepository,
   FilterQuery,
+  Populate,
   QueryOrder,
   QueryOrderMap,
 } from '@mikro-orm/core';
@@ -102,10 +103,13 @@ export class EventService {
         ['course', 'author'],
       ),
       this.recurrenceRepository.find(
-        {
-          dtstart: { $lte: end },
-          $or: [{ dtend: { $gte: start } }, { dtend: null }],
-        },
+        Object.assign(
+          {
+            dtstart: { $lte: end },
+            $or: [{ dtend: { $gte: start } }, { dtend: null }],
+          },
+          projects && { events: { project: { id: projects } } },
+        ),
         ['events.course', 'parentEvent'],
       ),
     ]);
@@ -113,15 +117,12 @@ export class EventService {
     await this.recurrenceRepository.populate(
       recurrences,
       'events',
-      Object.assign(
-        {
-          events: {
-            dtstart: { $lte: end },
-            $or: [{ dtend: { $gte: start } }, { dtend: null }],
-          },
+      Object.assign({
+        events: {
+          dtstart: { $lte: end },
+          $or: [{ dtend: { $gte: start } }, { dtend: null }],
         },
-        projects && { project: { id: projects } },
-      ),
+      }),
     );
 
     await Promise.all(
@@ -535,5 +536,20 @@ export class EventService {
     options.until = until;
 
     return new Schedule(options);
+  }
+
+  /**
+   * Loads relations on event entities.
+   *
+   * @param entities Event or events to populate.
+   * @param populate The relations to attempt to populate.
+   * @param where Query for population.
+   */
+  public async populate<P extends string | keyof Event | Populate<Event>>(
+    entities: Event | Event[],
+    populate: P,
+    where: FilterQuery<Event>,
+  ) {
+    return this.eventRepository.populate(entities, populate, where);
   }
 }
