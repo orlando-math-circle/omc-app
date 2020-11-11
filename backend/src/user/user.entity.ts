@@ -41,8 +41,8 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ nullable: true, hidden: true })
   password?: string;
 
-  @Property({ type: ArrayType, default: [Roles.ADMIN] })
-  roles: Roles[] = [Roles.ADMIN];
+  @Property({ type: ArrayType, default: [Roles.DEFAULT] })
+  roles: Roles[] = [Roles.DEFAULT];
 
   @Property({ default: false })
   feeWaived: boolean = false;

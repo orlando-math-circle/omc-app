@@ -1,5 +1,5 @@
 <template>
-  <dialog-form ref="dialog" @submit:form="onSubmit">
+  <dialog-form ref="refDialog" @submit:form="onSubmit">
     <template #title>Edit Event</template>
 
     <template #activator="{ on, attrs }">
@@ -9,21 +9,24 @@
     <v-card-text>
       <v-list dense>
         <v-list-item>
-          <v-list-item-avatar></v-list-item-avatar>
+          <v-list-item-avatar>
+            <v-icon>mdi-text</v-icon>
+          </v-list-item-avatar>
 
           <v-list-item-content>
             <v-text-field-validated
               v-model="data.name"
-              label="Name"
+              label="Title"
               hide-details="auto"
               vid="name"
               rules="required"
               required
-            ></v-text-field-validated>
+              outlined
+            />
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <v-list-item>
           <v-list-item-avatar>
@@ -33,13 +36,12 @@
           <v-list-item-content>All-day</v-list-item-content>
 
           <v-list-item-action>
-            <v-switch v-model="dates.allday" />
+            <v-switch v-model="dates.allday" color="secondary" />
           </v-list-item-action>
         </v-list-item>
 
         <v-list-item>
-          <!-- Intentionally empty for spacing -->
-          <v-list-item-avatar></v-list-item-avatar>
+          <v-list-item-avatar />
 
           <v-list-item-content>
             <v-row>
@@ -57,9 +59,10 @@
                           ? false
                           : { target: '@enddate' },
                       }"
+                      outlined
                       v-bind="attrs"
                       v-on="on"
-                    ></v-text-field-validated>
+                    />
                   </template>
 
                   <v-date-picker
@@ -81,7 +84,8 @@
                         : { time: '@endtime' },
                   }"
                   label="Start Time"
-                ></time-picker>
+                  outlined
+                />
               </v-col>
             </v-row>
 
@@ -98,14 +102,14 @@
                         hide-details="auto"
                         label="End Date"
                         v-bind="attrs"
+                        outlined
                         v-on="on"
-                      >
-                      </v-text-field-validated>
+                      />
                     </template>
                     <v-date-picker
                       v-model="dates.end.date"
                       @input="dates.end.menu = false"
-                    ></v-date-picker>
+                    />
                   </v-menu>
                 </v-col>
                 <v-col cols="4">
@@ -113,14 +117,15 @@
                     v-model="times.end.time"
                     vid="endtime"
                     label="End Time"
-                  ></time-picker>
+                    outlined
+                  />
                 </v-col>
               </v-row>
             </v-expand-transition>
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Recurrence -->
         <v-list-item>
@@ -134,14 +139,14 @@
                 <recurrence-dialog
                   ref="recurrenceDialog"
                   v-model="rrule"
-                  :date="dates.start.date"
-                ></recurrence-dialog>
+                  :date-string="dates.start.date"
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Location -->
         <v-list-item>
@@ -150,14 +155,20 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field
-              v-model="data.location"
-              label="Location"
-            ></v-text-field>
+            <v-row>
+              <v-col>
+                <v-text-field
+                  v-model="data.location"
+                  label="Location"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+            </v-row>
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Description -->
         <v-list-item>
@@ -166,16 +177,22 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-textarea
-              v-model="data.description"
-              label="Description"
-              rows="1"
-              auto-grow
-            ></v-textarea>
+            <v-row>
+              <v-col>
+                <v-textarea
+                  v-model="data.description"
+                  label="Description"
+                  rows="1"
+                  auto-grow
+                  hide-details="auto"
+                  outlined
+                />
+              </v-col>
+            </v-row>
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Project Management -->
         <v-list-item>
@@ -186,19 +203,26 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-project v-model="project" />
+                <auto-complete-project
+                  v-model="project"
+                  outlined
+                ></auto-complete-project>
               </v-col>
               <v-col cols="auto">
-                <dialog-select-project v-model="project" />
+                <dialog-select-project
+                  v-model="project"
+                ></dialog-select-project>
               </v-col>
               <v-col cols="auto">
-                <dialog-create-project @create:project="onProjectCreated" />
+                <dialog-create-project
+                  @create:project="onProjectCreated"
+                ></dialog-create-project>
               </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Course Management -->
         <v-list-item v-if="project">
@@ -209,24 +233,18 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-course
-                  v-model="course"
-                  :project="project"
-                ></auto-complete-course>
+                <auto-complete-course v-model="course" :project="project" />
               </v-col>
 
               <v-col cols="auto">
-                <dialog-select-course
-                  v-model="course"
-                  :project="project"
-                ></dialog-select-course>
+                <dialog-select-course v-model="course" :project="project" />
               </v-col>
 
               <v-col cols="auto">
                 <dialog-create-course
                   :project="project"
                   @create:course="onCourseCreated"
-                ></dialog-create-course>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -237,7 +255,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
 
-      <v-btn text @click="$refs.dialog.close()">Cancel</v-btn>
+      <v-btn text @click="dialog.close()">Cancel</v-btn>
       <v-btn text type="submit" :loading="isLoading">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
@@ -249,20 +267,17 @@
       </v-btn>
     </v-card-actions>
 
-    <dialog-update-event-type
-      ref="typeDialog"
-      @submit:type="onSubmitType"
-    ></dialog-update-event-type>
+    <dialog-update-event-type ref="typeDialog" @submit:type="onSubmitType" />
   </dialog-form>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Ref, Vue } from 'nuxt-property-decorator'
 import { Event } from '@backend/event/event.entity'
 import { format, isSameDay } from 'date-fns'
 import { UpdateEventDto } from '@backend/event/dtos/update-event.dto'
 import { EventRecurrenceDto } from '@backend/event/dtos/event-recurrence.dto'
-import RRule, { Options, RRuleSet, rrulestr } from 'rrule'
+import RRule, { Frequency, Options, RRuleSet, rrulestr } from 'rrule'
 import { difference, isValidDate, toDate } from '../../utils/utilities'
 import DialogForm from './DialogForm.vue'
 import DialogUpdateEventType from './DialogUpdateEventType.vue'
@@ -270,10 +285,10 @@ import { DTO } from '~/interfaces/date-to-string.interface'
 
 @Component
 export default class DialogUpdateEvent extends Vue {
+  @Ref('refDialog') readonly dialog!: DialogForm
   @Prop() event!: Event
 
   $refs!: {
-    dialog: InstanceType<typeof DialogForm>
     typeDialog: InstanceType<typeof DialogUpdateEventType>
   }
 
@@ -343,15 +358,62 @@ export default class DialogUpdateEvent extends Vue {
     if (this.data.recurrence?.rrule) {
       this.rruleOrSet = rrulestr(this.data.recurrence.rrule)
 
+      let options
       if (this.rruleOrSet instanceof RRuleSet) {
-        this.rrule = this.rruleOrSet.rrules()[0].origOptions as Options
+        options = this.rruleOrSet.rrules()[0].origOptions as Options
       } else {
-        this.rrule = this.rruleOrSet.options
+        options = this.rruleOrSet.options
       }
+
+      this.rrule = this.parseRRule(options) as any
+
+      console.log(options, this.rrule)
     }
 
     this.project = this.data?.project?.id || 0
     this.course = this.data?.course?.id || 0
+  }
+
+  /**
+   * Builds the RRule options from a parsed RRule
+   * without the unnecessary fields.
+   */
+  parseRRule(options: Partial<Options>) {
+    const retval: Partial<Options> = {
+      freq: options.freq,
+      dtstart: options.dtstart,
+    }
+
+    switch (options.freq) {
+      case Frequency.WEEKLY:
+        if (options.byweekday) {
+          retval.byweekday = options.byweekday
+        }
+        break
+      case Frequency.MONTHLY:
+        // Absolute month day.
+        if (options.bymonthday) {
+          retval.bymonthday = options.bymonthday
+          // Relative month weekday.
+        } else if (options.bysetpos) {
+          retval.bysetpos = options.bysetpos
+          retval.byweekday = options.byweekday
+        }
+        break
+    }
+
+    if (options.interval && options.interval !== 1) {
+      retval.interval = options.interval
+    }
+
+    // Sets the terminating condition.
+    if (options.until) {
+      retval.until = options.until
+    } else if (options.count) {
+      retval.count = options.count
+    }
+
+    return retval
   }
 
   format(dateString: string) {
@@ -403,8 +465,6 @@ export default class DialogUpdateEvent extends Vue {
 
     const differences: any = difference(this.event, normalized)
 
-    console.log(type, differences)
-
     await this.$accessor.events.update({
       id: this.data.id,
       dto: differences,
@@ -417,7 +477,7 @@ export default class DialogUpdateEvent extends Vue {
       this.$emit('event:update')
 
       this.success = true
-      this.$refs.dialog.close(1500)
+      this.dialog.close(1500)
     }
   }
 

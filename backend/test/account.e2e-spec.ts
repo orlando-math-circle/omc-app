@@ -11,6 +11,7 @@ import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
+import { FileModule } from '../src/file/file.module';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { UserFixtures } from './fixtures/user.fixture';
@@ -39,6 +40,7 @@ describe('Accounts', () => {
         AccountModule,
         UserModule,
         AuthModule,
+        FileModule,
       ],
     }).compile();
 

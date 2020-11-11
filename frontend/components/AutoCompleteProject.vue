@@ -10,8 +10,9 @@
     placeholder="Search for a project"
     hide-details="auto"
     clearable
+    v-bind="$attrs"
     @change="onChange"
-  />
+  ></v-autocomplete>
 </template>
 
 <script lang="ts">

@@ -14,8 +14,11 @@ import { CreateCourseDto } from '../src/course/dto/create-course.dto';
 import { LatePaymentType } from '../src/course/enums/late-payment-type.enum';
 import { PaymentType } from '../src/course/enums/payment-type.enum';
 import { EmailModule } from '../src/email/email.module';
+import { CreateOrderDto } from '../src/event-registration/dtos/create-order.dto';
+import { CreateRegistrationDto } from '../src/event-registration/dtos/create-registration.dto';
 import { EventRegistrationModule } from '../src/event-registration/event-registration.module';
 import { EventModule } from '../src/event/event.module';
+import { FileModule } from '../src/file/file.module';
 import { CreateProjectDto } from '../src/project/dto/create-project.dto';
 import { ProjectModule } from '../src/project/project.module';
 import { MikroORMConstraintExceptionFilter } from '../src/shared/errors/mikro-orm.exception';
@@ -47,6 +50,7 @@ describe('Event Registrations', () => {
         EmailModule,
         AccountModule,
         UserModule,
+        FileModule,
         AuthModule,
         EventModule,
         CourseModule,
@@ -103,65 +107,6 @@ describe('Event Registrations', () => {
       await request(app.getHttpServer())
         .post('/registration/order/create/1')
         .expect(401);
-    });
-
-    it('should throw 403 for unauthorized users', async () => {
-      await request(app.getHttpServer())
-        .post('/registration/order/create/1')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(403);
-    });
-
-    it('should throw 400 for unknown account users on non-admins', async () => {
-      await userFixtures.setUserRoles(1, [Roles.ADMIN]);
-
-      const createProjectDto: CreateProjectDto = {
-        name: 'TestProject',
-        description: 'First Fixture',
-      };
-
-      const project = await request(app.getHttpServer())
-        .post('/project')
-        .send(createProjectDto)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(201);
-
-      expect(project.body).toBeDefined();
-      expect(project.body).toEqual({
-        id: 1,
-        name: 'TestProject',
-        description: 'First Fixture',
-        courses: [],
-        events: [],
-      });
-
-      const createCourseDto: CreateCourseDto = {
-        name: `TestCourse:${new Date().getTime()}`,
-        description: 'First Fixture',
-        paymentType: PaymentType.ALL,
-        latePaymentType: LatePaymentType.DENY,
-        project: project.body.id,
-        fee: '12.34',
-      };
-
-      const course = await request(app.getHttpServer())
-        .post('/course')
-        .send(createCourseDto)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(201);
-
-      expect(course.body).toBeDefined();
-      expect(course.body).toEqual({
-        id: 1,
-        name: createCourseDto.name,
-        description: 'First Fixture',
-        paymentType: PaymentType.ALL,
-        latePaymentType: LatePaymentType.DENY,
-        project: 1,
-        fee: '12.34',
-        events: [],
-        invoices: [],
-      });
     });
   });
 });

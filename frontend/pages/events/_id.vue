@@ -40,11 +40,7 @@
 
           <v-row no-gutters>
             <v-col>
-              <v-breadcrumbs :items="breadcrumbs" large class="pa-0">
-                <template #divider>
-                  <v-icon size="20">mdi-chevron-right</v-icon>
-                </template>
-              </v-breadcrumbs>
+              <breadcrumbs :items="breadcrumbs" />
             </v-col>
           </v-row>
         </v-col>
@@ -201,10 +197,8 @@ export interface UserEligibility {
 }
 
 @Component({
-  head() {
-    return {
-      title: 'Registration',
-    }
+  head: {
+    title: 'Registration',
   },
 })
 export default class EventIdPage extends Vue {
@@ -218,7 +212,6 @@ export default class EventIdPage extends Vue {
     },
     {
       text: 'Event',
-      href: `/event/${this.$route.params.id}`,
     },
   ]
 

@@ -1,289 +1,290 @@
 <template>
-  <v-dialog
-    v-model="dialog"
-    :fullscreen="$vuetify.breakpoint.mobile"
-    max-width="540"
-    persistent
-  >
+  <dialog-form ref="refDialog" @submit:form="onSubmit">
+    <template #title>Create Event</template>
+
     <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" v-on="on">Add Event</v-btn>
-      </slot>
+      <v-btn text v-bind="attrs" v-on="on">Add Event</v-btn>
     </template>
 
-    <v-card>
-      <v-toolbar flat>
-        <v-toolbar-title>Add New Event</v-toolbar-title>
+    <v-card-text>
+      <v-list dense>
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-text</v-icon>
+          </v-list-item-avatar>
 
-        <v-btn small absolute right fab icon @click="dialog = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-toolbar>
+          <v-list-item-content>
+            <v-text-field-validated
+              v-model="meta.name"
+              label="Title"
+              hide-details="auto"
+              vid="title"
+              rules="required"
+              outlined
+            >
+            </v-text-field-validated>
+          </v-list-item-content>
+        </v-list-item>
 
-      <v-form-validated @submit:form="onSubmit">
-        <v-card-text class="pa-0">
-          <v-list dense>
-            <v-list-item>
-              <!-- Intentionally empty for spacing -->
-              <v-list-item-avatar></v-list-item-avatar>
+        <v-divider></v-divider>
 
-              <v-list-item-content>
-                <v-text-field-validated
-                  v-model="meta.name"
-                  label="Add title"
-                  hide-details="auto"
-                  vid="title"
-                  rules="required"
-                >
-                </v-text-field-validated>
-              </v-list-item-content>
-            </v-list-item>
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-clock-outline</v-icon>
+          </v-list-item-avatar>
 
-            <v-divider></v-divider>
+          <v-list-item-content>All-day</v-list-item-content>
 
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon>mdi-clock-outline</v-icon>
-              </v-list-item-avatar>
+          <v-list-item-action>
+            <v-switch v-model="dates.allday" color="secondary"></v-switch>
+          </v-list-item-action>
+        </v-list-item>
 
-              <v-list-item-content>All-day</v-list-item-content>
+        <v-list-item>
+          <!-- Intentionally empty for spacing -->
+          <v-list-item-avatar></v-list-item-avatar>
 
-              <v-list-item-action>
-                <v-switch v-model="dates.allday" />
-              </v-list-item-action>
-            </v-list-item>
-
-            <v-list-item>
-              <!-- Intentionally empty for spacing -->
-              <v-list-item-avatar></v-list-item-avatar>
-
-              <v-list-item-content>
-                <v-row>
-                  <v-col>
-                    <v-menu
-                      v-model="dates.start.menu"
-                      offset-y
-                      min-width="290px"
-                    >
-                      <template #activator="{ on, attrs }">
-                        <v-text-field-validated
-                          :value="format(dates.start.date)"
-                          :label="dates.allday ? 'Date' : 'Start Date'"
-                          hide-details="auto"
-                          vid="startdate"
-                          :rules="{
-                            required: true,
-                            startdate: dates.allday
-                              ? false
-                              : { target: '@enddate' },
-                          }"
-                          v-bind="attrs"
-                          v-on="on"
-                        ></v-text-field-validated>
-                      </template>
-
-                      <v-date-picker
-                        v-model="dates.start.date"
-                        @input="dates.start.menu = false"
-                      />
-                    </v-menu>
-                  </v-col>
-                  <v-col v-if="!dates.allday" cols="4">
-                    <time-picker
-                      v-model="times.start.time"
-                      vid="starttime"
+          <v-list-item-content>
+            <v-row>
+              <v-col>
+                <v-menu v-model="dates.start.menu" offset-y min-width="290px">
+                  <template #activator="{ on, attrs }">
+                    <v-text-field-validated
+                      :value="format(dates.start.date)"
+                      :label="dates.allday ? 'Date' : 'Start Date'"
+                      hide-details="auto"
+                      vid="startdate"
                       :rules="{
-                        required: dates.allday,
-                        starttime:
-                          dates.allday ||
-                          !isSameDay(dates.start.date, dates.end.date)
-                            ? false
-                            : { time: '@endtime' },
+                        required: true,
+                        startdate: dates.allday
+                          ? false
+                          : { target: '@enddate' },
                       }"
-                      label="Start Time"
-                    ></time-picker>
-                  </v-col>
-                </v-row>
+                      outlined
+                      v-bind="attrs"
+                      v-on="on"
+                    ></v-text-field-validated>
+                  </template>
 
-                <v-expand-transition>
-                  <v-row v-if="!dates.allday">
-                    <v-col>
-                      <v-menu
-                        v-model="dates.end.menu"
-                        offset-y
-                        min-width="290px"
+                  <v-date-picker
+                    v-model="dates.start.date"
+                    @input="dates.start.menu = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+              <v-col v-if="!dates.allday" cols="4">
+                <time-picker
+                  v-model="times.start.time"
+                  vid="starttime"
+                  :rules="{
+                    required: dates.allday,
+                    starttime:
+                      dates.allday ||
+                      !isSameDay(dates.start.date, dates.end.date)
+                        ? false
+                        : { time: '@endtime' },
+                  }"
+                  label="Start Time"
+                  outlined
+                ></time-picker>
+              </v-col>
+            </v-row>
+
+            <v-expand-transition>
+              <v-row v-if="!dates.allday">
+                <v-col>
+                  <v-menu v-model="dates.end.menu" offset-y min-width="290px">
+                    <template #activator="{ on, attrs }">
+                      <v-text-field-validated
+                        :value="format(dates.end.date)"
+                        :rules="{ required: !dates.allday }"
+                        vid="enddate"
+                        readonly
+                        hide-details="auto"
+                        label="End Date"
+                        v-bind="attrs"
+                        outlined
+                        v-on="on"
                       >
-                        <template #activator="{ on, attrs }">
-                          <v-text-field-validated
-                            :value="format(dates.end.date)"
-                            :rules="{ required: !dates.allday }"
-                            vid="enddate"
-                            readonly
-                            hide-details="auto"
-                            label="End Date"
-                            v-bind="attrs"
-                            v-on="on"
-                          >
-                          </v-text-field-validated>
-                        </template>
-                        <v-date-picker
-                          v-model="dates.end.date"
-                          @input="dates.end.menu = false"
-                        ></v-date-picker>
-                      </v-menu>
-                    </v-col>
-                    <v-col cols="4">
-                      <time-picker
-                        v-model="times.end.time"
-                        vid="endtime"
-                        label="End Time"
-                      ></time-picker>
-                    </v-col>
-                  </v-row>
-                </v-expand-transition>
-              </v-list-item-content>
-            </v-list-item>
+                      </v-text-field-validated>
+                    </template>
+                    <v-date-picker
+                      v-model="dates.end.date"
+                      @input="dates.end.menu = false"
+                    ></v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="4">
+                  <time-picker
+                    v-model="times.end.time"
+                    vid="endtime"
+                    label="End Time"
+                    outlined
+                  ></time-picker>
+                </v-col>
+              </v-row>
+            </v-expand-transition>
+          </v-list-item-content>
+        </v-list-item>
 
-            <v-divider></v-divider>
+        <v-divider></v-divider>
 
-            <!-- Recurrence -->
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon>mdi-update</v-icon>
-              </v-list-item-avatar>
+        <!-- Recurrence -->
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-update</v-icon>
+          </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-row>
-                  <v-col>
-                    <recurrence-dialog
-                      ref="recurrenceDialog"
-                      v-model="rrule"
-                      :date="dates.start.date"
-                    ></recurrence-dialog>
-                  </v-col>
-                </v-row>
-              </v-list-item-content>
-            </v-list-item>
+          <v-list-item-content>
+            <v-row>
+              <v-col>
+                <recurrence-dialog
+                  ref="recurrenceDialog"
+                  v-model="rrule"
+                  :date-string="dates.start.date"
+                ></recurrence-dialog>
+              </v-col>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
 
-            <v-divider></v-divider>
+        <v-divider></v-divider>
 
-            <!-- Location -->
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon>mdi-map-marker</v-icon>
-              </v-list-item-avatar>
+        <!-- Location -->
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-map-marker</v-icon>
+          </v-list-item-avatar>
 
-              <v-list-item-content>
+          <v-list-item-content>
+            <v-row>
+              <v-col>
                 <v-text-field
                   v-model="meta.location"
                   label="Location"
+                  hide-details="auto"
+                  outlined
                 ></v-text-field>
-              </v-list-item-content>
-            </v-list-item>
+              </v-col>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
 
-            <v-divider></v-divider>
+        <v-divider></v-divider>
 
-            <!-- Description -->
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon>mdi-text-subject</v-icon>
-              </v-list-item-avatar>
+        <!-- Description -->
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-text-subject</v-icon>
+          </v-list-item-avatar>
 
-              <v-list-item-content>
+          <v-list-item-content>
+            <v-row>
+              <v-col>
                 <v-textarea
                   v-model="meta.description"
                   label="Description"
                   rows="1"
                   auto-grow
+                  hide-details="auto"
+                  outlined
                 ></v-textarea>
-              </v-list-item-content>
-            </v-list-item>
+              </v-col>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
 
-            <v-divider></v-divider>
+        <v-divider></v-divider>
 
-            <!-- Project Management -->
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon>mdi-puzzle</v-icon>
-              </v-list-item-avatar>
+        <!-- Project Management -->
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-puzzle</v-icon>
+          </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-row>
-                  <v-col>
-                    <auto-complete-project v-model="project.id" />
-                  </v-col>
-                  <v-col cols="auto">
-                    <dialog-select-project v-model="project.id" />
-                  </v-col>
-                  <v-col cols="auto">
-                    <dialog-create-project @create:project="onProjectCreated" />
-                  </v-col>
-                </v-row>
-              </v-list-item-content>
-            </v-list-item>
+          <v-list-item-content>
+            <v-row>
+              <v-col>
+                <auto-complete-project
+                  v-model="project"
+                  outlined
+                ></auto-complete-project>
+              </v-col>
+              <v-col cols="auto">
+                <dialog-select-project
+                  v-model="project"
+                ></dialog-select-project>
+              </v-col>
+              <v-col cols="auto">
+                <dialog-create-project
+                  @create:project="onProjectCreated"
+                ></dialog-create-project>
+              </v-col>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
 
-            <v-divider></v-divider>
+        <v-divider></v-divider>
 
-            <!-- Course Management -->
-            <v-list-item v-if="project.id">
-              <v-list-item-avatar>
-                <v-icon>mdi-school-outline</v-icon>
-              </v-list-item-avatar>
+        <!-- Course Management -->
+        <v-list-item v-if="project">
+          <v-list-item-avatar>
+            <v-icon>mdi-school-outline</v-icon>
+          </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-row>
-                  <v-col>
-                    <auto-complete-course
-                      v-model="course.id"
-                      :project="project.id"
-                    ></auto-complete-course>
-                  </v-col>
+          <v-list-item-content>
+            <v-row>
+              <v-col>
+                <auto-complete-course
+                  v-model="course"
+                  :project="project"
+                ></auto-complete-course>
+              </v-col>
 
-                  <v-col cols="auto">
-                    <dialog-select-course
-                      v-model="course.id"
-                      :project="project.id"
-                    ></dialog-select-course>
-                  </v-col>
+              <v-col cols="auto">
+                <dialog-select-course
+                  v-model="course"
+                  :project="project"
+                ></dialog-select-course>
+              </v-col>
 
-                  <v-col cols="auto">
-                    <dialog-create-course
-                      :project="project.id"
-                      @create:course="onCourseCreated"
-                    ></dialog-create-course>
-                  </v-col>
-                </v-row>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
+              <v-col cols="auto">
+                <dialog-create-course
+                  :project="project"
+                  @create:course="onCourseCreated"
+                ></dialog-create-course>
+              </v-col>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-card-text>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
+    <v-card-actions>
+      <v-spacer></v-spacer>
 
-          <v-btn text @click="dialog = false">Cancel</v-btn>
-          <v-btn text type="submit" :loading="loading">
-            <v-scroll-x-transition>
-              <v-icon v-if="success" class="mr-2" color="success">
-                mdi-check
-              </v-icon>
-            </v-scroll-x-transition>
+      <v-btn text @click="dialog.close()">Cancel</v-btn>
+      <v-btn text type="submit" :loading="isLoading">
+        <v-scroll-x-transition>
+          <v-icon v-if="success" class="mr-2" color="success">
+            mdi-check
+          </v-icon>
+        </v-scroll-x-transition>
 
-            Create Event
-          </v-btn>
-        </v-card-actions>
-      </v-form-validated>
-    </v-card>
-  </v-dialog>
+        Create Event
+      </v-btn>
+    </v-card-actions>
+  </dialog-form>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { format, isSameDay } from 'date-fns'
+import { Vue, Component, Prop, Ref } from 'nuxt-property-decorator'
+import { addDays, format, isBefore, isSameDay, parse, parseISO } from 'date-fns'
 import { Options } from 'rrule'
 import { CreateEventDto } from '../../../backend/src/event/dtos/create-event.dto'
 import { Project } from '../../../backend/src/project/project.entity'
 import RecurrenceDialog from '../events/RecurrenceDialog.vue'
+import DialogForm from './DialogForm.vue'
 import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
 import { Course } from '~/../backend/src/course/course.entity'
@@ -298,15 +299,12 @@ export type RepeatingTypes = {
 
 @Component
 export default class DialogCreateEvent extends Vue {
+  @Ref('recurrenceDialog') readonly recurrenceDialog!: RecurrenceDialog
+  @Ref('calendar') readonly calendar!: Calendar
+  @Ref('refDialog') readonly dialog!: DialogForm
   @Prop({ default: new Date().toISOString().substr(0, 10) }) date!: string
   @Prop({ default: format(roundDate(new Date(), 30), 'HH:mm') }) time!: string
 
-  $refs!: {
-    recurrenceDialog: RecurrenceDialog
-    calendar: Calendar
-  }
-
-  dialog = false
   success = false
 
   dates = {
@@ -341,21 +339,32 @@ export default class DialogCreateEvent extends Vue {
     location: '',
   }
 
-  project = {
-    id: null as null | number,
-  }
+  project: null | number = null
+  course: null | number = null
 
-  course = {
-    id: null as null | number,
+  get isLoading() {
+    return this.$accessor.events.isLoading
   }
-
-  loading = false
 
   beforeMount() {
+    const now = new Date()
     this.dates.start.date = this.date
     this.dates.end.date = this.date
     this.times.start.time = this.time
     this.times.end.time = addTime(this.time, 1, 30)
+
+    // If the end time loops around to being before
+    // the starting time, increment the day.
+    if (
+      isBefore(
+        parse(this.times.end.time, 'HH:mm', now),
+        parse(this.times.start.time, 'HH:mm', now)
+      )
+    ) {
+      this.dates.end.date = addDays(parseISO(this.date), 1)
+        .toISOString()
+        .substr(0, 10)
+    }
 
     const hours = [
       '12',
@@ -398,16 +407,6 @@ export default class DialogCreateEvent extends Vue {
     return format(date, 'EEEE, LLLL do')
   }
 
-  updateRRule(type: number) {
-    switch (type) {
-      case 4:
-        this.$refs.recurrenceDialog.open()
-        break
-      default:
-        break
-    }
-  }
-
   async onSubmit() {
     const createEventDto: CreateEventDto = {
       ...this.meta,
@@ -418,35 +417,32 @@ export default class DialogCreateEvent extends Vue {
         ? undefined
         : toDate(this.dates.end.date, this.times.end.time),
       rrule: this.rrule || undefined,
-      project: this.project.id || undefined,
-      course: this.course.id || undefined,
+      project: this.project || undefined,
+      course: this.course || undefined,
     }
 
-    try {
-      this.loading = true
-      await this.$accessor.events.create(createEventDto)
+    await this.$accessor.events.create(createEventDto)
 
-      this.$emit('created')
+    if (this.$accessor.events.error) {
+      console.error(this.$accessor.events.error)
+    } else {
+      this.$emit('event:create')
+
       this.success = true
-      setTimeout(() => (this.dialog = false), 1500)
-    } catch (error) {
-      console.error(error)
-    } finally {
-      this.loading = false
+      this.dialog.close(1500)
     }
   }
 
   onProjectSelect(id: number) {
-    this.project.id = id
+    this.project = id
   }
 
   onProjectCreated(project: Project) {
-    this.project.id = project.id
+    this.project = project.id
   }
 
   onCourseCreated(course: Course) {
-    console.log(course)
-    this.course.id = course.id
+    this.course = course.id
   }
 }
 </script>

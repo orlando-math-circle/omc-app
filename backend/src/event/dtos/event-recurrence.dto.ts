@@ -38,28 +38,28 @@ export class EventRecurrenceDto implements Partial<Options> {
   readonly wkst?: Weekday | number;
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly bysetpos?: number | number[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly bymonth?: number | number[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly bymonthday?: number | number[];
 
   @IsOptional()
   @IsArray()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly bynmonthday?: number[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly byyearday?: number | number[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly byweekno?: number | number[];
 
   @IsOptional()
@@ -67,18 +67,18 @@ export class EventRecurrenceDto implements Partial<Options> {
   readonly byweekday?: ByWeekday | ByWeekday[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly bynweekday?: number[][];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly byhour?: number | number[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly byminute?: number | number[];
 
   @IsOptional()
-  @IsNumber(null, { each: true })
+  @IsNumber({}, { each: true })
   readonly bysecond?: number | number[];
 }

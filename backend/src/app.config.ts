@@ -14,6 +14,7 @@ const configSchema = Joi.object({
 const testSchema = Joi.object({
   SECRET: Joi.string().default('TESTING_SECRET'),
   PAYPAL_SANDBOXED: Joi.boolean().default(true),
+  FILE_DIRECTORY: Joi.string().default('../../files'),
 });
 
 export { configSchema, testSchema };

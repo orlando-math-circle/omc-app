@@ -10,6 +10,7 @@ import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { CourseModule } from '../src/course/course.module';
+import { FileModule } from '../src/file/file.module';
 import { CreateProjectDto } from '../src/project/dto/create-project.dto';
 import { FindAllProjectsDto } from '../src/project/dto/find-all-projects.dto';
 import { UpdateProjectDto } from '../src/project/dto/update-project.dto';
@@ -42,6 +43,7 @@ describe('Projects', () => {
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         AccountModule,
         UserModule,
+        FileModule,
         AuthModule,
         CourseModule,
         ProjectModule,
@@ -118,7 +120,7 @@ describe('Projects', () => {
         .expect(201);
 
       expect(project.body).toBeDefined();
-      expect(project.body).toEqual({
+      expect(project.body).toMatchObject({
         id: 1,
         name: createProjectDto.name,
         description: createProjectDto.description,
@@ -135,7 +137,7 @@ describe('Projects', () => {
         .expect(200);
 
       expect(project.body).toBeDefined();
-      expect(project.body).toEqual({
+      expect(project.body).toMatchObject({
         id: 1,
         name: 'Test Project A',
         description: 'Example description.',
@@ -162,7 +164,7 @@ describe('Projects', () => {
         .expect(201);
 
       expect(project.body).toBeDefined();
-      expect(project.body).toEqual({
+      expect(project.body).toMatchObject({
         id: 2,
         name: 'Test Project B',
         description: 'Example description.',
@@ -175,7 +177,7 @@ describe('Projects', () => {
         .expect(200);
 
       expect(projects.body).toBeDefined();
-      expect(projects.body).toEqual([
+      expect(projects.body).toMatchObject([
         [
           {
             id: 1,
@@ -201,7 +203,7 @@ describe('Projects', () => {
         .expect(200);
 
       expect(projects.body).toBeDefined();
-      expect(projects.body).toEqual([
+      expect(projects.body).toMatchObject([
         [
           {
             id: 2,
@@ -221,7 +223,7 @@ describe('Projects', () => {
         .expect(200);
 
       expect(projects.body).toBeDefined();
-      expect(projects.body).toEqual([
+      expect(projects.body).toMatchObject([
         [
           {
             id: 1,
@@ -251,23 +253,20 @@ describe('Projects', () => {
         .expect(200);
 
       expect(projects.body).toBeDefined();
-      expect(projects.body).toEqual([
-        [
-          {
-            id: 2,
-            name: 'Test Project B',
-            description: 'Example description.',
-            picture: null,
-          },
-          {
-            id: 1,
-            name: 'Test Project A',
-            description: 'Example description.',
-            picture: null,
-          },
-        ],
-        2,
-      ]);
+      expect(Array.isArray(projects.body)).toBeTruthy();
+      expect(projects.body[0][0]).toMatchObject({
+        id: 2,
+        name: 'Test Project B',
+        description: 'Example description.',
+        picture: null,
+      });
+      expect(projects.body[0][1]).toMatchObject({
+        id: 1,
+        name: 'Test Project A',
+        description: 'Example description.',
+        picture: null,
+      });
+      expect(projects.body[1]).toBe(2);
     });
 
     it('should paginate projects', async () => {
@@ -282,17 +281,14 @@ describe('Projects', () => {
         .expect(200);
 
       expect(projects.body).toBeDefined();
-      expect(projects.body).toEqual([
-        [
-          {
-            id: 2,
-            name: 'Test Project B',
-            description: 'Example description.',
-            picture: null,
-          },
-        ],
-        2,
-      ]);
+      expect(Array.isArray(projects.body[0])).toBeTruthy();
+      expect(projects.body[1]).toBe(2);
+      expect(projects.body[0][0]).toMatchObject({
+        id: 2,
+        name: 'Test Project B',
+        description: 'Example description.',
+        picture: null,
+      });
     });
   });
 
@@ -324,7 +320,7 @@ describe('Projects', () => {
         .expect(200);
 
       expect(project.body).toBeDefined();
-      expect(project.body).toEqual({
+      expect(project.body).toMatchObject({
         id: 2,
         name: updateProjectDto.name,
         description: 'Example description.',

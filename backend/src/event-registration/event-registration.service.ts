@@ -2,6 +2,7 @@ import { EntityRepository, FilterQuery } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   InternalServerErrorException,
   NotFoundException,
@@ -47,6 +48,10 @@ export class EventRegistrationService {
     author: User,
     account: Account,
   ) {
+    if (account.primaryUser.emailVerified === false) {
+      throw new ForbiddenException('Please validate your email');
+    }
+
     const registrations: EventRegistration[] = [];
     const event = await this.eventService.findOneOrFail(eventId, ['course']);
 
@@ -189,6 +194,10 @@ export class EventRegistrationService {
    * @param users Users for registration to generate orders.
    */
   public async createOrder(eventId: number, account: Account, users: number[]) {
+    if (account.primaryUser.emailVerified === false) {
+      throw new ForbiddenException('Please validate your email');
+    }
+
     const event = await this.eventService.findOneOrFail(eventId, [
       'course.events',
     ]);

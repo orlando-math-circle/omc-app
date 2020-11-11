@@ -14,6 +14,7 @@ import { CreateCourseDto } from '../src/course/dto/create-course.dto';
 import { UpdateCourseDto } from '../src/course/dto/update-course.dto';
 import { LatePaymentType } from '../src/course/enums/late-payment-type.enum';
 import { PaymentType } from '../src/course/enums/payment-type.enum';
+import { FileModule } from '../src/file/file.module';
 import { CreateProjectDto } from '../src/project/dto/create-project.dto';
 import { ProjectModule } from '../src/project/project.module';
 import { MikroORMConstraintExceptionFilter } from '../src/shared/errors/mikro-orm.exception';
@@ -44,6 +45,7 @@ describe('Courses', () => {
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         AccountModule,
         UserModule,
+        FileModule,
         AuthModule,
         CourseModule,
         ProjectModule,
@@ -117,7 +119,7 @@ describe('Courses', () => {
         .expect(201);
 
       expect(project.body).toBeDefined();
-      expect(project.body).toEqual({
+      expect(project.body).toMatchObject({
         id: 1,
         name: 'Test Project A',
         description: 'Example description.',
@@ -141,7 +143,7 @@ describe('Courses', () => {
         .expect(201);
 
       expect(course.body).toBeDefined();
-      expect(course.body).toEqual({
+      expect(course.body).toMatchObject({
         id: 1,
         name: 'Test Course A',
         description: 'Example description.',
@@ -163,7 +165,7 @@ describe('Courses', () => {
         .expect(200);
 
       expect(course.body).toBeDefined();
-      expect(course.body).toEqual({
+      expect(course.body).toMatchObject({
         id: 1,
         name: 'Test Course A',
         description: 'Example description.',
@@ -205,31 +207,28 @@ describe('Courses', () => {
         .expect(200);
 
       expect(courses.body).toBeDefined();
-      expect(courses.body).toEqual([
-        [
-          {
-            id: 1,
-            name: 'Test Course A',
-            description: 'Example description.',
-            paymentType: PaymentType.ALL,
-            latePaymentType: LatePaymentType.DENY,
-            fee: '12.34',
-            lateFee: null,
-            project: 1,
-          },
-          {
-            id: 2,
-            name: 'Test Course B',
-            description: 'Example description.',
-            paymentType: PaymentType.SINGLE,
-            latePaymentType: LatePaymentType.DENY,
-            fee: '43.21',
-            lateFee: null,
-            project: 1,
-          },
-        ],
-        2,
-      ]);
+      expect(Array.isArray(courses.body)).toBeTruthy();
+      expect(courses.body[0][0]).toMatchObject({
+        id: 1,
+        name: 'Test Course A',
+        description: 'Example description.',
+        paymentType: PaymentType.ALL,
+        latePaymentType: LatePaymentType.DENY,
+        fee: '12.34',
+        lateFee: null,
+        project: 1,
+      });
+      expect(courses.body[0][1]).toMatchObject({
+        id: 2,
+        name: 'Test Course B',
+        description: 'Example description.',
+        paymentType: PaymentType.SINGLE,
+        latePaymentType: LatePaymentType.DENY,
+        fee: '43.21',
+        lateFee: null,
+        project: 1,
+      });
+      expect(courses.body[1]).toBe(2);
     });
 
     it('should retrieve courses with fuzzy searching', async () => {
@@ -239,21 +238,18 @@ describe('Courses', () => {
         .expect(200);
 
       expect(courses.body).toBeDefined();
-      expect(courses.body).toEqual([
-        [
-          {
-            id: 2,
-            name: 'Test Course B',
-            description: 'Example description.',
-            paymentType: PaymentType.SINGLE,
-            latePaymentType: LatePaymentType.DENY,
-            fee: '43.21',
-            lateFee: null,
-            project: 1,
-          },
-        ],
-        1,
-      ]);
+      expect(Array.isArray(courses.body)).toBeTruthy();
+      expect(courses.body[0][0]).toMatchObject({
+        id: 2,
+        name: 'Test Course B',
+        description: 'Example description.',
+        paymentType: PaymentType.SINGLE,
+        latePaymentType: LatePaymentType.DENY,
+        fee: '43.21',
+        lateFee: null,
+        project: 1,
+      });
+      expect(courses.body[1]).toBe(1);
     });
 
     it('should paginate courses', async () => {

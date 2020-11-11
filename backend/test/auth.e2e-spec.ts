@@ -17,6 +17,7 @@ import { AccessGuard } from '../src/auth/guards/access-control.guard';
 import { CourseModule } from '../src/course/course.module';
 import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
+import { FileModule } from '../src/file/file.module';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
@@ -59,6 +60,7 @@ describe('Auth', () => {
         EmailModule,
         AccountModule,
         UserModule,
+        FileModule,
         AuthModule,
         CourseModule,
       ],
@@ -345,7 +347,7 @@ describe('Auth', () => {
 
       expect(spy).toBeCalled();
       expect(typeof spy.mock.calls[0][1]).toBe('string');
-      forgotToken = spy.mock.calls[0][1];
+      forgotToken = spy.mock.calls[0][2];
     });
   });
 

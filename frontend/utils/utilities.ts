@@ -148,15 +148,23 @@ export const addTime = (time: string, hours = 0, minutes = 0) => {
 }
 
 /**
+ * Returns the absolute difference between two numbers.
+ *
+ * @param a Number.
+ * @param b Number.
+ */
+export const diff = (a: number, b: number) => (a > b ? a - b : b - a)
+
+/**
  * Converts an ISO time into the representational number of
  * milliseconds it represents.
  *
  * @param time ISO time string.
  */
-export const getTimeValue = (time: string) => {
+export const getTimeValue = (time: string, format = 'HH:mm') => {
   const now = new Date()
 
-  return parse(time, 'HH:mm aaa', now).getTime() - now.getTime()
+  return diff(parse(time, format, now).getTime(), now.getTime())
 }
 
 /**

@@ -6,6 +6,9 @@ import { Course } from '../src/course/course.entity';
 import { EventRegistration } from '../src/event-registration/event-registration.entity';
 import { EventRecurrence } from '../src/event/event-recurrence.entity';
 import { Event } from '../src/event/event.entity';
+import { FileAttachment } from '../src/file-attachment/file-attachment.entity';
+import { FileField } from '../src/file-fields/file-field.entity';
+import { File } from '../src/file/file.entity';
 import { Invoice } from '../src/invoice/invoice.entity';
 import { Project } from '../src/project/project.entity';
 import { User } from '../src/user/user.entity';
@@ -22,6 +25,9 @@ export const MikroORMTestingConfig: Options = {
     Invoice,
     Course,
     Project,
+    File,
+    FileAttachment,
+    FileField,
   ],
   dbName: process.env.TESTING_DATABASE_NAME || 'omc_test',
   user: process.env.TESTING_DATABASE_USER || 'postgres',

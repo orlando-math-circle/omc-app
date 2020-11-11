@@ -1,30 +1,24 @@
 <template>
-  <v-dialog v-model="dialog" max-width="440">
+  <v-dialog v-model="dialog" max-width="440" @click:outside="close">
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
         <v-select
           v-model="rule.selected"
-          :items="rule.labels"
-          class="discrete"
+          :items="selections"
           hide-details
           filled
-          dense
-          @change="onChange"
-        ></v-select>
+          outlined
+        />
       </slot>
     </template>
 
     <v-card>
       <v-toolbar flat>
-        <v-btn icon @click="abort()">
+        <v-btn icon @click="close()">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
 
         <v-toolbar-title>Custom recurrence</v-toolbar-title>
-
-        <v-spacer></v-spacer>
-
-        <v-btn text @click="setCustomRRule()">Done</v-btn>
       </v-toolbar>
 
       <v-card-text>
@@ -40,21 +34,19 @@
                 <v-col>
                   <v-text-field
                     v-model.number="options.interval"
-                    class="discrete"
                     type="number"
-                    filled
+                    outlined
                     hide-details
                     dense
-                  ></v-text-field>
+                  />
                 </v-col>
 
                 <v-col>
                   <v-select
                     v-model="options.freq"
-                    class="discrete"
                     :items="frequencies"
                     :item-text="options.interval > 1 ? 'plural' : 'singular'"
-                    filled
+                    outlined
                     hide-details
                     dense
                   />
@@ -63,7 +55,7 @@
             </v-list-item-content>
           </v-list-item>
 
-          <v-divider></v-divider>
+          <v-divider />
 
           <!-- Option [Weekly]: ByWeekday -->
           <v-list-item v-if="options.freq === 2">
@@ -87,9 +79,8 @@
               <v-select
                 v-model="freq.monthType"
                 :items="monthTypes"
-                class="discrete"
                 hide-details
-                filled
+                outlined
                 dense
               />
             </v-list-item-content>
@@ -101,12 +92,14 @@
             <v-list-item-content>
               <v-list-item-title>Ends</v-list-item-title>
 
-              <v-radio-group v-model="type">
-                <v-radio value="never">
+              <v-radio-group v-model="type" class="pl-2">
+                <!-- Infinitely recurring events is disabled -->
+                <!-- <v-radio value="never">
                   <template #label>
                     <span class="inline-height">Never</span>
                   </template>
-                </v-radio>
+                </v-radio> -->
+
                 <v-radio value="until">
                   <template #label>
                     <v-row>
@@ -121,30 +114,34 @@
                           <template #activator="{ on, attrs }">
                             <v-text-field
                               :value="formattedUntilDate"
-                              class="discrete"
                               hide-details
-                              filled
+                              outlined
                               readonly
                               dense
                               v-bind="attrs"
                               v-on="on"
-                            ></v-text-field>
+                            />
                           </template>
 
                           <v-date-picker v-model="untilISO" scrollable>
-                            <v-spacer></v-spacer>
+                            <v-spacer />
+
                             <v-btn text @click="dateDialog = false"
-                              >Cancel</v-btn
+                              >Cancel
+                            </v-btn>
+                            <v-btn
+                              text
+                              @click="datePickerDialog.save(untilISO)"
                             >
-                            <v-btn text @click="$refs.dateDialog.save(untilISO)"
-                              >Ok</v-btn
-                            >
+                              Ok
+                            </v-btn>
                           </v-date-picker>
                         </v-dialog>
                       </v-col>
                     </v-row>
                   </template>
                 </v-radio>
+
                 <v-radio value="count">
                   <template #label>
                     <v-row>
@@ -155,16 +152,20 @@
                         <v-text-field
                           ref="occurrences"
                           v-model.number="options.count"
-                          class="discrete occurrence-field"
+                          class="occurrence-field"
                           type="number"
                           hide-details
-                          filled
+                          outlined
                           dense
                         />
-                        <span
+                        <v-sheet
                           class="fake-input"
-                          @click="$refs.occurrences.focus()"
-                          v-text="`occurrence${options.count > 1 ? 's' : ''}`"
+                          @click="occurrences.focus()"
+                          v-text="
+                            `occurrence${
+                              options.count && options.count > 1 ? 's' : ''
+                            }`
+                          "
                         />
                       </v-col>
                     </v-row>
@@ -175,15 +176,22 @@
           </v-list-item>
         </v-list>
       </v-card-text>
+
+      <v-card-actions>
+        <v-spacer />
+
+        <v-btn text @click="close">Cancel</v-btn>
+        <v-btn color="primary" @click="onSetRule()">OK</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { Frequency, ByWeekday } from 'rrule'
+import { Vue, Component, Prop, Ref, Watch } from 'vue-property-decorator'
+import { Frequency, ByWeekday, Options } from 'rrule'
 import moment from 'moment'
-import { parseISO } from 'date-fns/fp'
+import { parseISO } from 'date-fns'
 
 export interface RecurrenceOpts {
   interval: number
@@ -196,14 +204,14 @@ export interface RecurrenceOpts {
   bymonthday: number | number[] | null
 }
 
-export interface Weekdays {
+export interface Weekday {
   text: string
   value: ByWeekday
   short: string
 }
 
 export enum RecurrenceTerminator {
-  NEVER = 'never',
+  // NEVER = 'never',
   UNTIL = 'until',
   COUNT = 'count',
 }
@@ -213,13 +221,22 @@ export enum MonthType {
   RELATIVE = 'relative',
 }
 
+export enum RecurrenceSelections {
+  NONREPEATING = -1,
+  CUSTOM = 0,
+  DEFINED = 1,
+}
+
 @Component
 export default class RecurrenceDialog extends Vue {
-  @Prop() value?: any
-  @Prop({ required: true }) date!: string
+  @Ref('occurrences') readonly occurrences!: HTMLFormElement
+  @Ref('dateDialog') readonly datePickerDialog!: { save: (value: any) => void }
+  @Prop({ required: true }) value!: null | Partial<Options>
+  @Prop({ required: true }) dateString!: string
 
   dialog = false
   dateDialog = false
+  pristine = true
 
   frequencies = [
     {
@@ -249,16 +266,12 @@ export default class RecurrenceDialog extends Vue {
   ]
 
   rule = {
-    selected: null as number | null,
     labels: [
-      { text: 'Does not repeat', value: null },
-      { text: 'Every day', value: Frequency.DAILY },
-      { text: 'Every week', value: Frequency.WEEKLY },
-      { text: 'Every month', value: Frequency.MONTHLY },
-      { text: 'Every year', value: Frequency.YEARLY },
-      { text: 'Custom...', value: -1 },
+      { text: 'Does not repeat', value: RecurrenceSelections.NONREPEATING },
+      { text: 'Custom...', value: RecurrenceSelections.CUSTOM },
     ],
-    options: null as Partial<RecurrenceOpts> | null,
+    selected: RecurrenceSelections.NONREPEATING,
+    prevSelected: null as RecurrenceSelections | null,
   }
 
   occurance = ['first', 'second', 'third', 'fourth', 'fifth']
@@ -272,7 +285,7 @@ export default class RecurrenceDialog extends Vue {
     'Saturday',
   ]
 
-  weekdays = [
+  weekdays: Weekday[] = [
     { text: 'S', value: 6, short: 'Sun' },
     { text: 'M', value: 0, short: 'Mon' },
     { text: 'T', value: 1, short: 'Tue' },
@@ -280,9 +293,9 @@ export default class RecurrenceDialog extends Vue {
     { text: 'T', value: 3, short: 'Thu' },
     { text: 'F', value: 4, short: 'Fri' },
     { text: 'S', value: 5, short: 'Sat' },
-  ] as Weekdays[]
+  ]
 
-  type: RecurrenceTerminator = RecurrenceTerminator.NEVER
+  type: RecurrenceTerminator = RecurrenceTerminator.UNTIL
 
   freq = {
     monthType: MonthType.ABSOLUTE,
@@ -291,7 +304,7 @@ export default class RecurrenceDialog extends Vue {
   options: RecurrenceOpts = {
     interval: 1,
     freq: Frequency.DAILY,
-    dtstart: parseISO(this.date),
+    dtstart: parseISO(this.dateString),
     until: null,
     count: 10,
     byweekday: null,
@@ -299,10 +312,8 @@ export default class RecurrenceDialog extends Vue {
     bymonthday: null,
   }
 
-  defaults: RecurrenceOpts | null = null
-
-  get nativeDate() {
-    return parseISO(this.date)
+  get date() {
+    return parseISO(this.dateString)
   }
 
   get untilISO(): string {
@@ -322,41 +333,84 @@ export default class RecurrenceDialog extends Vue {
   get monthTypes() {
     return [
       {
-        text: `Monthly on day ${this.nativeDate.getDate()}`,
+        text: `Monthly on day ${this.date.getDate()}`,
         value: MonthType.ABSOLUTE,
       },
       {
         text: `Monthly on the ${
           this.occurance[(this.options.bysetpos as number) - 1]
-        } ${this.weekday[this.nativeDate.getDay()]}`,
+        } ${this.weekday[this.date.getDay()]}`,
       },
     ]
   }
 
-  onChange(type: number | null) {
-    if (type === null) {
-      this.$emit('input', null)
-      return
+  get selections() {
+    if (this.pristine) return this.rule.labels
+
+    return [
+      {
+        text: this.customRuleToText(this.options),
+        value: RecurrenceSelections.DEFINED,
+      },
+      ...this.rule.labels,
+    ]
+  }
+
+  /**
+   * Initializes the RRule data and copies any
+   * provided data over.
+   */
+  beforeMount() {
+    const now = new Date()
+    const month = now.getMonth()
+
+    const nextMonth =
+      month === 11
+        ? new Date(now.getFullYear() + 1, 0, 1)
+        : new Date(now.getFullYear(), month + 1, 1)
+
+    this.options.until = nextMonth
+
+    const weekday = this.weekdays[this.date.getDay()].value
+
+    // Set the byweekday value to the selected day
+    this.options.byweekday = [weekday]
+
+    // Set bymonthday and bysetpos for month-based intervals.
+    this.options.bysetpos = this.getWeekdayOccurance(this.date)
+    this.options.bymonthday = this.date.getDate()
+
+    if (this.value) {
+      Object.assign(this.options, this.value)
+
+      if (this.value.until) {
+        this.type = RecurrenceTerminator.UNTIL
+      } else if (this.value.count) {
+        this.type = RecurrenceTerminator.COUNT
+      }
+
+      this.rule.selected = RecurrenceSelections.DEFINED
+      this.pristine = false
+    }
+  }
+
+  @Watch('rule.selected')
+  onSelect(type: RecurrenceSelections, old: RecurrenceSelections) {
+    switch (type) {
+      case RecurrenceSelections.NONREPEATING:
+        this.$emit('input', null)
+        break
+      case RecurrenceSelections.CUSTOM:
+        this.dialog = true
+        break
+      case RecurrenceSelections.DEFINED:
+        this.onSetRule()
+        break
+      default:
+        break
     }
 
-    // The user selected "Custom..."
-    if (type === -1) {
-      this.dialog = true
-      return
-    }
-
-    // If they didn't select custom,
-    // set the rrule preset.
-    this.rule.options = {
-      freq: type,
-      dtstart: this.nativeDate,
-    }
-
-    if (this.rule.labels[0].value !== null) {
-      this.rule.labels.shift()
-    }
-
-    this.$emit('input', this.rule.options)
+    this.rule.prevSelected = old
   }
 
   customRuleToText(rule: Partial<RecurrenceOpts>) {
@@ -391,31 +445,6 @@ export default class RecurrenceDialog extends Vue {
     return retval.join(' ')
   }
 
-  beforeMount() {
-    // Set initial until date to the next month.
-    const now = new Date()
-    const month = now.getMonth()
-
-    const nextMonth =
-      month === 11
-        ? new Date(now.getFullYear() + 1, 0, 1)
-        : new Date(now.getFullYear(), month + 1, 1)
-
-    this.options.until = nextMonth
-
-    const weekday = this.weekdays[this.nativeDate.getDay()].value
-
-    // Set the byweekday value to the selected day
-    this.options.byweekday = [weekday]
-
-    // Set bymonthday and bysetpos for month-based intervals.
-    this.options.bysetpos = this.getWeekdayOccurance(this.nativeDate)
-    this.options.bymonthday = this.nativeDate.getDate()
-
-    // Copy the default options to reset the component.
-    this.defaults = Object.assign({}, this.options)
-  }
-
   /**
    * Calculates the occurrance of a weekday given a date.
    * For example, Thanksgiving is always the 4th Thursday of November.
@@ -427,18 +456,10 @@ export default class RecurrenceDialog extends Vue {
     return Math.ceil(date.getDate() / 7)
   }
 
-  reset() {
-    this.options = Object.assign({}, this.defaults)
-  }
-
-  open() {
-    this.dialog = true
-  }
-
-  setCustomRRule() {
+  onSetRule() {
     const retval: Partial<RecurrenceOpts> = {
       freq: this.options.freq,
-      dtstart: this.nativeDate,
+      dtstart: this.date,
     }
 
     if (this.type === RecurrenceTerminator.UNTIL) {
@@ -466,45 +487,29 @@ export default class RecurrenceDialog extends Vue {
       }
     }
 
-    this.rule.selected = -2
-    this.rule.options = retval
-
-    // Check if we already have a custom rule defined
-    if (this.rule.labels[0].value !== null) {
-      this.rule.labels[0].text = this.customRuleToText(retval)
-    } else {
-      this.rule.labels.unshift({
-        text: this.customRuleToText(this.rule.options),
-        value: -2,
-      })
-    }
+    this.pristine = false
+    this.rule.selected = RecurrenceSelections.DEFINED
 
     this.$emit('input', retval)
 
     this.dialog = false
   }
 
-  abort() {
+  close() {
     this.dialog = false
 
-    if (this.rule.selected === -1) {
-      this.rule.selected = null
+    if (this.rule.selected === RecurrenceSelections.CUSTOM) {
+      if (this.rule.prevSelected !== null) {
+        this.rule.selected = this.rule.prevSelected
+      } else {
+        this.rule.selected = RecurrenceSelections.NONREPEATING
+      }
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.discrete {
-  border-radius: 4px;
-
-  ::v-deep .v-input__slot {
-    &::before {
-      display: none;
-    }
-  }
-}
-
 .inline-height {
   line-height: 40px;
 }

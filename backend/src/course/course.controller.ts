@@ -24,7 +24,7 @@ export class CourseController {
     return this.courseService.create(createCourseDto);
   }
 
-  @Get(':project')
+  @Get('/project/:project')
   findAllByCourse(
     @Param('project') projectId: number,
     @Query() { contains, limit, offset, orderBy }: FindAllCoursesDto,

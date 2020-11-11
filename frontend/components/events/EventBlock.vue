@@ -3,7 +3,7 @@
     <v-img class="align-end" height="150px" :src="background"></v-img>
 
     <div class="card--bottom">
-      <v-card-title class="card--title">{{ event.name }}</v-card-title>
+      <v-card-title class="card--title mr-15">{{ event.name }}</v-card-title>
 
       <v-card-text class="card--text">
         <v-row>

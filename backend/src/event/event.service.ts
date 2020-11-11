@@ -157,8 +157,6 @@ export class EventService {
       events.push(...(await this.getRecurrenceEvents(recurrence, start, end)));
     }
 
-    console.log(events);
-
     return events.sort((a, b) => +a.dtstart - +b.dtstart);
   }
 

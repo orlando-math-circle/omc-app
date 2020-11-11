@@ -23,7 +23,7 @@
           </template>
 
           <v-list>
-            <dialog-create-event @created="onEventCreated">
+            <dialog-create-event @event:create="onEventCreated">
               <template #activator="{ on, attrs }">
                 <v-list-item v-bind="attrs" v-on="on">
                   <v-list-item-title>Create Event</v-list-item-title>

@@ -28,8 +28,6 @@ export const state = () => ({
   justRegistered: false,
 })
 
-// type AuthState = ReturnType<typeof state>
-
 export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
   loggedIn: (state) => !!state.token,

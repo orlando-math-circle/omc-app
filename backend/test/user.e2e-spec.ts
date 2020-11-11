@@ -12,6 +12,7 @@ import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
+import { FileModule } from '../src/file/file.module';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
 import { UpdateUserDto } from '../src/user/dtos/update-user.dto';
 import { Grades } from '../src/user/enums/grades.enum';
@@ -58,6 +59,7 @@ describe('Users', () => {
         EmailModule,
         AccountModule,
         UserModule,
+        FileModule,
         AuthModule,
       ],
     }).compile();
