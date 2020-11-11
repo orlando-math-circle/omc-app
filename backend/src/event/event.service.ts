@@ -1,13 +1,11 @@
 import {
-  EntityManager,
   EntityRepository,
   FilterQuery,
   QueryOrder,
   QueryOrderMap,
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import moment from 'moment';
+import { Injectable } from '@nestjs/common';
 import {
   addMinutes,
   getMinDate,
@@ -15,7 +13,6 @@ import {
   isAfterDay,
   isBeforeDay,
   isSameDay,
-  Populate,
   PopulateFail,
   subDays,
 } from '../app.utils';
@@ -35,7 +32,6 @@ export class EventService {
     private readonly eventRepository: EntityRepository<Event>,
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
-    private readonly em: EntityManager,
   ) {}
 
   /**
@@ -47,51 +43,26 @@ export class EventService {
   async create(createEventDto: CreateEventDto, author: User) {
     const { dtstart, dtend, rrule, ...meta } = createEventDto;
 
-    if (!rrule) {
-      const event = this.eventRepository.create({
-        dtstart,
-        dtend,
-        author,
-        ...meta,
-      });
-
-      await this.eventRepository.persist(event).flush();
-
-      return event;
-    }
-
-    const recurrence = new EventRecurrence(
-      new Schedule(rrule).toString(),
-      rrule.dtstart,
-      rrule.until,
-    );
-
     const event = this.eventRepository.create({
-      dtstart: rrule.dtstart,
+      dtstart: rrule ? rrule.dtstart : dtstart,
       dtend,
       author,
-      recurrence,
       ...meta,
     });
+
+    if (rrule) {
+      const schedule = new Schedule(rrule);
+      event.recurrence = new EventRecurrence(
+        schedule.toString(),
+        event,
+        schedule.dtstart,
+        schedule.dtend,
+      );
+    }
 
     await this.eventRepository.persist(event).flush();
 
     return event;
-  }
-
-  /**
-   * Finds a hydrated event entity or returns null.
-   *
-   * @param where Id or query of event parameters.
-   * @param populate Boolean, attribute array, or population options.
-   * @param orderBy Query for element ordering.
-   */
-  public async findOne(
-    where: FilterQuery<Event>,
-    populate?: Populate<Event>,
-    orderBy?: QueryOrderMap,
-  ) {
-    return this.eventRepository.findOne(where, populate, orderBy);
   }
 
   /**
@@ -109,14 +80,6 @@ export class EventService {
     return this.eventRepository.findOneOrFail(where, populate, orderBy);
   }
 
-  async populate(
-    event: Event,
-    populate: Populate<Event>,
-    where: FilterQuery<Event>,
-  ) {
-    return this.eventRepository.populate(event, populate, where);
-  }
-
   /**
    * Retrieves all events within a date range inclusively. This method
    * will hydrate any events that do not yet exist in this range for
@@ -126,38 +89,59 @@ export class EventService {
    * @param end End of the range
    */
   async findAll({ start, end, projects }: FindAllEventsDto) {
-    const eventQuery: FilterQuery<Event> = {
-      dtend: { $gte: start },
-      dtstart: { $lte: end },
-      recurrence: null,
-    };
-
-    const recurrenceQuery: FilterQuery<EventRecurrence> = {
-      dtstart: { $lte: end },
-      $or: [{ dtend: { $gte: start } }, { dtend: null }],
-      events: {
-        dtstart: { $lte: end },
-        $or: [{ dtend: { $gte: start } }, { dtend: null }],
-      },
-    };
-
-    // This separation is necessary as undefined is translated
-    // to null in the query, which is uncorrect.
-    if (projects) {
-      eventQuery['project'] = { id: projects };
-      recurrenceQuery['events']['project'] = { id: projects };
-    }
-
     const [events, recurrences] = await Promise.all([
-      this.eventRepository.find(eventQuery, ['course', 'author']),
-      this.recurrenceRepository.find(recurrenceQuery, ['events.course']),
+      this.eventRepository.find(
+        Object.assign(
+          {
+            recurrence: null,
+            dtend: { $gte: start },
+            dtstart: { $lte: end },
+          },
+          projects && { project: { id: projects } },
+        ),
+        ['course', 'author'],
+      ),
+      this.recurrenceRepository.find(
+        {
+          dtstart: { $lte: end },
+          $or: [{ dtend: { $gte: start } }, { dtend: null }],
+        },
+        ['events.course', 'parentEvent'],
+      ),
     ]);
 
+    await this.recurrenceRepository.populate(
+      recurrences,
+      'events',
+      Object.assign(
+        {
+          events: {
+            dtstart: { $lte: end },
+            $or: [{ dtend: { $gte: start } }, { dtend: null }],
+          },
+        },
+        projects && { project: { id: projects } },
+      ),
+    );
+
+    await Promise.all(
+      recurrences.map((recurrence) =>
+        this.getRecurrenceEvents(recurrence, start, end),
+      ),
+    );
+
+    const allEvents: Event[] = [...events];
+
     for (const recurrence of recurrences) {
-      events.push(...(await this.getRecurrenceEvents(recurrence, start, end)));
+      for (const event of recurrence.events) {
+        // This avoids the parentEvent from being added to this list.
+        if (event.dtstart >= start && event.dtend <= end) {
+          allEvents.push(event);
+        }
+      }
     }
 
-    return events.sort((a, b) => +a.dtstart - +b.dtstart);
+    return allEvents.sort((a, b) => +a.dtstart - +b.dtstart);
   }
 
   /**
@@ -238,6 +222,7 @@ export class EventService {
 
     const newRecurrence = new EventRecurrence(
       schedule.toString(),
+      pivot,
       rrule.dtstart,
       rrule.until,
       pivot.recurrence,
@@ -299,7 +284,7 @@ export class EventService {
 
     recurrence.rrule = schedule.toString();
     recurrence.dtstart = rrule.dtstart;
-    recurrence.dtend = rrule.until || null;
+    recurrence.dtend = rrule.until || schedule.dtend;
 
     // Obtains all viable new dates for the range of existing events.
     const iterator = schedule
@@ -498,21 +483,12 @@ export class EventService {
     start: Date,
     end: Date,
   ) {
-    const dates = recurrence.getSchedule().between(start, end, true);
+    const dates = recurrence.getSchedule().between(start, end);
     const events = recurrence.events.getItems();
-    const newEvents = [];
-
-    if (!events[0]) {
-      // Recurring event metadata is obtained from the first event
-      // instance. If it is deleted manually this event recurrence
-      // is no longer valid. This could be a silent warning.
-      throw new InternalServerErrorException('Event recurrence has no events');
-    }
-
-    const durationInMinutes = events[0].duration;
+    const durationInMinutes = recurrence.parentEvent.duration;
 
     for (const date of dates) {
-      const event = events.find(
+      let event = events.find(
         (e) => +e.dtstart === +date || +e.originalStart === +date,
       );
 
@@ -523,29 +499,26 @@ export class EventService {
 
       // TODO: Split this into an event factory function.
       // This has to be manually updated whenever the event structure is changed.
-      const builtEvent = this.eventRepository.create({
-        name: events[0].name,
-        description: events[0].description,
-        location: events[0].location,
-        picture: events[0].picture,
-        color: events[0].color,
+      event = this.eventRepository.create({
+        name: recurrence.parentEvent.name,
+        description: recurrence.parentEvent.description,
+        location: recurrence.parentEvent.location,
+        picture: recurrence.parentEvent.picture,
+        color: recurrence.parentEvent.color,
         dtstart: date,
-        dtend: durationInMinutes ? addMinutes(date, durationInMinutes) : null,
-        author: events[0].author,
-        course: events[0].course,
+        dtend: addMinutes(date, durationInMinutes),
+        author: recurrence.parentEvent.author,
+        course: recurrence.parentEvent.course,
         recurrence,
       });
 
-      builtEvent.recurrence.populated();
-
-      newEvents.push(builtEvent);
+      recurrence.events.add(event);
     }
 
-    if (newEvents.length) {
-      await this.eventRepository.persist(newEvents).flush();
-    }
+    // This will not do anything if no events are added.
+    await this.recurrenceRepository.flush();
 
-    return recurrence.events;
+    return recurrence;
   }
 
   /**

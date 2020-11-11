@@ -7,6 +7,7 @@ import {
   PrimaryKey,
   Property,
   Cascade,
+  OneToOne,
 } from '@mikro-orm/core';
 import { Event } from './event.entity';
 import { Schedule } from './schedule.class';
@@ -15,12 +16,14 @@ import { Schedule } from './schedule.class';
 export class EventRecurrence extends BaseEntity<EventRecurrence, 'id'> {
   constructor(
     rrule: string,
+    parentEvent: Event,
     start: Date,
     end?: Date,
     original?: EventRecurrence,
   ) {
     super();
     this.rrule = rrule;
+    this.parentEvent = parentEvent;
     this.dtstart = start;
     this.dtend = end;
     this.original = original;
@@ -47,6 +50,9 @@ export class EventRecurrence extends BaseEntity<EventRecurrence, 'id'> {
     cascade: [Cascade.ALL],
   })
   events: Collection<Event> = new Collection<Event>(this);
+
+  @OneToOne(() => Event)
+  parentEvent!: Event;
 
   @ManyToOne(() => EventRecurrence, { nullable: true })
   original?: EventRecurrence;

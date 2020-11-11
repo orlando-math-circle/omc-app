@@ -8,8 +8,7 @@ import {
   Property,
 } from '@mikro-orm/core';
 import { BadRequestException } from '@nestjs/common';
-import { differenceInMinutes } from 'date-fns';
-import moment from 'moment';
+import { differenceInMinutes, isAfter } from 'date-fns';
 import { getMinutesDiff } from '../app.utils';
 import { Course } from '../course/course.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
@@ -58,8 +57,8 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property()
   dtstart!: Date;
 
-  @Property({ nullable: true })
-  dtend?: Date;
+  @Property()
+  dtend!: Date;
 
   @Property({ nullable: true })
   originalStart?: Date;
@@ -95,14 +94,10 @@ export class Event extends BaseEntity<Event, 'id'> {
   }
 
   get isEnded() {
-    return moment(new Date()).isAfter(
-      this.dtend ? this.dtend : moment(this.dtstart).add('1', 'day'),
-    );
+    return isAfter(new Date(), this.dtend);
   }
 
   get duration() {
-    if (!this.dtend) return null;
-
     return differenceInMinutes(this.dtend, this.dtstart);
   }
 

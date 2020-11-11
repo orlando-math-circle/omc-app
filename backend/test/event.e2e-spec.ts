@@ -1,12 +1,9 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import {
-  INestApplication,
-  InternalServerErrorException,
-  ValidationPipe,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { addMonths } from 'date-fns';
 import moment from 'moment';
 import RRule, { Frequency } from 'rrule';
 import request from 'supertest';
@@ -25,7 +22,6 @@ import { EventRecurrence } from '../src/event/event-recurrence.entity';
 import { Event } from '../src/event/event.entity';
 import { EventModule } from '../src/event/event.module';
 import { EventService } from '../src/event/event.service';
-import { Schedule } from '../src/event/schedule.class';
 import { FileModule } from '../src/file/file.module';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
@@ -35,7 +31,6 @@ import { MikroORMTestingConfig } from './mikro-orm.test-config';
 describe('Events', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
-  let eventService: EventService;
 
   /**
    * Testing Data
@@ -64,7 +59,6 @@ describe('Events', () => {
 
     app = moduleRef.createNestApplication();
     orm = moduleRef.get<MikroORM>(MikroORM);
-    eventService = moduleRef.get(EventService);
 
     userFixtures = new UserFixtures(app, orm);
 
@@ -744,6 +738,48 @@ describe('Events', () => {
     });
   });
 
+  describe('Event Hydration', () => {
+    it('should hydrate events outside of the range', async () => {
+      const createEventDto: CreateEventDto = {
+        name: 'Extended Range',
+        dtend: new Date(Date.UTC(2020, 0, 1, 10, 30)),
+        rrule: {
+          freq: Frequency.WEEKLY,
+          dtstart: new Date(Date.UTC(2020, 0, 1)),
+          until: addMonths(new Date(Date.UTC(2020, 0, 1)), 4),
+        },
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .send(createEventDto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      const [, count] = await orm.em.findAndCount(Event, {
+        name: 'Extended Range',
+      });
+
+      expect(count).toBe(1);
+
+      const start = new Date(Date.UTC(2020, 2, 1));
+      const end = new Date(Date.UTC(2020, 3, 1));
+
+      const events = await request(app.getHttpServer())
+        .get('/event')
+        .query({ start, end })
+        .expect(200);
+
+      expect(events.body.length).toBe(4);
+
+      for (const event of events.body) {
+        expect(event.dtstart).not.toBe(
+          createEventDto.rrule.dtstart.toISOString(),
+        );
+      }
+    });
+  });
+
   describe('Post-Test Scanning', () => {
     it('should not have created any events where dtstart > dtend', async () => {
       const events = await orm.em.find(Event, {});
@@ -751,35 +787,6 @@ describe('Events', () => {
       expect(
         events.every((e) => !e.dtend || +e.dtstart < +e.dtend),
       ).toBeTruthy();
-    });
-  });
-
-  describe('getRecurrenceEvents()', () => {
-    it('should throw an error if the recurrence has no events', async () => {
-      const dto: CreateEventDto = {
-        name: 'UNUSED',
-        rrule: {
-          freq: Frequency.WEEKLY,
-          dtstart: new Date(Date.UTC(2020, 0, 1)),
-          until: new Date(Date.UTC(2020, 0, 20)),
-        },
-      };
-
-      const recurrence = orm.em.create(EventRecurrence, {
-        dtstart: dto.rrule.dtstart,
-        dtend: dto.rrule.until,
-        rrule: new Schedule(dto.rrule).toString(),
-      });
-
-      expect.assertions(1);
-
-      await expect(
-        eventService['getRecurrenceEvents'](
-          recurrence,
-          recurrence.dtstart,
-          recurrence.dtend,
-        ),
-      ).rejects.toThrowError(InternalServerErrorException);
     });
   });
 });

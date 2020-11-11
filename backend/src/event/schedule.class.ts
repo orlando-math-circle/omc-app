@@ -19,6 +19,18 @@ export class Schedule {
     return this.options.dtstart;
   }
 
+  get dtend() {
+    if (this.options.until) {
+      return this.options.until;
+    } else if (this.options.count) {
+      const events = this.all();
+
+      return events[events.length - 1];
+    }
+
+    return null;
+  }
+
   get options() {
     if (this._rrule instanceof RRuleSet) {
       return this._rrule.rrules()[0].origOptions;
