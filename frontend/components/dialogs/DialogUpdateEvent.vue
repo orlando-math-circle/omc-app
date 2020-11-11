@@ -45,7 +45,7 @@
 
           <v-list-item-content>
             <v-row>
-              <v-col>
+              <v-col :cols="dates.allday ? 12 : 8">
                 <v-menu v-model="dates.start.menu" offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
                     <v-text-field-validated
@@ -71,6 +71,7 @@
                   />
                 </v-menu>
               </v-col>
+
               <v-col v-if="!dates.allday" cols="4">
                 <time-picker
                   v-model="times.start.time"
@@ -87,41 +88,38 @@
                   outlined
                 />
               </v-col>
-            </v-row>
 
-            <v-expand-transition>
-              <v-row v-if="!dates.allday">
-                <v-col>
-                  <v-menu v-model="dates.end.menu" offset-y min-width="290px">
-                    <template #activator="{ on, attrs }">
-                      <v-text-field-validated
-                        :value="format(dates.end.date)"
-                        :rules="{ required: !dates.allday }"
-                        vid="enddate"
-                        readonly
-                        hide-details="auto"
-                        label="End Date"
-                        v-bind="attrs"
-                        outlined
-                        v-on="on"
-                      />
-                    </template>
-                    <v-date-picker
-                      v-model="dates.end.date"
-                      @input="dates.end.menu = false"
+              <v-col v-if="!dates.allday" cols="8">
+                <v-menu v-model="dates.end.menu" offset-y min-width="290px">
+                  <template #activator="{ on, attrs }">
+                    <v-text-field-validated
+                      :value="format(dates.end.date)"
+                      :rules="{ required: !dates.allday }"
+                      vid="enddate"
+                      readonly
+                      hide-details="auto"
+                      label="End Date"
+                      v-bind="attrs"
+                      outlined
+                      v-on="on"
                     />
-                  </v-menu>
-                </v-col>
-                <v-col cols="4">
-                  <time-picker
-                    v-model="times.end.time"
-                    vid="endtime"
-                    label="End Time"
-                    outlined
+                  </template>
+                  <v-date-picker
+                    v-model="dates.end.date"
+                    @input="dates.end.menu = false"
                   />
-                </v-col>
-              </v-row>
-            </v-expand-transition>
+                </v-menu>
+              </v-col>
+
+              <v-col v-if="!dates.allday" cols="4">
+                <time-picker
+                  v-model="times.end.time"
+                  vid="endtime"
+                  label="End Time"
+                  outlined
+                />
+              </v-col>
+            </v-row>
           </v-list-item-content>
         </v-list-item>
 
@@ -272,7 +270,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
 import { Event } from '@backend/event/event.entity'
 import { format, isSameDay } from 'date-fns'
 import { UpdateEventDto } from '@backend/event/dtos/update-event.dto'
@@ -336,7 +334,9 @@ export default class DialogUpdateEvent extends Vue {
    * Transforms the interpreted event data into the data required
    * for editing the events or events.
    */
-  beforeMount() {
+  @Watch('event', { immediate: true })
+  onEventUpdate() {
+    this.data = Object.assign({}, this.event)
     this.dates.start.date = ((this.data.dtstart as unknown) as string).substr(
       0,
       10

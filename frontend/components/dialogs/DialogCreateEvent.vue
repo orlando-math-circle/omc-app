@@ -45,8 +45,8 @@
           <v-list-item-avatar></v-list-item-avatar>
 
           <v-list-item-content>
-            <v-row>
-              <v-col>
+            <v-row wrap>
+              <v-col :cols="dates.allday ? 12 : 8">
                 <v-menu v-model="dates.start.menu" offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
                     <v-text-field-validated
@@ -72,6 +72,7 @@
                   ></v-date-picker>
                 </v-menu>
               </v-col>
+
               <v-col v-if="!dates.allday" cols="4">
                 <time-picker
                   v-model="times.start.time"
@@ -88,42 +89,39 @@
                   outlined
                 ></time-picker>
               </v-col>
-            </v-row>
 
-            <v-expand-transition>
-              <v-row v-if="!dates.allday">
-                <v-col>
-                  <v-menu v-model="dates.end.menu" offset-y min-width="290px">
-                    <template #activator="{ on, attrs }">
-                      <v-text-field-validated
-                        :value="format(dates.end.date)"
-                        :rules="{ required: !dates.allday }"
-                        vid="enddate"
-                        readonly
-                        hide-details="auto"
-                        label="End Date"
-                        v-bind="attrs"
-                        outlined
-                        v-on="on"
-                      >
-                      </v-text-field-validated>
-                    </template>
-                    <v-date-picker
-                      v-model="dates.end.date"
-                      @input="dates.end.menu = false"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-col>
-                <v-col cols="4">
-                  <time-picker
-                    v-model="times.end.time"
-                    vid="endtime"
-                    label="End Time"
-                    outlined
-                  ></time-picker>
-                </v-col>
-              </v-row>
-            </v-expand-transition>
+              <v-col v-if="!dates.allday" cols="8">
+                <v-menu v-model="dates.end.menu" offset-y min-width="290px">
+                  <template #activator="{ on, attrs }">
+                    <v-text-field-validated
+                      :value="format(dates.end.date)"
+                      :rules="{ required: !dates.allday }"
+                      vid="enddate"
+                      readonly
+                      hide-details="auto"
+                      label="End Date"
+                      v-bind="attrs"
+                      outlined
+                      v-on="on"
+                    >
+                    </v-text-field-validated>
+                  </template>
+                  <v-date-picker
+                    v-model="dates.end.date"
+                    @input="dates.end.menu = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+
+              <v-col v-if="!dates.allday" cols="4">
+                <time-picker
+                  v-model="times.end.time"
+                  vid="endtime"
+                  label="End Time"
+                  outlined
+                ></time-picker>
+              </v-col>
+            </v-row>
           </v-list-item-content>
         </v-list-item>
 
