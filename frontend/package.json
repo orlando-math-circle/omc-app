@@ -17,7 +17,7 @@
     "@nuxtjs/dotenv": "1.4.1",
     "@nuxtjs/pwa": "3.2.2",
     "animate.css": "4.1.1",
-    "apexcharts": "3.22.1",
+    "apexcharts": "3.22.2",
     "cookie-universal-nuxt": "2.1.4",
     "core-js": "3.7.0",
     "date-fns": "2.16.1",
@@ -27,7 +27,7 @@
     "nuxt-property-decorator": "2.8.8",
     "nuxt-typed-vuex": "0.1.22",
     "rrule": "2.6.6",
-    "vee-validate": "3.4.3",
+    "vee-validate": "3.4.4",
     "vue-apexcharts": "1.6.0",
     "vuetify-loader": "1.6.0"
   },
@@ -36,11 +36,11 @@
     "@nuxt/typescript-build": "2.0.3",
     "@nuxtjs/eslint-config-typescript": "4.0.0",
     "@nuxtjs/eslint-module": "3.0.0",
-    "@nuxtjs/html-validator": "0.1.2",
+    "@nuxtjs/html-validator": "0.1.3",
     "@types/lodash": "4.14.165",
     "babel-eslint": "10.1.0",
     "deepmerge": "4.2.2",
-    "eslint": "7.12.1",
+    "eslint": "7.13.0",
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-nuxt": "1.0.0",
     "eslint-plugin-prettier": "3.1.4",
@@ -48,7 +48,7 @@
     "prettier": "2.1.2",
     "sass": "1.29.0",
     "sass-loader": "10.0.5",
-    "vuetify": "2.3.16"
+    "vuetify": "2.3.17"
   },
   "prettier": {
     "semi": false,
