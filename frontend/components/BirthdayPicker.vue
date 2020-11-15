@@ -5,30 +5,36 @@
         v-model="birthday.month"
         label="Birthday Month"
         autocomplete="bday-month"
+        name="Birthday Month"
+        rules="required"
         :items="months"
-        hide-details
+        hide-details="auto"
         v-bind="$attrs"
-      ></v-select-validated>
+      />
     </v-col>
 
     <v-col cols="3">
       <v-text-field-validated
         v-model.number="birthday.day"
         type="number"
+        :rules="dayRules"
+        name="Date"
         label="Day"
-        hide-details
+        hide-details="auto"
         v-bind="$attrs"
-      ></v-text-field-validated>
+      />
     </v-col>
 
     <v-col cols="3">
       <v-text-field-validated
         v-model.number="birthday.year"
         type="number"
+        rules="required"
+        name="Year"
         label="Year"
-        hide-details
+        hide-details="auto"
         v-bind="$attrs"
-      ></v-text-field-validated>
+      />
     </v-col>
   </v-row>
 </template>
@@ -64,6 +70,8 @@ export default class BirthdayPicker extends Vue {
 
   @Watch('birthday', { deep: true })
   setDate(birthday: this['birthday']) {
+    if (!birthday.month || !birthday.day || !birthday.year) return
+
     const date = new Date(
       birthday.year as number,
       birthday.month as number,
@@ -73,6 +81,29 @@ export default class BirthdayPicker extends Vue {
     if (!isValidDate(date)) return
 
     this.$emit('input', date.toISOString())
+  }
+
+  /**
+   * Applies rules ensuring the user doesn't create a birthday
+   * with an invalid number of days in the month.
+   */
+  get dayRules() {
+    if (!this.birthday.month || !this.birthday.year) {
+      return {
+        required: true,
+        min_value: 1,
+      }
+    }
+
+    return {
+      required: true,
+      min_value: 1,
+      max_value: this.daysInMonth(this.birthday.month, this.birthday.year),
+    }
+  }
+
+  daysInMonth(month: number, year: number) {
+    return new Date(year, month + 1, 0).getDate()
   }
 
   mounted() {

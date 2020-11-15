@@ -38,13 +38,37 @@
                 <v-text-field-validated
                   v-model="dto.last"
                   label="Last Name"
+                  rules="required"
                   hide-details="auto"
                   outlined
-                ></v-text-field-validated>
+                />
               </v-col>
             </v-row>
 
-            <birthday-picker v-model="dto.dob" outlined />
+            <v-row>
+              <v-col>
+                <validation-provider
+                  v-slot="{ errors }"
+                  :rules="{
+                    min_age: 18,
+                    max_age: 100,
+                  }"
+                  name="Birthday"
+                >
+                  <birthday-picker v-model="dto.dob" outlined />
+
+                  <div class="v-text-field__details">
+                    <div class="v-messages error--text">
+                      <div class="v-messages__wrapper">
+                        <div v-if="errors.length" class="v-messages__message">
+                          {{ errors[0] }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </validation-provider>
+              </v-col>
+            </v-row>
 
             <v-text-field-validated
               v-model="dto.email"
@@ -58,6 +82,7 @@
               v-model="dto.password"
               label="Password"
               type="password"
+              rules="required"
               autocomplete="new-password"
               vid="password"
               outlined
@@ -146,7 +171,7 @@
 
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
-import { ValidationObserver } from 'vee-validate'
+import { ValidationObserver, ValidationProvider } from 'vee-validate'
 import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.dto'
 
 @Component({
@@ -156,6 +181,7 @@ import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.d
   },
   components: {
     ValidationObserver,
+    ValidationProvider,
   },
 })
 export default class RegisterPage extends Vue {

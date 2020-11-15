@@ -1,5 +1,10 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :vid="vid" :rules="rules">
+  <ValidationProvider
+    v-slot="{ errors }"
+    :vid="vid"
+    :name="$attrs.name"
+    :rules="rules"
+  >
     <v-text-field
       v-model="text"
       :error-messages="errors"

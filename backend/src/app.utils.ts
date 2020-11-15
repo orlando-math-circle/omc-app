@@ -40,6 +40,9 @@ export const isEqualArray = <T extends string | number | boolean | null>(
  * Date Utilities
  */
 
+export const toDate = (date: string | Date) =>
+  typeof date === 'string' ? new Date() : date;
+
 export const isBetween = (start: Date, end: Date, date: Date) =>
   isAfter(date, start) && isBefore(date, end);
 
@@ -48,9 +51,7 @@ export const isBetweenInclusive = (start: Date, end: Date, date: Date) =>
   (isSameDay(end, date) || isBefore(date, end));
 
 export const birthdayToAge = (date: Date | string) =>
-  typeof date === 'string'
-    ? differenceInYears(new Date(), new Date(date))
-    : differenceInYears(new Date(), date);
+  differenceInYears(new Date(), toDate(date));
 
 export const isBeforeDay = (dt1: Date, dt2: Date) =>
   moment(dt1).isBefore(dt2, 'day');

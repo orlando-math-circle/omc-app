@@ -1,7 +1,8 @@
-import { parse } from 'date-fns'
+import { differenceInYears, parse } from 'date-fns'
 import { isNumber } from 'lodash'
 import { extend, setInteractionMode } from 'vee-validate'
-import { email } from 'vee-validate/dist/rules'
+// eslint-disable-next-line camelcase
+import { email, min_value, max_value } from 'vee-validate/dist/rules'
 
 /**
  * Reduces the aggressiveness of vee-validate to not throw errors while the user
@@ -10,6 +11,9 @@ import { email } from 'vee-validate/dist/rules'
  * @see https://logaretm.github.io/vee-validate/guide/interaction-and-ux.html#interaction-modes
  */
 setInteractionMode('lazy')
+
+extend('min_value', min_value)
+extend('max_value', max_value)
 
 extend('positive', {
   validate: (value) => isNumber(value) && value > 0,
@@ -32,6 +36,30 @@ extend('ext', {
     return regex.test(files.name)
   },
   message: 'This file type is not permitted.',
+})
+
+extend('min_age', {
+  params: ['min'],
+  validate: (value, { min }: any) => {
+    const diff = differenceInYears(new Date(), new Date(value))
+
+    console.log(`Min: ${min}\nDiff: ${diff}\nValidate: ${diff >= min}`)
+
+    return diff >= min
+  },
+  message: 'Age is too low',
+})
+
+extend('max_age', {
+  params: ['max'],
+  validate: (value, { max }: any) => {
+    const diff = differenceInYears(new Date(), new Date(value))
+
+    console.log(`Max: ${max}\nDiff: ${diff}\nValidate: ${diff <= max}`)
+
+    return diff < max
+  },
+  message: 'Age is too high.',
 })
 
 extend('required', {
