@@ -49,6 +49,9 @@ export class File extends BaseEntity<File, 'id'> {
   path!: string;
 
   @Property()
+  root!: string;
+
+  @Property()
   createdAt: Date = new Date();
 
   /**

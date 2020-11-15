@@ -1,4 +1,5 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { File as FileEntity } from '@backend/file/file.entity'
 import { FileAttachment } from '../../backend/src/file-attachment/file-attachment.entity'
 import { FileField } from '../../backend/src/file-fields/file-field.entity'
 import { StateError } from '../interfaces/state-error.interface'
@@ -10,6 +11,8 @@ export const state = () => ({
   error: null as StateError | null,
   attachment: null as FileAttachment | null,
   attachments: [] as FileAttachment[],
+  file: null as FileEntity | null,
+  files: [] as FileEntity[],
   fields: [] as FileField[],
 })
 
@@ -38,6 +41,12 @@ export const mutations = mutationTree(state, {
   setFields(state, fields: FileField[]) {
     state.fields = fields
   },
+  setFiles(state, files: FileEntity[]) {
+    state.files = files
+  },
+  setFile(state, file: FileEntity) {
+    state.file = file
+  },
 })
 
 export const actions = actionTree(
@@ -61,6 +70,32 @@ export const actions = actionTree(
         commit('setAttachment', attachment)
         commit('setAttachments', [...state.attachments, attachment])
         commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async uploadFile({ commit }, filesIn: File | File[]) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const formData = new FormData()
+
+        if (Array.isArray(filesIn)) {
+          filesIn.forEach((file) => formData.append('file', file))
+        } else {
+          formData.append('file', filesIn)
+        }
+
+        const files = await this.$axios.$post('/file', formData)
+
+        if (Array.isArray(filesIn)) {
+          commit('setFiles', files)
+        } else {
+          commit('setFile', files)
+        }
+        commit('setStatus', StateStatus.WAITING)
+
+        return files
       } catch (error) {
         commit('setError', error)
       }
@@ -100,6 +135,17 @@ export const actions = actionTree(
         const [fields] = await this.$axios.$get('/file-field')
 
         commit('setFields', fields)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async delete({ commit }, id: string | number) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$delete(`/file/${id}`)
+
         commit('setStatus', StateStatus.WAITING)
       } catch (error) {
         commit('setError', error)

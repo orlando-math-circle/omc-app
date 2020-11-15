@@ -49,11 +49,7 @@
       <v-card>
         <v-card-title>{{ event.name }}</v-card-title>
         <v-card-subtitle>{{ event.description }}</v-card-subtitle>
-
-        <v-card-text></v-card-text>
       </v-card>
-
-      <dialog-update-event :event="event"></dialog-update-event>
 
       <v-stepper v-model="step" vertical class="mt-5">
         <!-- Step: User Selection -->

@@ -41,7 +41,7 @@ export default class EventBlock extends Vue {
   @Prop() event!: Event
   @Prop() link?: string
   @Prop({ default: require('~/assets/images/programmer.jpg') })
-  background!: string
+  defaultPicture!: string
 
   get date() {
     const d = formatDate(this.event.dtstart, 'd-MMM-h:mm aaaa')
@@ -49,6 +49,16 @@ export default class EventBlock extends Vue {
     const [day, month, time] = d.split('-')
 
     return { day, month, time }
+  }
+
+  get background() {
+    const picture = this.event.project?.picture
+
+    if (!picture) return this.defaultPicture
+
+    if (picture.startsWith('http')) return picture
+
+    return this.$config.staticBase + picture
   }
 }
 </script>

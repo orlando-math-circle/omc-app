@@ -29,7 +29,8 @@
                   v-model="dto.first"
                   label="First Name"
                   rules="required"
-                  hide-details
+                  hide-details="auto"
+                  outlined
                 ></v-text-field-validated>
               </v-col>
 
@@ -37,20 +38,21 @@
                 <v-text-field-validated
                   v-model="dto.last"
                   label="Last Name"
-                  hide-details
+                  hide-details="auto"
+                  outlined
                 ></v-text-field-validated>
               </v-col>
             </v-row>
 
-            <birthday-picker v-model="dto.dob"></birthday-picker>
+            <birthday-picker v-model="dto.dob" outlined />
 
             <v-text-field-validated
               v-model="dto.email"
               rules="required|email"
               autocomplete="email"
               label="Email"
-            >
-            </v-text-field-validated>
+              outlined
+            />
 
             <v-text-field-validated
               v-model="dto.password"
@@ -58,6 +60,7 @@
               type="password"
               autocomplete="new-password"
               vid="password"
+              outlined
             >
             </v-text-field-validated>
 
@@ -67,6 +70,7 @@
               type="password"
               autocomplete="new-password"
               rules="required|password:@password"
+              outlined
             >
             </v-text-field-validated>
 
@@ -74,6 +78,7 @@
               v-model="student"
               label="Are you a student?"
               hide-details
+              outlined
             >
             </v-checkbox-validated>
 

@@ -8,6 +8,7 @@ import rimraf from 'rimraf';
 import { promisify } from 'util';
 import { FILE_DIRECTORY } from '../app.constants';
 import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { File } from './file.entity';
 import { MulterFile } from './interfaces/multer-file.interface';
 
@@ -22,29 +23,40 @@ export class FileService {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: EntityRepository<File>,
-    config: ConfigService,
+    private readonly config: ConfigService,
   ) {
     this.path = resolve(config.get(FILE_DIRECTORY));
   }
 
   async create(
     metadata: MulterFile | MulterFile[],
-    user: User,
+    userOrId: User | number,
     persist = true,
   ) {
-    const entities: File[] = [];
+    const metadatas = Array.isArray(metadata) ? metadata : [metadata];
 
-    if (Array.isArray(metadata)) {
-      entities.push(...metadata.map((data) => new File(data, user)));
-    } else {
-      entities.push(new File(metadata, user));
-    }
+    const files = metadatas.map((metadata) =>
+      this.fileRepository.create({
+        name: metadata.filename,
+        originalName: metadata.originalname,
+        size: metadata.size,
+        mimetype: metadata.mimetype,
+        destination: metadata.destination,
+        path: metadata.path,
+        root: metadata.path.replace(this.config.get(FILE_DIRECTORY), ''),
+        author: userOrId,
+      }),
+    );
 
     if (persist) {
-      await this.fileRepository.persist(entities).flush();
+      await this.fileRepository.persist(files).flush();
     }
 
-    return entities;
+    if (Array.isArray(metadata)) {
+      return files;
+    } else {
+      return files[0];
+    }
   }
 
   async findOneOrFail(where: FilterQuery<File>) {

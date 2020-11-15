@@ -236,6 +236,7 @@
                 <auto-complete-course
                   v-model="course"
                   :project="project"
+                  outlined
                 ></auto-complete-course>
               </v-col>
 

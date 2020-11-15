@@ -4,6 +4,7 @@
 
 export const PORT = 'PORT';
 export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
+export const SERVE_STATIC = 'SERVE_STATIC';
 
 /**
  * SendGrid API

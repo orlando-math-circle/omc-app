@@ -17,6 +17,7 @@
       "@backend/*": ["./backend/src/*"]
     },
     "typeRoots": [
+      "./frontend/types",
       "./frontend/node_modules/@types",
       "./frontend/node_modules/vuetify/types"
     ],

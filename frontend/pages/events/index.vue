@@ -89,10 +89,6 @@
             ></event-block>
           </v-slide-item>
         </v-slide-group>
-
-        <!-- <template v-for="event in eventsForDate">
-          <event :key="event.id" class="mb-3" :value="event" />
-        </template> -->
       </v-col>
     </v-row>
   </div>

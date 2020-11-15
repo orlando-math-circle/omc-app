@@ -1,7 +1,9 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { PORT } from './app.constants';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import { FILE_DIRECTORY, PORT, SERVE_STATIC } from './app.constants';
 import { AppModule } from './app.module';
 import { JsonWebTokenFilter } from './auth/filters/jwt.filter';
 import { MikroORMConstraintExceptionFilter } from './shared/errors/mikro-orm.exception';
@@ -9,7 +11,7 @@ import { SearchPipe } from './shared/pipes/search.pipe';
 import { SortingPipe } from './shared/pipes/sorting.pipe';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config: ConfigService = app.get(ConfigService);
 
   app.useGlobalPipes(
@@ -27,6 +29,10 @@ async function bootstrap() {
     new JsonWebTokenFilter(),
     new MikroORMConstraintExceptionFilter(),
   );
+
+  if (config.get(SERVE_STATIC)) {
+    app.useStaticAssets(join(process.cwd(), config.get(FILE_DIRECTORY)));
+  }
 
   app.enableCors();
 

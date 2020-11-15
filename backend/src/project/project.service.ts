@@ -1,7 +1,10 @@
 import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Populate } from '../app.utils';
+import { File } from '../file/file.entity';
+import { MulterFile } from '../file/interfaces/multer-file.interface';
+import { User } from '../user/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './project.entity';

@@ -10,6 +10,7 @@
     placeholder="Search for a course"
     hide-details="auto"
     clearable
+    v-bind="$attrs"
   />
 </template>
 

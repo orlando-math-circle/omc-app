@@ -9,6 +9,7 @@ const configSchema = Joi.object({
   FILE_DIRECTORY: Joi.string().required(),
   FORM_SUBDIRECTORY: Joi.string().default('form'),
   SENDGRID_API_KEY: Joi.string().required(),
+  SERVE_STATIC: Joi.boolean().default(false),
 });
 
 const testSchema = Joi.object({
