@@ -1,46 +1,36 @@
 <template>
-  <v-alert
+  <!-- <v-alert
     type="error"
     border="left"
     icon="mdi-fire"
     transition="scale-transition"
   >
     {{ message }}
-  </v-alert>
+  </v-alert> -->
+  <span>{{ error }}</span>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { isNetworkError } from '~/utils/utilities'
+import { Vue, Prop, Component } from 'nuxt-property-decorator'
+import { StateError } from '../interfaces/state-error.interface'
 
-export default Vue.extend({
-  props: {
-    error: {
-      type: Error as PropType<any>,
-      required: true,
-    },
-  },
-  computed: {
-    isNetworkError(): boolean {
-      return isNetworkError(this.error)
-    },
-    status(): number {
-      return this.error?.response?.status
-    },
-    message(): string {
-      if (this.isNetworkError) {
-        return 'A networking error has occured, try again later or contact an administrator.'
-      }
+@Component
+export default class AlertError extends Vue {
+  @Prop({ required: true }) error!: StateError
 
-      switch (this.status) {
-        case 404:
-          return 'The resource was not found.'
-        case 400:
-          return 'The request was not accepted by the server, ensure the necessary information was provided and try again, or contact an administrator.'
-        default:
-          return 'An unexpected error occured, please try again later.'
-      }
-    },
-  },
-})
+  get status() {
+    return this.error.status
+  }
+
+  get message(): string {
+    switch (this.status) {
+      case 404:
+        return 'The resource was not found.'
+      case 400:
+        return 'The request was not accepted by the server, ensure the necessary information was provided and try again, or contact an administrator.'
+      default:
+        return 'An unexpected error occured, please try again later.'
+    }
+  }
+}
 </script>
