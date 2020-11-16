@@ -1,9 +1,9 @@
 <template>
-  <ValidationObserver v-slot="{ valid, passes, passed }" ref="observer">
+  <validation-observer v-slot="{ valid, passes, passed }" ref="observer">
     <v-form ref="form" @submit.prevent="passes(submit)">
       <slot v-bind="{ valid, passes, passed }"></slot>
     </v-form>
-  </ValidationObserver>
+  </validation-observer>
 </template>
 
 <script lang="ts">

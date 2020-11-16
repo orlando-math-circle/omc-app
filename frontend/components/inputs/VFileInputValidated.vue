@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider
+  <validation-provider
     v-slot="{ errors }"
     :vid="vid"
     :name="$attrs.name"
@@ -22,7 +22,7 @@
         <slot :name="slotName" />
       </template>
     </v-file-input>
-  </ValidationProvider>
+  </validation-provider>
 </template>
 
 <script lang="ts">

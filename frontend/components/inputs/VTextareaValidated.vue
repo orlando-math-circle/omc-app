@@ -5,7 +5,7 @@
     :name="$attrs.name"
     :rules="rules"
   >
-    <v-text-field
+    <v-textarea
       v-model="text"
       :error-messages="errors"
       v-bind="$attrs"
@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, PropSync } from 'nuxt-property-decorator'
+import { Component, Prop, PropSync, Vue } from 'nuxt-property-decorator'
 import { ValidationProvider } from 'vee-validate'
 
 @Component({
@@ -23,7 +23,7 @@ import { ValidationProvider } from 'vee-validate'
     ValidationProvider,
   },
 })
-export default class VTextFieldValidated extends Vue {
+export default class VTextareaValidated extends Vue {
   @PropSync('value') text!: string
   @Prop({ default: '' }) rules!: string | object
   @Prop() vid?: string

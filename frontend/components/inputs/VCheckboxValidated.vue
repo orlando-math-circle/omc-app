@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider
+  <validation-provider
     v-slot="{ errors }"
     :vid="vid"
     :name="$attrs.name"
@@ -12,7 +12,7 @@
       v-on="$listeners"
     >
     </v-checkbox>
-  </ValidationProvider>
+  </validation-provider>
 </template>
 
 <script lang="ts">
