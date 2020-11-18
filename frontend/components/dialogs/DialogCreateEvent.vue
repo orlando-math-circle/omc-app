@@ -10,8 +10,8 @@
 
     <v-card-text>
       <v-list dense>
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-text</v-icon>
           </v-list-item-avatar>
 
@@ -31,8 +31,8 @@
         <v-divider />
 
         <!-- All-Day Selector -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-clock-outline</v-icon>
           </v-list-item-avatar>
 
@@ -44,8 +44,8 @@
         </v-list-item>
 
         <!-- Dates and Times -->
-        <v-list-item>
-          <v-list-item-avatar></v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2" />
 
           <v-list-item-content>
             <v-row wrap>
@@ -131,8 +131,8 @@
         <v-divider />
 
         <!-- Permissions -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-key-chain-variant</v-icon>
           </v-list-item-avatar>
 
@@ -174,8 +174,8 @@
         <v-divider />
 
         <!-- Recurrence -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-update</v-icon>
           </v-list-item-avatar>
 
@@ -195,8 +195,8 @@
         <v-divider />
 
         <!-- Location -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-map-marker</v-icon>
           </v-list-item-avatar>
 
@@ -217,8 +217,8 @@
         <v-divider />
 
         <!-- Description -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-text-subject</v-icon>
           </v-list-item-avatar>
 
@@ -241,8 +241,8 @@
         <v-divider />
 
         <!-- Project Management -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-puzzle</v-icon>
           </v-list-item-avatar>
 
@@ -264,8 +264,8 @@
         <v-divider />
 
         <!-- Course Management -->
-        <v-list-item v-if="project">
-          <v-list-item-avatar>
+        <v-list-item v-if="project" class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-school-outline</v-icon>
           </v-list-item-avatar>
 
@@ -294,8 +294,8 @@
         </v-list-item>
 
         <!-- Picture -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-image-plus</v-icon>
           </v-list-item-avatar>
 
@@ -488,7 +488,7 @@ export default class DialogCreateEvent extends Vue {
 
     if (!isValidDate(date)) return 'Invalid Date'
 
-    return format(date, 'EEEE, LLLL do')
+    return format(date, 'EEE, LLL d, yyyy')
   }
 
   async onSubmit() {
