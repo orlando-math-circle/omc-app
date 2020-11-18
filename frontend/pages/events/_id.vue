@@ -66,7 +66,7 @@
 
         <v-card-title class="event--heading">Description</v-card-title>
 
-        <v-card-text>{{ event.description }}</v-card-text>
+        <v-card-text>{{ description }}</v-card-text>
 
         <v-card-actions class="pa-3">
           <v-btn v-if="isOpen" color="primary" rounded block>Register</v-btn>
@@ -118,6 +118,12 @@ export default class EventPage extends Vue {
       this.event.dtend,
       'h:mm a'
     )}`
+  }
+
+  get description() {
+    return this.event.description && this.event.description !== ''
+      ? this.event.description
+      : 'No description provided.'
   }
 
   get fee(): string | undefined {
