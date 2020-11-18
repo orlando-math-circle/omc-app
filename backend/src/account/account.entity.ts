@@ -29,9 +29,9 @@ export class Account extends BaseEntity<Account, 'id'> {
    * Relationships
    */
 
-  @OneToOne(() => User, null, {
+  @OneToOne({
+    entity: () => User,
     cascade: [Cascade.ALL],
-    orphanRemoval: true,
     owner: true,
   })
   primaryUser!: User;
