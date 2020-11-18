@@ -16,7 +16,8 @@ import { EventRegistration } from '../event-registration/event-registration.enti
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { Invoice } from '../invoice/invoice.entity';
-import { Grades } from './enums/grades.enum';
+import { Grade } from './enums/grade.enum';
+import { Sex } from './enums/sex.enum';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -31,6 +32,9 @@ export class User extends BaseEntity<User, 'id'> {
 
   @Property()
   dob!: Date;
+
+  @Enum(() => Sex)
+  sex!: Sex;
 
   @Property({ nullable: true, unique: true })
   email?: string;
@@ -47,8 +51,8 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ default: false })
   feeWaived: boolean = false;
 
-  @Enum({ type: () => Grades, nullable: true })
-  gradeSet?: Grades;
+  @Enum({ type: () => Grade, nullable: true })
+  gradeSet?: Grade;
 
   @Property({ nullable: true })
   gradeSetAt?: Date = new Date();
@@ -81,12 +85,12 @@ export class User extends BaseEntity<User, 'id'> {
     const currentSchoolYear = new Date(now.getUTCFullYear() + yearOffset, 7, 1);
 
     return Math.min(
-      Grades.GRADUATED,
+      Grade.GRADUATED,
       this.gradeSet + getYearsDiff(this.gradeSetAt, currentSchoolYear),
     );
   }
 
-  set grade(grade: Grades) {
+  set grade(grade: Grade) {
     this.gradeSet = grade;
   }
 

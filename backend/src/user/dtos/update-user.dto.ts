@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Roles } from '../../app.roles';
-import { Grades } from '../enums/grades.enum';
+import { Grade } from '../enums/grade.enum';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -28,8 +28,8 @@ export class UpdateUserDto {
   dob?: Date | string;
 
   @IsOptional()
-  @IsEnum(Grades)
-  gradeSet?: Grades;
+  @IsEnum(Grade)
+  gradeSet?: Grade;
 
   @IsOptional()
   @IsString()

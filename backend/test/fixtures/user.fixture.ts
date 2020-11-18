@@ -5,7 +5,7 @@ import { isNumber } from 'lodash';
 import request from 'supertest';
 import { CreateAccountDto } from '../../src/account/dtos/create-account.dto';
 import { Roles } from '../../src/app.roles';
-import { Grades } from '../../src/user/enums/grades.enum';
+import { Grades } from '../../src/user/enums/grade.enum';
 import { User } from '../../src/user/user.entity';
 
 export class UserFixtures {

@@ -8,17 +8,21 @@ import { CalendarEvent } from '../interfaces/calendar-event.interface'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { parseAxiosError, toLocalISO } from '../utils/utilities'
+import { DTO } from '../interfaces/date-to-string.interface'
+
+export type DTOEvent = DTO<Event>
 
 export const state = () => ({
   status: StateStatus.UNLOADED,
   error: null as StateError | null,
-  events: [] as Event[],
-  event: null as Event | null,
+  events: [] as DTOEvent[],
+  event: null as DTOEvent | null,
+  defaultPicture: require('~/assets/images/programmer.jpg'),
 })
 
 export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
-  calendarEvents: (state): CalendarEvent[] =>
+  calendarEvents: (state): DTOEvent[] =>
     state.events.map((event) =>
       Object.assign(event, {
         start: toLocalISO(event.dtstart),
@@ -41,10 +45,10 @@ export const mutations = mutationTree(state, {
     state.status = StateStatus.ERROR
     state.error = parseAxiosError(error)
   },
-  setEvents(state, events: Event[]) {
+  setEvents(state, events: DTOEvent[]) {
     state.events = events
   },
-  setEvent(state, event: Event) {
+  setEvent(state, event: DTOEvent) {
     state.event = event
   },
 })

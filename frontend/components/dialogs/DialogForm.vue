@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="dialog"
-    :fullscreen="$vuetify.breakpoint.mobile"
+    :fullscreen="expands ? $vuetify.breakpoint.mobile : false"
     :max-width="width"
     persistent
   >
@@ -35,6 +35,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 @Component
 export default class DialogForm extends Vue {
   @Prop({ default: 540 }) width?: number
+  @Prop({ default: true }) expands!: boolean
 
   dialog = false
   closing = false

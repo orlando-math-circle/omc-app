@@ -8,6 +8,7 @@ import {
 } from '@mikro-orm/core';
 import { Course } from '../course/course.entity';
 import { Event } from '../event/event.entity';
+import { VolunteerJob } from '../volunteer-job/volunteer-job.entity';
 
 @Entity()
 export class Project extends BaseEntity<Project, 'id'> {
@@ -38,4 +39,7 @@ export class Project extends BaseEntity<Project, 'id'> {
 
   @OneToMany(() => Event, (e) => e.project)
   events = new Collection<Event>(this);
+
+  @OneToMany(() => VolunteerJob, (j) => j.project)
+  jobs = new Collection<VolunteerJob>(this);
 }

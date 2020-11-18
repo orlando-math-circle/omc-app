@@ -1,1 +1,1 @@
-export type Uploads = File | File[] | null
+export type Uploads = File | File[] | string | null

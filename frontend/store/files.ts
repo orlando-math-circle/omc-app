@@ -5,6 +5,7 @@ import { FileField } from '../../backend/src/file-fields/file-field.entity'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { parseAxiosError } from '../utils/utilities'
+import { Uploads } from '../interfaces/uploads.interface'
 
 export const state = () => ({
   status: StateStatus.UNLOADED,
@@ -74,7 +75,10 @@ export const actions = actionTree(
         commit('setError', error)
       }
     },
-    async uploadFile({ commit }, filesIn: File | File[]) {
+    async uploadFile(
+      { commit },
+      filesIn: File | File[]
+    ): Promise<FileEntity | FileEntity[] | undefined> {
       try {
         commit('setStatus', StateStatus.BUSY)
 
@@ -150,6 +154,20 @@ export const actions = actionTree(
       } catch (error) {
         commit('setError', error)
       }
+    },
+    async filesToURL(_ctx, data: Uploads): Promise<string | string[] | null> {
+      if (!data || (Array.isArray(data) && data.length === 0)) return null
+
+      // Non-empty string means the user input a url not a file.
+      if (typeof data === 'string') {
+        return data === '' ? null : data
+      }
+
+      const files = await this.app.$accessor.files.uploadFile(data)
+
+      if (!files) return null
+
+      return Array.isArray(files) ? files.map((f) => f.root) : files.root
     },
   }
 )

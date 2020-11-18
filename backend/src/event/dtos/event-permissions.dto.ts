@@ -1,11 +1,7 @@
 import { Type } from 'class-transformer';
-import {
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, ValidateNested } from 'class-validator';
+import { Grade } from '../../user/enums/grade.enum';
+import { Sex } from '../../user/enums/sex.enum';
 
 export class EventAgePermissionsDto {
   @IsNumber()
@@ -22,8 +18,10 @@ export class EventPermissionsDto {
   readonly age: EventAgePermissionsDto;
 
   @IsOptional()
-  @IsNumber()
-  @Min(0) // Kindergarten
-  @Max(12) // Twelth Grade
-  readonly grade: number;
+  @IsEnum(Grade)
+  readonly grade: Grade;
+
+  @IsOptional()
+  @IsEnum(Sex)
+  readonly sex: Sex;
 }

@@ -22,11 +22,17 @@
             <v-btn v-bind="attrs" v-on="on">Admin</v-btn>
           </template>
 
-          <v-list>
+          <v-list dense nav>
             <dialog-create-event @event:create="onEventCreated">
               <template #activator="{ on, attrs }">
                 <v-list-item v-bind="attrs" v-on="on">
-                  <v-list-item-title>Create Event</v-list-item-title>
+                  <v-list-item-icon>
+                    <v-icon>mdi-calendar</v-icon>
+                  </v-list-item-icon>
+
+                  <v-list-item-content>
+                    <v-list-item-title>Create Event</v-list-item-title>
+                  </v-list-item-content>
                 </v-list-item>
               </template>
             </dialog-create-event>
@@ -48,27 +54,16 @@
 
     <v-row>
       <v-col>
-        <v-slide-group
+        <v-chip-group
           v-model="projectFilter"
           multiple
-          show-arrows
+          :show-arrows="$vuetify.breakpoint.mobile"
           @change="onFilterChange"
         >
-          <v-slide-item
-            v-for="project in projects"
-            :key="project.id"
-            v-slot="{ active, toggle }"
-          >
-            <v-btn
-              class="mr-4"
-              active-class="secondary--text"
-              :input-value="active"
-              depressed
-              @click="toggle"
-              >{{ project.name }}</v-btn
-            >
-          </v-slide-item>
-        </v-slide-group>
+          <v-chip v-for="project in projects" :key="project.id" filter>
+            {{ project.name }}
+          </v-chip>
+        </v-chip-group>
       </v-col>
     </v-row>
 
@@ -105,6 +100,9 @@ import Calendar from '~/components/Calendar.vue'
       title: 'Events',
     }
   },
+  async asyncData({ app: { $accessor } }) {
+    await $accessor.projects.findAll()
+  },
 })
 export default class EventsPage extends Vue {
   $refs!: {
@@ -136,7 +134,7 @@ export default class EventsPage extends Vue {
 
   get eventsForDate() {
     return this.events.filter((event) =>
-      isSameDay(this.dateNative, parseISO(event.start))
+      isSameDay(this.dateNative, parseISO(event.dtstart))
     )
   }
 
@@ -160,10 +158,6 @@ export default class EventsPage extends Vue {
 
   async onEventCreated() {
     await this.$refs.calendar.refresh()
-  }
-
-  async fetch() {
-    await this.$accessor.projects.findAll()
   }
 }
 </script>

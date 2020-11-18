@@ -3,7 +3,9 @@
     <template #title>Create Event</template>
 
     <template #activator="{ on, attrs }">
-      <v-btn text v-bind="attrs" v-on="on">Add Event</v-btn>
+      <slot name="activator" v-bind="{ on, attrs }">
+        <v-btn text v-bind="attrs" v-on="on">Add Event</v-btn>
+      </slot>
     </template>
 
     <v-card-text>
@@ -26,8 +28,9 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
+        <!-- All-Day Selector -->
         <v-list-item>
           <v-list-item-avatar>
             <v-icon>mdi-clock-outline</v-icon>
@@ -40,8 +43,8 @@
           </v-list-item-action>
         </v-list-item>
 
+        <!-- Dates and Times -->
         <v-list-item>
-          <!-- Intentionally empty for spacing -->
           <v-list-item-avatar></v-list-item-avatar>
 
           <v-list-item-content>
@@ -125,7 +128,50 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
+
+        <!-- Permissions -->
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-key-chain-variant</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-row>
+              <v-col cols="8">
+                <v-select
+                  v-model="permissions.gradeMin"
+                  :items="permissions.grades"
+                  label="Min Grade (Optional)"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+
+              <v-col cols="8">
+                <v-select
+                  v-model="permissions.gradeMax"
+                  :items="permissions.grades"
+                  label="Max Grade (Optional)"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+
+              <v-col cols="8">
+                <v-select
+                  v-model="permissions.sex"
+                  :items="sexes"
+                  label="Sex (Optional)"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider />
 
         <!-- Recurrence -->
         <v-list-item>
@@ -140,13 +186,13 @@
                   ref="recurrenceDialog"
                   v-model="rrule"
                   :date-string="dates.start.date"
-                ></recurrence-dialog>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Location -->
         <v-list-item>
@@ -168,7 +214,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Description -->
         <v-list-item>
@@ -192,7 +238,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Project Management -->
         <v-list-item>
@@ -203,26 +249,19 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-project
-                  v-model="project"
-                  outlined
-                ></auto-complete-project>
+                <auto-complete-project v-model="project" outlined />
               </v-col>
-              <v-col cols="auto">
-                <dialog-select-project
-                  v-model="project"
-                ></dialog-select-project>
+              <v-col cols="auto" class="align-self-center">
+                <dialog-select-project v-model="project" />
               </v-col>
-              <v-col cols="auto">
-                <dialog-create-project
-                  @create:project="onProjectCreated"
-                ></dialog-create-project>
+              <v-col cols="auto" class="align-self-center">
+                <dialog-create-project @create:project="onProjectCreated" />
               </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Course Management -->
         <v-list-item v-if="project">
@@ -237,33 +276,49 @@
                   v-model="course"
                   :project="project"
                   outlined
-                ></auto-complete-course>
+                />
               </v-col>
 
               <v-col cols="auto">
-                <dialog-select-course
-                  v-model="course"
-                  :project="project"
-                ></dialog-select-course>
+                <dialog-select-course v-model="course" :project="project" />
               </v-col>
 
               <v-col cols="auto">
                 <dialog-create-course
                   :project="project"
                   @create:course="onCourseCreated"
-                ></dialog-create-course>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
+
+        <!-- Picture -->
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-icon>mdi-image-plus</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <file-upload
+              v-model="files"
+              outlined
+              label="Picture (Optional)"
+              hint="Project pictures will be used as a fallback if provided."
+              persistent-hint
+            />
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider />
       </v-list>
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <v-btn text @click="dialog.close()">Cancel</v-btn>
-      <v-btn text type="submit" :loading="isLoading">
+      <v-btn type="submit" :loading="isLoading" color="primary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
             mdi-check
@@ -280,9 +335,12 @@
 import { Vue, Component, Prop, Ref } from 'nuxt-property-decorator'
 import { addDays, format, isBefore, isSameDay, parse, parseISO } from 'date-fns'
 import { Options } from 'rrule'
+import { Grade } from '../../../backend/src/user/enums/grade.enum'
+import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { CreateEventDto } from '../../../backend/src/event/dtos/create-event.dto'
 import { Project } from '../../../backend/src/project/project.entity'
 import RecurrenceDialog from '../events/RecurrenceDialog.vue'
+import { Uploads } from '../../interfaces/uploads.interface'
 import DialogForm from './DialogForm.vue'
 import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
@@ -330,6 +388,32 @@ export default class DialogCreateEvent extends Vue {
     times: [] as string[],
   }
 
+  sexes = [
+    { text: 'Male', value: 'male' },
+    { text: 'Female', value: 'female' },
+  ]
+
+  permissions = {
+    grades: [
+      { text: 'Kindergarten', value: Grade.KINDERGARTEN },
+      { text: '1st Grade', value: Grade.FIRST },
+      { text: '2nd Grade', value: Grade.SECOND },
+      { text: '3rd Grade', value: Grade.THIRD },
+      { text: '4th Grade', value: Grade.FOURTH },
+      { text: '5th Grade', value: Grade.FIFTH },
+      { text: '6th Grade', value: Grade.SIXTH },
+      { text: '7th Grade', value: Grade.SEVENTH },
+      { text: '8th Grade', value: Grade.EIGHTH },
+      { text: '9th Grade', value: Grade.NINTH },
+      { text: '10th Grade', value: Grade.TENTH },
+      { text: '11th Grade', value: Grade.ELEVENTH },
+      { text: '12th Grade', value: Grade.TWELFTH },
+    ],
+    gradeMin: Grade.KINDERGARTEN,
+    gradeMax: Grade.TWELFTH,
+    sex: Sex.MALE,
+  }
+
   rrule = null as EventRecurrenceDto | null
 
   meta = {
@@ -340,6 +424,7 @@ export default class DialogCreateEvent extends Vue {
 
   project: null | number = null
   course: null | number = null
+  files: Uploads = null
 
   get isLoading() {
     return this.$accessor.events.isLoading
@@ -407,18 +492,31 @@ export default class DialogCreateEvent extends Vue {
   }
 
   async onSubmit() {
-    const createEventDto: CreateEventDto = {
-      ...this.meta,
-      dtstart: this.rrule
-        ? undefined
-        : toDate(this.dates.start.date, this.times.start.time),
-      dtend: this.dates.allday
-        ? undefined
-        : toDate(this.dates.end.date, this.times.end.time),
-      rrule: this.rrule || undefined,
-      project: this.project || undefined,
-      course: this.course || undefined,
+    // Type asserted as this is not multi-file upload.
+    const url = (await this.$accessor.files.filesToURL(this.files)) as
+      | string
+      | null
+
+    if (this.$accessor.files.error) {
+      console.error(this.$accessor.files.error)
     }
+
+    const createEventDto: CreateEventDto = Object.assign(
+      {
+        dtend: toDate(
+          this.dates.end.date,
+          this.dates.allday ? '23:59' : this.times.end.time
+        ),
+        rrule: this.rrule || undefined,
+        project: this.project || undefined,
+        course: this.course || undefined,
+        ...this.meta,
+      },
+      !this.rrule && {
+        dtstart: toDate(this.dates.start.date, this.times.start.time),
+      },
+      url && { picture: url }
+    )
 
     await this.$accessor.events.create(createEventDto)
 

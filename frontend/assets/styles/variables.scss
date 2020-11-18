@@ -1,7 +1,9 @@
 // Vuetify SCSS Variable Overrides
 // https://github.com/vuetifyjs/vuetify/tree/master/packages/vuetify/src/styles/settings
 
-@import './tabs.scss';
+@import './components/tabs.scss';
+@import './components/buttons.scss';
+@import './components/cards.scss';
 @import './elevations.scss';
 
 // Basic Overrides

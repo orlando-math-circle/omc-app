@@ -7,10 +7,13 @@ export type ChangeTypeOfKeys<T extends object, Keys extends keyof T, Type> = {
 
 /**
  * Changes any date types found in an object to string types.
- * Inelegant
  */
 export type DateToString<T> = T extends Date ? string : T
 
+/**
+ * Used to change the native types from the backend entities
+ * into their JSON versions without having to define new interfaces.
+ */
 export type DTO<T> = {
   [key in keyof T]: DateToString<T[key]>
 }

@@ -15,7 +15,7 @@ import { EmailModule } from '../src/email/email.module';
 import { FileModule } from '../src/file/file.module';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
 import { UpdateUserDto } from '../src/user/dtos/update-user.dto';
-import { Grades } from '../src/user/enums/grades.enum';
+import { Grades } from '../src/user/enums/grade.enum';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';

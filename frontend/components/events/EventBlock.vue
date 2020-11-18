@@ -52,13 +52,13 @@ export default class EventBlock extends Vue {
   }
 
   get background() {
-    const picture = this.event.project?.picture
+    const url = this.event.picture ?? this.event?.project?.picture
 
-    if (!picture) return this.defaultPicture
+    if (!url) return this.$accessor.events.defaultPicture
 
-    if (picture.startsWith('http')) return picture
+    if (url.startsWith('http')) return url
 
-    return this.$config.staticBase + picture
+    return `${this.$config.staticBase}${url}`
   }
 }
 </script>

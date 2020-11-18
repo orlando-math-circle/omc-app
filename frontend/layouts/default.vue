@@ -59,7 +59,7 @@
           </v-list-item>
 
           <template v-if="isAdmin">
-            <v-divider></v-divider>
+            <v-divider />
 
             <v-list-item v-if="isAdmin" link to="/admin">
               <v-list-item-icon>
@@ -70,7 +70,7 @@
             </v-list-item>
           </template>
 
-          <v-divider></v-divider>
+          <v-divider />
 
           <v-list-item @click="logout">
             <v-list-item-icon>
@@ -106,7 +106,11 @@
       </v-container>
     </v-main>
 
-    <v-bottom-navigation app class="bottom-navigation">
+    <v-bottom-navigation
+      app
+      class="bottom-navigation"
+      active-class="primary--text"
+    >
       <v-btn v-for="item in items" :key="item.title" :to="item.to">
         <span>{{ item.title }}</span>
         <v-icon>{{ item.icon }}</v-icon>

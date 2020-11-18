@@ -17,7 +17,7 @@
         </v-list-item-content>
       </v-list-item>
 
-      <v-divider></v-divider>
+      <v-divider />
 
       <v-list nav dense>
         <v-list-item link exact to="/admin/" active-class="primary--text">
@@ -128,7 +128,7 @@
           </v-list-item>
         </v-list-group>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <v-list-item link to="/" exact>
           <v-list-item-icon>
@@ -195,7 +195,7 @@
             </v-list-item-content>
           </v-list-item>
 
-          <v-divider></v-divider>
+          <v-divider />
 
           <v-list-item link @click="logout">
             <v-list-item-icon>

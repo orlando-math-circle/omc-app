@@ -1,10 +1,8 @@
 import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Populate } from '../app.utils';
-import { File } from '../file/file.entity';
-import { MulterFile } from '../file/interfaces/multer-file.interface';
-import { User } from '../user/user.entity';
+import { VolunteerJob } from '../volunteer-job/volunteer-job.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './project.entity';
@@ -16,8 +14,18 @@ export class ProjectService {
     private readonly projectRepository: EntityRepository<Project>,
   ) {}
 
-  async create(createProjectDto: CreateProjectDto) {
-    const project = this.projectRepository.create(createProjectDto);
+  async create({ jobs, ...meta }: CreateProjectDto) {
+    const project = this.projectRepository.create(meta);
+
+    if (jobs) {
+      for (const job of jobs) {
+        project.jobs.add(
+          new VolunteerJob(job.name, job.hours, job.description),
+        );
+      }
+    }
+
+    console.log(project, jobs);
 
     await this.projectRepository.persist(project).flush();
 

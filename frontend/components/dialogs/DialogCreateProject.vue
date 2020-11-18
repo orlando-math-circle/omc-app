@@ -2,7 +2,20 @@
   <v-dialog v-model="dialog" max-width="440">
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" large text v-on="on">Create</v-btn>
+        <v-tooltip bottom>
+          <template #activator="tooltip">
+            <v-btn
+              v-bind="{ ...attrs, ...tooltip.attrs }"
+              large
+              icon
+              v-on="{ ...on, ...tooltip.on }"
+            >
+              <v-icon>mdi-folder-plus-outline</v-icon>
+            </v-btn>
+          </template>
+
+          <span>Create Project</span>
+        </v-tooltip>
       </slot>
     </template>
 
@@ -27,6 +40,7 @@
                 v-model="dto.name"
                 label="Name"
                 rules="required"
+                hide-details="auto"
                 required
                 outlined
               />
@@ -46,9 +60,55 @@
                 v-model="files"
                 label="Upload Image (Optional)"
                 endpoint="/file"
+                hide-details="auto"
                 outlined
                 chips
               />
+            </v-col>
+
+            <v-col>
+              <v-row>
+                <v-col>
+                  <v-chip-group column>
+                    <template v-for="(job, i) in jobs">
+                      <v-chip
+                        :key="job.name + i"
+                        close
+                        @click:close="jobs.splice(i, 1)"
+                      >
+                        {{ job.name }}
+                      </v-chip>
+                    </template>
+                  </v-chip-group>
+
+                  <v-select
+                    v-if="false"
+                    :items="jobs"
+                    label="Jobs"
+                    chips
+                    item-text="name"
+                    return-object
+                    multiple
+                    outlined
+                  >
+                    <template #item="{ item, on, attrs }">
+                      <v-list-item v-attrs="attrs" ripple v-on="on">
+                        <v-list-item-content>
+                          {{ item.name }}
+                        </v-list-item-content>
+
+                        <v-list-item-action>
+                          <v-icon> mdi-close-circle</v-icon>
+                        </v-list-item-action>
+                      </v-list-item>
+                    </template>
+                  </v-select>
+                </v-col>
+
+                <v-col cols="auto" class="align-self-center">
+                  <dialog-create-job @create:job="onCreateJob" />
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
         </v-card-text>
@@ -66,7 +126,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { File } from '@backend/file/file.entity'
+import { CreateJobDto } from '@backend/volunteer-job/dto/create-job.dto'
 import { CreateProjectDto } from '~/../backend/src/project/dto/create-project.dto'
 import { Nullable } from '~/interfaces/nullable.type'
 import { Uploads } from '~/interfaces/uploads.interface'
@@ -75,13 +135,13 @@ import { Uploads } from '~/interfaces/uploads.interface'
 export default class DialogCreateProject extends Vue {
   dialog = false
   project: number | null = null
+  jobs: CreateJobDto[] = []
+  files: Uploads = null
   dto: Nullable<CreateProjectDto> = {
     name: null,
     description: null,
     picture: null,
   }
-
-  files: Uploads = null
 
   get projects() {
     return this.$accessor.projects.projects
@@ -95,12 +155,15 @@ export default class DialogCreateProject extends Vue {
     return this.$accessor.files.isLoading || this.$accessor.projects.isLoading
   }
 
-  async onSubmit() {
-    let file: File | null = null
+  onCreateJob(job: CreateJobDto) {
+    this.jobs.push(job)
+  }
 
-    if (this.files && !(Array.isArray(this.files) && this.files.length === 0)) {
-      file = await this.$accessor.files.uploadFile(this.files)
-    }
+  async onSubmit() {
+    // Type asserted as this is not multi-file upload.
+    const url = (await this.$accessor.files.filesToURL(this.files)) as
+      | string
+      | null
 
     if (this.$accessor.files.error) {
       console.error(this.$accessor.files.error)
@@ -111,7 +174,8 @@ export default class DialogCreateProject extends Vue {
         {
           ...(this.dto as CreateProjectDto),
         },
-        file && { picture: file.root }
+        url && { picture: url },
+        this.jobs.length && { jobs: this.jobs }
       )
     )
 

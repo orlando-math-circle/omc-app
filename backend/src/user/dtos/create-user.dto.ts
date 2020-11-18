@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
-import { Grades } from '../enums/grades.enum';
+import { Grade } from '../enums/grade.enum';
 
 export class CreateUserDto {
   @IsString()
@@ -10,8 +10,8 @@ export class CreateUserDto {
   readonly last!: string;
 
   @IsOptional()
-  @IsEnum(Grades)
-  readonly grade?: Grades;
+  @IsEnum(Grade)
+  readonly grade?: Grade;
 
   @IsOptional()
   @IsString()

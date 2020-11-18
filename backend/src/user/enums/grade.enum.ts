@@ -1,5 +1,4 @@
-export enum Grades {
-  PREKINDERGARTEN = -1,
+export enum Grade {
   KINDERGARTEN = 0,
   FIRST = 1,
   SECOND = 2,

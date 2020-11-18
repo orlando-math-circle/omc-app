@@ -68,7 +68,7 @@
             </v-list-item-action>
           </v-list-item>
 
-          <v-divider></v-divider>
+          <v-divider />
 
           <v-list-item>
             <v-list-item-content>

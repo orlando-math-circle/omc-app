@@ -1,314 +1,163 @@
 <template>
   <v-row>
-    <v-col v-if="!!event">
-      <v-row no-gutters class="mb-5">
-        <v-col cols="auto" align-self="center" align="center">
-          <v-btn icon class="pr-2" @click="$router.back()">
-            <v-icon large>mdi-chevron-left</v-icon>
-          </v-btn>
-        </v-col>
-
-        <v-col>
-          <v-row no-gutters>
-            <v-col>
-              <h2 class="d-inline-flex">{{ event.name }}</h2>
-            </v-col>
-
-            <v-col>
-              <v-menu offset-y transition="slide-y-transition">
-                <template #activator="{ on, attrs }">
-                  <v-btn v-if="$accessor.auth.isAdmin" v-bind="attrs" v-on="on"
-                    >Admin</v-btn
-                  >
-                </template>
-
-                <v-list dense nav>
-                  <v-list-item
-                    link
-                    :to="`/admin/calendar/events/${$route.params.id}`"
-                  >
-                    <v-list-item-icon>
-                      <v-icon>mdi-calendar-month</v-icon>
-                    </v-list-item-icon>
-
-                    <v-list-item-title>Edit Event</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-col>
-          </v-row>
-
-          <v-row no-gutters>
-            <v-col>
-              <breadcrumbs :items="breadcrumbs" />
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-
+    <v-col cols="12">
       <v-card>
-        <v-card-title>{{ event.name }}</v-card-title>
-        <v-card-subtitle>{{ event.description }}</v-card-subtitle>
+        <v-img max-height="300" :src="picture">
+          <v-toolbar flat class="picture--toolbar">
+            <v-btn icon @click="$router.back()">
+              <v-sheet class="pa-2 rounded">
+                <v-icon>mdi-arrow-left</v-icon>
+              </v-sheet>
+            </v-btn>
+
+            <v-spacer />
+
+            <dialog-lightbox :image="picture">
+              <template #activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on">
+                  <v-sheet class="pa-2 rounded">
+                    <v-icon>mdi-open-in-new</v-icon>
+                  </v-sheet>
+                </v-btn>
+              </template>
+            </dialog-lightbox>
+          </v-toolbar>
+        </v-img>
       </v-card>
+    </v-col>
 
-      <v-stepper v-model="step" vertical class="mt-5">
-        <!-- Step: User Selection -->
-        <v-stepper-step editable :complete="selected.length > 0" step="1">
-          Select students to register
-        </v-stepper-step>
-        <v-stepper-content step="1">
-          <v-card flat>
-            <v-card-title>User Selection</v-card-title>
-            <v-card-subtitle>
-              Select which users you wish to register. You may add more users on
-              the account page.
-            </v-card-subtitle>
+    <v-col cols="12">
+      <v-card>
+        <v-card-title class="event--heading">{{ event.name }}</v-card-title>
 
-            <v-card-text>
-              <v-list>
-                <v-list-item-group v-model="selected" multiple>
-                  <v-list-item
-                    v-for="status in statuses"
-                    :key="status.user.id"
-                    :disabled="!status.eligible"
-                  >
-                    <template v-slot:default="{ active }">
-                      <v-list-item-avatar>
-                        <!-- <v-icon>mdi-account-circle-outline</v-icon> -->
-                        <v-img
-                          :src="
-                            status.user.avatar ||
-                            '/images/default_avatars/paper.png'
-                          "
-                        ></v-img>
-                      </v-list-item-avatar>
+        <v-card-text>
+          <v-list dense>
+            <v-list-item class="pl-0">
+              <v-list-item-avatar class="icon--bg rounded">
+                <v-icon color="primary">mdi-calendar-clock</v-icon>
+              </v-list-item-avatar>
 
-                      <v-list-item-content>
-                        <v-list-item-title>
-                          {{ status.user.first }} {{ status.user.last }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle>
-                          {{ getStatusMessage(status) }}
-                        </v-list-item-subtitle>
-                      </v-list-item-content>
+              <v-list-item-content>
+                <v-list-item-title>{{ date }}</v-list-item-title>
+                <v-list-item-subtitle>{{ times }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
 
-                      <v-list-item-action>
-                        <v-btn
-                          v-if="status.registered"
-                          icon
-                          @click="cancelRegistration(status)"
-                        >
-                          <v-icon>mdi-close-box</v-icon>
-                        </v-btn>
-                        <v-checkbox
-                          v-else-if="status.eligible"
-                          :input-value="active"
-                        />
-                      </v-list-item-action>
-                    </template>
-                  </v-list-item>
-                </v-list-item-group>
-              </v-list>
-            </v-card-text>
+            <v-list-item class="pl-0">
+              <v-list-item-avatar class="icon--bg rounded">
+                <v-icon color="primary">mdi-compass</v-icon>
+              </v-list-item-avatar>
 
-            <v-card-actions>
-              <v-btn
-                medium
-                color="primary"
-                :disabled="!selected.length"
-                @click="step++"
-              >
-                Continue
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-stepper-content>
+              <v-list-item-content>
+                <v-list-item-title>{{ event.location }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
 
-        <!-- Step: Payment -->
-        <v-stepper-step
-          v-if="fee"
-          :completed="statusesSelectedUnpaid.length === 0"
-          step="2"
-          >Payment</v-stepper-step
-        >
-        <v-stepper-content v-if="fee" step="2">
-          <v-card-title>Payment Due: ${{ sumFee }}</v-card-title>
+            <v-list-item v-if="fee" class="pl-0">
+              <v-list-item-avatar class="icon--bg rounded">
+                <v-icon color="primary">mdi-currency-usd</v-icon>
+              </v-list-item-avatar>
 
-          <v-card-text>
-            <paypal
-              :event="event.id"
-              :users="userIds"
-              @payment:complete="onPaymentComplete"
-            />
-          </v-card-text>
+              <v-list-item-content>Event Fees</v-list-item-content>
+              <v-list-item-subtitle>${{ fee }} Per Person</v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
 
-          <v-btn
-            medium
-            color="primary"
-            :disabled="statusesSelectedUnpaid.length > 0"
-            @click="step++"
-            >Continue
-          </v-btn>
-          <v-btn medium text @click="step--">Go Back</v-btn>
-        </v-stepper-content>
+        <v-card-title class="event--heading">Description</v-card-title>
 
-        <!-- Step: Event Registration -->
-        <v-stepper-step :step="fee ? 3 : 2">
-          Complete Registration
-        </v-stepper-step>
-        <v-stepper-content :step="fee ? 3 : 2">
-          <v-btn
-            :loading="isLoadingRegistrations"
-            color="primary"
-            @click="onSubmit"
-          >
-            Complete Registration
-          </v-btn>
-        </v-stepper-content>
+        <v-card-text>{{ event.description }}</v-card-text>
 
-        <!-- Step: Confirmation -->
-        <v-stepper-step :step="fee ? 4 : 3">Confirmation</v-stepper-step>
-        <v-stepper-content :step="fee ? 4 : 3">
-          Registrations Completed
-        </v-stepper-content>
-      </v-stepper>
+        <v-card-actions class="pa-3">
+          <v-btn v-if="isOpen" color="primary" rounded block>Register</v-btn>
+
+          <v-btn v-else disabled rounded block>Registrations Closed</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-col>
   </v-row>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { format } from 'date-fns'
-import { Invoice } from '~/../backend/src/invoice/invoice.entity'
-import { User } from '~/../backend/src/user/user.entity'
-import { EventRegistrationStatus } from '~/../backend/src/event-registration/dtos/event-registration-status.dto'
-import { getOrdinal } from '~/utils/utilities'
-
-export interface UserEligibility {
-  user: User
-  eligible: boolean
-  invoice?: Invoice
-  grade?: number
-  subtitle: string
-}
+import { isAfter } from 'date-fns'
+import { formatDate } from '~/utils/utilities'
 
 @Component({
   head: {
-    title: 'Registration',
+    title: 'Event Details',
+  },
+  async asyncData({ app: { $accessor }, route }) {
+    await Promise.all([
+      $accessor.events.findOne(route.params.id),
+      $accessor.registrations.getStatuses(route.params.id),
+    ])
   },
 })
-export default class EventIdPage extends Vue {
-  account: null | any = null // TODO: Fix issue with collection type on Users
-  selected: number[] = []
-  step = 1
-  breadcrumbs = [
-    {
-      text: 'Calendar',
-      href: '/events',
-    },
-    {
-      text: 'Event',
-    },
-  ]
-
+export default class EventPage extends Vue {
   get event() {
-    return this.$accessor.events.event
+    return this.$accessor.events.event!
   }
 
-  get statuses() {
-    return this.$accessor.registrations.registrationStatuses
+  get picture() {
+    const url = this.event.picture ?? this.event?.project?.picture
+
+    if (!url) return this.$accessor.events.defaultPicture
+
+    if (url.startsWith('http')) return url
+
+    return `${this.$config.staticBase}${url}`
   }
 
-  get isLoadingRegistrations() {
-    return this.$accessor.registrations.isLoading
+  get date() {
+    return this.format(this.event.dtstart, 'EEE, LLL d, yyyy')
   }
 
-  get start(): string {
-    if (!this.event) return ''
-
-    return format(new Date(this.event.dtstart), 'eee, MMM do yyyy')
+  get times() {
+    return `${this.format(this.event.dtstart, 'h:mm a')} - ${this.format(
+      this.event.dtend,
+      'h:mm a'
+    )}`
   }
 
   get fee(): string | undefined {
-    if (!this.event) return undefined
-
     if (this.event.course?.fee) {
       return this.event.course.fee
     } else if (this.event.fee) {
       return this.event.fee
     }
-
-    return undefined
   }
 
-  get sumFee(): number {
-    const fee = parseFloat(this.fee || '0')
-
-    return fee * this.statusesSelectedUnpaid.length
-  }
-
-  get userIds() {
-    return this.statusesSelected.map((status) => status.user.id)
-  }
-
-  get statusesSelected() {
-    return this.selected.map((i) => this.statuses[i])
-  }
-
-  get statusesSelectedUnpaid() {
-    return this.statusesSelected.filter((status) => !status.paid)
-  }
-
-  async fetch() {
-    await Promise.all([
-      this.$accessor.events.findOne(this.$route.params.id),
-      this.$accessor.registrations.getStatuses(this.$route.params.id),
-    ])
-  }
-
-  async onSubmit() {
-    await this.$accessor.registrations.create({
-      eventId: +this.$route.params.id,
-      users: this.statusesSelected.map((status) => status.user.id),
-    })
-    await this.$accessor.registrations.getStatuses(this.$route.params.id)
-    this.step++
-  }
-
-  onPaymentComplete() {
-    this.$accessor.registrations.getStatuses(this.$route.params.id)
-  }
-
-  getStatusMessage(status: EventRegistrationStatus) {
-    let retval = ''
-
-    if (status.user.age >= 18) {
-      retval += 'Adult -'
-    } else {
-      retval += `${status.user.grade}${getOrdinal(status.user.grade)} Grade -`
+  /**
+   * Determines if the event is open to new registrations.
+   * TODO: Implement override functionality.
+   */
+  get isOpen() {
+    // The event has already started.
+    if (isAfter(new Date(), new Date(this.event.dtstart))) {
+      return false
     }
 
-    if (status.registered) {
-      retval += ' Registered'
-    } else if (status.eligible) {
-      retval += ' Eligible'
-    } else {
-      retval += ' Ineligible'
-    }
-
-    return retval
+    return true
   }
 
-  cancelRegistration(status: EventRegistrationStatus) {
-    console.log(status)
+  format(date: string | Date, formatString: string) {
+    return formatDate(date, formatString)
   }
 }
 </script>
 
-<style lang="scss" scoped>
-.event-header {
-  font-family: 'Spartan', sans-serif;
-  font-weight: bold;
-  font-size: 1.2em;
+<style lang="scss">
+.icon--bg {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.event--heading {
+  font-weight: 700;
+  font-size: 1.35rem;
+}
+
+.picture--toolbar {
+  background-color: transparent !important;
 }
 </style>

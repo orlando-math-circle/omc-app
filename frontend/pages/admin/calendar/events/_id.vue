@@ -41,7 +41,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { Event } from '@backend/event/event.entity'
+import { DTOEvent } from '~/store/events'
 
 @Component
 export default class AdminEventEditPage extends Vue {
@@ -59,17 +59,17 @@ export default class AdminEventEditPage extends Vue {
     },
   ]
 
-  internalData = null as Event | null
+  internalData = null as DTOEvent | null
 
   get event() {
     if (this.internalData == null) {
       this.internalData = Object.assign({}, this.$accessor.events.event)
     }
 
-    return this.$accessor.events.event
+    return this.internalData
   }
 
-  set event(value: null | Event) {
+  set event(value: null | DTOEvent) {
     this.internalData = value
   }
 

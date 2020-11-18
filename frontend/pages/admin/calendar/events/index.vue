@@ -106,7 +106,7 @@ export default class CalendarAdminPage extends Vue {
 
   get eventsForDate() {
     return this.events.filter((event) =>
-      isSameDay(this.dateNative, parseISO(event.start))
+      isSameDay(this.dateNative, parseISO(event.dtstart))
     )
   }
 

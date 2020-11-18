@@ -2,7 +2,20 @@
   <v-dialog v-model="dialog" max-width="650">
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" large text v-on="on">Search</v-btn>
+        <v-tooltip bottom>
+          <template #activator="tooltip">
+            <v-btn
+              v-bind="{ ...attrs, ...tooltip.attrs }"
+              large
+              icon
+              v-on="{ ...on, ...tooltip.on }"
+            >
+              <v-icon>mdi-magnify</v-icon>
+            </v-btn>
+          </template>
+
+          <span>Search Projects</span>
+        </v-tooltip>
       </slot>
     </template>
 

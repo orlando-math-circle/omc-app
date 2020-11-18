@@ -33,6 +33,7 @@ export const getters = getterTree(state, {
   loggedIn: (state) => !!state.token,
   accountUsers: (state) => (state.account?.users as unknown) as User[],
   isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN),
+  isVolunteer: (state) => state.user?.roles?.includes(Roles.VOLUNTEER),
   isValidated: (state) => state.user?.emailVerified,
   avatar: (state) =>
     state.user?.avatar || '../images/default_avatars/default.svg',

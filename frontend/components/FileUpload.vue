@@ -9,6 +9,7 @@
               prepend-icon=""
               v-bind="attributes"
               hide-details="auto"
+              show-size
             />
           </v-col>
 
