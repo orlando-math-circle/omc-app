@@ -6,7 +6,6 @@
           v-model="rule.selected"
           :items="selections"
           hide-details
-          filled
           outlined
         />
       </slot>
@@ -159,14 +158,13 @@
                           dense
                         />
                         <v-sheet
-                          class="fake-input"
+                          class="fake-input outlined"
                           @click="occurrences.focus()"
-                          v-text="
-                            `occurrence${
-                              options.count && options.count > 1 ? 's' : ''
-                            }`
-                          "
-                        />
+                        >
+                          occurrence{{
+                            options.count && options.count > 1 ? 's' : ''
+                          }}
+                        </v-sheet>
                       </v-col>
                     </v-row>
                   </template>
@@ -517,12 +515,9 @@ export default class RecurrenceDialog extends Vue {
 .occurrence-field {
   display: inline-block;
   width: 65px;
-  border-radius: 4px 0 0 4px;
 }
 
 .fake-input {
-  background-color: #f0f0f0;
-  border-radius: 0 4px 4px 0;
   height: 40px;
   line-height: 40px;
   display: inline-block;
