@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Collection,
   Entity,
+  JsonType,
   ManyToOne,
   OneToMany,
   PrimaryKey,
@@ -38,7 +39,7 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ nullable: true })
   color?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: JsonType, nullable: true })
   permissions?: EventPermissionsDto;
 
   @Property({ nullable: true })
@@ -143,21 +144,18 @@ export class Event extends BaseEntity<Event, 'id'> {
 
   /**
    * Checks if a user fits the permissions of an event.
+   * TODO: Add default permissions, e.g. adults not being able to register.
    *
    * @param user User
    */
   public hasPermission(user: User) {
-    // TODO: Add default permissions, e.g. adults not being able to register.
+    if (!this.permissions) return true;
 
-    if (this.permissions) {
-      const { age } = this.permissions;
+    const { grades, sexes } = this.permissions;
 
-      if (user.age > age.max || user.age < age.min) {
-        return false;
-      }
+    if (!sexes?.includes(user.sex)) return false;
 
-      // TODO: Add grade
-    }
+    if (!grades?.includes(user.grade)) return false;
 
     return true;
   }

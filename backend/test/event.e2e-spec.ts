@@ -25,6 +25,7 @@ import { EventService } from '../src/event/event.service';
 import { FileModule } from '../src/file/file.module';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
+import { VolunteerJobModule } from '../src/volunteer-job/volunteer-job.module';
 import { UserFixtures } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
@@ -54,6 +55,7 @@ describe('Events', () => {
         AuthModule,
         EventModule,
         CourseModule,
+        VolunteerJobModule,
       ],
     }).compile();
 

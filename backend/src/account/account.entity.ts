@@ -29,16 +29,13 @@ export class Account extends BaseEntity<Account, 'id'> {
    * Relationships
    */
 
-  @OneToOne({
-    entity: () => User,
-    cascade: [Cascade.ALL],
-    owner: true,
-  })
+  @OneToOne({ entity: () => User, cascade: [Cascade.ALL] })
   primaryUser!: User;
 
-  @OneToMany(() => User, (u) => u.account, {
+  @OneToMany({
+    entity: () => User,
+    mappedBy: 'account',
     cascade: [Cascade.ALL],
-    orphanRemoval: true,
   })
   users = new Collection<User>(this);
 }

@@ -9,6 +9,8 @@
     </template>
 
     <v-card-text>
+      <alert-error v-if="error" class="mx-4" :error="error" />
+
       <v-list dense>
         <v-list-item class="pl-2">
           <v-list-item-avatar class="mr-2">
@@ -138,33 +140,33 @@
 
           <v-list-item-content>
             <v-row>
-              <v-col cols="8">
+              <v-col cols="6">
                 <v-select
-                  v-model="permissions.gradeMin"
-                  :items="permissions.grades"
-                  label="Min Grade (Optional)"
+                  v-model="meta.permissions.grades"
+                  :items="grades"
+                  label="Grades"
                   outlined
+                  multiple
                   hide-details="auto"
-                />
+                  chips
+                >
+                  <template #selection="{ index }">
+                    <v-chip v-if="index < gradeRanges.length" ripple>
+                      {{ gradeRanges[index] }}
+                    </v-chip>
+                  </template>
+                </v-select>
               </v-col>
 
-              <v-col cols="8">
+              <v-col cols="6">
                 <v-select
-                  v-model="permissions.gradeMax"
-                  :items="permissions.grades"
-                  label="Max Grade (Optional)"
-                  outlined
-                  hide-details="auto"
-                />
-              </v-col>
-
-              <v-col cols="8">
-                <v-select
-                  v-model="permissions.sex"
+                  v-model="meta.permissions.sexes"
                   :items="sexes"
-                  label="Sex (Optional)"
+                  label="Sex"
                   outlined
+                  multiple
                   hide-details="auto"
+                  chips
                 />
               </v-col>
             </v-row>
@@ -393,26 +395,21 @@ export default class DialogCreateEvent extends Vue {
     { text: 'Female', value: 'female' },
   ]
 
-  permissions = {
-    grades: [
-      { text: 'Kindergarten', value: Grade.KINDERGARTEN },
-      { text: '1st Grade', value: Grade.FIRST },
-      { text: '2nd Grade', value: Grade.SECOND },
-      { text: '3rd Grade', value: Grade.THIRD },
-      { text: '4th Grade', value: Grade.FOURTH },
-      { text: '5th Grade', value: Grade.FIFTH },
-      { text: '6th Grade', value: Grade.SIXTH },
-      { text: '7th Grade', value: Grade.SEVENTH },
-      { text: '8th Grade', value: Grade.EIGHTH },
-      { text: '9th Grade', value: Grade.NINTH },
-      { text: '10th Grade', value: Grade.TENTH },
-      { text: '11th Grade', value: Grade.ELEVENTH },
-      { text: '12th Grade', value: Grade.TWELFTH },
-    ],
-    gradeMin: Grade.KINDERGARTEN,
-    gradeMax: Grade.TWELFTH,
-    sex: Sex.MALE,
-  }
+  grades = [
+    { text: 'Kindergarten', short: 'K', value: Grade.KINDERGARTEN },
+    { text: '1st Grade', short: '1st', value: Grade.FIRST },
+    { text: '2nd Grade', short: '2nd', value: Grade.SECOND },
+    { text: '3rd Grade', short: '3rd', value: Grade.THIRD },
+    { text: '4th Grade', short: '4th', value: Grade.FOURTH },
+    { text: '5th Grade', short: '5th', value: Grade.FIFTH },
+    { text: '6th Grade', short: '6th', value: Grade.SIXTH },
+    { text: '7th Grade', short: '7th', value: Grade.SEVENTH },
+    { text: '8th Grade', short: '8th', value: Grade.EIGHTH },
+    { text: '9th Grade', short: '9th', value: Grade.NINTH },
+    { text: '10th Grade', short: '10th', value: Grade.TENTH },
+    { text: '11th Grade', short: '11th', value: Grade.ELEVENTH },
+    { text: '12th Grade', short: '12th', value: Grade.TWELFTH },
+  ]
 
   rrule = null as EventRecurrenceDto | null
 
@@ -420,11 +417,33 @@ export default class DialogCreateEvent extends Vue {
     name: '',
     description: '',
     location: '',
+    permissions: {
+      grades: [
+        Grade.KINDERGARTEN,
+        Grade.FIRST,
+        Grade.SECOND,
+        Grade.THIRD,
+        Grade.FOURTH,
+        Grade.FIFTH,
+        Grade.SIXTH,
+        Grade.SEVENTH,
+        Grade.EIGHTH,
+        Grade.NINTH,
+        Grade.TENTH,
+        Grade.ELEVENTH,
+        Grade.TWELFTH,
+      ],
+      sexes: [Sex.MALE, Sex.FEMALE],
+    },
   }
 
   project: null | number = null
   course: null | number = null
   files: Uploads = null
+
+  get error() {
+    return this.$accessor.events.error || this.$accessor.files.error
+  }
 
   get isLoading() {
     return this.$accessor.events.isLoading
@@ -489,6 +508,43 @@ export default class DialogCreateEvent extends Vue {
     if (!isValidDate(date)) return 'Invalid Date'
 
     return format(date, 'EEE, LLL d, yyyy')
+  }
+
+  get gradeRanges() {
+    const levels = [...this.meta.permissions.grades].sort((a, b) => a - b)
+
+    const ranges: number[][] = []
+
+    for (let i = 0, j = 0; i < levels.length; i++) {
+      if (!ranges[j]) {
+        ranges[j] = [levels[i]]
+      } else if (levels[i] === levels[i - 1] + 1) {
+        ranges[j].push(levels[i])
+      } else {
+        ranges[++j] = [levels[i]]
+      }
+    }
+
+    const chips = []
+
+    for (const range of ranges) {
+      switch (range.length) {
+        case 0:
+          break
+        case 1:
+          chips.push(this.grades[range[0]].text)
+          break
+        default:
+          chips.push(
+            `${this.grades[range[0]].short} - ${
+              this.grades[range[range.length - 1]].text
+            }`
+          )
+          break
+      }
+    }
+
+    return chips
   }
 
   async onSubmit() {

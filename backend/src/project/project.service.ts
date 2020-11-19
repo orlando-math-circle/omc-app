@@ -25,8 +25,6 @@ export class ProjectService {
       }
     }
 
-    console.log(project, jobs);
-
     await this.projectRepository.persist(project).flush();
 
     return project;

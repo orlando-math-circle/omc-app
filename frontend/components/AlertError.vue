@@ -1,13 +1,12 @@
 <template>
-  <!-- <v-alert
+  <v-alert
     type="error"
     border="left"
     icon="mdi-fire"
     transition="scale-transition"
   >
     {{ message }}
-  </v-alert> -->
-  <span>{{ error }}</span>
+  </v-alert>
 </template>
 
 <script lang="ts">

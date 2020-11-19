@@ -19,6 +19,7 @@ import { EmailModule } from '../src/email/email.module';
 import { EmailService } from '../src/email/email.service';
 import { FileModule } from '../src/file/file.module';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
+import { Sex } from '../src/user/enums/sex.enum';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { UserService } from '../src/user/user.service';
@@ -101,6 +102,7 @@ describe('Auth', () => {
       const createAccountDto: CreateAccountDto = {
         first: 'Jane',
         last: 'Doe',
+        sex: Sex.FEMALE,
         email: 'jane@doe.com',
         password: 'apple',
         dob: new Date(Date.UTC(1995, 0, 1)),
@@ -237,6 +239,7 @@ describe('Auth', () => {
       const dto: CreateUserDto = {
         first: 'Jacob',
         last: 'Doe',
+        sex: Sex.MALE,
         dob: new Date(Date.UTC(1995, 0, 1)),
       };
 

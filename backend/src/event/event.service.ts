@@ -506,6 +506,7 @@ export class EventService {
         location: recurrence.parentEvent.location,
         picture: recurrence.parentEvent.picture,
         color: recurrence.parentEvent.color,
+        permissions: recurrence.parentEvent.permissions,
         dtstart: date,
         dtend: addMinutes(date, durationInMinutes),
         author: recurrence.parentEvent.author,

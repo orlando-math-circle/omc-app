@@ -6,25 +6,19 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
 import { testSchema } from '../src/app.config';
-import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { CourseModule } from '../src/course/course.module';
-import { CreateCourseDto } from '../src/course/dto/create-course.dto';
-import { LatePaymentType } from '../src/course/enums/late-payment-type.enum';
-import { PaymentType } from '../src/course/enums/payment-type.enum';
 import { EmailModule } from '../src/email/email.module';
-import { CreateOrderDto } from '../src/event-registration/dtos/create-order.dto';
-import { CreateRegistrationDto } from '../src/event-registration/dtos/create-registration.dto';
 import { EventRegistrationModule } from '../src/event-registration/event-registration.module';
 import { EventModule } from '../src/event/event.module';
 import { FileModule } from '../src/file/file.module';
-import { CreateProjectDto } from '../src/project/dto/create-project.dto';
 import { ProjectModule } from '../src/project/project.module';
 import { MikroORMConstraintExceptionFilter } from '../src/shared/errors/mikro-orm.exception';
 import { SearchPipe } from '../src/shared/pipes/search.pipe';
 import { SortingPipe } from '../src/shared/pipes/sorting.pipe';
 import { UserModule } from '../src/user/user.module';
+import { VolunteerJobModule } from '../src/volunteer-job/volunteer-job.module';
 import { UserFixtures } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
@@ -55,6 +49,7 @@ describe('Event Registrations', () => {
         EventModule,
         CourseModule,
         ProjectModule,
+        VolunteerJobModule,
         EventRegistrationModule,
       ],
     }).compile();

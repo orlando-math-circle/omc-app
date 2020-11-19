@@ -1,12 +1,12 @@
 import { Type } from 'class-transformer';
 import {
-  IsBoolean,
   IsDate,
   IsOptional,
   IsString,
   Matches,
   ValidateNested,
 } from 'class-validator';
+import { EventPermissionsDto } from './event-permissions.dto';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
 export class CreateEventDto {
@@ -43,6 +43,11 @@ export class CreateEventDto {
   @IsDate()
   @Type(() => Date)
   readonly dtend?: Date;
+
+  @IsOptional()
+  @Type(() => EventPermissionsDto)
+  @ValidateNested()
+  readonly permissions?: EventPermissionsDto;
 
   /**
    * Recurring Events

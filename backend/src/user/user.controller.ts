@@ -9,7 +9,6 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { Account } from '../account/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
@@ -21,7 +20,6 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { FindUserDto } from './dtos/find-user.dto';
 import { FindUsersDto } from './dtos/find-users.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { UserValidationPipe } from './pipe/user-validator.pipe';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 
@@ -29,7 +27,6 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UsePipes(new UserValidationPipe())
   @UserAuth('user', 'create:own')
   @Post()
   create(@Acc() account: Account, @Body() createUserDto: CreateUserDto) {

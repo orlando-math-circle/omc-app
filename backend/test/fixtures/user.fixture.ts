@@ -5,7 +5,8 @@ import { isNumber } from 'lodash';
 import request from 'supertest';
 import { CreateAccountDto } from '../../src/account/dtos/create-account.dto';
 import { Roles } from '../../src/app.roles';
-import { Grades } from '../../src/user/enums/grade.enum';
+import { Grade } from '../../src/user/enums/grade.enum';
+import { Sex } from '../../src/user/enums/sex.enum';
 import { User } from '../../src/user/user.entity';
 
 export class UserFixtures {
@@ -30,7 +31,7 @@ export class UserFixtures {
     last = 'Doe',
     age = 25,
     email?: string,
-    grade?: Grades,
+    grade?: Grade,
   ) {
     const dob = set(sub(new Date(), { years: age }), {
       hours: 0,
@@ -44,6 +45,7 @@ export class UserFixtures {
       last,
       email: email || `${first}@${last}.com`.toLowerCase(),
       dob,
+      sex: Sex.FEMALE,
       password: 'apple',
       grade: grade || undefined,
     };

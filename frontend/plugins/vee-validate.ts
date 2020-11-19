@@ -81,12 +81,9 @@ extend('password', {
 
 extend('startdate', {
   params: ['target'],
-  validate: (value, { target }: any) => {
-    return (
-      parse(value, 'EEEE, LLLL do', new Date()) <=
-      parse(target, 'EEEE, LLLL do', new Date())
-    )
-  },
+  validate: (value, { target }: any) =>
+    parse(value, 'EEE, LLL d, yyyy', new Date()) <=
+    parse(target, 'EEE, LLL d, yyyy', new Date()),
   message: 'Start date cannot be after the end date.',
 })
 
