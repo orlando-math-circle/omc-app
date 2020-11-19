@@ -31,7 +31,7 @@
         <v-card-title class="event--heading">{{ event.name }}</v-card-title>
 
         <v-card-text>
-          <v-list dense>
+          <v-list>
             <v-list-item class="pl-0">
               <v-list-item-avatar class="icon--bg rounded">
                 <v-icon color="primary">mdi-calendar-clock</v-icon>
@@ -58,18 +58,50 @@
                 <v-icon color="primary">mdi-currency-usd</v-icon>
               </v-list-item-avatar>
 
-              <v-list-item-content>Event Fees</v-list-item-content>
-              <v-list-item-subtitle>${{ fee }} Per Person</v-list-item-subtitle>
+              <v-list-item-content>
+                <v-list-item-title>Event Fees</v-list-item-title>
+                <v-list-item-subtitle>
+                  ${{ fee }} Per Person
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item v-if="perms" class="pl-0">
+              <v-list-item-avatar class="icon--bg rounded">
+                <v-icon color="primary">mdi-school-outline</v-icon>
+              </v-list-item-avatar>
+
+              <v-list-item-content>
+                <v-list-item-title>{{ perms.title }}</v-list-item-title>
+                <v-list-item-subtitle>{{
+                  perms.subtitle
+                }}</v-list-item-subtitle>
+              </v-list-item-content>
             </v-list-item>
           </v-list>
         </v-card-text>
 
         <v-card-title class="event--heading">Description</v-card-title>
 
-        <v-card-text>{{ description }}</v-card-text>
+        <v-card-text>
+          <span>{{ description }}</span>
+
+          <v-list>
+            <v-list-item>
+              <v-list-item-avatar>
+                <!-- <v-img :src="" /> -->
+              </v-list-item-avatar>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
 
         <v-card-actions class="pa-3">
-          <v-btn v-if="isOpen" color="primary" rounded block>Register</v-btn>
+          <v-btn v-if="!$accessor.auth.isValidated" disabled rounded block
+            >Email Verification Required</v-btn
+          >
+          <v-btn v-else-if="canRegister" color="primary" rounded block
+            >Register</v-btn
+          >
 
           <v-btn v-else disabled rounded block>Registrations Closed</v-btn>
         </v-card-actions>
@@ -81,6 +113,8 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { isAfter } from 'date-fns'
+import { contiguousGradeRanges, gradeGroups } from '../../utils/events'
+import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { formatDate } from '~/utils/utilities'
 
 @Component({
@@ -97,6 +131,10 @@ import { formatDate } from '~/utils/utilities'
 export default class EventPage extends Vue {
   get event() {
     return this.$accessor.events.event!
+  }
+
+  get statuses() {
+    return this.$accessor.registrations.registrationStatuses
   }
 
   get picture() {
@@ -134,11 +172,39 @@ export default class EventPage extends Vue {
     }
   }
 
+  get perms() {
+    if (!this.event.permissions) return
+
+    const { sexes, grades } = this.event.permissions
+
+    let title: string | null = null
+    let subtitle: string | null = null
+
+    if (grades?.length) {
+      const ranges = gradeGroups(contiguousGradeRanges(grades))
+
+      title = ranges.join(', ')
+    } else {
+      title = 'All Grade Levels'
+    }
+
+    // If both male and female are selected, don't show anything.
+    if (sexes?.length === 1) {
+      const str = sexes[0] === Sex.MALE ? 'Boys Only' : 'Girls Only'
+
+      subtitle = str
+    } else {
+      subtitle = 'Boys and Girls'
+    }
+
+    return { title, subtitle }
+  }
+
   /**
    * Determines if the event is open to new registrations.
    * TODO: Implement override functionality.
    */
-  get isOpen() {
+  get canRegister() {
     // The event has already started.
     if (isAfter(new Date(), new Date(this.event.dtstart))) {
       return false

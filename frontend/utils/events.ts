@@ -1,0 +1,55 @@
+import { Grade } from '../../backend/src/user/enums/grade.enum'
+
+export const grades = [
+  { text: 'Kindergarten', short: 'K', value: Grade.KINDERGARTEN },
+  { text: '1st Grade', short: '1st', value: Grade.FIRST },
+  { text: '2nd Grade', short: '2nd', value: Grade.SECOND },
+  { text: '3rd Grade', short: '3rd', value: Grade.THIRD },
+  { text: '4th Grade', short: '4th', value: Grade.FOURTH },
+  { text: '5th Grade', short: '5th', value: Grade.FIFTH },
+  { text: '6th Grade', short: '6th', value: Grade.SIXTH },
+  { text: '7th Grade', short: '7th', value: Grade.SEVENTH },
+  { text: '8th Grade', short: '8th', value: Grade.EIGHTH },
+  { text: '9th Grade', short: '9th', value: Grade.NINTH },
+  { text: '10th Grade', short: '10th', value: Grade.TENTH },
+  { text: '11th Grade', short: '11th', value: Grade.ELEVENTH },
+  { text: '12th Grade', short: '12th', value: Grade.TWELFTH },
+]
+
+export const contiguousGradeRanges = (grades: Grade[]) => {
+  const levels = [...grades].sort((a, b) => a - b)
+  const ranges: Grade[][] = []
+
+  for (let i = 0, j = 0; i < levels.length; i++) {
+    if (!ranges[j]) {
+      ranges[j] = [levels[i]]
+    } else if (levels[i] === levels[i - 1] + 1) {
+      ranges[j].push(levels[i])
+    } else {
+      ranges[++j] = [levels[i]]
+    }
+  }
+
+  return ranges
+}
+
+export const gradeGroups = (ranges: Grade[][]) => {
+  const chips = []
+
+  for (const range of ranges) {
+    switch (range.length) {
+      case 0:
+        break
+      case 1:
+        chips.push(grades[range[0]].text)
+        break
+      default:
+        chips.push(
+          `${grades[range[0]].short} - ${grades[range[range.length - 1]].text}`
+        )
+        break
+    }
+  }
+
+  return chips
+}

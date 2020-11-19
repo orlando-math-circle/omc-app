@@ -35,16 +35,11 @@
                 rules="required"
                 required
                 outlined
-              >
-              </v-text-field-validated>
+              />
             </v-col>
           </v-row>
 
-          <birthday-picker
-            v-model="dto.dob"
-            class="mb-5"
-            outlined
-          ></birthday-picker>
+          <birthday-picker v-model="dto.dob" class="mb-5" outlined />
 
           <v-text-field-validated
             v-model="dto.email"
@@ -52,13 +47,15 @@
             rules="email"
             type="email"
             outlined
-          ></v-text-field-validated>
+          />
+
+          <v-v-select-validated v-model="dto.sex" label="Sex" :items="sexes" />
 
           <v-checkbox
             v-show="!occupation.professional"
             v-model="occupation.student"
             label="Are they a student?"
-          ></v-checkbox>
+          />
 
           <v-expand-transition>
             <div v-show="occupation.student">
@@ -68,7 +65,7 @@
                 :items="Object.keys(educationLevels)"
                 :rules="{ required: occupation.student }"
                 outlined
-              ></v-select-validated>
+              />
 
               <v-select-validated
                 v-model="occupation.educationLevel"
@@ -80,7 +77,7 @@
                 :items="educationLevels[occupation.education]"
                 :rules="{ required: occupation.student }"
                 outlined
-              ></v-select-validated>
+              />
 
               <v-text-field-validated
                 v-model="occupation.institution"
@@ -88,7 +85,7 @@
                 hint="Enter the name of your school or institution."
                 :rules="{ required: occupation.student }"
                 outlined
-              ></v-text-field-validated>
+              />
             </div>
           </v-expand-transition>
 
@@ -96,24 +93,18 @@
             v-show="!occupation.student"
             v-model="occupation.professional"
             label="Are they an industry professional?"
-          ></v-checkbox>
+          />
 
           <v-expand-transition>
             <div v-show="occupation.professional">
-              <v-text-field-validated
-                label="Profession (Optional)"
-                outlined
-              ></v-text-field-validated>
+              <v-text-field-validated label="Profession (Optional)" outlined />
 
-              <v-text-field-validated
-                label="Job Title (Optional)"
-                outlined
-              ></v-text-field-validated>
+              <v-text-field-validated label="Job Title (Optional)" outlined / >
 
               <v-text-field-validated
                 label="Company or Workplace (Optional)"
                 outlined
-              ></v-text-field-validated>
+              />
             </div>
           </v-expand-transition>
         </v-card-text>
@@ -138,6 +129,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { CreateUserDto } from '../../../backend/src/user/dtos/create-user.dto'
+import { Sex } from '../../../backend/src/user/enums/sex.enum'
 
 @Component
 export default class DialogUserCreate extends Vue {
@@ -148,6 +140,7 @@ export default class DialogUserCreate extends Vue {
     last: '',
     dob: '',
     email: '',
+    sex: Sex.MALE,
   }
 
   occupation = {
@@ -157,6 +150,17 @@ export default class DialogUserCreate extends Vue {
     educationLevel: 0,
     institution: '',
   }
+
+  sexes = [
+    {
+      text: 'Female',
+      value: 'female',
+    },
+    {
+      text: 'Male',
+      value: 'male',
+    },
+  ]
 
   educationLevels = {
     'Middle School': [
@@ -185,6 +189,7 @@ export default class DialogUserCreate extends Vue {
       first: this.dto.first,
       last: this.dto.last,
       dob: this.dto.dob,
+      sex: this.dto.sex,
       email: this.dto.email.length ? this.dto.email : undefined,
       grade: this.occupation.student
         ? this.occupation.educationLevel

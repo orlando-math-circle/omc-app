@@ -4,9 +4,13 @@
       <h2 class="headline">Upcoming Events</h2>
 
       <v-row>
-        <v-col>
+        <v-col class="py-0">
           <v-slide-group class="mb-4">
-            <v-slide-item v-for="event in events.slice(0, 10)" :key="event.id">
+            <v-slide-item
+              v-for="event in events.slice(0, 10)"
+              :key="event.id"
+              class="padded-block"
+            >
               <event-block
                 :event="event"
                 :link="`/events/${event.id}`"
@@ -97,6 +101,10 @@ export default class HomePage extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.padded-block {
+  margin: 15px 0;
+}
+
 .headline {
   font-weight: 700 !important;
 }

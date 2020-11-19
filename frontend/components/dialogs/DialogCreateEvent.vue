@@ -140,7 +140,7 @@
 
           <v-list-item-content>
             <v-row>
-              <v-col cols="6">
+              <v-col cols="12">
                 <v-select
                   v-model="meta.permissions.grades"
                   :items="grades"
@@ -151,14 +151,14 @@
                   chips
                 >
                   <template #selection="{ index }">
-                    <v-chip v-if="index < gradeRanges.length" ripple>
-                      {{ gradeRanges[index] }}
+                    <v-chip v-if="index < gradeGroups.length" ripple>
+                      {{ gradeGroups[index] }}
                     </v-chip>
                   </template>
                 </v-select>
               </v-col>
 
-              <v-col cols="6">
+              <v-col cols="12">
                 <v-select
                   v-model="meta.permissions.sexes"
                   :items="sexes"
@@ -344,6 +344,7 @@ import { Project } from '../../../backend/src/project/project.entity'
 import RecurrenceDialog from '../events/RecurrenceDialog.vue'
 import { Uploads } from '../../interfaces/uploads.interface'
 import DialogForm from './DialogForm.vue'
+import { gradeGroups, contiguousGradeRanges, grades } from '~/utils/events'
 import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
 import { Course } from '~/../backend/src/course/course.entity'
@@ -365,6 +366,7 @@ export default class DialogCreateEvent extends Vue {
   @Prop({ default: format(roundDate(new Date(), 30), 'HH:mm') }) time!: string
 
   success = false
+  grades = grades
 
   dates = {
     allday: false,
@@ -393,22 +395,6 @@ export default class DialogCreateEvent extends Vue {
   sexes = [
     { text: 'Male', value: 'male' },
     { text: 'Female', value: 'female' },
-  ]
-
-  grades = [
-    { text: 'Kindergarten', short: 'K', value: Grade.KINDERGARTEN },
-    { text: '1st Grade', short: '1st', value: Grade.FIRST },
-    { text: '2nd Grade', short: '2nd', value: Grade.SECOND },
-    { text: '3rd Grade', short: '3rd', value: Grade.THIRD },
-    { text: '4th Grade', short: '4th', value: Grade.FOURTH },
-    { text: '5th Grade', short: '5th', value: Grade.FIFTH },
-    { text: '6th Grade', short: '6th', value: Grade.SIXTH },
-    { text: '7th Grade', short: '7th', value: Grade.SEVENTH },
-    { text: '8th Grade', short: '8th', value: Grade.EIGHTH },
-    { text: '9th Grade', short: '9th', value: Grade.NINTH },
-    { text: '10th Grade', short: '10th', value: Grade.TENTH },
-    { text: '11th Grade', short: '11th', value: Grade.ELEVENTH },
-    { text: '12th Grade', short: '12th', value: Grade.TWELFTH },
   ]
 
   rrule = null as EventRecurrenceDto | null
@@ -447,6 +433,10 @@ export default class DialogCreateEvent extends Vue {
 
   get isLoading() {
     return this.$accessor.events.isLoading
+  }
+
+  get gradeGroups() {
+    return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
   }
 
   beforeMount() {
@@ -508,43 +498,6 @@ export default class DialogCreateEvent extends Vue {
     if (!isValidDate(date)) return 'Invalid Date'
 
     return format(date, 'EEE, LLL d, yyyy')
-  }
-
-  get gradeRanges() {
-    const levels = [...this.meta.permissions.grades].sort((a, b) => a - b)
-
-    const ranges: number[][] = []
-
-    for (let i = 0, j = 0; i < levels.length; i++) {
-      if (!ranges[j]) {
-        ranges[j] = [levels[i]]
-      } else if (levels[i] === levels[i - 1] + 1) {
-        ranges[j].push(levels[i])
-      } else {
-        ranges[++j] = [levels[i]]
-      }
-    }
-
-    const chips = []
-
-    for (const range of ranges) {
-      switch (range.length) {
-        case 0:
-          break
-        case 1:
-          chips.push(this.grades[range[0]].text)
-          break
-        default:
-          chips.push(
-            `${this.grades[range[0]].short} - ${
-              this.grades[range[range.length - 1]].text
-            }`
-          )
-          break
-      }
-    }
-
-    return chips
   }
 
   async onSubmit() {

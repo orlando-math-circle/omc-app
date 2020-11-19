@@ -1,14 +1,15 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { UpdateEventDto } from '@backend/event/dtos/update-event.dto'
 import { UpdateEventsDto } from '@backend/event/dtos/update-events.dto'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { CreateEventDto } from '../../backend/src/event/dtos/create-event.dto'
 import { FindAllEventsDto } from '../../backend/src/event/dtos/find-all-events.dto'
 import { Event } from '../../backend/src/event/event.entity'
+import { Grade } from '../../backend/src/user/enums/grade.enum'
 import { CalendarEvent } from '../interfaces/calendar-event.interface'
+import { DTO } from '../interfaces/date-to-string.interface'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { parseAxiosError, toLocalISO } from '../utils/utilities'
-import { DTO } from '../interfaces/date-to-string.interface'
 
 export type DTOEvent = DTO<Event>
 
