@@ -185,11 +185,7 @@ export default class EventPage extends Vue {
   }
 
   get fee(): string | undefined {
-    if (this.event.course?.fee) {
-      return this.event.course.fee
-    } else if (this.event.fee) {
-      return this.event.fee
-    }
+    return this.event?.fee?.amount || this.event?.course?.fee?.amount
   }
 
   get perms() {
