@@ -4,7 +4,7 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
-import { CreateEventDto } from '../dtos/create-event.dto';
+import { CreateEventDto } from '../dto/create-event.dto';
 
 @Injectable()
 export class EventValidationPipe implements PipeTransform {

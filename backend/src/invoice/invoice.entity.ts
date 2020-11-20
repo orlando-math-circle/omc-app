@@ -7,6 +7,7 @@ import {
   Property,
 } from '@mikro-orm/core';
 import { Course } from '../course/course.entity';
+import { EventFee } from '../event-fee/event-fee.entity';
 import { Event } from '../event/event.entity';
 import { User } from '../user/user.entity';
 import { InvoiceStatus } from './enums/invoice-status.enum';
@@ -26,14 +27,13 @@ export class Invoice extends BaseEntity<Invoice, 'id'> {
   gross: string;
 
   @Property()
-  fee: string;
+  amount: string;
 
   @Property()
   net: string;
 
-  /**
-   * Relationships
-   */
+  @ManyToOne(() => EventFee)
+  fee!: EventFee;
 
   @ManyToOne(() => Event, { nullable: true })
   event?: Event;

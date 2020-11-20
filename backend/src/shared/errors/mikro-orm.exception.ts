@@ -1,4 +1,5 @@
 import {
+  ForeignKeyConstraintViolationException,
   NotNullConstraintViolationException,
   ServerException,
   UniqueConstraintViolationException,
@@ -11,13 +12,15 @@ import { Response } from 'express';
  * violations and inform the user through a 400 BadRequest error.
  */
 
-@Catch(UniqueConstraintViolationException, NotNullConstraintViolationException)
+@Catch(
+  UniqueConstraintViolationException,
+  NotNullConstraintViolationException,
+  ForeignKeyConstraintViolationException,
+)
 export class MikroORMConstraintExceptionFilter implements ExceptionFilter {
   catch(exception: ServerException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-
-    console.log(exception);
 
     response
       .status(400)
@@ -28,6 +31,8 @@ export class MikroORMConstraintExceptionFilter implements ExceptionFilter {
     switch (code) {
       case '23502':
         return 'SQL not null constraint violation';
+      case '23503':
+        return 'SQL Foreign Key Constraint Violation';
       case '23505':
         return 'SQL unique constraint violation';
       default:

@@ -3,6 +3,7 @@ import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { NotFoundException } from '@nestjs/common';
 import { Account } from '../src/account/account.entity';
 import { Course } from '../src/course/course.entity';
+import { EventFee } from '../src/event-fee/event-fee.entity';
 import { EventRegistration } from '../src/event-registration/event-registration.entity';
 import { EventRecurrence } from '../src/event/event-recurrence.entity';
 import { Event } from '../src/event/event.entity';
@@ -21,6 +22,7 @@ export const MikroORMTestingConfig: Options = {
     Account,
     User,
     Event,
+    EventFee,
     EventRecurrence,
     EventRegistration,
     Invoice,

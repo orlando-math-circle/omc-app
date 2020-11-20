@@ -2,6 +2,7 @@ import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import { Populate, PopulateFail } from '../app.utils';
+import { EventFee } from '../event-fee/event-fee.entity';
 import { Course } from './course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -18,8 +19,13 @@ export class CourseService {
    *
    * @param createCourseDto CreateCourseDto
    */
-  async create(createCourseDto: CreateCourseDto) {
-    const course = this.courseRepository.create(createCourseDto);
+  async create({ fee, ...meta }: CreateCourseDto) {
+    const course = this.courseRepository.create(meta);
+
+    if (fee) {
+      course.fee = new EventFee(fee);
+      course.fee.populated();
+    }
 
     await this.courseRepository.persist(course).flush();
 

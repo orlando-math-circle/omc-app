@@ -4,15 +4,11 @@ import {
   BadRequestException,
   ForbiddenException,
   HttpException,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Account } from '../account/account.entity';
 import { Populate } from '../app.utils';
 import { AccessService } from '../auth/access.service';
-import { LatePaymentType } from '../course/enums/late-payment-type.enum';
-import { PaymentType } from '../course/enums/payment-type.enum';
-import { Event } from '../event/event.entity';
 import { EventService } from '../event/event.service';
 import { CreateInvoiceDto } from '../invoice/dtos/create-invoice.dto';
 import { InvoiceStatus } from '../invoice/enums/invoice-status.enum';
@@ -20,16 +16,20 @@ import { InvoiceService } from '../invoice/invoice.service';
 import { PurchaseUnitRequest } from '../paypal/interfaces/orders/purchase-unit.interface';
 import { PayPalService } from '../paypal/paypal.service';
 import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { EventRegistrationStatus } from './dtos/event-registration-status.dto';
 import { EventRegistration } from './event-registration.entity';
 
 export class EventRegistrationService {
   constructor(
     @InjectRepository(EventRegistration)
-    private readonly regRepository: EntityRepository<EventRegistration>,
+    private readonly registrationRepository: EntityRepository<
+      EventRegistration
+    >,
     private readonly invoiceService: InvoiceService,
     private readonly paypalService: PayPalService,
     private readonly eventService: EventService,
+    private readonly userService: UserService,
     private readonly ac: AccessService,
   ) {}
 
@@ -38,138 +38,125 @@ export class EventRegistrationService {
    * and have the necessary payments already completed.
    *
    * @param eventId Id of the event to register the user(s) to.
-   * @param users Array of users to register.
+   * @param userIds Array of users to register.
    * @param author User initiating the registration.
    * @param account Account of the user initiating the registration.
    */
   public async create(
     eventId: number,
-    users: number[],
+    userIds: number[],
     author: User,
     account: Account,
   ) {
-    if (account.primaryUser.emailVerified === false) {
-      throw new ForbiddenException('Please validate your email');
+    if (!account.primaryUser.emailVerified) {
+      throw new ForbiddenException(
+        'Email verification required to register to events',
+      );
     }
 
-    const registrations: EventRegistration[] = [];
-    const event = await this.eventService.findOneOrFail(eventId, ['course']);
+    const event = await this.eventService.findOneOrFail(eventId, [
+      'course.events',
+      'fee',
+    ]);
 
+    if (event.isClosed) {
+      throw new BadRequestException('Event registrations are closed');
+    }
+
+    if (event?.course.isClosed) {
+      throw new BadRequestException('Course registrations are closed');
+    }
+
+    // Find any invoices for the provided users.
     await this.eventService.populate(
       event,
-      ['course.invoices', 'course.events', 'invoices'],
+      ['fee.invoices', 'course.invoices'],
       {
-        course: {
-          invoices: { user: users },
+        fee: {
+          invoices: { user: userIds },
         },
-        invoices: { user: users },
+        course: {
+          invoices: { user: userIds },
+        },
       },
     );
 
-    // If the author has admin privileges, they can force a registration.
-    if (this.ac.can(author, 'create:any', 'event-registration')) return;
+    const registrations: EventRegistration[] = [];
+    const users = account.users.getItems();
+    const fee = event.fee || event.course?.fee;
 
-    for (const userId of users) {
-      const user = account.users.getItems().find((user) => user.id === userId);
+    for (const userId of userIds) {
+      let user = users.find((user) => user.id === userId);
 
-      // Ensure the user provided belong to the account.
       if (!user) {
-        throw new BadRequestException(`User ${userId} not found on account`);
-      }
-
-      // Fee-waived students skip the invoice checks.
-      if (user.feeWaived) return;
-
-      if (event.course) {
-        switch (event.course.paymentType) {
-          case PaymentType.ALL:
-            const courseInvoice = event.course.invoices
-              .getItems()
-              .find((invoice) => invoice.user.id === userId);
-
-            if (!courseInvoice) {
-              throw new HttpException('Course invoice not found', 402);
-            }
-            break;
-          case PaymentType.SINGLE:
-            const eventInvoice = event.invoices
-              .getItems()
-              .find((invoice) => invoice.user.id === userId);
-
-            if (!eventInvoice) {
-              throw new HttpException('Event invoice not found', 402);
-            }
-            break;
-          case PaymentType.FREE:
-            break;
-          default:
-            throw new InternalServerErrorException(
-              'Unexpected course payment type',
-            );
-        }
-      } else if (event.fee) {
-        const eventInvoice = event.invoices
-          .getItems()
-          .find((invoice) => invoice.user.id === userId);
-
-        if (!eventInvoice) {
-          throw new HttpException('Event invoice not found', 402);
+        if (this.ac.can(author, 'create:any', 'event-registration')) {
+          user = await this.userService.findOneOrFail(user);
+        } else {
+          throw new BadRequestException(`User ${userId} not found on account`);
         }
       }
 
-      // Check the permissions, incredibly incomplete, requires talk with clients.
-      // if (event.permissions) {
-      //   // Maybe extract this to a method on the entity class.
-      //   const canRegister = this.canRegister(event.permissions, user);
+      if (!event.hasPermission(user)) {
+        throw new ForbiddenException();
+      }
 
-      //   if (!canRegister) throw new ForbiddenException();
-      // }
+      if (fee && !user.feeWaived) {
+        const invoices = event.fee ? event.invoices : event.course.invoices;
 
-      registrations.push(this.regRepository.create({ user, event }));
+        const invoice = invoices.getItems().find((i) => i.user.id === userId);
+
+        if (!invoice) {
+          throw new HttpException('Payment required', 402);
+        }
+      }
+
+      registrations.push(this.registrationRepository.create({ user, event }));
     }
 
-    await this.regRepository.persist(registrations).flush();
+    await this.registrationRepository.persist(registrations).flush();
 
     return registrations;
   }
 
+  /**
+   * Composite method for returning the status of each user on an account
+   * for a specific event such as if each user is eligible and if they
+   * have already paid for the event.
+   *
+   * @param eventId ID of the event.
+   * @param account Account to retrive the statuses for.
+   */
   public async getRegistrationStatus(eventId: number, account: Account) {
     const userIds = account.users.getIdentifiers();
-    const event = await this.eventService.findOneOrFail(eventId);
+    const event = await this.eventService.findOneOrFail(eventId, [
+      'course.events',
+      'fee',
+    ]);
 
     await this.eventService.populate(
       event,
-      ['course.invoices', 'course.events', 'invoices', 'registrations'],
+      ['fee.invoices', 'course.invoices', 'registrations'],
       {
+        fee: {
+          invoices: { user: userIds },
+        },
         course: {
           invoices: { user: userIds },
         },
-        invoices: { user: userIds },
         registrations: { user: userIds },
       },
     );
 
+    const fee = event.fee || event.course?.fee;
     const retval: EventRegistrationStatus[] = [];
+
     for (const user of account.users) {
       let hasInvoice: boolean;
 
-      const hasFee =
-        event.fee ||
-        (event.course && event.course.paymentType !== PaymentType.FREE);
+      if (fee) {
+        const invoices = event.fee ? event.invoices : event.course.invoices;
 
-      if (hasFee) {
-        if (event.course && event.course.paymentType === PaymentType.ALL) {
-          hasInvoice = !!event.course.invoices
-            .getItems()
-            .find((invoice) => invoice.user.id === user.id);
-        } else if (
-          (event.course && event.course.paymentType === PaymentType.SINGLE) ||
-          event.fee
-        ) {
-          hasInvoice = !!event.invoices
-            .getItems()
-            .find((invoice) => invoice.user.id === user.id);
-        }
+        hasInvoice = !!invoices.getItems().find((i) => i.user.id === user.id);
       }
 
       const hasRegistration = !!event.registrations
@@ -179,12 +166,13 @@ export class EventRegistrationService {
       retval.push({
         user,
         eligible: event.hasPermission(user),
-        paid: hasFee ? hasInvoice : undefined,
+        paid: fee ? hasInvoice : undefined,
         registered: hasRegistration,
       });
     }
 
-    return retval;
+    // Sort by eligibility with type coercion.
+    return retval.sort((a, b) => Number(a.eligible) - Number(b.eligible));
   }
 
   /**
@@ -194,11 +182,13 @@ export class EventRegistrationService {
    * @param users Users for registration to generate orders.
    */
   public async createOrder(eventId: number, account: Account, users: number[]) {
-    if (account.primaryUser.emailVerified === false) {
+    if (!account.primaryUser.emailVerified) {
       throw new ForbiddenException('Please validate your email');
     }
 
     const event = await this.eventService.findOneOrFail(eventId, [
+      'fee',
+      'course.fee',
       'course.events',
     ]);
 
@@ -223,10 +213,10 @@ export class EventRegistrationService {
       throw new BadRequestException('Invoice already exists');
     }
 
-    const cost = this.getEventCost(event);
+    const fee = event.fee || event.course?.fee;
 
-    if (!cost) {
-      throw new BadRequestException('Event has no cost');
+    if (!fee) {
+      throw new BadRequestException('Event has no fee');
     }
 
     const purchaseUnits: PurchaseUnitRequest[] = [];
@@ -245,7 +235,7 @@ export class EventRegistrationService {
 
       purchaseUnits.push({
         reference_id: id.toString(),
-        amount: { currency_code: 'USD', value: cost },
+        amount: { currency_code: 'USD', value: fee.amount },
       });
     }
 
@@ -262,16 +252,16 @@ export class EventRegistrationService {
   public async captureOrder(orderId: string, eventId: number) {
     const [order, event] = await Promise.all([
       this.paypalService.getOrder(orderId),
-      this.eventService.findOneOrFail(eventId, ['course.events']),
+      this.eventService.findOneOrFail(eventId, ['fee', 'course.events']),
     ]);
 
-    const cost = this.getEventCost(event);
+    const fee = event.fee || event.course?.fee;
 
-    if (!cost) {
-      throw new BadRequestException('Event has no cost');
+    if (!fee) {
+      throw new BadRequestException('Event has no fee');
     }
 
-    this.paypalService.validateCapture(order, 'APPROVED', cost);
+    this.paypalService.validateCapture(order, 'APPROVED', fee.amount);
 
     // WARNING: If this completes but subsequent code fails, money is taken but no registration.
     const capturedOrder = await this.paypalService.captureOrder(orderId);
@@ -280,74 +270,37 @@ export class EventRegistrationService {
     for (const purchase_unit of capturedOrder.purchase_units) {
       const capture = purchase_unit.payments.captures[0];
 
-      createInvoiceDtos.push({
-        status: InvoiceStatus.COMPLETED,
-        id: capture.id,
-        fee: capture.seller_receivable_breakdown.paypal_fee.value,
-        gross: capture.seller_receivable_breakdown.gross_amount.value,
-        net: capture.seller_receivable_breakdown.net_amount.value,
-        purchasedAt: new Date(capture.create_time),
-        event:
-          event.course?.paymentType === PaymentType.SINGLE ? event : undefined,
-        course:
-          event.course?.paymentType === PaymentType.ALL
-            ? event.course
-            : undefined,
-        user: +purchase_unit.reference_id,
-      });
+      createInvoiceDtos.push(
+        Object.assign(
+          {
+            status: InvoiceStatus.COMPLETED,
+            id: capture.id,
+            fee: capture.seller_receivable_breakdown.paypal_fee.value,
+            gross: capture.seller_receivable_breakdown.gross_amount.value,
+            net: capture.seller_receivable_breakdown.net_amount.value,
+            purchasedAt: new Date(capture.create_time),
+            user: +purchase_unit.reference_id,
+          },
+          event.fee && { event },
+          event.course?.fee && { course: event.course },
+        ),
+      );
     }
 
     return this.invoiceService.batchCreate(createInvoiceDtos);
-  }
-
-  /**
-   * Gets the cost of an event from its fee or associated course.
-   *
-   * @param event Event the fee will be extracted from.
-   */
-  private getEventCost(event: Event) {
-    // Events without a course are single-fee or free.
-    if (!event.course) {
-      return event.fee;
-    }
-
-    const isLate = event.course.events[0].isStarted;
-
-    if (isLate) {
-      switch (event.course.latePaymentType) {
-        case LatePaymentType.DENY:
-          throw new BadRequestException('Late registration is disabled');
-        case LatePaymentType.LATEFEE:
-          return event.course.lateFee;
-        case LatePaymentType.DEFAULT:
-          break; // Fall through to normal payment method.
-        default:
-          throw new BadRequestException('Unknown late payment mode');
-      }
-    }
-
-    switch (event.course.paymentType) {
-      case PaymentType.FREE:
-        return null;
-      case PaymentType.ALL:
-      case PaymentType.SINGLE:
-        return event.course.fee;
-      default:
-        throw new BadRequestException('Unknown payment mode');
-    }
   }
 
   findOne(
     where: FilterQuery<EventRegistration>,
     populate?: Populate<EventRegistration>,
   ) {
-    return this.regRepository.findOne(where, populate);
+    return this.registrationRepository.findOne(where, populate);
   }
 
   findOwnRegistration(
     where: Omit<FilterQuery<EventRegistration>, 'user'>,
     populate?: any,
   ) {
-    return this.regRepository.findOne(where, populate);
+    return this.registrationRepository.findOne(where, populate);
   }
 }

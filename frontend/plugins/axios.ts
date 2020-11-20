@@ -27,7 +27,11 @@ const plugin: Plugin = ({ $axios, app }) => {
       return
     }
 
-    console.log(error.config)
+    // Issue with the current access token.
+    if (error.response?.status === 401) {
+      app.$accessor.auth.logout()
+      app.router?.push('/')
+    }
 
     console.error(
       `${error.config.method}: ${

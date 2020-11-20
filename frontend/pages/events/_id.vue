@@ -85,14 +85,6 @@
 
         <v-card-text>
           <span>{{ description }}</span>
-
-          <v-list>
-            <v-list-item>
-              <v-list-item-avatar>
-                <!-- <v-img :src="" /> -->
-              </v-list-item-avatar>
-            </v-list-item>
-          </v-list>
         </v-card-text>
 
         <v-card-actions class="pa-3">
@@ -105,6 +97,34 @@
 
           <v-btn v-else disabled rounded block>Registrations Closed</v-btn>
         </v-card-actions>
+      </v-card>
+    </v-col>
+
+    <!-- User Selections -->
+    <v-col cols="12">
+      <v-card v-if="canRegister">
+        <v-card-title class="event--heading">Registration</v-card-title>
+
+        <v-card-text>
+          <v-list>
+            <v-list-item v-for="status in statuses" :key="status.user.id">
+              <v-list-item-avatar>
+                <!-- <v-img :src="" /> -->
+              </v-list-item-avatar>
+
+              <v-list-item-content>
+                <v-list-item-title>{{ status.user.name }}</v-list-item-title>
+                <v-list-item-subtitle>{{ status }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+      </v-card>
+
+      <v-card v-else>
+        <v-card-title class="event--heading">Registrations Closed</v-card-title>
+
+        <v-card-text>This event is no longer accepting </v-card-text>
       </v-card>
     </v-col>
   </v-row>

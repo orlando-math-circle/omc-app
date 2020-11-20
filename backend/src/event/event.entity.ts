@@ -2,21 +2,28 @@ import {
   BaseEntity,
   Collection,
   Entity,
+  Enum,
   JsonType,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import { BadRequestException } from '@nestjs/common';
-import { differenceInMinutes, isAfter } from 'date-fns';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { addMinutes, differenceInMinutes, isAfter, isBefore } from 'date-fns';
 import { getMinutesDiff } from '../app.utils';
 import { Course } from '../course/course.entity';
+import { EventFee } from '../event-fee/event-fee.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { Invoice } from '../invoice/invoice.entity';
 import { Project } from '../project/project.entity';
 import { User } from '../user/user.entity';
-import { EventPermissionsDto } from './dtos/event-permissions.dto';
+import { EventPermissionsDto } from './dto/event-permissions.dto';
+import { EventTimeThreshold } from './enums/event-time-threshold.enum';
 import { EventRecurrence } from './event-recurrence.entity';
 
 @Entity()
@@ -42,8 +49,17 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ type: JsonType, nullable: true })
   permissions?: EventPermissionsDto;
 
-  @Property({ nullable: true })
-  fee?: string;
+  @Enum(() => EventTimeThreshold)
+  cutoffThreshold: EventTimeThreshold = EventTimeThreshold.AFTER_END;
+
+  @Property()
+  cutoffOffset: number = 0;
+
+  @Enum(() => EventTimeThreshold)
+  lateThreshold: EventTimeThreshold = EventTimeThreshold.AFTER_START;
+
+  @Property()
+  lateOffset: number = 0;
 
   @Property({ onUpdate: () => new Date(), hidden: true })
   updatedAt: Date = new Date();
@@ -64,15 +80,14 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ nullable: true })
   originalStart?: Date;
 
-  /**
-   * Relationships
-   */
-
-  @ManyToOne(() => EventRecurrence, { nullable: true })
-  recurrence?: EventRecurrence;
+  @OneToOne(() => EventFee, (ef) => ef.event, { owner: true, nullable: true })
+  fee?: EventFee;
 
   @OneToMany(() => Invoice, (i) => i.event)
   invoices = new Collection<Invoice>(this);
+
+  @ManyToOne(() => EventRecurrence, { nullable: true })
+  recurrence?: EventRecurrence;
 
   @OneToMany(() => EventRegistration, (r) => r.event)
   registrations = new Collection<EventRegistration>(this);
@@ -87,24 +102,83 @@ export class Event extends BaseEntity<Event, 'id'> {
   author!: User;
 
   /**
-   * Getters
+   * @returns If the event has started.
    */
-
   get isStarted() {
-    return new Date() > this.dtstart;
+    return isAfter(this.dtstart, new Date());
   }
 
+  /**
+   * @returns If the event has ended.
+   */
   get isEnded() {
     return isAfter(new Date(), this.dtend);
   }
 
+  /**
+   * @returns Duration of the event in minutes.
+   */
   get duration() {
     return differenceInMinutes(this.dtend, this.dtstart);
   }
 
   /**
-   * Methods
+   * @returns If the event is accepting new registrations.
    */
+  get isClosed() {
+    const started = this.isStarted;
+    const ended = this.isEnded;
+
+    // There is currently no "too early" registration limitation.
+    if (!started) return false;
+
+    switch (this.cutoffThreshold) {
+      case EventTimeThreshold.NEVER:
+        return false;
+      case EventTimeThreshold.AFTER_START:
+        return started;
+      case EventTimeThreshold.AFTER_END:
+        return ended;
+      case EventTimeThreshold.OFFSET_START:
+        const startOffset = addMinutes(this.dtstart, this.cutoffOffset);
+
+        return isBefore(startOffset, new Date());
+      case EventTimeThreshold.OFFSET_END:
+        const endOffset = addMinutes(this.dtend, this.cutoffOffset);
+
+        return isBefore(endOffset, new Date());
+      default:
+        throw new InternalServerErrorException(
+          `Unexpected registration cutoff threshold ${this.cutoffThreshold}`,
+        );
+    }
+  }
+
+  get isLate() {
+    const started = this.isStarted;
+    const ended = this.isEnded;
+
+    switch (this.lateThreshold) {
+      case EventTimeThreshold.NEVER:
+        return false;
+      case EventTimeThreshold.AFTER_START:
+        return started;
+      case EventTimeThreshold.AFTER_END:
+        return ended;
+      case EventTimeThreshold.OFFSET_START:
+        const startOffset = addMinutes(this.dtstart, this.lateOffset);
+
+        return isBefore(startOffset, new Date());
+      case EventTimeThreshold.OFFSET_END:
+        const endOffset = addMinutes(this.dtend, this.lateOffset);
+
+        return isBefore(endOffset, new Date());
+      default:
+        throw new InternalServerErrorException(
+          `Unexpected registration late threshold ${this.lateThreshold}`,
+        );
+    }
+  }
 
   /**
    * Returns the most accurate starting time for an event.

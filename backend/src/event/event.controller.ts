@@ -12,10 +12,10 @@ import {
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
-import { CreateEventDto } from './dtos/create-event.dto';
-import { FindAllEventsDto } from './dtos/find-all-events.dto';
-import { UpdateEventDto } from './dtos/update-event.dto';
-import { UpdateEventsDto } from './dtos/update-events.dto';
+import { CreateEventDto } from './dto/create-event.dto';
+import { FindAllEventsDto } from './dto/find-all-events.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventsDto } from './dto/update-events.dto';
 import { EventService } from './event.service';
 import { EventValidationPipe } from './pipes/event-validation.pipe';
 

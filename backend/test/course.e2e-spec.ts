@@ -12,8 +12,7 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { CourseModule } from '../src/course/course.module';
 import { CreateCourseDto } from '../src/course/dto/create-course.dto';
 import { UpdateCourseDto } from '../src/course/dto/update-course.dto';
-import { LatePaymentType } from '../src/course/enums/late-payment-type.enum';
-import { PaymentType } from '../src/course/enums/payment-type.enum';
+import { LateFeeMode } from '../src/event-fee/enums/late-fee-mode.enum';
 import { FileModule } from '../src/file/file.module';
 import { CreateProjectDto } from '../src/project/dto/create-project.dto';
 import { ProjectModule } from '../src/project/project.module';
@@ -130,9 +129,10 @@ describe('Courses', () => {
       const createCourseDto: CreateCourseDto = {
         name: 'Test Course A',
         description: 'Example description.',
-        paymentType: PaymentType.ALL,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '12.34',
+        fee: {
+          lateMode: LateFeeMode.DEFAULT,
+          amount: '12.34',
+        },
         project: 1,
       };
 
@@ -147,9 +147,10 @@ describe('Courses', () => {
         id: 1,
         name: 'Test Course A',
         description: 'Example description.',
-        paymentType: PaymentType.ALL,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '12.34',
+        fee: {
+          lateMode: LateFeeMode.DEFAULT,
+          amount: '12.34',
+        },
         events: [],
         invoices: [],
         project: 1,
@@ -169,10 +170,7 @@ describe('Courses', () => {
         id: 1,
         name: 'Test Course A',
         description: 'Example description.',
-        paymentType: PaymentType.ALL,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '12.34',
-        lateFee: null,
+        fee: 1,
         project: 1,
       });
     });
@@ -190,9 +188,10 @@ describe('Courses', () => {
       const createCourseDto: CreateCourseDto = {
         name: 'Test Course B',
         description: 'Example description.',
-        paymentType: PaymentType.SINGLE,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '43.21',
+        fee: {
+          lateMode: LateFeeMode.DEFAULT,
+          amount: '43.21',
+        },
         project: 1,
       };
 
@@ -212,20 +211,14 @@ describe('Courses', () => {
         id: 1,
         name: 'Test Course A',
         description: 'Example description.',
-        paymentType: PaymentType.ALL,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '12.34',
-        lateFee: null,
+        fee: 1,
         project: 1,
       });
       expect(courses.body[0][1]).toMatchObject({
         id: 2,
         name: 'Test Course B',
         description: 'Example description.',
-        paymentType: PaymentType.SINGLE,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '43.21',
-        lateFee: null,
+        fee: 2,
         project: 1,
       });
       expect(courses.body[1]).toBe(2);
@@ -243,10 +236,7 @@ describe('Courses', () => {
         id: 2,
         name: 'Test Course B',
         description: 'Example description.',
-        paymentType: PaymentType.SINGLE,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '43.21',
-        lateFee: null,
+        fee: 2,
         project: 1,
       });
       expect(courses.body[1]).toBe(1);
@@ -259,16 +249,13 @@ describe('Courses', () => {
         .expect(200);
 
       expect(courses.body).toBeDefined();
-      expect(courses.body).toEqual([
+      expect(courses.body).toMatchObject([
         [
           {
             id: 2,
             name: 'Test Course B',
             description: 'Example description.',
-            paymentType: PaymentType.SINGLE,
-            latePaymentType: LatePaymentType.DENY,
-            fee: '43.21',
-            lateFee: null,
+            fee: 2,
             project: 1,
           },
         ],
@@ -291,14 +278,11 @@ describe('Courses', () => {
         .expect(200);
 
       expect(course.body).toBeDefined();
-      expect(course.body).toEqual({
+      expect(course.body).toMatchObject({
         id: 2,
         name: updateCourseDto.name,
         description: updateCourseDto.description,
-        paymentType: PaymentType.SINGLE,
-        latePaymentType: LatePaymentType.DENY,
-        fee: '43.21',
-        lateFee: null,
+        fee: 2,
         project: 1,
       });
     });

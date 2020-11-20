@@ -1,11 +1,14 @@
 import { Type } from 'class-transformer';
 import {
   IsDate,
+  IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
-  Matches,
   ValidateNested,
 } from 'class-validator';
+import { CreateEventFeeDto } from '../../event-fee/dto/create-event-fee.dto';
+import { EventTimeThreshold } from '../enums/event-time-threshold.enum';
 import { EventPermissionsDto } from './event-permissions.dto';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
@@ -30,9 +33,25 @@ export class CreateEventDto {
   readonly color?: string;
 
   @IsOptional()
-  @IsString()
-  @Matches(/^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$/)
-  readonly fee?: string;
+  @Type(() => EventPermissionsDto)
+  @ValidateNested()
+  readonly permissions?: EventPermissionsDto;
+
+  @IsOptional()
+  @IsEnum(EventTimeThreshold)
+  readonly cutoffThreshold?: EventTimeThreshold;
+
+  @IsOptional()
+  @IsNumber()
+  readonly cutoffOffset?: number;
+
+  @IsOptional()
+  @IsEnum(EventTimeThreshold)
+  readonly lateThreshold?: EventTimeThreshold;
+
+  @IsOptional()
+  @IsNumber()
+  readonly lateOffset?: number;
 
   @IsOptional()
   @IsDate()
@@ -45,30 +64,18 @@ export class CreateEventDto {
   readonly dtend?: Date;
 
   @IsOptional()
-  @Type(() => EventPermissionsDto)
-  @ValidateNested()
-  readonly permissions?: EventPermissionsDto;
-
-  /**
-   * Recurring Events
-   */
-
-  @IsOptional()
   @Type(() => EventRecurrenceDto)
   @ValidateNested()
   readonly rrule?: EventRecurrenceDto;
 
-  /**
-   * Course
-   */
+  @IsOptional()
+  @Type(() => CreateEventFeeDto)
+  @ValidateNested()
+  readonly fee?: CreateEventFeeDto;
 
   @IsOptional()
   @Type(() => Number)
   readonly course?: number;
-
-  /**
-   * Project
-   */
 
   @IsOptional()
   @Type(() => Number)

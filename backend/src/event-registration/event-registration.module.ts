@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { EventModule } from '../event/event.module';
 import { InvoiceModule } from '../invoice/invoice.module';
 import { PayPalModule } from '../paypal/paypal.module';
+import { UserModule } from '../user/user.module';
 import { EventRegistrationController } from './event-registration.controller';
 import { EventRegistration } from './event-registration.entity';
 import { EventRegistrationService } from './event-registration.service';
@@ -13,6 +14,7 @@ import { EventRegistrationService } from './event-registration.service';
     EventModule,
     InvoiceModule,
     PayPalModule,
+    UserModule,
   ],
   controllers: [EventRegistrationController],
   providers: [EventRegistrationService],

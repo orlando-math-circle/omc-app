@@ -1,6 +1,11 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { LatePaymentType } from '../enums/late-payment-type.enum';
-import { PaymentType } from '../enums/payment-type.enum';
+import { Type } from 'class-transformer';
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { CreateEventFeeDto } from '../../event-fee/dto/create-event-fee.dto';
 
 export class CreateCourseDto {
   @IsString()
@@ -10,24 +15,15 @@ export class CreateCourseDto {
   @IsString()
   description?: string;
 
-  @IsEnum(PaymentType)
-  paymentType!: PaymentType;
-
-  @IsEnum(LatePaymentType)
-  latePaymentType!: LatePaymentType;
-
-  @IsOptional()
-  @IsString()
-  fee?: string;
-
-  @IsOptional()
-  @IsString()
-  lateFee?: string;
-
   @IsNumber()
   project!: number;
 
   @IsOptional()
   @IsNumber({}, { each: true })
   events?: number[];
+
+  @IsOptional()
+  @Type(() => CreateEventFeeDto)
+  @ValidateNested()
+  fee?: CreateEventFeeDto;
 }
