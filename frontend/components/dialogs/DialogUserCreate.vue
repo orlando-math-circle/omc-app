@@ -99,7 +99,7 @@
             <div v-show="occupation.professional">
               <v-text-field-validated label="Profession (Optional)" outlined />
 
-              <v-text-field-validated label="Job Title (Optional)" outlined / >
+              <v-text-field-validated label="Job Title (Optional)" outlined />
 
               <v-text-field-validated
                 label="Company or Workplace (Optional)"

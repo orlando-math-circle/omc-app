@@ -12,9 +12,12 @@ module.exports = {
     'plugin:nuxt/recommended',
   ],
   plugins: ['prettier'],
-  // add your custom rules here
   rules: {
     'no-console': 'off',
     quotes: [2, 'single', { avoidEscape: true }],
+    'vue/custom-event-name-casing': [
+      'error',
+      { ignores: ['/^[a-z]+(?:-[a-z]+)*:[a-z]+(?:-[a-z]+)*$/u'] },
+    ],
   },
 }
