@@ -18,6 +18,9 @@ node_modules/
 # Personal VSCode workplace settings
 .vscode/
 
+# Optional eslint cache
+.eslintcache
+
 # Logs
 logs
 *.log
