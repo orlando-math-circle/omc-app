@@ -56,7 +56,7 @@ export function FileInterceptor(
 
       await this.fileStorage.ensureDirectory();
 
-      await new Promise((resolve, reject) =>
+      await new Promise<void>((resolve, reject) =>
         this.multer.single(field)(
           ctx.getRequest(),
           ctx.getResponse(),

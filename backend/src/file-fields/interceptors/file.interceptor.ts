@@ -41,7 +41,7 @@ export function FileInterceptor(): Type<NestInterceptor> {
 
       await fileStorage.ensureDirectory();
 
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         const storage = multer.diskStorage({
           destination: function (req, file, callback) {
             callback(null, fileStorage.path);
