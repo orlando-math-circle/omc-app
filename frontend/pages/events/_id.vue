@@ -86,45 +86,73 @@
         <v-card-text>
           <span>{{ description }}</span>
         </v-card-text>
-
-        <v-card-actions class="pa-3">
-          <v-btn v-if="!$accessor.auth.isValidated" disabled rounded block
-            >Email Verification Required</v-btn
-          >
-          <v-btn v-else-if="canRegister" color="primary" rounded block
-            >Register</v-btn
-          >
-
-          <v-btn v-else disabled rounded block>Registrations Closed</v-btn>
-        </v-card-actions>
       </v-card>
     </v-col>
 
     <!-- User Selections -->
     <v-col cols="12">
-      <v-card v-if="canRegister">
-        <v-card-title class="event--heading">Registration</v-card-title>
+      <v-card v-if="isClosed">
+        <v-card-title class="event--heading">Registrations Closed</v-card-title>
 
-        <v-card-text>
-          <v-list>
-            <v-list-item v-for="status in statuses" :key="status.user.id">
-              <v-list-item-avatar>
-                <!-- <v-img :src="" /> -->
-              </v-list-item-avatar>
-
-              <v-list-item-content>
-                <v-list-item-title>{{ status.user.name }}</v-list-item-title>
-                <v-list-item-subtitle>{{ status }}</v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
+        <v-card-text
+          >This event is no longer accepting new registrations at this
+          time.</v-card-text
+        >
       </v-card>
 
       <v-card v-else>
-        <v-card-title class="event--heading">Registrations Closed</v-card-title>
+        <v-card-title class="event--heading">Registration</v-card-title>
 
-        <v-card-text>This event is no longer accepting </v-card-text>
+        <v-card-text>
+          Select the users you wish to register to the event.
+
+          <v-list rounded>
+            <v-list-item-group
+              v-model="registering"
+              multiple
+              active-class="primary--text"
+            >
+              <v-list-item
+                v-for="status in statuses"
+                :key="status.user.id"
+                :disabled="!status.eligible"
+              >
+                <template #default="{ active }">
+                  <v-list-item-avatar>
+                    <v-img :src="avatar(status.user)" />
+                  </v-list-item-avatar>
+
+                  <v-list-item-content>
+                    <v-list-item-title>{{
+                      status.user.name
+                    }}</v-list-item-title>
+
+                    <v-list-item-subtitle v-if="!status.eligible">
+                      Ineligible
+                    </v-list-item-subtitle>
+
+                    <v-list-item-subtitle v-else-if="status.user.grade">
+                      Eligible • {{ grade(status.user) }}
+                    </v-list-item-subtitle>
+
+                    <v-list-item-subtitle v-else>Eligible</v-list-item-subtitle>
+                  </v-list-item-content>
+
+                  <v-list-item-action v-if="status.eligible">
+                    <v-checkbox :input-value="active"></v-checkbox>
+                  </v-list-item-action>
+                </template>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-card-text>
+
+        <v-card-actions class="pa-3">
+          <v-btn v-if="!$accessor.auth.isValidated" disabled rounded block
+            >Email Verification Required</v-btn
+          >
+          <v-btn v-else color="primary" rounded block>Register</v-btn>
+        </v-card-actions>
       </v-card>
     </v-col>
   </v-row>
@@ -132,9 +160,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { isAfter } from 'date-fns'
 import { contiguousGradeRanges, gradeGroups } from '../../utils/events'
+import { User } from '../../../backend/src/user/user.entity'
 import { Sex } from '../../../backend/src/user/enums/sex.enum'
+import { EventRegistrationStatus } from '../../../backend/src/event-registration/dtos/event-registration-status.dto'
+import { grades } from '~/utils/events'
 import { formatDate } from '~/utils/utilities'
 
 @Component({
@@ -149,6 +179,8 @@ import { formatDate } from '~/utils/utilities'
   },
 })
 export default class EventPage extends Vue {
+  registering: EventRegistrationStatus[] = []
+
   get event() {
     return this.$accessor.events.event!
   }
@@ -220,13 +252,24 @@ export default class EventPage extends Vue {
    * Determines if the event is open to new registrations.
    * TODO: Implement override functionality.
    */
-  get canRegister() {
-    // The event has already started.
-    if (isAfter(new Date(), new Date(this.event.dtstart))) {
-      return false
-    }
+  get isClosed() {
+    return !!(this.event?.isClosed || this.event?.course?.isClosed)
+  }
 
-    return true
+  avatar(user: User) {
+    if (!user.avatar) return this.$accessor.users.defaultAvatar
+
+    if (user.avatar.startsWith('http')) return user.avatar
+
+    return this.$config.staticBase + user.avatar
+  }
+
+  grade(user: User) {
+    if (!user.grade) return null
+
+    if (user.grade < 13) return grades[user.grade].text
+
+    return 'Graduated'
   }
 
   format(date: string | Date, formatString: string) {

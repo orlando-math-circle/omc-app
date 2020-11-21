@@ -68,18 +68,11 @@ export class EventRegistrationService {
     }
 
     // Find any invoices for the provided users.
-    await this.eventService.populate(
-      event,
-      ['fee.invoices', 'course.invoices'],
-      {
-        fee: {
-          invoices: { user: userIds },
-        },
-        course: {
-          invoices: { user: userIds },
-        },
+    await this.eventService.populate(event, ['fee.invoices'], {
+      fee: {
+        invoices: { user: userIds },
       },
-    );
+    });
 
     const registrations: EventRegistration[] = [];
     const users = account.users.getItems();
@@ -101,9 +94,9 @@ export class EventRegistrationService {
       }
 
       if (fee && !user.feeWaived) {
-        const invoices = event.fee ? event.invoices : event.course.invoices;
-
-        const invoice = invoices.getItems().find((i) => i.user.id === userId);
+        const invoice = fee.invoices
+          .getItems()
+          .find((i) => i.user.id === userId);
 
         if (!invoice) {
           throw new HttpException('Payment required', 402);
@@ -129,19 +122,24 @@ export class EventRegistrationService {
   public async getRegistrationStatus(eventId: number, account: Account) {
     const userIds = account.users.getIdentifiers();
     const event = await this.eventService.findOneOrFail(eventId, [
-      'course.events',
       'fee',
+      'course.fee',
+      'course.events',
     ]);
 
     await this.eventService.populate(
       event,
-      ['fee.invoices', 'course.invoices', 'registrations'],
+      ['fee.invoices', 'course.fee.invoices', 'registrations'],
       {
         fee: {
           invoices: { user: userIds },
         },
         course: {
-          invoices: { user: userIds },
+          fee: {
+            invoices: {
+              user: userIds,
+            },
+          },
         },
         registrations: { user: userIds },
       },
@@ -151,13 +149,8 @@ export class EventRegistrationService {
     const retval: EventRegistrationStatus[] = [];
 
     for (const user of account.users) {
-      let hasInvoice: boolean;
-
-      if (fee) {
-        const invoices = event.fee ? event.invoices : event.course.invoices;
-
-        hasInvoice = !!invoices.getItems().find((i) => i.user.id === user.id);
-      }
+      const hasInvoice =
+        fee && !!fee.invoices.getItems().find((i) => i.user.id === user.id);
 
       const hasRegistration = !!event.registrations
         .getItems()
@@ -200,23 +193,32 @@ export class EventRegistrationService {
     // }
 
     // Try to find any existing registrations or invoices.
-    await this.eventService.populate(event, ['registrations', 'invoices'], {
-      registrations: { user: { $in: users } },
-      invoices: { user: { $in: users } },
-    });
-
-    if (event.registrations.length) {
-      throw new BadRequestException('Registration already exists');
-    }
-
-    if (event.invoices.length) {
-      throw new BadRequestException('Invoice already exists');
-    }
+    await this.eventService.populate(
+      event,
+      ['fee.invoices', 'course.fee.invoices', 'registrations'],
+      {
+        fee: {
+          invoices: { user: users },
+        },
+        course: {
+          fee: {
+            invoices: {
+              user: users,
+            },
+          },
+        },
+        registrations: { user: { $in: users } },
+      },
+    );
 
     const fee = event.fee || event.course?.fee;
 
     if (!fee) {
       throw new BadRequestException('Event has no fee');
+    }
+
+    if (fee.invoices.length) {
+      throw new BadRequestException('Invoice already exists');
     }
 
     const purchaseUnits: PurchaseUnitRequest[] = [];

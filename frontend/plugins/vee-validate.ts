@@ -20,6 +20,14 @@ extend('positive', {
   message: 'Value must be positive.',
 })
 
+extend('has_course', {
+  params: ['course'],
+  validate: (value, { course }: any) => {
+    return value === 'course' ? !!course : true
+  },
+  message: 'Selecting a course is required for this payment mode',
+})
+
 extend('email', email)
 
 extend('ext', {

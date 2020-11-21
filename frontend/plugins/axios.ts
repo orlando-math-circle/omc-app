@@ -15,6 +15,7 @@ const plugin: Plugin = ({ $axios, app }) => {
     if (app.$accessor.auth.token) {
       config.headers.common.Authorization = `Bearer ${app.$accessor.auth.token}`
     } else {
+      console.log('Removing token')
       delete config.headers.common.Authorization
     }
 

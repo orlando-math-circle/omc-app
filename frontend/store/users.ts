@@ -12,6 +12,7 @@ export const state = () => ({
   error: null as StateError | null,
   users: [] as User[],
   user: null as User | null,
+  defaultAvatar: '/images/default_avatars/crane.png',
 })
 
 export const getters = getterTree(state, {

@@ -69,10 +69,6 @@ export class User extends BaseEntity<User, 'id'> {
   @Property()
   createdAt: Date = new Date();
 
-  /**
-   * Computed Properties
-   */
-
   @Property({ persist: false })
   get grade() {
     if (!this.gradeSet) return null;

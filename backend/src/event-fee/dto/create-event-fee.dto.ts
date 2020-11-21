@@ -1,5 +1,4 @@
-import { IsEnum, IsNumberString, IsOptional } from 'class-validator';
-import { LateFeeMode } from '../enums/late-fee-mode.enum';
+import { IsNumberString, IsOptional } from 'class-validator';
 
 export class CreateEventFeeDto {
   @IsNumberString()
@@ -8,7 +7,4 @@ export class CreateEventFeeDto {
   @IsOptional()
   @IsNumberString()
   readonly lateAmount?: string;
-
-  @IsEnum(LateFeeMode)
-  readonly lateMode!: LateFeeMode;
 }

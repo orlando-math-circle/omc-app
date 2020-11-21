@@ -13,7 +13,6 @@ import {
 import { InternalServerErrorException } from '@nestjs/common';
 import { EventFee } from '../event-fee/event-fee.entity';
 import { Event } from '../event/event.entity';
-import { Invoice } from '../invoice/invoice.entity';
 import { Project } from '../project/project.entity';
 import { CourseTimeThreshold } from './enums/course-registration-cutoff.enum';
 
@@ -42,9 +41,6 @@ export class Course extends BaseEntity<Course, 'id'> {
 
   @OneToOne(() => EventFee, (ef) => ef.course, { owner: true, nullable: true })
   fee?: EventFee;
-
-  @OneToMany(() => Invoice, (i) => i.course)
-  invoices = new Collection<Invoice>(this);
 
   @ManyToOne(() => Project)
   project!: Project;

@@ -19,7 +19,6 @@ import { getMinutesDiff } from '../app.utils';
 import { Course } from '../course/course.entity';
 import { EventFee } from '../event-fee/event-fee.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
-import { Invoice } from '../invoice/invoice.entity';
 import { Project } from '../project/project.entity';
 import { User } from '../user/user.entity';
 import { EventPermissionsDto } from './dto/event-permissions.dto';
@@ -83,9 +82,6 @@ export class Event extends BaseEntity<Event, 'id'> {
   @OneToOne(() => EventFee, (ef) => ef.event, { owner: true, nullable: true })
   fee?: EventFee;
 
-  @OneToMany(() => Invoice, (i) => i.event)
-  invoices = new Collection<Invoice>(this);
-
   @ManyToOne(() => EventRecurrence, { nullable: true })
   recurrence?: EventRecurrence;
 
@@ -104,13 +100,15 @@ export class Event extends BaseEntity<Event, 'id'> {
   /**
    * @returns If the event has started.
    */
+  @Property({ persist: false })
   get isStarted() {
-    return isAfter(this.dtstart, new Date());
+    return isAfter(new Date(), this.dtstart);
   }
 
   /**
    * @returns If the event has ended.
    */
+  @Property({ persist: false })
   get isEnded() {
     return isAfter(new Date(), this.dtend);
   }
@@ -118,6 +116,7 @@ export class Event extends BaseEntity<Event, 'id'> {
   /**
    * @returns Duration of the event in minutes.
    */
+  @Property({ persist: false })
   get duration() {
     return differenceInMinutes(this.dtend, this.dtstart);
   }
@@ -125,6 +124,7 @@ export class Event extends BaseEntity<Event, 'id'> {
   /**
    * @returns If the event is accepting new registrations.
    */
+  @Property({ persist: false })
   get isClosed() {
     const started = this.isStarted;
     const ended = this.isEnded;
@@ -154,6 +154,7 @@ export class Event extends BaseEntity<Event, 'id'> {
     }
   }
 
+  @Property({ persist: false })
   get isLate() {
     const started = this.isStarted;
     const ended = this.isEnded;

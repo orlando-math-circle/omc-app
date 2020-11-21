@@ -182,6 +182,8 @@ export default class DefaultLayout extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '~assets/styles/global.scss';
+
 .page-enter-active,
 .page-leave-active {
   transition-property: opacity;

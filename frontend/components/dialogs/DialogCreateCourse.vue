@@ -29,65 +29,15 @@
             outlined
           ></v-text-field-validated>
 
-          <v-textarea
+          <v-textarea-validated
             v-model="dto.description"
             label="Course Description"
             outlined
-          ></v-textarea>
-
-          <v-row>
-            <v-col>
-              <v-select
-                v-model="dto.paymentType"
-                :items="paymentTypes"
-                label="Payment Mode"
-                outlined
-              />
-            </v-col>
-
-            <v-col v-if="dto.paymentType !== 'free'">
-              <v-text-field-validated
-                v-model.number="dto.fee"
-                label="Fee"
-                type="number"
-                :rules="{
-                  required: dto.paymentType !== 'free',
-                  positive: true,
-                }"
-                prefix="$"
-                outlined
-              ></v-text-field-validated>
-            </v-col>
-          </v-row>
-
-          <v-row v-if="dto.paymentType !== 'free'">
-            <v-col>
-              <v-select
-                v-model="dto.latePaymentType"
-                :items="latePaymentTypes"
-                label="Late Payment Mode"
-                outlined
-              />
-            </v-col>
-
-            <v-col v-if="dto.latePaymentType === 'latefee'">
-              <v-text-field-validated
-                v-model.number="dto.lateFee"
-                label="Late Fee"
-                type="number"
-                :rules="{
-                  required: dto.latePaymentType === 'latefee',
-                  positive: true,
-                }"
-                prefix="$"
-                outlined
-              ></v-text-field-validated>
-            </v-col>
-          </v-row>
+          />
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
 
           <v-btn
             text
@@ -107,29 +57,13 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 @Component
 export default class DialogCreateCourse extends Vue {
-  @Prop() project!: number | null
+  @Prop() project!: number
 
   dialog = false
-
-  paymentTypes = [
-    { text: 'Free', value: 'free' },
-    { text: 'Per-Event', value: 'single' },
-    { text: 'All', value: 'all' },
-  ]
-
-  latePaymentTypes = [
-    { text: 'Forbid Registration', value: 'deny' },
-    { text: 'Normal Payment', value: 'default' },
-    { text: 'Late Fee', value: 'latefee' },
-  ]
 
   dto = {
     name: '',
     description: '',
-    paymentType: 'free',
-    latePaymentType: 'default',
-    fee: 0,
-    lateFee: 0,
   }
 
   get error() {
@@ -137,20 +71,13 @@ export default class DialogCreateCourse extends Vue {
   }
 
   async onSubmit() {
-    const fee =
-      this.dto.fee % 1 === 0 ? `${this.dto.fee}.00` : this.dto.fee.toString()
-
     const dto = {
       name: this.dto.name,
       description: this.dto.description,
-      paymentType: this.dto.paymentType,
-      latePaymentType: this.dto.latePaymentType,
       project: this.project,
-      fee,
-      lateFee: this.dto.lateFee.toString(),
     }
 
-    const course = await this.$accessor.courses.create(dto as any)
+    const course = await this.$accessor.courses.create(dto)
 
     if (!this.error) {
       this.$emit('create:course', course)

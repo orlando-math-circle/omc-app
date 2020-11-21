@@ -169,6 +169,48 @@
                   chips
                 />
               </v-col>
+
+              <v-col cols="meta.cutoffThreshold.includes('offset') ? 8 : 12">
+                <v-select
+                  v-model="meta.lateThreshold"
+                  :items="timeThresholds"
+                  label="Late Threshold"
+                  hint="The point in which a registration is late, for payment purposes."
+                  hide-details="auto"
+                  outlined
+                />
+              </v-col>
+
+              <v-col v-if="meta.lateThreshold.includes('offset')" cols="4">
+                <v-text-field-validated
+                  v-model.number="meta.lateOffset"
+                  label="Minute Offset"
+                  type="number"
+                  hide-details="auto"
+                  outlined
+                />
+              </v-col>
+
+              <v-col :cols="meta.cutoffThreshold.includes('offset') ? 8 : 12">
+                <v-select
+                  v-model="meta.cutoffThreshold"
+                  :items="timeThresholds"
+                  label="Cutoff Threshold"
+                  hint="The point in which further registrations will not be allowed."
+                  hide-details="auto"
+                  outlined
+                />
+              </v-col>
+
+              <v-col v-if="meta.cutoffThreshold.includes('offset')" cols="4">
+                <v-text-field-validated
+                  v-model.number="meta.cutoffOffset"
+                  label="Minute Offset"
+                  type="number"
+                  hide-details="auto"
+                  outlined
+                />
+              </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
@@ -295,6 +337,53 @@
           </v-list-item-content>
         </v-list-item>
 
+        <!-- Fee Management -->
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
+            <v-icon>mdi-currency-usd</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-row>
+              <v-col cols="12">
+                <v-select-validated
+                  v-model="paymentMode"
+                  :items="paymentModes"
+                  :rules="{ required: true, has_course: { course } }"
+                  label="Payment Mode"
+                  hide-details="auto"
+                  outlined
+                />
+              </v-col>
+
+              <template v-if="paymentMode !== 'free'">
+                <v-col cols="6">
+                  <v-text-field-validated
+                    v-model.number="fee.amount"
+                    :rules="{ required: paymentMode !== 'free' }"
+                    label="Event Fee"
+                    type="number"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+
+                <v-col cols="6">
+                  <v-text-field-validated
+                    v-model.number="fee.lateAmount"
+                    label="Late Fee (Optional)"
+                    type="number"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+              </template>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider />
+
         <!-- Picture -->
         <v-list-item class="pl-2">
           <v-list-item-avatar class="mr-2">
@@ -341,6 +430,7 @@ import { Grade } from '../../../backend/src/user/enums/grade.enum'
 import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { CreateEventDto } from '../../../backend/src/event/dto/create-event.dto'
 import { Project } from '../../../backend/src/project/project.entity'
+import { EventTimeThreshold } from '../../../backend/src/event/enums/event-time-threshold.enum'
 import RecurrenceDialog from '../events/RecurrenceDialog.vue'
 import { Uploads } from '../../interfaces/uploads.interface'
 import DialogForm from './DialogForm.vue'
@@ -399,10 +489,35 @@ export default class DialogCreateEvent extends Vue {
 
   rrule = null as EventRecurrenceDto | null
 
+  timeThresholds = [
+    { text: 'Never', value: EventTimeThreshold.NEVER },
+    { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
+    { text: 'After Event Starts', value: EventTimeThreshold.AFTER_START },
+    { text: 'Minutes From Start', value: EventTimeThreshold.OFFSET_START },
+    { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
+  ]
+
+  paymentMode = 'free'
+
+  paymentModes = [
+    { text: 'Free', value: 'free' },
+    { text: 'Pay Per Event', value: 'event' },
+    { text: 'Pay Per Course', value: 'course' },
+  ]
+
+  fee = {
+    amount: '',
+    lateAmount: '',
+  }
+
   meta = {
     name: '',
     description: '',
     location: '',
+    cutoffThreshold: EventTimeThreshold.AFTER_END,
+    cutoffOffset: 0,
+    lateThreshold: EventTimeThreshold.AFTER_START,
+    lateOffset: 0,
     permissions: {
       grades: [
         Grade.KINDERGARTEN,

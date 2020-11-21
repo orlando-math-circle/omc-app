@@ -2,7 +2,6 @@ import {
   BaseEntity,
   Collection,
   Entity,
-  Enum,
   OneToMany,
   OneToOne,
   PrimaryKey,
@@ -12,20 +11,14 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { Course } from '../course/course.entity';
 import { Event } from '../event/event.entity';
 import { Invoice } from '../invoice/invoice.entity';
-import { LateFeeMode } from './enums/late-fee-mode.enum';
 
 @Entity()
 export class EventFee extends BaseEntity<EventFee, 'id'> {
-  constructor(data: {
-    amount: string;
-    lateMode: LateFeeMode;
-    lateAmount?: string;
-  }) {
+  constructor(data: { amount: string; lateAmount?: string }) {
     super();
 
     this.amount = data.amount;
     this.lateAmount = data.lateAmount;
-    this.lateMode = data.lateMode;
   }
 
   @PrimaryKey()
@@ -36,9 +29,6 @@ export class EventFee extends BaseEntity<EventFee, 'id'> {
 
   @Property({ nullable: true })
   lateAmount?: string;
-
-  @Enum(() => LateFeeMode)
-  lateMode!: LateFeeMode;
 
   @OneToOne(() => Event, (e) => e.fee, { nullable: true })
   event?: Event;
@@ -60,17 +50,10 @@ export class EventFee extends BaseEntity<EventFee, 'id'> {
       throw new InternalServerErrorException('Event fee has no parent');
     }
 
-    if (!isLate) return this.amount;
-
-    switch (this.lateMode) {
-      case LateFeeMode.DEFAULT:
-        return this.amount;
-      case LateFeeMode.LATEFEE:
-        return this.lateAmount;
-      default:
-        throw new InternalServerErrorException(
-          `Unexpected late fee mode ${this.lateMode}`,
-        );
+    if (isLate && this.lateAmount) {
+      return this.lateAmount;
     }
+
+    return this.amount;
   }
 }
