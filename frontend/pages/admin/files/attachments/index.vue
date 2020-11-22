@@ -48,19 +48,19 @@
             :headers="headers"
             :items="attachments"
           >
-            <template v-slot:[`item.id`]="{ item }">
+            <template #[`item.id`]="{ item }">
               <v-chip>#{{ item.id }}</v-chip>
             </template>
 
-            <template v-slot:[`item.status`]="{ item }">
+            <template #[`item.status`]="{ item }">
               {{ getStatus(item.status) }}
             </template>
 
-            <template v-slot:[`item.user`]="{ item }">
+            <template #[`item.user`]="{ item }">
               {{ item.user.name }}
             </template>
 
-            <template v-slot:[`item.edit`]="{ item }">
+            <template #[`item.edit`]="{ item }">
               <v-btn icon :to="`/admin/files/attachments/${item.id}`">
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>

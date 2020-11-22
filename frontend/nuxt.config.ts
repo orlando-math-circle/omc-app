@@ -89,6 +89,11 @@ const config: NuxtConfig = {
     'nuxt-typed-vuex',
     // '@nuxtjs/html-validator',
   ],
+
+  eslint: {
+    cache: false,
+    lintDirtyModulesOnly: false,
+  },
   /*
    ** Nuxt.js modules
    */

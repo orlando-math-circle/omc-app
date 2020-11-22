@@ -72,7 +72,7 @@
                     :key="status.user.id"
                     :disabled="!status.eligible"
                   >
-                    <template v-slot:default="{ active }">
+                    <template #:default="{ active }">
                       <v-list-item-avatar>
                         <!-- <v-icon>mdi-account-circle-outline</v-icon> -->
                         <v-img

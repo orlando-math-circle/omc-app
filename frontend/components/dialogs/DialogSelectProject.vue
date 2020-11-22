@@ -72,14 +72,6 @@ export default Vue.extend({
       default: 0,
     },
   },
-  async fetch() {
-    if (this.$store.state.projects.projects.length < this.pagination.limit) {
-      await this.$store.dispatch('projects/findAll', {
-        limit: this.pagination.limit,
-        offset: this.pagination.offset,
-      })
-    }
-  },
   data() {
     return {
       dialog: false,
@@ -95,6 +87,14 @@ export default Vue.extend({
         offset: 0,
         sort: [] as string[],
       },
+    }
+  },
+  async fetch() {
+    if (this.$store.state.projects.projects.length < this.pagination.limit) {
+      await this.$store.dispatch('projects/findAll', {
+        limit: this.pagination.limit,
+        offset: this.pagination.offset,
+      })
     }
   },
   computed: {

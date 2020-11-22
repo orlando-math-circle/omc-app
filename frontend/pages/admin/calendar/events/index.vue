@@ -37,19 +37,19 @@
     <v-row>
       <v-col>
         <v-data-table-paginated :items="eventsForDate" :headers="headers">
-          <template v-slot:[`item.id`]="{ item }">
+          <template #[`item.id`]="{ item }">
             # <link-copy :text="item.id"></link-copy>
           </template>
 
-          <template v-slot:[`item.start`]="{ item }">
+          <template #[`item.start`]="{ item }">
             {{ format(item.dtstart, 'EEE, MMM do, yyyy') }}
           </template>
 
-          <template v-slot:[`item.end`]="{ item }">
+          <template #[`item.end`]="{ item }">
             {{ format(item.dtend, 'EEE, MMM do, yyyy') }}
           </template>
 
-          <template v-slot:[`item.edit`]="{ item }">
+          <template #[`item.edit`]="{ item }">
             <v-btn icon :to="`/admin/calendar/events/${item.id}`">
               <v-icon>mdi-open-in-new</v-icon>
             </v-btn>

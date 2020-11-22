@@ -43,19 +43,19 @@
             :search="search"
             @refresh="onRefresh"
           >
-            <template v-slot:[`item.id`]="{ item }">
+            <template #[`item.id`]="{ item }">
               # <link-copy :text="item.id"></link-copy>
             </template>
 
-            <template v-slot:[`item.createdAt`]="{ item }">
+            <template #[`item.createdAt`]="{ item }">
               {{ format(item.createdAt, 'MMM d, yyyy') }}
             </template>
 
-            <template v-slot:[`item.updatedAt`]="{ item }">
+            <template #[`item.updatedAt`]="{ item }">
               {{ format(item.updatedAt, 'MMM d, yyyy h:mm a') }}
             </template>
 
-            <template v-slot:[`item.edit`]="{ item }">
+            <template #[`item.edit`]="{ item }">
               <v-btn icon :to="`/admin/calendar/courses/${item.id}`">
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>

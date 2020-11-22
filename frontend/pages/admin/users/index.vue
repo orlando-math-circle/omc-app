@@ -65,11 +65,11 @@
             show-select
             @refresh="onRefresh"
           >
-            <template v-slot:[`item.id`]="{ item }">
+            <template #[`item.id`]="{ item }">
               # <link-copy :text="item.id"></link-copy>
             </template>
 
-            <template v-slot:[`item.email`]="{ item }">
+            <template #[`item.email`]="{ item }">
               <div class="d-flex align-center py-1">
                 <v-avatar size="32px" class="elevation-1">
                   <v-img :src="item.avatar"></v-img>
@@ -81,7 +81,7 @@
               </div>
             </template>
 
-            <template v-slot:[`item.roles`]="{ item }">
+            <template #[`item.roles`]="{ item }">
               <v-chip
                 v-for="role in item.roles"
                 :key="role"
@@ -94,7 +94,7 @@
               </v-chip>
             </template>
 
-            <template v-slot:[`item.emailVerified`]="{ item }">
+            <template #[`item.emailVerified`]="{ item }">
               <v-icon :class="`${item.emailVerified ? 'success--text' : ''}`">
                 {{
                   item.emailVerified ? 'mdi-check-circle' : 'mdi-circle-outline'
@@ -102,13 +102,13 @@
               </v-icon>
             </template>
 
-            <template v-slot:[`item.feeWaived`]="{ item }">
+            <template #[`item.feeWaived`]="{ item }">
               <v-icon :class="`${item.feeWaived ? 'success--text' : ''}`">
                 {{ item.feeWaived ? 'mdi-check-circle' : 'mdi-circle-outline' }}
               </v-icon>
             </template>
 
-            <template v-slot:[`item.edit`]="{ item }">
+            <template #[`item.edit`]="{ item }">
               <v-btn icon :to="`/admin/users/${item.id}`">
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>

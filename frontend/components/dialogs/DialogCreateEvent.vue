@@ -347,8 +347,8 @@
             <v-row>
               <v-col cols="12">
                 <v-select-validated
-                  v-model="paymentMode"
-                  :items="paymentModes"
+                  v-model="feeType"
+                  :items="feeTypes"
                   :rules="{ required: true, has_course: { course } }"
                   label="Payment Mode"
                   hide-details="auto"
@@ -356,11 +356,11 @@
                 />
               </v-col>
 
-              <template v-if="paymentMode !== 'free'">
+              <template v-if="feeType !== 'free'">
                 <v-col cols="6">
                   <v-text-field-validated
                     v-model.number="fee.amount"
-                    :rules="{ required: paymentMode !== 'free' }"
+                    :rules="{ required: feeType !== 'free' }"
                     label="Event Fee"
                     type="number"
                     hide-details="auto"
@@ -433,6 +433,7 @@ import { Project } from '../../../backend/src/project/project.entity'
 import { EventTimeThreshold } from '../../../backend/src/event/enums/event-time-threshold.enum'
 import RecurrenceDialog from '../events/RecurrenceDialog.vue'
 import { Uploads } from '../../interfaces/uploads.interface'
+import { FeeType } from '../../../backend/src/event/enums/fee-type.enum'
 import DialogForm from './DialogForm.vue'
 import { gradeGroups, contiguousGradeRanges, grades } from '~/utils/events'
 import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
@@ -497,12 +498,12 @@ export default class DialogCreateEvent extends Vue {
     { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
   ]
 
-  paymentMode = 'free'
+  feeType = 'free'
 
-  paymentModes = [
-    { text: 'Free', value: 'free' },
-    { text: 'Pay Per Event', value: 'event' },
-    { text: 'Pay Per Course', value: 'course' },
+  feeTypes = [
+    { text: 'Free', value: FeeType.FREE },
+    { text: 'Pay Per Event', value: FeeType.EVENT },
+    { text: 'Pay Per Course', value: FeeType.COURSE },
   ]
 
   fee = {
@@ -638,6 +639,9 @@ export default class DialogCreateEvent extends Vue {
       },
       !this.rrule && {
         dtstart: toDate(this.dates.start.date, this.times.start.time),
+      },
+      this.feeType !== 'free' && {
+        fee: this.fee,
       },
       url && { picture: url }
     )
