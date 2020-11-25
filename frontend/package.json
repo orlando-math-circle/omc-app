@@ -20,7 +20,7 @@
     "animate.css": "4.1.1",
     "apexcharts": "3.22.2",
     "cookie-universal-nuxt": "2.1.4",
-    "core-js": "3.7.0",
+    "core-js": "3.8.0",
     "cropperjs": "1.5.9",
     "date-fns": "2.16.1",
     "lodash": "4.17.20",
@@ -52,7 +52,7 @@
     "prettier": "2.2.0",
     "sass": "1.29.0",
     "sass-loader": "10.1.0",
-    "vuetify": "2.3.18"
+    "vuetify": "2.3.19"
   },
   "prettier": {
     "semi": false,
