@@ -1,10 +1,10 @@
 <template>
   <v-sheet
     class="avatar--bg d-flex align-center justify-center"
-    width="130px"
-    height="130px"
+    width="120px"
+    height="120px"
   >
-    <v-avatar size="120px">
+    <v-avatar size="110px">
       <v-img :src="url"> </v-img>
     </v-avatar>
   </v-sheet>
@@ -26,7 +26,7 @@ export default class AvatarPicker extends Vue {
   &--bg {
     border-radius: 50% !important;
     position: absolute;
-    top: -40px;
+    top: -50px;
     left: 0;
     right: 0;
     margin-left: auto;

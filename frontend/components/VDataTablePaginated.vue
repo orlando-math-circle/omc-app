@@ -1,5 +1,9 @@
 <template>
-  <v-data-table v-bind="$attrs" @update:options="onChangeOptions">
+  <v-data-table
+    v-model="selections"
+    v-bind="$attrs"
+    @update:options="onChangeOptions"
+  >
     <template
       v-for="(_, scopedSlotName) in $scopedSlots"
       #[scopedSlotName]="slotData"
@@ -20,7 +24,16 @@ import { DataTableOptions } from '~/interfaces/data-table.interface'
 
 @Component
 export default class VDataTablePaginated extends Vue {
+  @Prop() value!: any
   @Prop() search?: string
+
+  get selections() {
+    return this.value
+  }
+
+  set selections(value: any) {
+    this.$emit('input', value)
+  }
 
   pagination = {
     total: 0,

@@ -69,5 +69,16 @@ export const actions = actionTree(
         commit('setError', error)
       }
     },
+    async delete({ commit }, id: number | string) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$delete(`/registration/${id}`)
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
   }
 )

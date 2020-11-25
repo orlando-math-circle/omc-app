@@ -4,7 +4,7 @@
       <h2 class="headline">Upcoming Events</h2>
 
       <v-row>
-        <v-col class="py-0">
+        <v-col v-if="events.length" class="py-0">
           <v-slide-group class="mb-4">
             <v-slide-item
               v-for="event in events.slice(0, 10)"
@@ -18,6 +18,10 @@
               ></event-block>
             </v-slide-item>
           </v-slide-group>
+        </v-col>
+
+        <v-col class="pb-4">
+          <span>No upcoming events.</span>
         </v-col>
       </v-row>
 
@@ -34,7 +38,7 @@
         <div class="d-flex flex-no-wrap justify-space-between">
           <div>
             <v-card-title>
-              <v-icon large left color="accent">mdi-twitter</v-icon>
+              <v-icon large left color="primary">mdi-twitter</v-icon>
               <span>{{ tweet.user.name }}</span>
             </v-card-title>
             <v-card-subtitle>{{ format(tweet.created_at) }}</v-card-subtitle>

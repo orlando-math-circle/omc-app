@@ -246,13 +246,24 @@
 
           <v-list-item-content>
             <v-row>
-              <v-col>
-                <v-text-field
-                  v-model="meta.location"
-                  label="Location"
+              <v-col cols="12">
+                <v-combobox-validated
+                  v-model="meta.locationTitle"
+                  rules="required"
+                  :items="['Online', 'Zoom', 'In-Person']"
+                  label="Location Short"
                   hide-details="auto"
                   outlined
-                ></v-text-field>
+                />
+              </v-col>
+
+              <v-col cols="12">
+                <v-text-field
+                  v-model="meta.location"
+                  label="Location (Optional)"
+                  hide-details="auto"
+                  outlined
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -323,11 +334,11 @@
                 />
               </v-col>
 
-              <v-col cols="auto">
+              <v-col cols="auto" class="align-self-center">
                 <dialog-select-course v-model="course" :project="project" />
               </v-col>
 
-              <v-col cols="auto">
+              <v-col cols="auto" class="align-self-center">
                 <dialog-create-course
                   :project="project"
                   @create:course="onCourseCreated"
@@ -360,7 +371,7 @@
                 <v-col cols="6">
                   <v-text-field-validated
                     v-model.number="fee.amount"
-                    :rules="{ required: feeType !== 'free' }"
+                    rules="required"
                     label="Event Fee"
                     type="number"
                     hide-details="auto"
@@ -498,8 +509,7 @@ export default class DialogCreateEvent extends Vue {
     { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
   ]
 
-  feeType = 'free'
-
+  feeType: FeeType = FeeType.FREE
   feeTypes = [
     { text: 'Free', value: FeeType.FREE },
     { text: 'Pay Per Event', value: FeeType.EVENT },
@@ -507,14 +517,15 @@ export default class DialogCreateEvent extends Vue {
   ]
 
   fee = {
-    amount: '',
-    lateAmount: '',
+    amount: 0,
+    lateAmount: 0,
   }
 
   meta = {
     name: '',
     description: '',
     location: '',
+    locationTitle: '',
     cutoffThreshold: EventTimeThreshold.AFTER_END,
     cutoffOffset: 0,
     lateThreshold: EventTimeThreshold.AFTER_START,
@@ -641,7 +652,11 @@ export default class DialogCreateEvent extends Vue {
         dtstart: toDate(this.dates.start.date, this.times.start.time),
       },
       this.feeType !== 'free' && {
-        fee: this.fee,
+        feeType: this.feeType,
+        fee: {
+          amount: this.fee.amount.toFixed(2),
+          lateAmount: this.fee.lateAmount?.toFixed(2),
+        },
       },
       url && { picture: url }
     )

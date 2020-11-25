@@ -2,7 +2,9 @@
   <v-dialog v-model="dialog" max-width="440">
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" large text v-on="on">Create</v-btn>
+        <v-btn v-bind="attrs" large icon v-on="on">
+          <v-icon>mdi-folder-plus-outline</v-icon>
+        </v-btn>
       </slot>
     </template>
 

@@ -1,5 +1,6 @@
 <template>
   <v-row>
+    <!-- Event Picture -->
     <v-col cols="12">
       <v-card>
         <v-img max-height="300" :src="picture">
@@ -26,9 +27,10 @@
       </v-card>
     </v-col>
 
+    <!-- Event Metadata -->
     <v-col cols="12">
       <v-card>
-        <v-card-title class="event--heading">{{ event.name }}</v-card-title>
+        <v-card-title>{{ event.name }}</v-card-title>
 
         <v-card-text>
           <v-list>
@@ -49,7 +51,10 @@
               </v-list-item-avatar>
 
               <v-list-item-content>
-                <v-list-item-title>{{ event.location }}</v-list-item-title>
+                <v-list-item-title>{{ event.locationTitle }}</v-list-item-title>
+                <v-list-item-subtitle v-if="event.location">
+                  {{ event.location }}
+                </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
 
@@ -61,6 +66,7 @@
               <v-list-item-content>
                 <v-list-item-title>Event Fees</v-list-item-title>
                 <v-list-item-subtitle>
+                  <span v-if="isLate">Late Fee •</span>
                   ${{ fee }} Per Person
                 </v-list-item-subtitle>
               </v-list-item-content>
@@ -81,7 +87,7 @@
           </v-list>
         </v-card-text>
 
-        <v-card-title class="event--heading">Description</v-card-title>
+        <v-card-title>Description</v-card-title>
 
         <v-card-text>
           <span>{{ description }}</span>
@@ -89,83 +95,203 @@
       </v-card>
     </v-col>
 
-    <!-- User Selections -->
-    <v-col cols="12">
+    <!-- Existing Registrations -->
+    <v-expand-transition>
+      <v-col v-if="registeredUsers.length" cols="12">
+        <v-card>
+          <v-card-title>Registered Users</v-card-title>
+
+          <v-card-text>
+            <v-list rounded>
+              <v-list-item
+                v-for="status in registeredUsers"
+                :key="status.user.id"
+              >
+                <v-list-item-avatar>
+                  <v-img :src="avatar(status.user)" />
+                </v-list-item-avatar>
+
+                <v-list-item-content>
+                  <v-list-item-title>{{ status.user.name }}</v-list-item-title>
+
+                  <v-list-item-subtitle v-if="!status.eligible">
+                    Ineligible
+                  </v-list-item-subtitle>
+
+                  <v-list-item-subtitle v-else-if="status.user.grade">
+                    Eligible • {{ grade(status.user) }}
+                  </v-list-item-subtitle>
+
+                  <v-list-item-subtitle v-else>Eligible</v-list-item-subtitle>
+                </v-list-item-content>
+
+                <v-list-item-action v-if="!isClosed">
+                  <v-btn text @click="cancelDialog.open(status)">
+                    Cancel
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-expand-transition>
+
+    <!-- Registration Process -->
+    <v-col v-if="unregisteredUsers.length" cols="12">
       <v-card v-if="isClosed">
-        <v-card-title class="event--heading">Registrations Closed</v-card-title>
-
-        <v-card-text
-          >This event is no longer accepting new registrations at this
-          time.</v-card-text
-        >
-      </v-card>
-
-      <v-card v-else>
-        <v-card-title class="event--heading">Registration</v-card-title>
+        <v-card-title>Registrations Closed</v-card-title>
 
         <v-card-text>
-          Select the users you wish to register to the event.
-
-          <v-list rounded>
-            <v-list-item-group
-              v-model="registering"
-              multiple
-              active-class="primary--text"
-            >
-              <v-list-item
-                v-for="status in statuses"
-                :key="status.user.id"
-                :disabled="!status.eligible"
-              >
-                <template #default="{ active }">
-                  <v-list-item-avatar>
-                    <v-img :src="avatar(status.user)" />
-                  </v-list-item-avatar>
-
-                  <v-list-item-content>
-                    <v-list-item-title>{{
-                      status.user.name
-                    }}</v-list-item-title>
-
-                    <v-list-item-subtitle v-if="!status.eligible">
-                      Ineligible
-                    </v-list-item-subtitle>
-
-                    <v-list-item-subtitle v-else-if="status.user.grade">
-                      Eligible • {{ grade(status.user) }}
-                    </v-list-item-subtitle>
-
-                    <v-list-item-subtitle v-else>Eligible</v-list-item-subtitle>
-                  </v-list-item-content>
-
-                  <v-list-item-action v-if="status.eligible">
-                    <v-checkbox :input-value="active"></v-checkbox>
-                  </v-list-item-action>
-                </template>
-              </v-list-item>
-            </v-list-item-group>
-          </v-list>
+          This event is no longer accepting new registrations at this time.
         </v-card-text>
-
-        <v-card-actions class="pa-3">
-          <v-btn v-if="!$accessor.auth.isValidated" disabled rounded block
-            >Email Verification Required</v-btn
-          >
-          <v-btn v-else color="primary" rounded block>Register</v-btn>
-        </v-card-actions>
       </v-card>
+
+      <v-stepper v-else v-model="step">
+        <v-stepper-items>
+          <v-stepper-content class="pa-0" step="1">
+            <v-card>
+              <v-card-title>Registration</v-card-title>
+
+              <v-card-text>
+                <v-list rounded>
+                  <v-list-item-group
+                    v-model="selections"
+                    multiple
+                    active-class="primary--text"
+                  >
+                    <v-list-item
+                      v-for="status in unregisteredUsers"
+                      :key="status.user.id"
+                      :disabled="!status.eligible"
+                    >
+                      <template #default="{ active }">
+                        <v-list-item-avatar>
+                          <v-img :src="avatar(status.user)" />
+                        </v-list-item-avatar>
+
+                        <v-list-item-content>
+                          <v-list-item-title>{{
+                            status.user.name
+                          }}</v-list-item-title>
+
+                          <v-list-item-subtitle v-if="!status.eligible">
+                            Not Eligible
+                          </v-list-item-subtitle>
+
+                          <v-list-item-subtitle v-else-if="status.user.grade">
+                            <span>Eligible</span>
+                            <span>• {{ grade(status.user) }}</span>
+                            <span v-if="status.paid">• Paid</span>
+                          </v-list-item-subtitle>
+
+                          <v-list-item-subtitle v-else
+                            >Eligible</v-list-item-subtitle
+                          >
+                        </v-list-item-content>
+
+                        <v-list-item-action v-if="status.eligible">
+                          <v-checkbox :input-value="active"></v-checkbox>
+                        </v-list-item-action>
+                      </template>
+                    </v-list-item>
+                  </v-list-item-group>
+                </v-list>
+              </v-card-text>
+
+              <v-card-actions>
+                <v-btn
+                  v-if="!$accessor.auth.isValidated"
+                  disabled
+                  rounded
+                  block
+                >
+                  Email Verification Required
+                </v-btn>
+
+                <v-btn
+                  v-else-if="!selections.length"
+                  rounded
+                  block
+                  disabled
+                  @click="register"
+                >
+                  Select Users
+                </v-btn>
+
+                <v-btn
+                  v-else-if="checkoutCost === 0"
+                  rounded
+                  block
+                  color="primary"
+                  @click="register"
+                >
+                  Complete Registration
+                </v-btn>
+
+                <v-btn v-else rounded block color="primary" @click="step++">
+                  Continue to Payment
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-stepper-content>
+
+          <v-stepper-content class="pa-0" step="2">
+            <v-card>
+              <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
+
+              <v-card-text>
+                <paypal
+                  :event="event.id"
+                  :users="usersRequiringPayment.map((u) => u.id)"
+                  @payment:complete="onPaymentComplete"
+                />
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text @click="step--">Go Back</v-btn>
+                <v-btn color="primary" @click="step++">Continue</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-stepper-content>
+
+          <v-stepper-content class="pa-0" step="3">
+            <v-card>
+              <v-card-title> Confirmation </v-card-title>
+
+              <v-card-text>Confirmation</v-card-text>
+            </v-card>
+          </v-stepper-content>
+        </v-stepper-items>
+      </v-stepper>
     </v-col>
+
+    <!-- Registration -->
+    <v-col cols="12"> </v-col>
+
+    <dialog-confirm ref="cancelDialog" @confirm="onCancelConfirm">
+      You may re-register at any time for no charge.
+    </dialog-confirm>
   </v-row>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Ref, Vue } from 'nuxt-property-decorator'
 import { contiguousGradeRanges, gradeGroups } from '../../utils/events'
 import { User } from '../../../backend/src/user/user.entity'
 import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { EventRegistrationStatus } from '../../../backend/src/event-registration/dtos/event-registration-status.dto'
+import { EventRegistration } from '../../../backend/src/event-registration/event-registration.entity'
+import DialogConfirm from '../../components/dialogs/DialogConfirm.vue'
 import { grades } from '~/utils/events'
 import { formatDate } from '~/utils/utilities'
+
+enum RegisterStep {
+  SELECTION = 1,
+  PAYMENT = 2,
+  COMPLETION = 3,
+}
 
 @Component({
   head: {
@@ -179,7 +305,10 @@ import { formatDate } from '~/utils/utilities'
   },
 })
 export default class EventPage extends Vue {
-  registering: EventRegistrationStatus[] = []
+  @Ref('cancelDialog') readonly cancelDialog!: DialogConfirm
+
+  selections: number[] = []
+  step: RegisterStep = RegisterStep.SELECTION
 
   get event() {
     return this.$accessor.events.event!
@@ -216,8 +345,35 @@ export default class EventPage extends Vue {
       : 'No description provided.'
   }
 
+  get selectedStatuses() {
+    return this.selections.map((s) => this.statuses[s])
+  }
+
   get fee(): string | undefined {
-    return this.event?.fee?.amount || this.event?.course?.fee?.amount
+    if (this.event?.course?.fee) {
+      if (this.event.course.isLate) {
+        return this.event.course.fee.lateAmount
+      } else {
+        return this.event.course.fee.amount
+      }
+    } else if (this.event?.fee) {
+      if (this.event.isLate) {
+        return this.event.fee.lateAmount
+      } else {
+        return this.event.fee.amount
+      }
+    }
+  }
+
+  get isLate(): boolean {
+    return this.event.course?.isLate || this.event.isLate
+  }
+
+  get checkoutCost() {
+    if (typeof this.fee !== 'string') return 0
+
+    const fee = parseFloat(this.fee) || 0
+    return fee * this.usersRequiringPayment.length
   }
 
   get perms() {
@@ -248,6 +404,26 @@ export default class EventPage extends Vue {
     return { title, subtitle }
   }
 
+  get registeredUsers() {
+    return this.statuses.filter((s) => s.registration !== false)
+  }
+
+  get unregisteredUsers() {
+    return this.statuses.filter((s) => !this.registeredUsers.includes(s))
+  }
+
+  get usersRequiringPayment() {
+    const retval: User[] = []
+
+    for (const status of this.selectedStatuses) {
+      if (status.paid || status.user.feeWaived) continue
+
+      retval.push(status.user)
+    }
+
+    return retval
+  }
+
   /**
    * Determines if the event is open to new registrations.
    * TODO: Implement override functionality.
@@ -257,7 +433,10 @@ export default class EventPage extends Vue {
   }
 
   avatar(user: User) {
-    if (!user.avatar) return this.$accessor.users.defaultAvatar
+    if (!user.avatar)
+      return `${this.$config.staticBase}${this.$config.avatarBase}/${
+        user.id % 10
+      }.png`
 
     if (user.avatar.startsWith('http')) return user.avatar
 
@@ -275,17 +454,38 @@ export default class EventPage extends Vue {
   format(date: string | Date, formatString: string) {
     return formatDate(date, formatString)
   }
+
+  async onPaymentComplete() {
+    await this.$accessor.registrations.getStatuses(this.$route.params.id)
+    await this.register()
+  }
+
+  async onCancelConfirm(status: EventRegistrationStatus) {
+    await this.$accessor.registrations.delete(
+      (status.registration as EventRegistration).id
+    )
+
+    await this.$accessor.registrations.getStatuses(this.$route.params.id)
+  }
+
+  async register() {
+    await this.$accessor.registrations.create({
+      eventId: +this.$route.params.id,
+      users: this.selectedStatuses.map((s) => s.user.id),
+    })
+
+    if (this.$accessor.registrations.error) {
+      console.error(this.$accessor.registrations.error)
+    }
+
+    await this.$accessor.registrations.getStatuses(this.$route.params.id)
+  }
 }
 </script>
 
 <style lang="scss">
 .icon--bg {
   background-color: rgba(0, 0, 0, 0.1);
-}
-
-.event--heading {
-  font-weight: 700;
-  font-size: 1.35rem;
 }
 
 .picture--toolbar {

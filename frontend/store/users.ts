@@ -3,16 +3,19 @@ import { FindUsersDto } from '@backend/user/dtos/find-users.dto'
 import { UpdateUserDto } from '@backend/user/dtos/update-user.dto'
 import { User } from '@backend/user/user.entity'
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { UpdateOwnUserDto } from '../../backend/src/user/dtos/update-own-user.dto'
+import { DTO } from '../interfaces/date-to-string.interface'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { parseAxiosError } from '../utils/utilities'
 
+export type DTOUser = DTO<User>
+
 export const state = () => ({
   status: StateStatus.UNLOADED,
   error: null as StateError | null,
-  users: [] as User[],
-  user: null as User | null,
-  defaultAvatar: '/images/default_avatars/crane.png',
+  users: [] as DTOUser[],
+  user: null as DTOUser | null,
 })
 
 export const getters = getterTree(state, {
@@ -31,15 +34,15 @@ export const mutations = mutationTree(state, {
     state.status = StateStatus.ERROR
     state.error = parseAxiosError(error)
   },
-  setUser(state, user: User) {
+  setUser(state, user: DTOUser) {
     state.user = user
   },
-  setUserById(state, { id, user }: { id: number; user: User }) {
+  setUserById(state, { id, user }: { id: number; user: DTOUser }) {
     const index = state.users.findIndex((u) => u.id === id)
 
     state.users.splice(index, 1, user)
   },
-  setUsers(state, users: User[]) {
+  setUsers(state, users: DTOUser[]) {
     state.users = users
   },
 })
@@ -91,6 +94,27 @@ export const actions = actionTree(
         commit('setStatus', StateStatus.BUSY)
 
         const user = await this.$axios.$patch(`/user/${id}`, updateUserDto)
+
+        commit('setUserById', { id, user })
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async updateOwn(
+      { commit },
+      {
+        id,
+        updateOwnUserDto,
+      }: { id: number; updateOwnUserDto: UpdateOwnUserDto }
+    ) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const user = await this.$axios.$patch(
+          `/user/own/${id}`,
+          updateOwnUserDto
+        )
 
         commit('setUserById', { id, user })
         commit('setStatus', StateStatus.WAITING)

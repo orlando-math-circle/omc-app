@@ -56,7 +56,7 @@
         >
           <template #item="{ item }">
             <v-avatar size="32px" class="mr-2">
-              <v-img :src="item.avatar"></v-img>
+              <v-img :src="$avatar(item)" />
             </v-avatar>
 
             <span>{{ item.name }}</span>
@@ -64,7 +64,7 @@
 
           <template #selection="{ item }">
             <v-avatar size="32px" class="mr-2">
-              <v-img :src="item.avatar"></v-img>
+              <v-img :src="$avatar(item)" />
             </v-avatar>
 
             <span>{{ item.name }}</span>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="6" sm="5" md="3">
+      <v-col cols="5" md="3">
         <v-select
           v-model="calendar.type"
           class="filled--bright type-selector elevation-2"
@@ -15,29 +15,8 @@
         />
       </v-col>
 
-      <!-- Admin Quick Management -->
-      <v-col v-if="$accessor.auth.loggedIn">
-        <v-menu offset-y>
-          <template #activator="{ on, attrs }">
-            <v-btn v-bind="attrs" v-on="on">Admin</v-btn>
-          </template>
-
-          <v-list dense nav>
-            <dialog-create-event @event:create="onEventCreated">
-              <template #activator="{ on, attrs }">
-                <v-list-item v-bind="attrs" v-on="on">
-                  <v-list-item-icon>
-                    <v-icon>mdi-calendar</v-icon>
-                  </v-list-item-icon>
-
-                  <v-list-item-content>
-                    <v-list-item-title>Create Event</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </dialog-create-event>
-          </v-list>
-        </v-menu>
+      <v-col cols="auto" class="ml-auto">
+        <v-btn @click="resetDate">Today</v-btn>
       </v-col>
     </v-row>
 
@@ -154,6 +133,10 @@ export default class EventsPage extends Vue {
 
   onFilterChange(indices: number[]) {
     this.projectFilterIds = indices.map((i) => this.projects[i].id)
+  }
+
+  resetDate() {
+    this.calendar.date = new Date().toISOString().substr(0, 10)
   }
 
   async onEventCreated() {

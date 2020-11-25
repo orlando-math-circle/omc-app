@@ -3,7 +3,7 @@
     <v-navigation-drawer v-if="user != null" v-model="drawer" app>
       <v-list-item class="px-2">
         <v-list-item-avatar>
-          <v-img :src="user.avatar"></v-img>
+          <v-img :src="$avatar(user)" />
         </v-list-item-avatar>
 
         <v-list-item-content>
@@ -163,7 +163,7 @@
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" icon elevation="2" v-on="on">
             <v-avatar>
-              <v-img :src="avatar"></v-img>
+              <v-img :src="$avatar(user)"></v-img>
             </v-avatar>
           </v-btn>
         </template>
@@ -232,11 +232,7 @@ export default class AdminLayout extends Vue {
   mini = false
 
   get user() {
-    return this.$accessor.auth.user
-  }
-
-  get avatar() {
-    return this.$accessor.auth.avatar
+    return this.$accessor.auth.user!
   }
 
   get isDark() {

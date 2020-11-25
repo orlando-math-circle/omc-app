@@ -10,9 +10,7 @@
       <v-list>
         <v-list-item v-for="usr in users" :key="usr.id">
           <v-list-item-avatar>
-            <v-img
-              :src="usr.avatar || '/images/default_avatars/default.png'"
-            ></v-img>
+            <v-img :src="$avatar(usr)" />
           </v-list-item-avatar>
 
           <v-list-item-content>
@@ -130,10 +128,6 @@ export default class AccountSettingsPage extends Vue {
   get users() {
     return this.$accessor.auth.account?.users || []
   }
-
-  // isPrimaryUser(user: User) {
-  //   return user.id === this.$accessor.auth.account?.primaryUser.id
-  // }
 
   async onDeleteConfirm(user: User) {
     await this.$accessor.users.delete(user.id)

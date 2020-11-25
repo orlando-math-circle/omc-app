@@ -72,11 +72,12 @@
             <template #[`item.email`]="{ item }">
               <div class="d-flex align-center py-1">
                 <v-avatar size="32px" class="elevation-1">
-                  <v-img :src="item.avatar"></v-img>
+                  <v-img :src="$avatar(item)" />
                 </v-avatar>
 
                 <div class="ml-2">
-                  <link-copy :text="item.email"></link-copy>
+                  <link-copy v-if="item.email" :text="item.email"></link-copy>
+                  <span v-else>No Email</span>
                 </div>
               </div>
             </template>

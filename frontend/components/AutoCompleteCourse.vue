@@ -39,7 +39,7 @@ export default class AutoCompleteCourse extends Vue {
   }
 
   async findAll() {
-    await this.$accessor.courses.findAllByCourse({ project: this.project })
+    await this.$accessor.courses.findAllByProject({ project: this.project })
     this.bouncing = false
   }
 }

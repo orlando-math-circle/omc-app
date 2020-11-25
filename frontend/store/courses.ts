@@ -85,19 +85,22 @@ export const actions = actionTree(
         commit('setError', error)
       }
     },
-    async findAllByCourse(
+    async findAllByProject(
       { commit },
       {
         project,
-        findallCoursesDto,
-      }: { project: number; findallCoursesDto?: FindAllCoursesDto }
+        findAllCoursesDto,
+      }: { project: number; findAllCoursesDto?: FindAllCoursesDto }
     ) {
       try {
         commit('setStatus', StateStatus.BUSY)
 
-        const [courses, total] = await this.$axios.$get(`/course/${project}`, {
-          params: findallCoursesDto,
-        })
+        const [courses, total] = await this.$axios.$get(
+          `/course/project/${project}`,
+          {
+            params: findAllCoursesDto,
+          }
+        )
 
         commit('setCourses', courses)
         commit('setTotal', total)

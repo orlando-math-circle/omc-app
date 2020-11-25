@@ -24,9 +24,7 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                <v-img
-                  :src="user.avatar || '/images/default_avatars/pig.png'"
-                />
+                <v-img :src="$avatar(user)" />
               </v-avatar>
             </template>
             <span>{{ user.first }} {{ user.last }}</span>

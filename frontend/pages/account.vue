@@ -16,21 +16,20 @@
       <v-row>
         <v-col>
           <v-card class="avatar--offset">
-            <avatar-picker :url="$accessor.auth.avatar"></avatar-picker>
-            <div class="d-flex flex-row">
-              <v-card-title>User Settings</v-card-title>
+            <avatar-picker :url="$avatar(user)" />
 
-              <v-spacer></v-spacer>
+            <div class="d-flex flex-row">
+              <v-spacer />
 
               <dialog-select-avatar v-slot="{ on, attrs }">
-                <v-btn text class="ma-2" v-bind="attrs" v-on="on"
-                  >Edit Avatar</v-btn
-                >
+                <v-btn text class="ma-2" v-bind="attrs" v-on="on">
+                  Edit Avatar
+                </v-btn>
               </dialog-select-avatar>
             </div>
 
             <div class="d-flex flex-column align-center justify-center my-3">
-              <div class="text-h3 user--name">{{ user.name }}</div>
+              <div class="text-h4 user--name">{{ user.name }}</div>
               <div v-if="role" class="text-h5 user--role">{{ role }}</div>
             </div>
 

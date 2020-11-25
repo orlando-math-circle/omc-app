@@ -41,6 +41,7 @@
           :events="events"
           :loading="$store.getters['events/isLoading']"
           :short-weekdays="false"
+          @click:event="onClickEvent"
           @change="onChange"
         >
         </v-calendar>
@@ -61,6 +62,7 @@ import {
 import { VCalendar } from 'vuetify/src/components/VCalendar'
 import { VCalendarChange } from '../interfaces/calendar.interface'
 import { months } from '../utils/constants'
+import { Event } from '../../backend/src/event/event.entity'
 
 @Component
 export default class Calendar extends Vue {
@@ -140,6 +142,10 @@ export default class Calendar extends Vue {
     })
   }
 
+  onClickEvent({ event }: { event: Event }) {
+    this.$router.push(`/events/${event.id}`)
+  }
+
   async onChange({ start, end }: VCalendarChange) {
     this.range.start = parseISO(start.date)
     this.range.end = parseISO(end.date)
@@ -155,11 +161,24 @@ export default class Calendar extends Vue {
   }
 
   async onPickerChange(dateString: string) {
-    const now = parseISO(dateString)
+    const now = new Date()
+    const date = parseISO(dateString)
+
+    let newDate: string
+
+    if (now.getUTCMonth() === date.getUTCMonth()) {
+      newDate = now.toISOString().substr(0, 10)
+    } else {
+      newDate = date.toISOString().substr(0, 10)
+    }
+
+    if (this.date === newDate) return
+
+    this.date = newDate
 
     await this.$accessor.events.findAll({
-      start: startOfMonth(now),
-      end: endOfMonth(now),
+      start: startOfMonth(date),
+      end: endOfMonth(date),
     })
   }
 

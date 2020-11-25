@@ -1,5 +1,5 @@
 <template>
-  <v-card width="250px" :to="link">
+  <v-card width="270" :to="link">
     <v-img class="align-end" height="150px" :src="background"></v-img>
 
     <div class="card--bottom">
@@ -12,7 +12,7 @@
               event.location === 'Online' ? 'mdi-web' : 'mdi-map-marker-outline'
             }}</v-icon>
 
-            {{ event.location }}
+            {{ event.locationTitle }}
           </v-col>
 
           <v-col>
@@ -40,8 +40,6 @@ import { formatDate } from '~/utils/utilities'
 export default class EventBlock extends Vue {
   @Prop() event!: Event
   @Prop() link?: string
-  @Prop({ default: require('~/assets/images/programmer.jpg') })
-  defaultPicture!: string
 
   get date() {
     const d = formatDate(this.event.dtstart, 'd-MMM-h:mm aaaa')
@@ -52,9 +50,7 @@ export default class EventBlock extends Vue {
   }
 
   get background() {
-    const url = this.event.picture ?? this.event?.project?.picture
-
-    if (!url) return this.$accessor.events.defaultPicture
+    const url = this.event.picture
 
     if (url.startsWith('http')) return url
 

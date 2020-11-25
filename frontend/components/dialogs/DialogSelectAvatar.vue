@@ -32,7 +32,7 @@
                   width="100"
                   @click="toggle"
                 >
-                  <v-img :src="avatar">
+                  <v-img :src="avatarToImage(avatar)">
                     <v-scroll-y-transition>
                       <div v-if="active" class="flex-grow-1 text-center">
                         Selected
@@ -47,7 +47,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn text @click="dialog = false">Cancel</v-btn>
         <v-btn :loading="isLoading" color="primary" @click="onSubmit">
@@ -60,27 +60,28 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { DefaultAvatar } from '../../../backend/src/user/enums/default-avatar.enum'
 
 @Component
 export default class DialogSelectAvatar extends Vue {
   dialog = false
   selected = 0
-
-  avatars = [
-    '/images/default_avatars/crane.png',
-    '/images/default_avatars/flower.png',
-    '/images/default_avatars/paper.png',
-    '/images/default_avatars/pig.png',
-  ]
+  avatars = [...Array(10).keys()].map((key) =>
+    key.toString()
+  ) as DefaultAvatar[]
 
   get isLoading() {
     return this.$accessor.users.isLoading
   }
 
+  avatarToImage(avatar: DefaultAvatar) {
+    return `${this.$config.staticBase}${this.$config.avatarBase}/${avatar}.png`
+  }
+
   async onSubmit() {
-    await this.$accessor.users.update({
+    await this.$accessor.users.updateOwn({
       id: this.$accessor.auth.user!.id,
-      updateUserDto: {
+      updateOwnUserDto: {
         avatar: this.avatars[this.selected],
       },
     })

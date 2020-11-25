@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div v-if="!completed" ref="buttons" />
+    <div v-if="loading">
+      <v-progress-circular indeterminate />
+    </div>
+    <div v-if="!completed" ref="buttons"></div>
 
     <v-alert v-else type="success"> Payment successfully completed. </v-alert>
   </div>

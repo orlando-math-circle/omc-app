@@ -54,6 +54,7 @@ const config: NuxtConfig = {
   publicRuntimeConfig: {
     paypalClientId: process.env.PAYPAL_CLIENT_ID || 'sb',
     staticBase: process.env.STATIC_BASE || 'http://localhost:3000',
+    avatarBase: process.env.AVATAR_BASE || '/defaults/avatar',
   },
 
   /*
@@ -71,6 +72,7 @@ const config: NuxtConfig = {
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
     '~/plugins/axios',
+    '~/plugins/avatar',
     {
       src: '~/plugins/apex-charts',
       ssr: false,

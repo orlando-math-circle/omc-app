@@ -1,6 +1,6 @@
 <template>
   <v-container class="pa-6">
-    <template v-if="user == null">
+    <template v-if="!user">
       <v-row>
         <v-col>
           <v-alert> Unable to retrieve the user. </v-alert>
@@ -45,7 +45,7 @@
                     <div class="d-flex flex-column">
                       <v-col>
                         <v-avatar size="100px">
-                          <v-img :src="user.avatar"></v-img>
+                          <v-img :src="$avatar(user)" />
                         </v-avatar>
                       </v-col>
 
@@ -58,6 +58,7 @@
                       <v-col class="py-0">
                         <v-text-field-validated
                           v-model="user.first"
+                          label="First Name"
                           rules="required"
                           outlined
                           required
@@ -67,6 +68,7 @@
                       <v-col class="py-0">
                         <v-text-field-validated
                           v-model="user.last"
+                          label="Last Name"
                           rules="required"
                           outlined
                           required
@@ -78,6 +80,7 @@
                       <v-col class="py-0">
                         <v-text-field-validated
                           v-model="user.email"
+                          label="Email (Optional)"
                           rules="email"
                           outlined
                         ></v-text-field-validated>
@@ -192,15 +195,21 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { format } from 'date-fns'
-import { User } from '~/../backend/src/user/user.entity'
+import { DTOUser } from '../../../store/users'
 
 @Component({
   layout: 'admin',
   head: {
     title: 'Edit User',
   },
+  async asyncData({ app: { $accessor }, route }) {
+    await $accessor.users.getUser(route.params.id)
+
+    return { user: { ...$accessor.users.user } }
+  },
 })
 export default class UserPage extends Vue {
+  user: DTOUser | null = null
   panel = [0]
 
   breadcrumbs = [
@@ -216,18 +225,6 @@ export default class UserPage extends Vue {
       text: 'Edit User',
     },
   ]
-
-  get user() {
-    return this.$accessor.users.user as User
-  }
-
-  set user(value: User) {
-    this.$accessor.users.setUser(value)
-  }
-
-  async fetch() {
-    await this.$accessor.users.getUser(this.$route.params.id)
-  }
 
   formatDate(date: string, formatString: string) {
     return format(new Date(date), formatString)

@@ -3,7 +3,9 @@
     <!-- Slot: Activator -->
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" large text v-on="on">Search</v-btn>
+        <v-btn v-bind="attrs" large icon v-on="on">
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
       </slot>
     </template>
 
@@ -13,7 +15,7 @@
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
 
-        <v-toolbar-title>Custom recurrence</v-toolbar-title>
+        <v-toolbar-title>Search Courses</v-toolbar-title>
 
         <v-spacer></v-spacer>
       </v-toolbar>
@@ -99,9 +101,9 @@ export default class DialogSelectCourse extends Vue {
   }
 
   async fetch() {
-    await this.$accessor.courses.findAllByCourse({
+    await this.$accessor.courses.findAllByProject({
       project: this.project,
-      findallCoursesDto: {
+      findAllCoursesDto: {
         limit: this.pagination.limit,
         offset: this.pagination.offset,
       },
