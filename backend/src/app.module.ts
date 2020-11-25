@@ -24,7 +24,6 @@ import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
     ConfigModule.forRoot({
       validationSchema: ConfigSchema,
       isGlobal: true,
-      envFilePath: '../backend.env',
     }),
     MikroOrmModule.forRoot(MikroORMConfig),
     EmailModule,

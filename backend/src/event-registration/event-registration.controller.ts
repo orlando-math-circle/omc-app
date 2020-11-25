@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { Account } from '../account/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
 import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
@@ -43,5 +43,11 @@ export class EventRegistrationController {
   @Post('/order/capture/:eventId/:invoiceId')
   captureOrder(@Param() { eventId, invoiceId }: FindEventWithInvoiceDto) {
     return this.registrationService.captureOrder(invoiceId, eventId);
+  }
+
+  @UserAuth('event-registration', 'delete:own')
+  @Delete(':id')
+  delete(@Param('id') id: number, @Usr() user: User) {
+    return this.registrationService.delete(id, user);
   }
 }

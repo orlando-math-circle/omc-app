@@ -19,6 +19,7 @@ import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { FindUserDto } from './dtos/find-user.dto';
 import { FindUsersDto } from './dtos/find-users.dto';
+import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
@@ -87,6 +88,16 @@ export class UserController {
   @Patch(':id')
   update(@Param() { id }: FindUserDto, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @UserAuth('user', 'update:own')
+  @Patch('/own/:id')
+  updateOwn(
+    @Param('id') id: number,
+    @Body() updateOwnUserDto: UpdateOwnUserDto,
+    @Usr() user: User,
+  ) {
+    return this.userService.update(id, updateOwnUserDto, user);
   }
 
   @UserAuth('user', 'delete:any')

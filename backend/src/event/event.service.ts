@@ -7,6 +7,8 @@ import {
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { DEFAULT_EVENT_PICTURE } from '../app.constants';
 import {
   addMinutes,
   getMinDate,
@@ -17,11 +19,14 @@ import {
   PopulateFail,
   subDays,
 } from '../app.utils';
+import { CourseService } from '../course/course.service';
+import { EventFee } from '../event-fee/event-fee.entity';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { FindAllEventsDto } from './dto/find-all-events.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventsDto } from './dto/update-events.dto';
+import { FeeType } from './enums/fee-type.enum';
 import { EventRecurrence } from './event-recurrence.entity';
 import { Event } from './event.entity';
 import { Schedule } from './schedule.class';
@@ -33,6 +38,8 @@ export class EventService {
     private readonly eventRepository: EntityRepository<Event>,
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
+    private readonly courseService: CourseService,
+    private readonly config: ConfigService,
   ) {}
 
   /**
@@ -42,7 +49,7 @@ export class EventService {
    * @param author User author
    */
   async create(createEventDto: CreateEventDto, author: User) {
-    const { dtstart, dtend, rrule, ...meta } = createEventDto;
+    const { dtstart, dtend, rrule, feeType, fee, ...meta } = createEventDto;
 
     const event = this.eventRepository.create({
       dtstart: rrule ? rrule.dtstart : dtstart,
@@ -50,6 +57,21 @@ export class EventService {
       author,
       ...meta,
     });
+
+    if (feeType) {
+      const eventFee = new EventFee(fee);
+
+      switch (feeType) {
+        case FeeType.COURSE:
+          eventFee.course = await this.courseService.findOneOrFail(meta.course);
+          break;
+        case FeeType.EVENT:
+          eventFee.event = event;
+          break;
+        default:
+          break;
+      }
+    }
 
     if (rrule) {
       const schedule = new Schedule(rrule);
@@ -59,6 +81,10 @@ export class EventService {
         schedule.dtstart,
         schedule.dtend,
       );
+    }
+
+    if (!event.picture) {
+      event.picture = this.config.get(DEFAULT_EVENT_PICTURE);
     }
 
     await this.eventRepository.persist(event).flush();
@@ -504,6 +530,7 @@ export class EventService {
         name: recurrence.parentEvent.name,
         description: recurrence.parentEvent.description,
         location: recurrence.parentEvent.location,
+        locationTitle: recurrence.parentEvent.locationTitle,
         picture: recurrence.parentEvent.picture,
         color: recurrence.parentEvent.color,
         permissions: recurrence.parentEvent.permissions,

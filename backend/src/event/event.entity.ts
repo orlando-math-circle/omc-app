@@ -39,8 +39,11 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ nullable: true })
   location?: string;
 
-  @Property({ nullable: true })
-  picture?: string;
+  @Property()
+  locationTitle!: string;
+
+  @Property()
+  picture!: string;
 
   @Property({ nullable: true })
   color?: string;
@@ -79,7 +82,10 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property({ nullable: true })
   originalStart?: Date;
 
-  @OneToOne(() => EventFee, (ef) => ef.event, { owner: true, nullable: true })
+  @OneToOne(() => EventFee, (ef) => ef.event, {
+    owner: true,
+    nullable: true,
+  })
   fee?: EventFee;
 
   @ManyToOne(() => EventRecurrence, { nullable: true })

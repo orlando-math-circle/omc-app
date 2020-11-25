@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { CreateEventFeeDto } from '../../event-fee/dto/create-event-fee.dto';
 import { EventTimeThreshold } from '../enums/event-time-threshold.enum';
+import { FeeType } from '../enums/fee-type.enum';
 import { EventPermissionsDto } from './event-permissions.dto';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
@@ -23,6 +24,9 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   readonly location?: string;
+
+  @IsString()
+  readonly locationTitle!: string;
 
   @IsOptional()
   @IsString()
@@ -72,6 +76,10 @@ export class CreateEventDto {
   @Type(() => CreateEventFeeDto)
   @ValidateNested()
   readonly fee?: CreateEventFeeDto;
+
+  @IsOptional()
+  @IsEnum(FeeType)
+  readonly feeType?: FeeType;
 
   @IsOptional()
   @Type(() => Number)

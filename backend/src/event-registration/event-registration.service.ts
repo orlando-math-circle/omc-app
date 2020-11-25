@@ -23,9 +23,7 @@ import { EventRegistration } from './event-registration.entity';
 export class EventRegistrationService {
   constructor(
     @InjectRepository(EventRegistration)
-    private readonly registrationRepository: EntityRepository<
-      EventRegistration
-    >,
+    private readonly registrationRepository: EntityRepository<EventRegistration>,
     private readonly invoiceService: InvoiceService,
     private readonly paypalService: PayPalService,
     private readonly eventService: EventService,
@@ -63,7 +61,7 @@ export class EventRegistrationService {
       throw new BadRequestException('Event registrations are closed');
     }
 
-    if (event?.course.isClosed) {
+    if (event.course?.isClosed) {
       throw new BadRequestException('Course registrations are closed');
     }
 
@@ -94,6 +92,7 @@ export class EventRegistrationService {
       }
 
       if (fee && !user.feeWaived) {
+        console.log(fee.invoices.getItems());
         const invoice = fee.invoices
           .getItems()
           .find((i) => i.user.id === userId);
@@ -152,15 +151,15 @@ export class EventRegistrationService {
       const hasInvoice =
         fee && !!fee.invoices.getItems().find((i) => i.user.id === user.id);
 
-      const hasRegistration = !!event.registrations
-        .getItems()
-        .find((reg) => reg.user.id === user.id);
+      const registration =
+        event.registrations.getItems().find((reg) => reg.user.id === user.id) ||
+        false;
 
       retval.push({
         user,
         eligible: event.hasPermission(user),
         paid: fee ? hasInvoice : undefined,
-        registered: hasRegistration,
+        registration: registration,
       });
     }
 
@@ -221,6 +220,16 @@ export class EventRegistrationService {
       throw new BadRequestException('Invoice already exists');
     }
 
+    let isLate = false;
+
+    if (fee.lateAmount && parseFloat(fee.lateAmount) !== 0) {
+      if (event.course) {
+        isLate = event.course.isLate;
+      } else {
+        isLate = event.isLate;
+      }
+    }
+
     const purchaseUnits: PurchaseUnitRequest[] = [];
 
     for (const id of users) {
@@ -237,7 +246,10 @@ export class EventRegistrationService {
 
       purchaseUnits.push({
         reference_id: id.toString(),
-        amount: { currency_code: 'USD', value: fee.amount },
+        amount: {
+          currency_code: 'USD',
+          value: isLate ? fee.lateAmount : fee.amount,
+        },
       });
     }
 
@@ -263,7 +275,19 @@ export class EventRegistrationService {
       throw new BadRequestException('Event has no fee');
     }
 
-    this.paypalService.validateCapture(order, 'APPROVED', fee.amount);
+    let isLate = false;
+
+    if (fee.lateAmount && parseFloat(fee.lateAmount) !== 0) {
+      if (event.course) {
+        isLate = event.course.isLate;
+      } else {
+        isLate = event.isLate;
+      }
+    }
+
+    const cost = isLate ? fee.lateAmount : fee.amount;
+
+    this.paypalService.validateCapture(order, 'APPROVED', cost);
 
     // WARNING: If this completes but subsequent code fails, money is taken but no registration.
     const capturedOrder = await this.paypalService.captureOrder(orderId);
@@ -277,10 +301,11 @@ export class EventRegistrationService {
           {
             status: InvoiceStatus.COMPLETED,
             id: capture.id,
-            fee: capture.seller_receivable_breakdown.paypal_fee.value,
+            amount: capture.seller_receivable_breakdown.paypal_fee.value,
             gross: capture.seller_receivable_breakdown.gross_amount.value,
             net: capture.seller_receivable_breakdown.net_amount.value,
             purchasedAt: new Date(capture.create_time),
+            fee,
             user: +purchase_unit.reference_id,
           },
           event.fee && { event },
@@ -304,5 +329,27 @@ export class EventRegistrationService {
     populate?: any,
   ) {
     return this.registrationRepository.findOne(where, populate);
+  }
+
+  async delete(id: number, user: User) {
+    const deleteAny = this.ac.can(user, 'delete:any', 'event-registration');
+
+    let registration: EventRegistration;
+
+    if (deleteAny) {
+      registration = await this.registrationRepository.findOneOrFail(id, true);
+    } else {
+      registration = await this.registrationRepository.findOneOrFail(
+        {
+          id,
+          user: {
+            id: user.account.users.getIdentifiers(),
+          },
+        },
+        true,
+      );
+    }
+
+    return this.registrationRepository.remove(registration).flush();
   }
 }

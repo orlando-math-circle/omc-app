@@ -9,31 +9,35 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { eachWeekOfInterval, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
-import {
-  isBetweenInclusive,
-  isNumber,
-  Populate,
-  PopulateFail,
-} from '../app.utils';
+import { DEFAULT_AVATAR_FOLDER } from '../app.constants';
+import { isBetweenInclusive, Populate, PopulateFail } from '../app.utils';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
-import { FileService } from '../file/file.service';
 import { ApprovalStatus } from '../file/interfaces/approval-status.enum';
 import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
 
 @Injectable()
 export class UserService {
+  private readonly avatars: Record<string, string> = {};
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: EntityRepository<User>,
-    private readonly fileService: FileService,
-  ) {}
+    config: ConfigService,
+  ) {
+    for (let i = 0; i < 10; i++) {
+      this.avatars[i] = `${config.get(DEFAULT_AVATAR_FOLDER)}/${i}.png`;
+    }
+  }
 
   /**
    * Creates a new user for the given account.
@@ -101,14 +105,28 @@ export class UserService {
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User>;
-  async update(user: User, updateUserDto: UpdateUserDto): Promise<User>;
-  async update(idOrUser: number | User, updateUserDto: UpdateUserDto) {
-    const user = isNumber(idOrUser)
-      ? await this.userRepository.findOneOrFail(idOrUser)
-      : idOrUser;
+  async update(
+    id: number,
+    dto: UpdateUserDto | UpdateOwnUserDto,
+    author?: User,
+  ) {
+    let user: User;
 
-    user.assign(updateUserDto);
+    if (author) {
+      user = author.account.users.getItems().find((u) => u.id === id);
+
+      if (!user) {
+        throw new NotFoundException();
+      }
+    } else {
+      user = await this.userRepository.findOneOrFail(id);
+    }
+
+    if (Object.keys(this.avatars).includes(dto.avatar)) {
+      dto.avatar = this.avatars[dto.avatar];
+    }
+
+    user.assign(dto);
 
     await this.userRepository.flush();
 

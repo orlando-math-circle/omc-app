@@ -39,7 +39,10 @@ export class Course extends BaseEntity<Course, 'id'> {
   @Property()
   lateOffset: number = 0;
 
-  @OneToOne(() => EventFee, (ef) => ef.course, { owner: true, nullable: true })
+  @OneToOne(() => EventFee, (ef) => ef.course, {
+    owner: true,
+    nullable: true,
+  })
   fee?: EventFee;
 
   @ManyToOne(() => Project)

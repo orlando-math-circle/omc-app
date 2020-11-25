@@ -39,7 +39,8 @@ export class EventController {
   findOne(@Param('id') id: number) {
     return this.eventService.findOneOrFail(id, [
       'author',
-      'course',
+      'fee',
+      'course.fee',
       'recurrence',
     ]);
   }

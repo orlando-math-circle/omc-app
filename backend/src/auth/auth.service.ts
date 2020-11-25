@@ -1,3 +1,4 @@
+import { EntityManager } from '@mikro-orm/core';
 import {
   BadRequestException,
   forwardRef,
@@ -36,6 +37,7 @@ export class AuthService {
     private readonly accountService: AccountService,
     private readonly emailService: EmailService,
     private readonly config: ConfigService,
+    private readonly em: EntityManager,
   ) {}
 
   async validateLogin(email: string, password: string) {
@@ -182,7 +184,11 @@ export class AuthService {
 
     if (user.emailVerified) throw new GoneException();
 
-    await this.userService.update(user, { emailVerified: true });
+    user.emailVerified = true;
+
+    await this.em.flush();
+
+    return user;
   }
 
   /**
@@ -242,8 +248,10 @@ export class AuthService {
   public async resetUserPassword(token: string, password: string) {
     const user = await this.getValidResetTokenUser(token);
 
-    password = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    user.password = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
-    await this.userService.update(user, { password });
+    await this.em.flush();
+
+    return user;
   }
 }

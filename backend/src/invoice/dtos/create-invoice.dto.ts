@@ -1,7 +1,6 @@
 import { Type } from 'class-transformer';
 import {
   IsDate,
-  IsEAN,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -9,6 +8,7 @@ import {
   Matches,
 } from 'class-validator';
 import { Course } from '../../course/course.entity';
+import { EventFee } from '../../event-fee/event-fee.entity';
 import { Event } from '../../event/event.entity';
 import { User } from '../../user/user.entity';
 import { InvoiceStatus } from '../enums/invoice-status.enum';
@@ -26,15 +26,15 @@ export class CreateInvoiceDto {
 
   @IsString()
   @Matches(/^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$/)
-  readonly gross: string;
+  readonly gross!: string;
 
   @IsString()
   @Matches(/^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$/)
-  readonly fee: string;
+  readonly amount!: string;
 
   @IsString()
   @Matches(/^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$/)
-  readonly net: string;
+  readonly net!: string;
 
   @IsOptional()
   @IsNumber()
@@ -45,5 +45,8 @@ export class CreateInvoiceDto {
   readonly course?: number | Course;
 
   @IsNumber()
-  readonly user: number | User;
+  readonly fee!: number | EventFee;
+
+  @IsNumber()
+  readonly user!: number | User;
 }

@@ -7,6 +7,12 @@ export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
 export const SERVE_STATIC = 'SERVE_STATIC';
 
 /**
+ * Defaults
+ */
+export const DEFAULT_EVENT_PICTURE = 'DEFAULT_EVENT_PICTURE';
+export const DEFAULT_AVATAR_FOLDER = 'DEFAULT_AVATAR_FOLDER';
+
+/**
  * SendGrid API
  */
 export const SENDGRID_API_KEY = 'SENDGRID_API_KEY';

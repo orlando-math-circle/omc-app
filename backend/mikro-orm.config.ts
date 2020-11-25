@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { UserSubscriber } from './src/user/user.subscriber';
 
-dotenv.config({ path: path.resolve(__dirname, '../../backend.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 export const config: Options = {
   type: 'postgresql',
