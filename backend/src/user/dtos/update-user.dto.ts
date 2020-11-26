@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsDate,
   IsEnum,
@@ -49,7 +50,8 @@ export class UpdateUserDto {
   password?: string;
 
   @IsOptional()
-  @IsEnum({ each: true })
+  @IsArray()
+  @IsEnum(Roles, { each: true })
   roles?: Roles[];
 
   @IsOptional()

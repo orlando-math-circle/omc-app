@@ -101,7 +101,7 @@
                         <birthday-picker v-model="user.dob" outlined />
                       </v-col>
 
-                      <v-col>
+                      <v-col col="12" xl="4">
                         <v-select-validated
                           v-model="user.sex"
                           :items="sexes"
@@ -109,15 +109,26 @@
                           rules="required"
                           outlined
                           hide-details="auto"
-                        ></v-select-validated>
+                        />
                       </v-col>
 
-                      <v-col>
+                      <v-col col="12" xl="4">
                         <v-select-validated
                           v-model="user.grade"
                           :items="grades"
                           rules="required"
                           hide-details="auto"
+                          outlined
+                        />
+                      </v-col>
+
+                      <v-col col="12" xl="4">
+                        <v-select-validated
+                          v-model="user.roles"
+                          :items="roles"
+                          label="Roles"
+                          hide-details="auto"
+                          multiple
                           outlined
                         />
                       </v-col>
@@ -273,8 +284,9 @@ import { format } from 'date-fns'
 import { DTOUser } from '../../../store/users'
 import { Sex } from '../../../../backend/src/user/enums/sex.enum'
 import { UpdateUserDto } from '../../../../backend/src/user/dtos/update-user.dto'
-import { difference } from '../../../utils/utilities'
+import { shallowDiff } from '../../../utils/utilities'
 import { grades } from '../../../utils/events'
+import { Roles } from '../../../../backend/src/app.roles'
 
 @Component({
   layout: 'admin',
@@ -313,6 +325,11 @@ export default class UserPage extends Vue {
   sexes = [
     { text: 'Male', value: Sex.MALE },
     { text: 'Female', value: Sex.FEMALE },
+  ]
+
+  roles = [
+    { text: 'Administrator', value: Roles.ADMIN },
+    { text: 'Volunteer', value: Roles.VOLUNTEER },
   ]
 
   formatDate(date: string, formatString: string) {
@@ -354,7 +371,7 @@ export default class UserPage extends Vue {
     }
 
     // Obtain the differences from the old user and the dto.
-    const diff: any = difference(old, dto)
+    const diff: any = shallowDiff(old, dto)
 
     return diff
   }

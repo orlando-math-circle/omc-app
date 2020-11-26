@@ -30,6 +30,23 @@ export const difference = (origObj: object, newObj: object) => {
 }
 
 /**
+ * Shallow object comparison that returns the keys from the second object
+ * that are different in the first.
+ *
+ * @param o1 Object
+ * @param o2 Object
+ */
+export const shallowDiff = (o1: Record<string, any>, o2: Record<string, any>) =>
+  Object.keys(o2).reduce((diff, key) => {
+    if (isEqual(o1[key], o2[key])) return diff
+
+    return {
+      ...diff,
+      [key]: o2[key],
+    }
+  }, {})
+
+/**
  * Parses an Axios error to avoid cyclic dependency
  * errors in Vuex.
  *
