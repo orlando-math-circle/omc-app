@@ -73,11 +73,9 @@ export default class BirthdayPicker extends Vue {
     if (!birthday.month || !birthday.date || !birthday.year) return
 
     const date = new Date(
-      Date.UTC(
-        birthday.year as number,
-        birthday.month as number,
-        birthday.date as number
-      )
+      birthday.year as number,
+      birthday.month as number,
+      birthday.date as number
     )
 
     if (!isValidDate(date)) return

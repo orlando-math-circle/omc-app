@@ -59,11 +59,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { DefaultAvatar } from '../../../backend/src/user/enums/default-avatar.enum'
 
 @Component
 export default class DialogSelectAvatar extends Vue {
+  @Prop({ default: false }) upload!: boolean
+
   dialog = false
   selected = 0
   avatars = [...Array(10).keys()].map((key) =>

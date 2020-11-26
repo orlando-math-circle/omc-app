@@ -14,6 +14,7 @@ export const grades = [
   { text: '10th Grade', short: '10th', value: Grade.TENTH },
   { text: '11th Grade', short: '11th', value: Grade.ELEVENTH },
   { text: '12th Grade', short: '12th', value: Grade.TWELFTH },
+  { text: 'Graduated', short: 'G', value: Grade.GRADUATED },
 ]
 
 export const contiguousGradeRanges = (grades: Grade[]) => {

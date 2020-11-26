@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { Roles } from '../../app.roles';
 import { Grade } from '../enums/grade.enum';
+import { Sex } from '../enums/sex.enum';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -50,4 +51,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum({ each: true })
   roles?: Roles[];
+
+  @IsOptional()
+  @IsEnum(Sex)
+  sex?: Sex;
 }

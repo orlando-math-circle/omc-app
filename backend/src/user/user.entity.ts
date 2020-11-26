@@ -1,5 +1,4 @@
 import {
-  ArrayType,
   BaseEntity,
   Collection,
   Entity,
@@ -45,7 +44,7 @@ export class User extends BaseEntity<User, 'id'> {
   @Property({ nullable: true, hidden: true })
   password?: string;
 
-  @Property({ type: ArrayType, default: [Roles.DEFAULT] })
+  @Enum({ items: () => Roles, array: true, default: [Roles.DEFAULT] })
   roles: Roles[] = [Roles.DEFAULT];
 
   @Property({ default: false })

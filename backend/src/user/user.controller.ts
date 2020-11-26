@@ -23,6 +23,8 @@ import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
+import { expr } from '@mikro-orm/core';
+import { Roles } from '../app.roles';
 
 @Controller('user')
 export class UserController {
@@ -48,8 +50,10 @@ export class UserController {
 
   @UserAuth('user', 'read:any')
   @Get()
-  findAll(@Query() { limit, offset, contains, orderBy }: FindUsersDto) {
-    // Prevent sorting by computed property.
+  findAll(
+    @Query() { limit, offset, grade, role, contains, orderBy }: FindUsersDto,
+  ) {
+    // Prevent sorting by a computed property.
     if (orderBy && 'name' in orderBy) {
       orderBy['first'] = orderBy.name;
       orderBy['last'] = orderBy.name;
@@ -57,20 +61,46 @@ export class UserController {
       delete orderBy.name;
     }
 
+    const roles = Array.isArray(role) ? role : [role];
+
+    // This is a workaround because the $in operator does not seem to work
+    // on the roles enum array. If that is fixed, this can be simplified.
+    const rolesOrQuery =
+      (role && [...roles.map((role) => ({ roles: { $contains: [role] } }))]) ||
+      [];
+    const containsOrQuery =
+      (contains && [
+        { [expr('lower(id::text)')]: { $like: `%${contains}%` } },
+        { [expr('lower(first)')]: { $like: `%${contains}%` } },
+        { [expr('lower(last)')]: { $like: `%${contains}%` } },
+        { [expr('lower(roles::text)')]: { $like: `%${contains}%` } },
+        {
+          [expr('lower(fee_waived::text)')]: { $like: `%${contains}%` },
+        },
+        {
+          [expr('lower(email_verified::text)')]: {
+            $like: `%${contains}%`,
+          },
+        },
+        {
+          [expr('lower(email_verified::text)')]: {
+            $like: `%${contains}%`,
+          },
+        },
+      ]) ||
+      [];
+
     return this.userService.findAll(
-      contains
-        ? ({
-            $or: [
-              { 'lower(id::text)': { $like: `%${contains}%` } },
-              { 'lower(first)': { $like: `%${contains}%` } },
-              { 'lower(last)': { $like: `%${contains}%` } },
-              { 'lower(roles::text)': { $like: `%${contains}%` } },
-              { 'lower(fee_waived::text)': { $like: `%${contains}%` } },
-              { 'lower(email_verified::text)': { $like: `%${contains}%` } },
-              { 'lower(email_verified::text)': { $like: `%${contains}%` } },
-            ],
-          } as any)
-        : {},
+      Object.assign(
+        {},
+        contains &&
+          role && {
+            $and: [{ $or: containsOrQuery }, { $or: rolesOrQuery }],
+          },
+        contains && { $or: containsOrQuery },
+        role && { $or: rolesOrQuery },
+        grade && { gradeSet: { $in: Array.isArray(grade) ? grade : [grade] } },
+      ),
       {},
       limit,
       offset,

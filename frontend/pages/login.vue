@@ -30,7 +30,7 @@
               v-model="password"
               label="Password"
               :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-              :type="showPassword ? 'test' : 'password'"
+              :type="showPassword ? 'text' : 'password'"
               rules="required"
               autocomplete="current-password"
               prepend-inner-icon="mdi-lock-outline"

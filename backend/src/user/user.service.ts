@@ -11,10 +11,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { eachWeekOfInterval, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
-import { DEFAULT_AVATAR_FOLDER } from '../app.constants';
+import { BCRYPT_ROUNDS, DEFAULT_AVATAR_FOLDER } from '../app.constants';
 import { isBetweenInclusive, Populate, PopulateFail } from '../app.utils';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
@@ -124,6 +125,10 @@ export class UserService {
 
     if (Object.keys(this.avatars).includes(dto.avatar)) {
       dto.avatar = this.avatars[dto.avatar];
+    }
+
+    if ('password' in dto) {
+      dto.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     }
 
     user.assign(dto);

@@ -18,11 +18,53 @@
       <v-col cols="auto" align-self="center">
         <v-btn color="primary">Create User</v-btn>
       </v-col>
+
+      <v-col cols="auto" align-self="center">
+        <v-btn @click="filters.panel = !filters.panel">
+          Filters <v-icon>mdi-filter-variant</v-icon>
+        </v-btn>
+      </v-col>
     </v-row>
 
     <v-row>
       <v-col>
         <v-card>
+          <v-toolbar v-if="filters.panel" flat class="pa-3">
+            <v-row>
+              <v-col>
+                <v-select
+                  v-model="filters.grades"
+                  :items="grades"
+                  label="Grades"
+                  outlined
+                  multiple
+                  hide-details="auto"
+                  clearable
+                  @change="onRefresh(options)"
+                >
+                  <template #selection="{ index }">
+                    <v-chip v-if="index < gradeGroups.length">
+                      {{ gradeGroups[index] }}
+                    </v-chip>
+                  </template>
+                </v-select>
+              </v-col>
+
+              <v-col>
+                <v-select
+                  v-model="filters.roles"
+                  :items="roles"
+                  label="Roles"
+                  hide-details="auto"
+                  outlined
+                  multiple
+                  clearable
+                  @change="onRefresh(options)"
+                />
+              </v-col>
+            </v-row>
+          </v-toolbar>
+
           <v-card-title>
             <v-menu v-if="selected.length" offset-y>
               <template #activator="{ on, attrs }">
@@ -46,6 +88,7 @@
               append-icon="mdi-magnify"
               placeholder="filter for id, name, email, etc"
               label="Search"
+              clearable
               single-line
               solo
               hide-details
@@ -80,6 +123,10 @@
                   <span v-else>No Email</span>
                 </div>
               </div>
+            </template>
+
+            <template #[`item.grade`]="{ item }">
+              {{ grades[item.grade].text }}
             </template>
 
             <template #[`item.roles`]="{ item }">
@@ -117,28 +164,18 @@
           </v-data-table-paginated>
         </v-card>
       </v-col>
-
-      <v-col cols="3">
-        <div class="text-h6 mb-3">Filters</div>
-        <div class="font-weight-bold mt-3">Age Range</div>
-        <v-range-slider
-          hide-details
-          thumb-label
-          max="100"
-          min="1"
-        ></v-range-slider>
-
-        <div class="font-weight-bold mt-3">Roles</div>
-
-        <v-checkbox label="Admin" hide-details></v-checkbox>
-        <v-checkbox label="Volunteer" hide-details></v-checkbox>
-      </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import {
+  contiguousGradeRanges,
+  gradeGroups,
+  grades,
+} from '../../../utils/events'
+import { Roles } from '../../../../backend/src/app.roles'
 import { formatDate } from '~/utils/utilities'
 
 @Component({
@@ -151,13 +188,21 @@ import { formatDate } from '~/utils/utilities'
 export default class AdminUsersPage extends Vue {
   search = ''
   selected = []
+  grades = grades
   options = null
+
+  filters = {
+    panel: false,
+    grades: [],
+    roles: [],
+  }
 
   headers = [
     { text: 'ID', value: 'id' },
     { text: 'Name', value: 'name' },
     { text: 'Email', value: 'email' },
     { text: 'Verified', value: 'emailVerified' },
+    { text: 'Grades', value: 'grade' },
     { text: 'Roles', value: 'roles' },
     { text: 'Fee Waived', value: 'feeWaived' },
     {
@@ -177,8 +222,17 @@ export default class AdminUsersPage extends Vue {
     },
   ]
 
+  roles = [
+    { text: 'Administrator', value: Roles.ADMIN },
+    { text: 'Volunteer', value: Roles.VOLUNTEER },
+  ]
+
   get isLoading() {
     return this.$accessor.users.isLoading
+  }
+
+  get gradeGroups() {
+    return gradeGroups(contiguousGradeRanges(this.filters.grades))
   }
 
   getRoleColor(role: string) {
@@ -207,7 +261,14 @@ export default class AdminUsersPage extends Vue {
       return // Prevent fetching twice on first page load.
     }
 
-    await this.$accessor.users.findAll(options)
+    await this.$accessor.users.findAll(
+      Object.assign(
+        {},
+        options,
+        this.filters.grades.length && { grade: this.filters.grades },
+        this.filters.roles.length && { role: this.filters.roles }
+      )
+    )
   }
 
   async fetch() {

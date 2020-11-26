@@ -41,9 +41,9 @@
             <v-card-text>
               <v-form-validated>
                 <v-row>
-                  <v-col cols="auto">
+                  <v-col cols="12" sm="auto">
                     <div class="d-flex flex-column">
-                      <v-col>
+                      <v-col class="d-flex justify-center">
                         <v-avatar size="100px">
                           <v-img :src="$avatar(user)" />
                         </v-avatar>
@@ -55,44 +55,63 @@
 
                   <v-col>
                     <v-row>
-                      <v-col class="py-0">
+                      <v-col cols="6">
                         <v-text-field-validated
                           v-model="user.first"
                           label="First Name"
                           rules="required"
+                          hide-details="auto"
                           outlined
                           required
                         ></v-text-field-validated>
                       </v-col>
 
-                      <v-col class="py-0">
+                      <v-col cols="6">
                         <v-text-field-validated
                           v-model="user.last"
                           label="Last Name"
                           rules="required"
+                          hide-details="auto"
                           outlined
                           required
                         ></v-text-field-validated>
                       </v-col>
-                    </v-row>
 
-                    <v-row>
-                      <v-col class="py-0">
+                      <v-col cols="12">
                         <v-text-field-validated
                           v-model="user.email"
+                          name="Email"
                           label="Email (Optional)"
+                          hide-details="auto"
                           rules="email"
                           outlined
                         ></v-text-field-validated>
                       </v-col>
-                    </v-row>
 
-                    <v-row>
-                      <v-col class="mb-3">
-                        <birthday-picker
-                          v-model="user.dob"
+                      <v-col cols="12">
+                        <birthday-picker v-model="user.dob" outlined />
+                      </v-col>
+
+                      <v-col>
+                        <v-select-validated
+                          v-model="user.sex"
+                          :items="sexes"
+                          label="Sex"
+                          rules="required"
                           outlined
-                        ></birthday-picker>
+                          hide-details="auto"
+                        ></v-select-validated>
+                      </v-col>
+
+                      <v-col>
+                        <v-select-validated
+                          v-model="grade"
+                          :items="grades"
+                          rules="required"
+                          hide-details="auto"
+                          outlined
+                          @change="onGradeChange"
+                        />
                       </v-col>
                     </v-row>
 
@@ -119,8 +138,24 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn text @click="reset">Reset</v-btn>
-              <v-btn>Save Changes</v-btn>
+              <v-slide-x-transition>
+                <v-btn
+                  v-show="Object.keys(changes).length"
+                  text
+                  @click="onReset"
+                >
+                  Reset
+                </v-btn>
+              </v-slide-x-transition>
+
+              <v-btn
+                :disabled="!Object.keys(changes).length"
+                :loading="$accessor.users.isLoading"
+                color="primary"
+                @click="onSubmit"
+              >
+                Save Changes
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -139,9 +174,39 @@
                     Sends the user an email prompting them to reset their
                     password.
                   </div>
-                  <v-btn class="mb-2">
+                  <v-btn class="mb-2" color="primary">
                     <v-icon left>mdi-email</v-icon>
                     Send Reset Password Email
+                  </v-btn>
+                </div>
+
+                <v-divider class="my-5"></v-divider>
+
+                <div class="my-2">
+                  <div class="title">Change Password</div>
+                  <div class="subtitle mb-2">
+                    Changes the user's password. A notification is not sent, and
+                    this cannot be undone.
+                  </div>
+
+                  <div class="mb-3">
+                    <v-text-field-validated
+                      v-model="password"
+                      class="my-2"
+                      label="Change Password (Optional)"
+                      outlined
+                      hide-details="auto"
+                      clearable
+                      @click:append="showPassword = !showPassword"
+                    />
+                  </div>
+
+                  <v-btn
+                    :disabled="!password || password.length === 0"
+                    :loading="$accessor.users.isLoading"
+                    color="primary"
+                    @click="changePassword"
+                    >Change Password
                   </v-btn>
                 </div>
 
@@ -152,7 +217,7 @@
                   <div class="subtitle mb-2">
                     Prevents the user from signing in on the platform.
                   </div>
-                  <v-btn class="mb-2" @click="user.locked = !user.locked">
+                  <v-btn class="mb-2" color="primary" @click="toggleLocked">
                     <v-icon left>{{
                       user.locked ? 'mdi-lock-open' : 'mdi-lock'
                     }}</v-icon>
@@ -169,7 +234,9 @@
               <v-expansion-panel-content>
                 <div class="my-2">
                   <span class="font-weight-bold">Created On</span>
-                  <span>{{ formatDate(user.createdAt, 'MMM d, yyyy') }}</span>
+                  <span>{{
+                    formatDate(user.createdAt, 'MMM d, yyyy h:mm a')
+                  }}</span>
                 </div>
 
                 <div class="my-2">
@@ -196,6 +263,11 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { format } from 'date-fns'
 import { DTOUser } from '../../../store/users'
+import { Sex } from '../../../../backend/src/user/enums/sex.enum'
+import { UpdateUserDto } from '../../../../backend/src/user/dtos/update-user.dto'
+import { difference } from '../../../utils/utilities'
+import { grades } from '../../../utils/events'
+import { Grade } from '../../../../backend/src/user/enums/grade.enum'
 
 @Component({
   layout: 'admin',
@@ -205,11 +277,17 @@ import { DTOUser } from '../../../store/users'
   async asyncData({ app: { $accessor }, route }) {
     await $accessor.users.getUser(route.params.id)
 
-    return { user: { ...$accessor.users.user } }
+    return {
+      user: { ...$accessor.users.user },
+    }
   },
 })
 export default class UserPage extends Vue {
   user: DTOUser | null = null
+  showPassword = false
+  password = ''
+  grade: Grade | null = null
+  grades = grades
   panel = [0]
 
   breadcrumbs = [
@@ -226,12 +304,93 @@ export default class UserPage extends Vue {
     },
   ]
 
+  sexes = [
+    { text: 'Male', value: Sex.MALE },
+    { text: 'Female', value: Sex.FEMALE },
+  ]
+
   formatDate(date: string, formatString: string) {
     return format(new Date(date), formatString)
   }
 
-  async reset() {
+  toggleLocked() {
+    if (!this.user) return
+
+    this.user.locked = !this.user.locked
+
+    this.onSubmit()
+  }
+
+  get changes(): UpdateUserDto {
+    const old = this.$accessor.users.user!
+    const user = this.user!
+
+    const dto: UpdateUserDto = {
+      first: user.first,
+      last: user.last,
+      avatar: user.avatar,
+      dob: user.dob,
+      gradeSet: user.gradeSet,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      locked: user.locked,
+      password: user.password,
+      roles: user.roles,
+      sex: user.sex,
+    }
+
+    // Obtain the differences from the old user and the dto.
+    const diff: any = difference(old, dto)
+
+    return diff
+  }
+
+  mounted() {
+    this.grade = this.user!.grade
+  }
+
+  onGradeChange(value: Grade) {
+    this.user!.gradeSet = value
+  }
+
+  async changePassword() {
+    await this.$accessor.users.update({
+      id: this.user!.id,
+      updateUserDto: { password: this.password },
+    })
+
+    this.$accessor.snackbar.show({
+      text: 'User password changed',
+      timeout: 2000,
+    })
+  }
+
+  async onReset() {
     await this.$accessor.users.getUser(this.$route.params.id)
+
+    this.user = { ...this.$accessor.users.user } as DTOUser
+
+    this.grade = this.user.grade
+  }
+
+  async onSubmit() {
+    if (!Object.keys(this.changes).length) return
+
+    await this.$accessor.users.update({
+      id: this.user!.id,
+      updateUserDto: this.changes,
+    })
+
+    if (this.$accessor.users.error) {
+      console.error(this.$accessor.users.error)
+    } else {
+      await this.onReset()
+
+      this.$accessor.snackbar.show({
+        text: 'Changes successfully saved.',
+        timeout: 2000,
+      })
+    }
   }
 }
 </script>

@@ -49,7 +49,7 @@
             outlined
           />
 
-          <v-v-select-validated v-model="dto.sex" label="Sex" :items="sexes" />
+          <v-select-validated v-model="dto.sex" label="Sex" :items="sexes" />
 
           <v-checkbox
             v-show="!occupation.professional"
