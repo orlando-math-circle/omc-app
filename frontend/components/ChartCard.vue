@@ -15,11 +15,7 @@
 
       <div style="min-height: 60px">
         <client-only>
-          <apexchart
-            height="60"
-            :options="options"
-            :series="series"
-          ></apexchart>
+          <apex-chart height="60" :options="options" :series="series" />
         </client-only>
       </div>
     </div>
