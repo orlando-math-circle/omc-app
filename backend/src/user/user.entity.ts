@@ -10,7 +10,7 @@ import {
 } from '@mikro-orm/core';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
-import { birthdayToAge, getYearsDiff } from '../app.utils';
+import { birthdayToAge } from '../app.utils';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
@@ -51,7 +51,7 @@ export class User extends BaseEntity<User, 'id'> {
   feeWaived: boolean = false;
 
   @Enum({ type: () => Grade, nullable: true })
-  gradeSet?: Grade;
+  grade?: Grade;
 
   @Property({ nullable: true })
   gradeSetAt?: Date = new Date();
@@ -67,27 +67,6 @@ export class User extends BaseEntity<User, 'id'> {
 
   @Property()
   createdAt: Date = new Date();
-
-  @Property({ persist: false })
-  get grade() {
-    if (!this.gradeSet) return null;
-
-    const now = new Date();
-    // If August has not happened this year, the current
-    // school year is in the last year.
-    const yearOffset = now.getUTCMonth() < 7 ? -1 : 0;
-    // The current school year is the threshold of August 1st.
-    const currentSchoolYear = new Date(now.getUTCFullYear() + yearOffset, 7, 1);
-
-    return Math.min(
-      Grade.GRADUATED,
-      this.gradeSet + getYearsDiff(this.gradeSetAt, currentSchoolYear),
-    );
-  }
-
-  set grade(grade: Grade) {
-    this.gradeSet = grade;
-  }
 
   @Property({ persist: false })
   get name() {

@@ -16,6 +16,12 @@
       </v-toolbar>
 
       <v-card-text>
+        <template v-if="upload">
+          <file-upload v-model="file" outlined label="Upload Avatar" />
+
+          <v-divider class="my-3" />
+        </template>
+
         <v-item-group v-model="selected" mandatory>
           <v-row wrap>
             <v-col
@@ -61,13 +67,16 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { DefaultAvatar } from '../../../backend/src/user/enums/default-avatar.enum'
+import { User } from '../../../backend/src/user/user.entity'
 
 @Component
 export default class DialogSelectAvatar extends Vue {
   @Prop({ default: false }) upload!: boolean
+  @Prop({ required: true }) user!: User
 
   dialog = false
   selected = 0
+  file: File | null = null
   avatars = [...Array(10).keys()].map((key) =>
     key.toString()
   ) as DefaultAvatar[]
@@ -81,18 +90,29 @@ export default class DialogSelectAvatar extends Vue {
   }
 
   async onSubmit() {
-    await this.$accessor.users.updateOwn({
-      id: this.$accessor.auth.user!.id,
-      updateOwnUserDto: {
-        avatar: this.avatars[this.selected],
-      },
-    })
+    if (this.upload && this.file) {
+      const url = (await this.$accessor.files.filesToURL(this.file)) as string
 
-    await this.$accessor.auth.getMe()
+      if (this.$accessor.files.error) {
+        console.error(this.$accessor.files.error)
+      }
 
-    if (this.$route.path === '/account/settings') {
-      await this.$accessor.auth.getAccount()
+      await this.$accessor.users.update({
+        id: this.user.id,
+        updateUserDto: {
+          avatar: url,
+        },
+      })
+    } else {
+      await this.$accessor.users.updateOwn({
+        id: this.$accessor.auth.user!.id,
+        updateOwnUserDto: {
+          avatar: this.avatars[this.selected],
+        },
+      })
     }
+
+    this.$emit('update:avatar')
 
     this.dialog = false
   }

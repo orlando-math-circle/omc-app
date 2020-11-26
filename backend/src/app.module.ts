@@ -1,6 +1,7 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import MikroORMConfig from '../mikro-orm.config';
 import { AccountModule } from './account/account.module';
 import ConfigSchema from './app.config';
@@ -21,6 +22,7 @@ import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       validationSchema: ConfigSchema,
       isGlobal: true,

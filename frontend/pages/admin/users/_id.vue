@@ -49,7 +49,16 @@
                         </v-avatar>
                       </v-col>
 
-                      <v-btn class="mt-1">Edit Avatar</v-btn>
+                      <dialog-select-avatar
+                        v-slot="{ on, attrs }"
+                        :upload="true"
+                        :user="user"
+                        @update:avatar="onUpdateAvatar"
+                      >
+                        <v-btn class="mt-1" text v-bind="attrs" v-on="on">
+                          Edit Avatar
+                        </v-btn>
+                      </dialog-select-avatar>
                     </div>
                   </v-col>
 
@@ -105,12 +114,11 @@
 
                       <v-col>
                         <v-select-validated
-                          v-model="grade"
+                          v-model="user.grade"
                           :items="grades"
                           rules="required"
                           hide-details="auto"
                           outlined
-                          @change="onGradeChange"
                         />
                       </v-col>
                     </v-row>
@@ -267,7 +275,6 @@ import { Sex } from '../../../../backend/src/user/enums/sex.enum'
 import { UpdateUserDto } from '../../../../backend/src/user/dtos/update-user.dto'
 import { difference } from '../../../utils/utilities'
 import { grades } from '../../../utils/events'
-import { Grade } from '../../../../backend/src/user/enums/grade.enum'
 
 @Component({
   layout: 'admin',
@@ -286,7 +293,6 @@ export default class UserPage extends Vue {
   user: DTOUser | null = null
   showPassword = false
   password = ''
-  grade: Grade | null = null
   grades = grades
   panel = [0]
 
@@ -321,6 +327,14 @@ export default class UserPage extends Vue {
     this.onSubmit()
   }
 
+  onUpdateAvatar() {
+    this.onReset()
+
+    if (+this.$route.params.id === this.$accessor.auth.user?.id) {
+      this.$accessor.auth.getMe()
+    }
+  }
+
   get changes(): UpdateUserDto {
     const old = this.$accessor.users.user!
     const user = this.user!
@@ -330,7 +344,7 @@ export default class UserPage extends Vue {
       last: user.last,
       avatar: user.avatar,
       dob: user.dob,
-      gradeSet: user.gradeSet,
+      grade: user.grade,
       email: user.email,
       emailVerified: user.emailVerified,
       locked: user.locked,
@@ -343,14 +357,6 @@ export default class UserPage extends Vue {
     const diff: any = difference(old, dto)
 
     return diff
-  }
-
-  mounted() {
-    this.grade = this.user!.grade
-  }
-
-  onGradeChange(value: Grade) {
-    this.user!.gradeSet = value
   }
 
   async changePassword() {
@@ -369,8 +375,6 @@ export default class UserPage extends Vue {
     await this.$accessor.users.getUser(this.$route.params.id)
 
     this.user = { ...this.$accessor.users.user } as DTOUser
-
-    this.grade = this.user.grade
   }
 
   async onSubmit() {

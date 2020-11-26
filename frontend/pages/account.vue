@@ -21,7 +21,11 @@
             <div class="d-flex flex-row">
               <v-spacer />
 
-              <dialog-select-avatar v-slot="{ on, attrs }">
+              <dialog-select-avatar
+                v-slot="{ on, attrs }"
+                :user="user"
+                @update:avatar="onUpdateAvatar"
+              >
                 <v-btn text class="ma-2" v-bind="attrs" v-on="on">
                   Edit Avatar
                 </v-btn>
@@ -73,6 +77,10 @@ export default class AccountPage extends Vue {
       : this.user.roles.includes(Roles.VOLUNTEER)
       ? 'Volunteer'
       : undefined
+  }
+
+  onUpdateAvatar() {
+    this.$accessor.auth.getMe()
   }
 
   async fetch() {

@@ -71,16 +71,4 @@ export const getMinDate = (...dates: Date[]) =>
 export const subDays = (date: Date, days = 1) =>
   moment(date).subtract(days, 'day').toDate();
 
-export const getYearsDiff = (start: Date, end: Date) => {
-  let retval = 0;
-  const pivot = new Date(start.getTime());
-
-  while (pivot < end) {
-    pivot.setFullYear(pivot.getFullYear() + 1);
-    retval++;
-  }
-
-  return retval;
-};
-
 export { isSameDay };

@@ -1,3 +1,4 @@
+import { expr } from '@mikro-orm/core';
 import {
   Body,
   Controller,
@@ -23,8 +24,6 @@ import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
-import { expr } from '@mikro-orm/core';
-import { Roles } from '../app.roles';
 
 @Controller('user')
 export class UserController {
@@ -73,6 +72,7 @@ export class UserController {
         { [expr('lower(id::text)')]: { $like: `%${contains}%` } },
         { [expr('lower(first)')]: { $like: `%${contains}%` } },
         { [expr('lower(last)')]: { $like: `%${contains}%` } },
+        { [expr("lower(first || ' ' || last)")]: { $like: `%${contains}%` } },
         { [expr('lower(roles::text)')]: { $like: `%${contains}%` } },
         {
           [expr('lower(fee_waived::text)')]: { $like: `%${contains}%` },
@@ -99,7 +99,7 @@ export class UserController {
           },
         contains && { $or: containsOrQuery },
         role && { $or: rolesOrQuery },
-        grade && { gradeSet: { $in: Array.isArray(grade) ? grade : [grade] } },
+        grade && { grade: { $in: Array.isArray(grade) ? grade : [grade] } },
       ),
       {},
       limit,

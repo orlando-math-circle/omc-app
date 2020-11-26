@@ -13,8 +13,8 @@ export class UserSubscriber implements EventSubscriber<User> {
   }
 
   async beforeUpdate(args: EventArgs<User>) {
-    // If the grade was manually changed, update when it was set.
-    if ('gradeSet' in args.changeSet.payload) {
+    // If the grade was changed, update when it was set.
+    if ('grade' in args.changeSet.payload) {
       if (args.changeSet.payload.gradeSet === null) {
         args.entity.gradeSetAt = null;
       } else {

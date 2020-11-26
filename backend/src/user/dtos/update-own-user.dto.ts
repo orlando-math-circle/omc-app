@@ -23,5 +23,5 @@ export class UpdateOwnUserDto {
 
   @IsOptional()
   @IsEnum(Grade)
-  gradeSet?: Grade;
+  grade?: Grade;
 }

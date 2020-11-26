@@ -30,7 +30,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsEnum(Grade)
-  gradeSet?: Grade;
+  grade?: Grade;
 
   @IsOptional()
   @IsString()
