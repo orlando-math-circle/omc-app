@@ -15,7 +15,7 @@
 
     <v-col cols="3">
       <v-text-field-validated
-        v-model.number="birthday.day"
+        v-model.number="birthday.date"
         type="number"
         :rules="dayRules"
         name="Date"
@@ -64,18 +64,20 @@ export default class BirthdayPicker extends Vue {
 
   birthday = {
     month: null as number | null,
-    day: null as number | null,
+    date: null as number | null,
     year: null as number | null,
   }
 
   @Watch('birthday', { deep: true })
   setDate(birthday: this['birthday']) {
-    if (!birthday.month || !birthday.day || !birthday.year) return
+    if (!birthday.month || !birthday.date || !birthday.year) return
 
     const date = new Date(
-      birthday.year as number,
-      birthday.month as number,
-      birthday.day as number
+      Date.UTC(
+        birthday.year as number,
+        birthday.month as number,
+        birthday.date as number
+      )
     )
 
     if (!isValidDate(date)) return
@@ -115,7 +117,7 @@ export default class BirthdayPicker extends Vue {
 
     this.birthday.year = date.getFullYear()
     this.birthday.month = date.getMonth()
-    this.birthday.day = date.getDay()
+    this.birthday.date = date.getDate()
   }
 }
 </script>
