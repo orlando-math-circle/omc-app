@@ -54,7 +54,7 @@
     "rimraf": "3.0.2",
     "rrule": "2.6.6",
     "rxjs": "6.6.3",
-    "systeminformation": "4.30.4",
+    "systeminformation": "4.30.5",
     "uuid": "8.3.1"
   },
   "devDependencies": {
