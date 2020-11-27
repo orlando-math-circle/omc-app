@@ -1,12 +1,12 @@
 <template>
   <v-autocomplete
-    :value="value"
+    v-model="model"
     :items="$store.state.courses.courses"
     :loading="isLoading"
     :search-input.sync="search"
     label="Course"
     item-text="name"
-    item-value="id"
+    return-object
     placeholder="Search for a course"
     hide-details="auto"
     clearable
@@ -25,6 +25,14 @@ export default class AutoCompleteCourse extends Vue {
 
   search = ''
   bouncing = false
+
+  get model() {
+    return this.value
+  }
+
+  set model(value: any) {
+    this.$emit('input', value)
+  }
 
   get isLoading() {
     return this.bouncing || this.$accessor.courses.isLoading

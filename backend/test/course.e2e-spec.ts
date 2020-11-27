@@ -12,7 +12,6 @@ import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { CourseModule } from '../src/course/course.module';
 import { CreateCourseDto } from '../src/course/dto/create-course.dto';
 import { UpdateCourseDto } from '../src/course/dto/update-course.dto';
-import { LateFeeMode } from '../src/event-fee/enums/late-fee-mode.enum';
 import { FileModule } from '../src/file/file.module';
 import { CreateProjectDto } from '../src/project/dto/create-project.dto';
 import { ProjectModule } from '../src/project/project.module';
@@ -130,7 +129,6 @@ describe('Courses', () => {
         name: 'Test Course A',
         description: 'Example description.',
         fee: {
-          lateMode: LateFeeMode.DEFAULT,
           amount: '12.34',
         },
         project: 1,
@@ -148,11 +146,9 @@ describe('Courses', () => {
         name: 'Test Course A',
         description: 'Example description.',
         fee: {
-          lateMode: LateFeeMode.DEFAULT,
           amount: '12.34',
         },
         events: [],
-        invoices: [],
         project: 1,
       });
     });
@@ -189,7 +185,6 @@ describe('Courses', () => {
         name: 'Test Course B',
         description: 'Example description.',
         fee: {
-          lateMode: LateFeeMode.DEFAULT,
           amount: '43.21',
         },
         project: 1,

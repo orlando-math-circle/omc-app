@@ -55,6 +55,16 @@
             </v-list-item-content>
           </v-list-item>
 
+          <v-list-item link to="/admin/calendar/registrations">
+            <v-list-item-icon>
+              <v-icon>mdi-circle-medium</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Registrations</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
           <v-list-item link to="/admin/calendar/courses">
             <v-list-item-icon>
               <v-icon>mdi-circle-medium</v-icon>
@@ -211,7 +221,9 @@
     </v-app-bar>
 
     <v-main>
-      <nuxt />
+      <v-container class="pa-6">
+        <nuxt />
+      </v-container>
     </v-main>
 
     <snackbar></snackbar>

@@ -40,6 +40,7 @@ export class EventController {
     return this.eventService.findOneOrFail(id, [
       'author',
       'fee',
+      'project',
       'course.fee',
       'recurrence',
     ]);

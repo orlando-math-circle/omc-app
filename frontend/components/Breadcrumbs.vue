@@ -1,10 +1,10 @@
 <template>
   <v-breadcrumbs :items="items" v-bind="$attrs">
     <template #item="{ item }">
-      <nuxt-link v-if="item.href" :to="item.href">
+      <nuxt-link v-if="item.href" :to="item.href" class="breadcrumb">
         {{ item.text }}
       </nuxt-link>
-      <span v-else>
+      <span v-else class="breadcrumb">
         {{ item.text }}
       </span>
     </template>
@@ -19,3 +19,9 @@ export default class Breadcrumbs extends Vue {
   @Prop(Array) items!: any[]
 }
 </script>
+
+<style lang="scss" scoped>
+.breadcrumb {
+  font-weight: 600 !important;
+}
+</style>

@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { Account } from '../account/account.entity';
 import { Acc } from '../auth/decorators/account.decorator';
 import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
@@ -6,6 +14,8 @@ import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { CreateRegistrationDto } from './dtos/create-registration.dto';
+import { CreateVolunteerRegistrationDto } from './dtos/create-volunteer-registration.dto';
+import { FindAllRegistrationsDto } from './dtos/find-all-registrations.dto';
 import { FindEventWithInvoiceDto } from './dtos/find-event-with-invoice.dto';
 import { EventRegistrationService } from './event-registration.service';
 
@@ -21,6 +31,41 @@ export class EventRegistrationController {
     @Acc() account: Account,
   ) {
     return this.registrationService.create(eventId, users, user, account);
+  }
+
+  @UserAuth('volunteer-registration', 'create:own')
+  @Post('/volunteer')
+  volunteer(
+    @Body() { eventId, users }: CreateVolunteerRegistrationDto,
+    @Usr() user: User,
+  ) {
+    return this.registrationService.volunteer(eventId, users, user);
+  }
+
+  @UserAuth('event-registration', 'read:any')
+  @Get()
+  findAll(@Query() { limit, offset }: FindAllRegistrationsDto) {
+    return this.registrationService.findAll(
+      {
+        volunteering: false,
+      },
+      ['event', 'user'],
+      limit,
+      offset,
+    );
+  }
+
+  @UserAuth('volunteer-registration', 'read:any')
+  @Get('/volunteering')
+  findAllVolunteering(@Query() { limit, offset }: FindAllRegistrationsDto) {
+    return this.registrationService.findAll(
+      {
+        volunteering: true,
+      },
+      ['event', 'user', 'job', 'work'],
+      limit,
+      offset,
+    );
   }
 
   @AccountAuth()

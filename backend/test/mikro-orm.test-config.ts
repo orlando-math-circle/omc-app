@@ -14,6 +14,7 @@ import { Invoice } from '../src/invoice/invoice.entity';
 import { Project } from '../src/project/project.entity';
 import { User } from '../src/user/user.entity';
 import { VolunteerJob } from '../src/volunteer-job/volunteer-job.entity';
+import { VolunteerWork } from '../src/volunteer-work/volunteer-work.entity';
 
 export const MikroORMTestingConfig: Options = {
   type: 'postgresql',
@@ -32,6 +33,7 @@ export const MikroORMTestingConfig: Options = {
     FileAttachment,
     FileField,
     VolunteerJob,
+    VolunteerWork,
   ],
   dbName: process.env.TESTING_DATABASE_NAME || 'omc_test',
   user: process.env.TESTING_DATABASE_USER || 'postgres',

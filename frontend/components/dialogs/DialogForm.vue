@@ -16,11 +16,14 @@
         <v-toolbar-title>
           <slot name="title"></slot>
         </v-toolbar-title>
-
         <v-btn small absolute right fab icon @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
+
+      <v-card-subtitle>
+        <slot name="subtitle"></slot>
+      </v-card-subtitle>
 
       <v-form-validated v-slot="data" @submit:form="submit">
         <slot v-bind="{ ...data, closing }"></slot>

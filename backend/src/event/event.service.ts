@@ -140,22 +140,18 @@ export class EventService {
       ),
     ]);
 
-    await this.recurrenceRepository.populate(
-      recurrences,
-      'events',
-      Object.assign({
-        events: {
-          dtstart: { $lte: end },
-          $or: [{ dtend: { $gte: start } }, { dtend: null }],
-        },
-      }),
+    await this.recurrenceRepository.populate(recurrences, 'events', {
+      events: {
+        dtstart: { $lte: end },
+        $or: [{ dtend: { $gte: start } }, { dtend: null }],
+      },
+    });
+
+    recurrences.forEach((recurrence) =>
+      this.getRecurrenceEvents(recurrence, start, end),
     );
 
-    await Promise.all(
-      recurrences.map((recurrence) =>
-        this.getRecurrenceEvents(recurrence, start, end),
-      ),
-    );
+    await this.recurrenceRepository.flush();
 
     const allEvents: Event[] = [...events];
 
@@ -225,8 +221,10 @@ export class EventService {
 
     const oldSchedule = pivot.recurrence.getSchedule();
 
+    console.log(rrule.dtstart, oldSchedule.dtstart);
+
     // Checks if we're making an update to the entire event stream.
-    if (isSameDay(rrule.dtstart, oldSchedule.dtstart)) {
+    if (isSameDay(pivot.dtstart, oldSchedule.dtstart)) {
       return this.updateAllEvents(pivot.recurrence, updateEventsDto);
     }
 
@@ -505,7 +503,7 @@ export class EventService {
    * @param start Date signifying the beginning of the date range.
    * @param end Date signifying the end of the date range.
    */
-  private async getRecurrenceEvents(
+  private getRecurrenceEvents(
     recurrence: EventRecurrence,
     start: Date,
     end: Date,
@@ -518,6 +516,8 @@ export class EventService {
       let event = events.find(
         (e) => +e.dtstart === +date || +e.originalStart === +date,
       );
+
+      console.log(date.toISOString(), recurrence.id, event?.id);
 
       if (event) {
         event.recurrence.populated();
@@ -540,12 +540,7 @@ export class EventService {
         course: recurrence.parentEvent.course,
         recurrence,
       });
-
-      recurrence.events.add(event);
     }
-
-    // This will not do anything if no events are added.
-    await this.recurrenceRepository.flush();
 
     return recurrence;
   }

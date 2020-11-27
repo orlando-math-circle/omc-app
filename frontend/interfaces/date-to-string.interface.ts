@@ -10,10 +10,16 @@ export type ChangeTypeOfKeys<T extends object, Keys extends keyof T, Type> = {
  */
 export type DateToString<T> = T extends Date ? string : T
 
+export type Replace<T, TReplace, TWith> = T extends TReplace
+  ? T extends TReplace
+    ? TWith
+    : T
+  : {
+      [P in keyof T]: Replace<T[P], TReplace, TWith>
+    }
+
 /**
  * Used to change the native types from the backend entities
  * into their JSON versions without having to define new interfaces.
  */
-export type DTO<T> = {
-  [key in keyof T]: DateToString<T[key]>
-}
+export type DTO<T> = Replace<T, Date, string>

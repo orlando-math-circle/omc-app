@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
-import { FindAllJobsDto } from './dto/find-all-jobs.dto';
 import { VolunteerJob } from './volunteer-job.entity';
 
 @Injectable()

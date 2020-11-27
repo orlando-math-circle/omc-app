@@ -12,6 +12,7 @@
       <alert-error v-if="error" class="mx-4" :error="error" />
 
       <v-list dense>
+        <!-- Name -->
         <v-list-item class="pl-2">
           <v-list-item-avatar class="mr-2">
             <v-icon>mdi-text</v-icon>

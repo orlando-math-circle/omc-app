@@ -1,28 +1,24 @@
 <template>
-  <v-container class="pa-6">
-    <v-row>
-      <v-col cols="12" md="4">
-        <chart-card
-          title="New Users"
-          subtitle="Users added this month"
-          icon="mdi-account-plus-outline"
-          :options="userChartOptions"
-          :series="userChartSeries"
-        >
-        </chart-card>
-      </v-col>
+  <v-row>
+    <v-col cols="12" md="4">
+      <chart-card
+        title="New Users"
+        subtitle="Users added this month"
+        icon="mdi-account-plus-outline"
+        :options="userChartOptions"
+        :series="userChartSeries"
+      >
+      </chart-card>
+    </v-col>
 
-      <v-col cols="12" md="4">
-        <v-card></v-card>
-      </v-col>
+    <v-col cols="12" md="4">
+      <v-card></v-card>
+    </v-col>
 
-      <v-col cols="12" md="4">
-        <v-card></v-card>
-      </v-col>
-    </v-row>
-
-    <v-row></v-row>
-  </v-container>
+    <v-col cols="12" md="4">
+      <v-card></v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

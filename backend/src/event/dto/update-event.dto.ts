@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsDate,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
@@ -8,6 +9,8 @@ import {
 } from 'class-validator';
 import { Course } from '../../course/course.entity';
 import { Project } from '../../project/project.entity';
+import { EventTimeThreshold } from '../enums/event-time-threshold.enum';
+import { EventPermissionsDto } from './event-permissions.dto';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
 export class UpdateEventDto {
@@ -18,6 +21,10 @@ export class UpdateEventDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  locationTitle?: string;
 
   @IsOptional()
   @IsString()
@@ -32,6 +39,27 @@ export class UpdateEventDto {
   color?: string;
 
   @IsOptional()
+  @Type(() => EventPermissionsDto)
+  @ValidateNested()
+  readonly permissions?: EventPermissionsDto;
+
+  @IsOptional()
+  @IsEnum(EventTimeThreshold)
+  readonly cutoffThreshold?: EventTimeThreshold;
+
+  @IsOptional()
+  @IsNumber()
+  readonly cutoffOffset?: number;
+
+  @IsOptional()
+  @IsEnum(EventTimeThreshold)
+  readonly lateThreshold?: EventTimeThreshold;
+
+  @IsOptional()
+  @IsNumber()
+  readonly lateOffset?: number;
+
+  @IsOptional()
   @Type(() => Date)
   @IsDate()
   dtstart?: Date;
@@ -43,11 +71,11 @@ export class UpdateEventDto {
 
   @IsOptional()
   @IsNumber()
-  project?: number | Project;
+  project?: number | Project | null;
 
   @IsOptional()
   @IsNumber()
-  course?: number | Course;
+  course?: number | Course | null;
 
   @IsOptional()
   @Type(() => EventRecurrenceDto)

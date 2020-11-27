@@ -11,9 +11,10 @@ import { Roles } from '../../app.roles';
 import { Grade } from '../enums/grade.enum';
 
 export class FindUsersDto {
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  limit = 40;
+  limit?: number;
 
   @IsOptional()
   @Type(() => Number)

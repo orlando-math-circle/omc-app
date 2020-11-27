@@ -1,3 +1,4 @@
+import { Frequency, Options } from 'rrule'
 import { Grade } from '../../backend/src/user/enums/grade.enum'
 
 export const grades = [
@@ -53,4 +54,42 @@ export const gradeGroups = (ranges: Grade[][]) => {
   }
 
   return chips
+}
+
+export const parseRRule = (options: Partial<Options>) => {
+  const retval: Partial<Options> = {
+    freq: options.freq,
+    dtstart: options.dtstart,
+  }
+
+  switch (options.freq) {
+    case Frequency.WEEKLY:
+      if (options.byweekday) {
+        retval.byweekday = options.byweekday
+      }
+      break
+    case Frequency.MONTHLY:
+      // Absolute month day.
+      if (options.bymonthday) {
+        retval.bymonthday = options.bymonthday
+        // Relative month weekday.
+      } else if (options.bysetpos) {
+        retval.bysetpos = options.bysetpos
+        retval.byweekday = options.byweekday
+      }
+      break
+  }
+
+  if (options.interval && options.interval !== 1) {
+    retval.interval = options.interval
+  }
+
+  // Sets the terminating condition.
+  if (options.until) {
+    retval.until = options.until
+  } else if (options.count) {
+    retval.count = options.count
+  }
+
+  return retval
 }

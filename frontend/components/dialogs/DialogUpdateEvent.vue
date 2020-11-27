@@ -8,6 +8,7 @@
 
     <v-card-text>
       <v-list dense>
+        <!-- Name -->
         <v-list-item>
           <v-list-item-avatar>
             <v-icon>mdi-text</v-icon>
@@ -20,7 +21,6 @@
               hide-details="auto"
               vid="name"
               rules="required"
-              required
               outlined
             />
           </v-list-item-content>
@@ -28,6 +28,7 @@
 
         <v-divider />
 
+        <!-- All-Day Selector -->
         <v-list-item>
           <v-list-item-avatar>
             <v-icon>mdi-clock-outline</v-icon>

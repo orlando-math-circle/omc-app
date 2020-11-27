@@ -194,7 +194,7 @@ import { parseISO } from 'date-fns'
 export interface RecurrenceOpts {
   interval: number
   freq: Frequency
-  dtstart: Date | null
+  dtstart: Date | string | null
   until: Date | null
   count: number | null
   byweekday: ByWeekday | ByWeekday[] | null
@@ -457,7 +457,7 @@ export default class RecurrenceDialog extends Vue {
   onSetRule() {
     const retval: Partial<RecurrenceOpts> = {
       freq: this.options.freq,
-      dtstart: this.date,
+      dtstart: this.date.toISOString(),
     }
 
     if (this.type === RecurrenceTerminator.UNTIL) {

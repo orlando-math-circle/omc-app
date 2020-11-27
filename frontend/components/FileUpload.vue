@@ -6,6 +6,7 @@
           <v-col>
             <v-file-input
               v-model="files"
+              :disabled="window === 'url'"
               prepend-icon=""
               v-bind="attributes"
               hide-details="auto"
@@ -28,7 +29,7 @@
           <v-col cols="auto" class="align-self-center">
             <v-tooltip bottom>
               <template #activator="{ on, attrs }">
-                <v-btn icon v-bind="attrs" v-on="on" @click="window = 'url'">
+                <v-btn icon v-bind="attrs" v-on="on" @click="switchTo('url')">
                   <v-icon>mdi-link-variant</v-icon>
                 </v-btn>
               </template>
@@ -53,7 +54,12 @@
           <v-col cols="auto" class="align-self-center">
             <v-tooltip bottom>
               <template #activator="{ on, attrs }">
-                <v-btn icon v-bind="attrs" v-on="on" @click="window = 'upload'">
+                <v-btn
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="switchTo('upload')"
+                >
                   <v-icon>mdi-file-upload</v-icon>
                 </v-btn>
               </template>
@@ -72,11 +78,11 @@
 
           <v-spacer />
 
-          <v-btn icon @click="cropper.rotate(-90)">
+          <v-btn icon @click="cropper && cropper.rotate(-90)">
             <v-icon>mdi-rotate-left</v-icon>
           </v-btn>
 
-          <v-btn icon @click="cropper.rotate(90)">
+          <v-btn icon @click="cropper && cropper.rotate(90)">
             <v-icon>mdi-rotate-right</v-icon>
           </v-btn>
 
@@ -114,7 +120,7 @@ import 'cropperjs/dist/cropper.css'
 
 @Component
 export default class FileUpload extends Vue {
-  @Prop() value?: string | File
+  @Prop() value?: Uploads
   @Ref('cropper') readonly cropperEl!: HTMLImageElement
   @Prop({ default: 'file' }) field!: string
   @Prop({ default: false }) multiple!: boolean
@@ -136,9 +142,29 @@ export default class FileUpload extends Vue {
     { text: 'Free', value: null },
   ]
 
+  @Watch('files')
+  onFilesChange(files: Uploads) {
+    if (this.window !== 'upload') return
+
+    this.$emit('input', files)
+  }
+
+  @Watch('url')
+  onURLChange(url: string) {
+    if (this.window !== 'url') return
+
+    this.$emit('input', url)
+  }
+
   beforeMount() {
     if (typeof this.value === 'string') {
       this.window = 'url'
+      this.url = this.value
+    } else if (
+      this.value instanceof File ||
+      (Array.isArray(this.value) && this.value.every((f) => f instanceof File))
+    ) {
+      this.files = this.value
     }
   }
 
@@ -190,20 +216,16 @@ export default class FileUpload extends Vue {
     })
   }
 
+  switchTo(type: 'upload' | 'url') {
+    this.window = type
+  }
+
   get hasFile() {
     return this.files && !(Array.isArray(this.files) && this.files.length === 0)
   }
 
   get attributes() {
-    return Object.assign(
-      { ...this.$attrs },
-      this.multiple && { multiple: true }
-    )
-  }
-
-  @Watch('files')
-  onFilesChange(files: Uploads) {
-    this.$emit('input', files)
+    return Object.assign({}, this.$attrs, this.multiple && { multiple: true })
   }
 }
 </script>

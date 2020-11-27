@@ -10,6 +10,7 @@ export const state = () => ({
   status: StateStatus.UNLOADED,
   error: null as StateError | null,
   registration: null as EventRegistration | null,
+  registrations: [] as EventRegistration[],
   registrationStatuses: [] as EventRegistrationStatus[],
 })
 
@@ -32,6 +33,9 @@ export const mutations = mutationTree(state, {
   setRegistration(state, registration: EventRegistration) {
     state.registration = registration
   },
+  setRegistrations(state, registrations: EventRegistration[]) {
+    state.registrations = registrations
+  },
   setStatuses(state, statuses: EventRegistrationStatus[]) {
     state.registrationStatuses = statuses
   },
@@ -50,6 +54,18 @@ export const actions = actionTree(
         )
 
         commit('setRegistration', registration)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async findAll({ commit }) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const [registrations] = await this.$axios.$get('/registration')
+
+        commit('setRegistrations', registrations)
         commit('setStatus', StateStatus.WAITING)
       } catch (error) {
         commit('setError', error)

@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-6">
+  <div>
     <template v-if="course == null">
       <v-row no-gutters class="mb-6">
         <v-col>
@@ -53,7 +53,7 @@
         </v-col>
       </v-row>
     </template>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">

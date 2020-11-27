@@ -1,4 +1,4 @@
-import { EntityRepository, FilterQuery } from '@mikro-orm/core';
+import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   BadRequestException,
@@ -17,6 +17,7 @@ import { PurchaseUnitRequest } from '../paypal/interfaces/orders/purchase-unit.i
 import { PayPalService } from '../paypal/paypal.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
+import { VolunteerUserJobDto } from './dtos/create-volunteer-registration.dto';
 import { EventRegistrationStatus } from './dtos/event-registration-status.dto';
 import { EventRegistration } from './event-registration.entity';
 
@@ -54,6 +55,7 @@ export class EventRegistrationService {
 
     const event = await this.eventService.findOneOrFail(eventId, [
       'course.events',
+      'course.fee',
       'fee',
     ]);
 
@@ -108,6 +110,82 @@ export class EventRegistrationService {
     await this.registrationRepository.persist(registrations).flush();
 
     return registrations;
+  }
+
+  /**
+   * Registers users to an event as a volunteer.
+   * Volunteers bypass all payment requirements.
+   *
+   * @param eventId Id off the event.
+   * @param users Volunteer data for each user.
+   * @param author User creating the volunteer registration.
+   */
+  public async volunteer(
+    eventId: number,
+    users: VolunteerUserJobDto[],
+    author: User,
+  ) {
+    if (!author.emailVerified) {
+      throw new BadRequestException(
+        'Email verification is required to volunteer',
+      );
+    }
+
+    const event = await this.eventService.findOneOrFail(eventId, [
+      'course.events',
+    ]);
+
+    if (event.isClosed) {
+      throw new BadRequestException('Event registrations are closed');
+    }
+
+    if (event.course?.isClosed) {
+      throw new BadRequestException('Course registrations are closed');
+    }
+
+    const registrations: EventRegistration[] = [];
+    const accountUsers = author.account.users.getItems();
+
+    for (const { userId, job } of users) {
+      let user = accountUsers.find((user) => user.id === userId);
+
+      // Ensure if the account lacks this user, this is allowed.
+      if (!user) {
+        if (this.ac.can(author, 'create:any', 'volunteer-registration')) {
+          user = await this.userService.findOneOrFail(user);
+        } else {
+          throw new BadRequestException(`User ${userId} not found on account`);
+        }
+      }
+
+      registrations.push(
+        this.registrationRepository.create({
+          user,
+          event,
+          volunteering: true,
+          job,
+        }),
+      );
+    }
+
+    await this.registrationRepository.persist(registrations).flush();
+
+    return registrations;
+  }
+
+  public async findAll<P extends Populate<EventRegistration> = any>(
+    where: FilterQuery<EventRegistration>,
+    populate?: P,
+    limit?: number,
+    offset?: number,
+    orderBy?: QueryOrderMap,
+  ) {
+    return this.registrationRepository.findAndCount(where, {
+      populate,
+      limit,
+      offset,
+      orderBy,
+    });
   }
 
   /**

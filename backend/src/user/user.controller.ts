@@ -78,9 +78,10 @@ export class UserController {
           [expr('lower(fee_waived::text)')]: { $like: `%${contains}%` },
         },
         {
-          [expr('lower(email_verified::text)')]: {
-            $like: `%${contains}%`,
-          },
+          [expr('(grade::text)')]: { $like: `%${contains}%` },
+        },
+        {
+          [expr('lower(email)')]: { $like: `%${contains}%` },
         },
         {
           [expr('lower(email_verified::text)')]: {
