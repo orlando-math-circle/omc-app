@@ -221,8 +221,6 @@ export class EventService {
 
     const oldSchedule = pivot.recurrence.getSchedule();
 
-    console.log(rrule.dtstart, oldSchedule.dtstart);
-
     // Checks if we're making an update to the entire event stream.
     if (isSameDay(pivot.dtstart, oldSchedule.dtstart)) {
       return this.updateAllEvents(pivot.recurrence, updateEventsDto);
@@ -516,8 +514,6 @@ export class EventService {
       let event = events.find(
         (e) => +e.dtstart === +date || +e.originalStart === +date,
       );
-
-      console.log(date.toISOString(), recurrence.id, event?.id);
 
       if (event) {
         event.recurrence.populated();
