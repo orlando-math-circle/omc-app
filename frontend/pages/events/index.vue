@@ -79,8 +79,8 @@ import Calendar from '~/components/Calendar.vue'
       title: 'Events',
     }
   },
-  async asyncData({ app: { $accessor } }) {
-    await $accessor.projects.findAll()
+  fetch({ app: { $accessor } }) {
+    $accessor.projects.findAll()
   },
 })
 export default class EventsPage extends Vue {

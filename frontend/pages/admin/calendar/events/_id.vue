@@ -356,8 +356,8 @@ import { DTOEvent } from '~/store/events'
   head: {
     title: 'Edit Event',
   },
-  async asyncData({ app: { $accessor }, route }) {
-    await $accessor.events.findOne(route.params.id)
+  fetch({ app: { $accessor }, route }) {
+    $accessor.events.findOne(route.params.id)
   },
 })
 export default class AdminEventEditPage extends Vue {

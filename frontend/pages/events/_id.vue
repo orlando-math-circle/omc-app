@@ -297,8 +297,8 @@ enum RegisterStep {
   head: {
     title: 'Event Details',
   },
-  async asyncData({ app: { $accessor }, route }) {
-    await Promise.all([
+  fetch({ app: { $accessor }, route }) {
+    Promise.all([
       $accessor.events.findOne(route.params.id),
       $accessor.registrations.getStatuses(route.params.id),
     ])
