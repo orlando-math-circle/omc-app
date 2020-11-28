@@ -54,7 +54,7 @@
     "rimraf": "3.0.2",
     "rrule": "2.6.6",
     "rxjs": "6.6.3",
-    "systeminformation": "4.30.5",
+    "systeminformation": "4.30.6",
     "uuid": "8.3.1"
   },
   "devDependencies": {
@@ -81,7 +81,7 @@
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-import": "2.22.1",
     "jest": "26.6.3",
-    "prettier": "2.2.0",
+    "prettier": "2.2.1",
     "supertest": "6.0.1",
     "ts-jest": "26.4.4",
     "ts-loader": "8.0.11",
