@@ -283,7 +283,7 @@ export class EventService {
 
     const dates = schedule.between(rrule.dtstart, end).values();
 
-    return this.setEventData(
+    await this.setEventData(
       pivot,
       pivot.recurrence.events,
       dtend,
@@ -320,6 +320,7 @@ export class EventService {
     // This is called pivot for consistency, but is arbitrarily
     // the first event that exists in this collection.
     const pivot = recurrence.events[0];
+    const pivotCache = this.eventRepository.create({ ...pivot });
 
     if (!rrule) {
       return this.setEventData(pivot, recurrence.events, dtend, meta);
@@ -340,7 +341,7 @@ export class EventService {
       )
       .values();
 
-    return this.setEventData(
+    await this.setEventData(
       pivot,
       recurrence.events,
       dtend,
@@ -348,6 +349,16 @@ export class EventService {
       recurrence,
       iterator,
     );
+
+    // If we deleted all of our events that's quite upsetting.
+    if (!recurrence.events.length) {
+      const start = schedule.first();
+      const end = addMinutes(start, pivotCache.duration);
+
+      this.getRecurrenceEvents(recurrence, pivotCache, start, end);
+
+      await this.recurrenceRepository.flush();
+    }
   }
 
   /**

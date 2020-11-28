@@ -518,6 +518,77 @@ describe('Events', () => {
       expect(recurrence.events.length).toBe(3);
       expect(recurrence.rrule.includes('COUNT=3')).toBeTruthy();
     });
+
+    it('should remove an orphaned recurrence', async () => {
+      const dto: CreateEventDto = {
+        name: 'Orphan Recurrence Test',
+        dtend: new Date(Date.UTC(2020, 6, 1, 10)),
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 6, 1)),
+          count: 5,
+        },
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .send(dto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      const resp = await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: dto.rrule.dtstart,
+          end: moment(dto.rrule.dtstart).add(5, 'days').toDate(),
+        })
+        .expect(200);
+
+      expect(resp.body).toBeDefined();
+      expect(Array.isArray(resp.body)).toBeTruthy();
+      expect(resp.body.length).toBe(5);
+
+      const first = resp.body[0].id;
+      const recurrence = await orm.em.findOneOrFail(
+        EventRecurrence,
+        {
+          events: { id: first },
+        },
+        { populate: ['events'] },
+      );
+
+      expect(recurrence).toBeDefined();
+      expect(recurrence.events.length).toBe(5);
+
+      const eventIds = [...recurrence.events.getIdentifiers()];
+      orm.em.clear();
+
+      const secondDto: UpdateEventsDto = {
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 7, 1)),
+          count: 5,
+        },
+      };
+
+      await request(app.getHttpServer())
+        .patch(`/event/${first}/future`)
+        .send(secondDto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const recurrenceAfter = await orm.em.findOneOrFail(
+        EventRecurrence,
+        recurrence.id,
+        {
+          populate: ['events'],
+        },
+      );
+
+      const newIdentifiers = recurrenceAfter.events.getIdentifiers();
+      expect(newIdentifiers.length).toBeTruthy();
+      expect(newIdentifiers.every((id) => !eventIds.includes(id))).toBeTruthy();
+    });
   });
 
   describe('PATCH /event/:id/all', () => {
