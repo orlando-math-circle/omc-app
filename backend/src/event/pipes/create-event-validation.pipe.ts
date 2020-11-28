@@ -7,19 +7,19 @@ import {
 import { CreateEventDto } from '../dto/create-event.dto';
 
 @Injectable()
-export class EventValidationPipe implements PipeTransform {
+export class CreateEventValidationPipe implements PipeTransform {
   transform(value: CreateEventDto, { type }: ArgumentMetadata) {
     // Do not perform validation on anything other than the body.
     if (type !== 'body') return value;
 
     if (value.dtstart && value.rrule) {
       throw new BadRequestException(
-        'Start date is only provided for non-recurring events',
+        'dtstart is only provided for non-recurring events',
       );
     }
 
     if (value.dtstart && value.dtend && value.dtstart > value.dtend) {
-      throw new BadRequestException('Start date cannot occur after end date');
+      throw new BadRequestException('dtstart cannot occur after dtend');
     }
 
     if (
@@ -35,6 +35,11 @@ export class EventValidationPipe implements PipeTransform {
       throw new BadRequestException(
         'Cannot create event no rrule or starting date',
       );
+    }
+
+    // Must have both feeType and fee when adding or updating a fee.
+    if (!!value.feeType && !!value.fee) {
+      throw new BadRequestException('Malformed fee mutation');
     }
 
     return value;

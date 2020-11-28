@@ -464,7 +464,10 @@ import { EventTimeThreshold } from '../../../backend/src/event/enums/event-time-
 import { Grade } from '../../../backend/src/user/enums/grade.enum'
 import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { contiguousGradeRanges, gradeGroups, grades } from '../../utils/events'
-import { EventUpdateModesAndFile } from '../../interfaces/events/event-update-modes.interface'
+import {
+  AddFile,
+  EventUpdateModesAndFile,
+} from '../../interfaces/events/event-update-modes.interface'
 import { UpdateEventsDto } from '../../../backend/src/event/dto/update-events.dto'
 import { UpdateEventDto } from '../../../backend/src/event/dto/update-event.dto'
 import { RRuleOptions } from '../../interfaces/events/event-recurrence.interface'
@@ -472,6 +475,7 @@ import { Project } from '../../../backend/src/project/project.entity'
 import { Course } from '../../../backend/src/course/course.entity'
 import { EventRecurrenceDto } from '../../../backend/src/event/dto/event-recurrence.dto'
 import { File as FileEntity } from '../../../backend/src/file/file.entity'
+import { CreateEventFeeDto } from '../../../backend/src/event-fee/dto/create-event-fee.dto'
 import DialogUpdateEventType from './DialogUpdateEventType.vue'
 import DialogForm from './DialogForm.vue'
 import { DTO } from '~/interfaces/date-to-string.interface'
@@ -523,17 +527,17 @@ export default class DialogUpdateEvent extends Vue {
     { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
   ]
 
+  fee = {
+    amount: null as number | null,
+    lateAmount: null as number | null,
+  }
+
   feeType = FeeType.FREE
   feeTypes = [
     { text: 'Free', value: FeeType.FREE },
     { text: 'Pay Per Event', value: FeeType.EVENT },
     { text: 'Pay Per Course', value: FeeType.COURSE },
   ]
-
-  fee = {
-    amount: 0,
-    lateAmount: 0,
-  }
 
   meta = {
     name: '',
@@ -597,6 +601,23 @@ export default class DialogUpdateEvent extends Vue {
     return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
   }
 
+  get feeDTO(): CreateEventFeeDto {
+    return {
+      amount: (this.fee.amount || 0).toPrecision(2),
+      lateAmount: (this.fee.lateAmount || 0).toPrecision(2),
+    }
+  }
+
+  get eventFeeType() {
+    if (this.event.fee) {
+      return FeeType.EVENT
+    } else if (this.event.course?.fee) {
+      return FeeType.COURSE
+    }
+
+    return FeeType.FREE
+  }
+
   /**
    * Determines the meta changes made to an event.
    */
@@ -647,8 +668,24 @@ export default class DialogUpdateEvent extends Vue {
     const { dtstart, ...rule } = this.rruleChanges
     const rruleOptsChanged = Object.keys(rule).length !== 0
     const changedStart = this.metaChanges.dtstart
-    const meta = { ...this.meta, dtend: this.metaChanges.dtend }
+    const meta: AddFile<DTO<UpdateEventDto>> = {
+      ...this.meta,
+      dtend: this.metaChanges.dtend,
+    }
     const rrule = this.rrule!
+
+    // If the fee type of values have changed, replace the fee.
+    const origFee = this.event.fee || this.event.course?.fee
+    const feeTypeChanged = this.eventFeeType !== this.feeType
+    if (
+      feeTypeChanged ||
+      (origFee &&
+        (origFee.amount !== this.feeDTO.amount ||
+          origFee.lateAmount !== this.feeDTO.lateAmount))
+    ) {
+      meta.fee = this.feeDTO
+      meta.feeType = this.feeType
+    }
 
     // Changing the date of an event eliminates the "all" option, and
     // changing the rrule options eliminates "single", so force a future update.
@@ -664,7 +701,10 @@ export default class DialogUpdateEvent extends Vue {
       return {
         future: Object.assign({}, meta, { rrule }),
         all: Object.assign({}, meta, {
-          rrule: { ...rrule, dtstart: this.originalRRule!.dtstart },
+          rrule: {
+            ...rrule,
+            dtstart: this.originalRRule?.dtstart || this.event.dtstart,
+          },
         }),
       }
     }
@@ -742,15 +782,25 @@ export default class DialogUpdateEvent extends Vue {
     this.meta.lateOffset = this.intEvent.lateOffset
     this.meta.permissions.grades = this.intEvent.permissions?.grades || []
     this.meta.permissions.sexes = this.intEvent.permissions?.sexes || []
-    this.meta.project = this.intEvent?.project?.id || null
-    this.meta.course = this.intEvent?.course?.id || null
+    this.meta.project = this.intEvent.project?.id || null
+    this.meta.course = this.intEvent.course?.id || null
     this.meta.picture = this.intEvent.picture
 
-    // Copy event fee
-    const fee = this.intEvent.fee || this.intEvent.course?.fee
-    if (fee) {
+    // Event Fee
+    if (this.intEvent.fee) {
+      const fee = this.intEvent.fee
+
+      this.feeType = FeeType.EVENT
       this.fee.amount = +fee.amount
       this.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
+    } else if (this.intEvent.course?.fee) {
+      const fee = this.intEvent.course.fee
+
+      this.feeType = FeeType.COURSE
+      this.fee.amount = +fee.amount
+      this.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
+    } else {
+      this.feeType = FeeType.FREE
     }
 
     // Serialize RRule string to object

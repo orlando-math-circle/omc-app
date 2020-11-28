@@ -6,7 +6,11 @@ import {
   QueryOrderMap,
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DEFAULT_EVENT_PICTURE } from '../app.constants';
 import {
@@ -20,6 +24,7 @@ import {
   subDays,
 } from '../app.utils';
 import { CourseService } from '../course/course.service';
+import { CreateEventFeeDto } from '../event-fee/dto/create-event-fee.dto';
 import { EventFee } from '../event-fee/event-fee.entity';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -191,6 +196,60 @@ export class EventService {
   }
 
   /**
+   * Updates a fee as appropriate
+   *
+   * @param event Event for upserting event fee into.
+   * @param feeType FeeType
+   * @param createEventDto Amount and optional late fee amountt.
+   */
+  public async upsertEventFee(
+    event: Event,
+    feeType: FeeType,
+    { amount, lateAmount }: CreateEventFeeDto,
+  ) {
+    switch (feeType) {
+      case FeeType.FREE:
+        if (event.fee) this.eventRepository.remove(event.fee);
+        if (event.course?.fee) this.eventRepository.remove(event.course.fee);
+        break;
+      case FeeType.EVENT:
+        if (event.fee) {
+          event.fee.amount = amount;
+          event.fee.lateAmount = lateAmount;
+        } else {
+          event.fee = new EventFee({ amount, lateAmount });
+        }
+
+        if (event.course?.fee) {
+          this.eventRepository.remove(event.course.fee);
+        }
+        break;
+      case FeeType.COURSE:
+        if (!event.course) {
+          throw new BadRequestException(
+            'Cannot add course fee to event without course',
+          );
+        }
+
+        if (!event.course.isInitialized()) {
+          await this.eventRepository.populate(event, 'course');
+        }
+
+        if (event.course.fee) {
+          event.course.fee.amount = amount;
+          event.course.fee.lateAmount = lateAmount;
+        } else {
+          event.course.fee = new EventFee({ amount, lateAmount });
+        }
+
+        if (event.fee) {
+          this.eventRepository.remove(event.fee);
+        }
+        break;
+    }
+  }
+
+  /**
    * Modifies an event instance as an exception. If the modifications
    * are temporal a reference to the original times is maintained.
    *
@@ -198,8 +257,11 @@ export class EventService {
    * @param updateEventDto UpdateEventDto object
    */
   public async updateSingleEvent(id: number, updateEventDto: UpdateEventDto) {
-    const { dtstart, dtend, ...meta } = updateEventDto;
-    const event = await this.eventRepository.findOneOrFail(id);
+    const { dtstart, dtend, feeType, fee, ...meta } = updateEventDto;
+    const event = await this.eventRepository.findOneOrFail(id, [
+      'fee',
+      'course.fee',
+    ]);
 
     if (dtstart) {
       event.originalStart = event.dtstart;
@@ -211,6 +273,10 @@ export class EventService {
     }
 
     event.assign({ ...meta });
+
+    if (feeType) {
+      await this.upsertEventFee(event, feeType, fee);
+    }
 
     await this.eventRepository.flush();
 
@@ -231,11 +297,36 @@ export class EventService {
     const { dtend, rrule, ...meta } = updateEventsDto;
     const pivot = await this.eventRepository.findOneOrFail(
       id,
-      ['recurrence.events'],
+      [
+        'fee',
+        'course.fee',
+        'recurrence.events.fee',
+        'recurrence.events.course.fee',
+      ],
       {
         recurrence: { events: { dtstart: QueryOrder.ASC } },
       },
     );
+
+    // Edge-Case: There is no recurrence thus no "all" to update.
+    if (!pivot.recurrence) {
+      // If we're given an rrule, we can work with this.
+      if (rrule) {
+        const schedule = new Schedule(rrule);
+        const recurrence = new EventRecurrence(
+          schedule.toString(),
+          rrule.dtstart,
+          rrule.until,
+        );
+        recurrence.events.add(pivot);
+        pivot.recurrence = recurrence;
+
+        this.recurrenceRepository.persist(recurrence);
+      }
+
+      // From here on we know we aren't interested in complex rrule changes.
+      return this.updateSingleEvent(pivot.id, updateEventsDto);
+    }
 
     // No RRule changes, update topical data and return.
     if (!rrule) {
@@ -302,24 +393,52 @@ export class EventService {
    */
   public async updateAllEvents(
     idOrRecurrence: number | EventRecurrence,
-    { dtend, rrule, ...meta }: UpdateEventDto,
-  ): Promise<void> {
-    const recurrence =
-      typeof idOrRecurrence === 'number'
-        ? (
-            await this.eventRepository.findOneOrFail(
-              idOrRecurrence,
-              ['recurrence.events'],
-              {
-                recurrence: { events: { dtstart: QueryOrder.ASC } },
-              },
-            )
-          ).recurrence
-        : idOrRecurrence;
+    updateEventsDto: UpdateEventsDto,
+  ) {
+    const { dtend, rrule, ...meta } = updateEventsDto;
+    let pivot: Event;
+    let recurrence: EventRecurrence;
 
-    // This is called pivot for consistency, but is arbitrarily
-    // the first event that exists in this collection.
-    const pivot = recurrence.events[0];
+    if (typeof idOrRecurrence === 'number') {
+      pivot = await this.eventRepository.findOneOrFail(
+        idOrRecurrence,
+        [
+          'fee',
+          'course.fee',
+          'recurrence.events.fee',
+          'recurrence.events.course.fee',
+        ],
+        {
+          recurrence: { events: { dtstart: QueryOrder.ASC } },
+        },
+      );
+
+      recurrence = pivot.recurrence;
+    } else {
+      recurrence = idOrRecurrence;
+      pivot = recurrence.events[0];
+    }
+
+    // Edge-Case: There is no recurrence thus no "all" to update.
+    if (!recurrence) {
+      // If we're given an rrule, we can work with this.
+      if (rrule) {
+        const schedule = new Schedule(rrule);
+        const recurrence = new EventRecurrence(
+          schedule.toString(),
+          rrule.dtstart,
+          rrule.until,
+        );
+        recurrence.events.add(pivot);
+        pivot.recurrence = recurrence;
+
+        this.recurrenceRepository.persist(recurrence);
+      }
+
+      // From here on we know we aren't interested in complex rrule changes.
+      return this.updateSingleEvent(pivot.id, updateEventsDto);
+    }
+
     const pivotCache = this.eventRepository.create({ ...pivot });
 
     if (!rrule) {
@@ -485,7 +604,15 @@ export class EventService {
         event.setEndDate(addMinutes(event.dtstart, duration));
       }
 
-      if (meta) event.assign({ ...meta });
+      if (meta) {
+        const { feeType, fee, ...rest } = meta;
+
+        event.assign({ ...rest });
+
+        if (feeType) {
+          this.upsertEventFee(event, feeType, fee);
+        }
+      }
     }
 
     return this.eventRepository.flush();
@@ -567,7 +694,12 @@ export class EventService {
         cutoffOffset: reference.cutoffOffset,
         lateThreshold: reference.lateThreshold,
         lateOffset: reference.lateOffset,
-        fee: reference.fee,
+        fee: reference.fee
+          ? new EventFee({
+              amount: reference.fee.amount,
+              lateAmount: reference.fee.lateAmount,
+            })
+          : null,
         author: reference.author,
         course: reference.course,
         project: reference.project,

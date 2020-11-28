@@ -17,7 +17,8 @@ import { FindAllEventsDto } from './dto/find-all-events.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventsDto } from './dto/update-events.dto';
 import { EventService } from './event.service';
-import { EventValidationPipe } from './pipes/event-validation.pipe';
+import { CreateEventValidationPipe } from './pipes/create-event-validation.pipe';
+import { UpdateEventValidationPipe } from './pipes/update-event-validation.pipe';
 
 @Controller('event')
 export class EventController {
@@ -25,7 +26,7 @@ export class EventController {
 
   @UserAuth('event', 'create:any')
   @Post()
-  @UsePipes(new EventValidationPipe())
+  @UsePipes(new CreateEventValidationPipe())
   create(@Usr() user: User, @Body() createEventDto: CreateEventDto) {
     return this.eventService.create(createEventDto, user);
   }
@@ -48,6 +49,7 @@ export class EventController {
 
   @UserAuth('event', 'update:any')
   @Patch(':id/single')
+  @UsePipes(new UpdateEventValidationPipe())
   updateSingleEvent(
     @Param('id') id: number,
     @Body() updateEventDto: UpdateEventDto,
@@ -57,6 +59,7 @@ export class EventController {
 
   @UserAuth('event', 'update:any')
   @Patch(':id/future')
+  @UsePipes(new UpdateEventValidationPipe())
   updateFutureEvents(
     @Param('id') id: number,
     @Body() updateEventsDto: UpdateEventsDto,
@@ -66,6 +69,7 @@ export class EventController {
 
   @UserAuth('event', 'update:any')
   @Patch(':id/all')
+  @UsePipes(new UpdateEventValidationPipe())
   updateAllEvents(
     @Param('id') id: number,
     @Body() updateEventsDto: UpdateEventsDto,

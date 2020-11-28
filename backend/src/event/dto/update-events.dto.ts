@@ -8,72 +8,83 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Course } from '../../course/course.entity';
+import { CreateEventFeeDto } from '../../event-fee/dto/create-event-fee.dto';
 import { Project } from '../../project/project.entity';
 import { EventTimeThreshold } from '../enums/event-time-threshold.enum';
+import { FeeType } from '../enums/fee-type.enum';
 import { EventPermissionsDto } from './event-permissions.dto';
 import { EventRecurrenceDto } from './event-recurrence.dto';
 
 export class UpdateEventsDto {
   @IsOptional()
   @IsString()
-  readonly name?: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
-  readonly description?: string | null;
+  description?: string | null;
 
   @IsOptional()
   @IsString()
-  readonly locationTitle?: string;
+  locationTitle?: string;
 
   @IsOptional()
   @IsString()
-  readonly location?: string | null;
+  location?: string | null;
 
   @IsOptional()
   @Type(() => EventPermissionsDto)
   @ValidateNested()
-  readonly permissions?: EventPermissionsDto;
+  permissions?: EventPermissionsDto;
 
   @IsOptional()
   @IsEnum(EventTimeThreshold)
-  readonly cutoffThreshold?: EventTimeThreshold;
+  cutoffThreshold?: EventTimeThreshold;
 
   @IsOptional()
   @IsNumber()
-  readonly cutoffOffset?: number;
+  cutoffOffset?: number;
 
   @IsOptional()
   @IsEnum(EventTimeThreshold)
-  readonly lateThreshold?: EventTimeThreshold;
+  lateThreshold?: EventTimeThreshold;
 
   @IsOptional()
   @IsNumber()
-  readonly lateOffset?: number;
+  lateOffset?: number;
 
   @IsOptional()
   @IsString()
-  readonly picture?: string | null;
+  picture?: string | null;
 
   @IsOptional()
   @IsString()
-  readonly color?: string | null;
+  color?: string | null;
 
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  readonly dtend?: Date;
+  dtend?: Date;
 
   @IsOptional()
   @IsNumber()
-  readonly project?: number | Project | null;
+  project?: number | Project | null;
 
   @IsOptional()
   @IsNumber()
-  readonly course?: number | Course | null;
+  course?: number | Course | null;
+
+  @IsOptional()
+  @IsEnum(FeeType)
+  feeType?: FeeType;
+
+  @IsOptional()
+  @Type(() => CreateEventFeeDto)
+  @ValidateNested()
+  fee?: CreateEventFeeDto;
 
   @IsOptional()
   @Type(() => EventRecurrenceDto)
   @ValidateNested()
-  readonly rrule?: EventRecurrenceDto;
+  rrule?: EventRecurrenceDto;
 }

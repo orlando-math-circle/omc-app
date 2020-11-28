@@ -15,78 +15,78 @@ import { EventRecurrenceDto } from './event-recurrence.dto';
 
 export class CreateEventDto {
   @IsString()
-  readonly name!: string;
+  name!: string;
 
   @IsOptional()
   @IsString()
-  readonly description?: string;
+  description?: string;
 
   @IsOptional()
   @IsString()
-  readonly location?: string;
+  location?: string;
 
   @IsOptional()
   @IsString()
-  readonly locationTitle?: string = 'Online';
+  locationTitle?: string = 'Online';
 
   @IsOptional()
   @IsString()
-  readonly picture?: string;
+  picture?: string;
 
   @IsOptional()
   @IsString()
-  readonly color?: string;
+  color?: string;
 
   @IsOptional()
   @Type(() => EventPermissionsDto)
   @ValidateNested()
-  readonly permissions?: EventPermissionsDto;
+  permissions?: EventPermissionsDto;
 
   @IsOptional()
   @IsEnum(EventTimeThreshold)
-  readonly cutoffThreshold?: EventTimeThreshold;
+  cutoffThreshold?: EventTimeThreshold;
 
   @IsOptional()
   @IsNumber()
-  readonly cutoffOffset?: number;
+  cutoffOffset?: number;
 
   @IsOptional()
   @IsEnum(EventTimeThreshold)
-  readonly lateThreshold?: EventTimeThreshold;
+  lateThreshold?: EventTimeThreshold;
 
   @IsOptional()
   @IsNumber()
-  readonly lateOffset?: number;
+  lateOffset?: number;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  readonly dtstart?: Date;
+  dtstart?: Date;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  readonly dtend?: Date;
+  dtend?: Date;
 
   @IsOptional()
   @Type(() => EventRecurrenceDto)
   @ValidateNested()
-  readonly rrule?: EventRecurrenceDto;
+  rrule?: EventRecurrenceDto;
+
+  @IsOptional()
+  @IsEnum(FeeType)
+  feeType?: FeeType;
 
   @IsOptional()
   @Type(() => CreateEventFeeDto)
   @ValidateNested()
-  readonly fee?: CreateEventFeeDto;
-
-  @IsOptional()
-  @IsEnum(FeeType)
-  readonly feeType?: FeeType;
+  fee?: CreateEventFeeDto;
 
   @IsOptional()
   @Type(() => Number)
-  readonly course?: number;
+  course?: number;
 
   @IsOptional()
   @Type(() => Number)
-  readonly project?: number;
+  project?: number;
 }
