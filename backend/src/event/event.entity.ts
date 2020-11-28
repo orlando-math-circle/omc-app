@@ -33,7 +33,7 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property()
   name!: string;
 
-  @Property({ nullable: true })
+  @Property({ nullable: true, columnType: 'text' })
   description?: string;
 
   @Property({ nullable: true })
