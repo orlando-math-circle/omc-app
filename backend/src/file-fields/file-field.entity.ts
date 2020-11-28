@@ -49,7 +49,6 @@ export class FileField extends BaseEntity<FileField, 'name'> {
     file: Express.Multer.File,
     callback: multer.FileFilterCallback,
   ) => {
-    console.log(`File Size: ${file.size}, Limit: ${this.fileCountLimit}`);
     if (file.size > this.fileCountLimit) {
       callback(new BadRequestException('File is too large.'));
     }

@@ -6,7 +6,7 @@ import {
   QueryOrderMap,
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DEFAULT_EVENT_PICTURE } from '../app.constants';
 import {
@@ -29,6 +29,7 @@ import { UpdateEventsDto } from './dto/update-events.dto';
 import { FeeType } from './enums/fee-type.enum';
 import { EventRecurrence } from './event-recurrence.entity';
 import { Event } from './event.entity';
+import { EventMetadata } from './interfaces/event-metadata.interface';
 import { Schedule } from './schedule.class';
 
 @Injectable()
@@ -77,7 +78,6 @@ export class EventService {
       const schedule = new Schedule(rrule);
       event.recurrence = new EventRecurrence(
         schedule.toString(),
-        event,
         schedule.dtstart,
         schedule.dtend,
       );
@@ -121,12 +121,12 @@ export class EventService {
         Object.assign(
           {
             recurrence: null,
-            dtend: { $gte: start },
             dtstart: { $lte: end },
+            dtend: { $gte: start },
           },
           projects && { project: { id: projects } },
         ),
-        ['course', 'author'],
+        ['course', 'fee', 'project', 'author'],
       ),
       this.recurrenceRepository.find(
         Object.assign(
@@ -136,20 +136,43 @@ export class EventService {
           },
           projects && { events: { project: { id: projects } } },
         ),
-        ['events.course', 'parentEvent'],
       ),
     ]);
 
-    await this.recurrenceRepository.populate(recurrences, 'events', {
+    await this.recurrenceRepository.populate(recurrences, 'events.course', {
       events: {
         dtstart: { $lte: end },
         $or: [{ dtend: { $gte: start } }, { dtend: null }],
       },
     });
 
-    recurrences.forEach((recurrence) =>
-      this.getRecurrenceEvents(recurrence, start, end),
-    );
+    let reference: Event;
+    for (const recurrence of recurrences) {
+      // If the recurrence does not have any events we need to find
+      // the first to use it as a reference.
+
+      // TODO: Consider an alternative to this as metadata exceptions
+      // made to this queried reference will permeate to new hydrations.
+      if (!recurrence.events.length) {
+        reference = await this.eventRepository.findOne({ recurrence }, [
+          'course',
+          'fee',
+          'project',
+          'author',
+        ]);
+      } else {
+        reference = recurrence.events[0];
+      }
+
+      // If we still don't have a reference, the recurrence somehow has no events.
+      if (!reference) {
+        throw new InternalServerErrorException(
+          'Event recurrence lacks any events',
+        );
+      }
+
+      this.getRecurrenceEvents(recurrence, reference, start, end);
+    }
 
     await this.recurrenceRepository.flush();
 
@@ -216,7 +239,6 @@ export class EventService {
 
     // No RRule changes, update topical data and return.
     if (!rrule) {
-      console.log('no rule changes');
       return this.setEventData(pivot, pivot.recurrence.events, dtend, meta);
     }
 
@@ -224,10 +246,7 @@ export class EventService {
 
     // Checks if we're making an update to the entire event stream.
     if (isSameDay(pivot.dtstart, oldSchedule.dtstart)) {
-      console.log('UPDATING ALL');
       return this.updateAllEvents(pivot.recurrence, updateEventsDto);
-    } else {
-      console.log('FUTURE UPDATE');
     }
 
     const oldRRuleCutoff = subDays(getMinDate(rrule.dtstart, pivot.dtstart), 1);
@@ -249,7 +268,6 @@ export class EventService {
 
     const newRecurrence = new EventRecurrence(
       schedule.toString(),
-      pivot,
       rrule.dtstart,
       rrule.until,
       pivot.recurrence,
@@ -502,17 +520,19 @@ export class EventService {
    * them in the instances relationship.
    *
    * @param recurrence EventRecurrence to hydrate.
+   * @param reference Event for copying metadata.
    * @param start Date signifying the beginning of the date range.
    * @param end Date signifying the end of the date range.
    */
   private getRecurrenceEvents(
     recurrence: EventRecurrence,
+    reference: Event,
     start: Date,
     end: Date,
   ) {
     const dates = recurrence.getSchedule().between(start, end);
     const events = recurrence.events.getItems();
-    const durationInMinutes = recurrence.parentEvent.duration;
+    const durationInMinutes = reference.duration;
 
     for (const date of dates) {
       let event = events.find(
@@ -524,21 +544,29 @@ export class EventService {
         continue;
       }
 
-      // TODO: Split this into an event factory function.
-      // This has to be manually updated whenever the event structure is changed.
+      const meta: EventMetadata = {
+        name: reference.name,
+        description: reference.description,
+        location: reference.location,
+        locationTitle: reference.locationTitle,
+        picture: reference.picture,
+        color: reference.color,
+        permissions: reference.permissions,
+        cutoffThreshold: reference.cutoffThreshold,
+        cutoffOffset: reference.cutoffOffset,
+        lateThreshold: reference.lateThreshold,
+        lateOffset: reference.lateOffset,
+        fee: reference.fee,
+        author: reference.author,
+        course: reference.course,
+        project: reference.project,
+        recurrence: recurrence,
+      };
+
       event = this.eventRepository.create({
-        name: recurrence.parentEvent.name,
-        description: recurrence.parentEvent.description,
-        location: recurrence.parentEvent.location,
-        locationTitle: recurrence.parentEvent.locationTitle,
-        picture: recurrence.parentEvent.picture,
-        color: recurrence.parentEvent.color,
-        permissions: recurrence.parentEvent.permissions,
+        ...meta,
         dtstart: date,
         dtend: addMinutes(date, durationInMinutes),
-        author: recurrence.parentEvent.author,
-        course: recurrence.parentEvent.course,
-        recurrence,
       });
     }
 

@@ -151,7 +151,6 @@ export class UserController {
   @UserAuth('file', 'read:own')
   @Get('form/fishy')
   findForms(@Acc() account: Account) {
-    console.log(account);
     return this.userService.findForms(
       {
         attachments: {

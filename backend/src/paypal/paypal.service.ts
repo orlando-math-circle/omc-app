@@ -104,7 +104,6 @@ export class PayPalService {
 
     for (const purchase_unit of order.purchase_units) {
       if (purchase_unit.amount.value !== value) {
-        console.log(purchase_unit, value);
         throw new BadRequestException('Order cost mismatch');
       }
     }

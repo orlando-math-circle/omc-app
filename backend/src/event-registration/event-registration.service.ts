@@ -94,7 +94,6 @@ export class EventRegistrationService {
       }
 
       if (fee && !user.feeWaived) {
-        console.log(fee.invoices.getItems());
         const invoice = fee.invoices
           .getItems()
           .find((i) => i.user.id === userId);
