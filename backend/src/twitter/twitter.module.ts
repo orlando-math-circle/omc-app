@@ -1,9 +1,9 @@
-import { HttpModule, Module } from '@nestjs/common';
+import { CacheModule, HttpModule, Module } from '@nestjs/common';
 import { TwitterController } from './twitter.controller';
 import { TwitterService } from './twitter.service';
 
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, CacheModule.register()],
   controllers: [TwitterController],
   providers: [TwitterService],
   exports: [TwitterService],
