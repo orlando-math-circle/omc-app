@@ -1,30 +1,18 @@
 <template>
   <div>
-    <v-row no-gutters class="mb-6">
-      <v-col>
-        <v-row>
-          <v-col>
-            <h1>Users</h1>
-          </v-col>
-        </v-row>
+    <admin-header title="Users" :breadcrumbs="breadcrumbs">
+      <v-row>
+        <v-col cols="auto" align-self="center">
+          <v-btn color="primary">Create User</v-btn>
+        </v-col>
 
-        <v-row>
-          <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
-          </v-col>
-        </v-row>
-      </v-col>
-
-      <v-col cols="auto" align-self="center">
-        <v-btn color="primary">Create User</v-btn>
-      </v-col>
-
-      <v-col cols="auto" align-self="center">
-        <v-btn @click="filters.panel = !filters.panel">
-          Filters <v-icon>mdi-filter-variant</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
+        <v-col cols="auto" align-self="center">
+          <v-btn @click="filters.panel = !filters.panel">
+            Filters <v-icon>mdi-filter-variant</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </admin-header>
 
     <v-row>
       <v-col>

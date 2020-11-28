@@ -3,11 +3,9 @@
     <template #title>Edit Event</template>
 
     <template #activator="{ on, attrs }">
-      <v-btn text v-bind="attrs" v-on="on">Edit Event</v-btn>
-    </template>
-
-    <template #image>
-      <v-img :src="background" max-height="150" />
+      <slot name="activator" v-bind="{ on, attrs }">
+        <v-btn text v-bind="attrs" v-on="on">Edit Event</v-btn>
+      </slot>
     </template>
 
     <v-card-text>
@@ -355,7 +353,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider />
+        <v-divider v-if="meta.project" />
 
         <!-- Fee Management -->
         <v-list-item class="pl-2">
@@ -599,14 +597,6 @@ export default class DialogUpdateEvent extends Vue {
     return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
   }
 
-  get background() {
-    const url = this.event.picture
-
-    if (url.startsWith('http')) return url
-
-    return `${this.$config.staticBase}${url}`
-  }
-
   /**
    * Determines the meta changes made to an event.
    */
@@ -657,7 +647,7 @@ export default class DialogUpdateEvent extends Vue {
     const { dtstart, ...rule } = this.rruleChanges
     const rruleOptsChanged = Object.keys(rule).length !== 0
     const changedStart = this.metaChanges.dtstart
-    const meta = this.meta
+    const meta = { ...this.meta, dtend: this.metaChanges.dtend }
     const rrule = this.rrule!
 
     // Changing the date of an event eliminates the "all" option, and
@@ -937,6 +927,7 @@ export default class DialogUpdateEvent extends Vue {
       this.$accessor.snackbar.show({
         text: 'Event successfully updated',
       })
+      this.dialog.close()
     }
   }
 }
