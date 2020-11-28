@@ -70,8 +70,30 @@
               </v-col>
             </v-row>
 
+            <v-select-validated
+              v-model="dto.sex"
+              :items="genders"
+              rules="required"
+              label="Sex"
+              outlined
+            >
+              <template #append-outer>
+                <v-tooltip left>
+                  <template #activator="{ on, attrs }">
+                    <v-icon v-bind="attrs" v-on="on">mdi-help</v-icon>
+                  </template>
+
+                  <span
+                    >We only collect this information for our girls-only and
+                    boys-only events.</span
+                  >
+                </v-tooltip>
+              </template>
+            </v-select-validated>
+
             <v-text-field-validated
               v-model="dto.email"
+              name="Email"
               rules="required|email"
               autocomplete="email"
               label="Email"
@@ -98,36 +120,6 @@
               outlined
             >
             </v-text-field-validated>
-
-            <v-checkbox-validated
-              v-model="student"
-              label="Are you a student?"
-              hide-details
-              outlined
-            >
-            </v-checkbox-validated>
-
-            <v-expand-transition>
-              <div v-show="student">
-                <v-select-validated
-                  v-model="education"
-                  label="Education Level"
-                  :items="Object.keys(educationLevels)"
-                ></v-select-validated>
-
-                <v-select-validated
-                  :label="
-                    education === 'College' ? 'Level of Study' : 'Grade Level'
-                  "
-                  :items="educationLevels[education]"
-                ></v-select-validated>
-
-                <v-text-field-validated
-                  label="School Name"
-                  hint="Enter the name of your school or institution."
-                ></v-text-field-validated>
-              </div>
-            </v-expand-transition>
 
             <v-checkbox-validated
               v-model="professional"
@@ -161,7 +153,19 @@
               hide-details
             ></v-checkbox>
 
-            <v-btn block class="mt-4" type="submit">Sign up</v-btn>
+            <v-btn block class="my-4" type="submit" color="secondary">
+              Sign up
+            </v-btn>
+
+            <div>
+              By continuing to register you are agreeing to our
+              <a
+                href="https://www.orlandomathcircle.org/privacy-policy/"
+                target="blank"
+                rel="noreferrer"
+                >privacy policy</a
+              >.
+            </div>
           </v-form-validated>
         </v-col>
       </v-row>
@@ -172,6 +176,7 @@
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import { Sex } from '../../backend/src/user/enums/sex.enum'
 import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.dto'
 
 @Component({
@@ -186,6 +191,11 @@ import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.d
 })
 export default class RegisterPage extends Vue {
   student = false
+
+  genders = [
+    { text: 'Female', value: 'female' },
+    { text: 'Male', value: 'male' },
+  ]
 
   educationLevels = {
     'Middle School': [
@@ -205,6 +215,10 @@ export default class RegisterPage extends Vue {
     ],
   }
 
+  agreements = {
+    release: false,
+  }
+
   education: keyof this['educationLevels'] = 'Middle School'
 
   professional = false
@@ -213,6 +227,7 @@ export default class RegisterPage extends Vue {
     first: '',
     last: '',
     password: '',
+    sex: null as Sex | null,
     dob: null as Date | null,
     email: '',
     grade: 0,
