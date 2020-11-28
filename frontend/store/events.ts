@@ -22,6 +22,7 @@ export const state = () => ({
 
 export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
+  isErrored: (state) => state.status === StateStatus.ERROR,
   calendarEvents: (state): DTOEvent[] =>
     state.events.map((event) =>
       Object.assign(event, {

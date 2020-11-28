@@ -303,13 +303,13 @@
             <v-row>
               <v-col>
                 <AutoCompleteProject
-                  v-model="project"
+                  v-model="meta.project"
                   item-value="id"
                   outlined
                 />
               </v-col>
               <v-col cols="auto" class="align-self-center">
-                <DialogSelectProject v-model="project" />
+                <DialogSelectProject v-model="meta.project" />
               </v-col>
               <v-col cols="auto" class="align-self-center">
                 <DialogSelectProject @create:project="onProjectCreated" />
@@ -321,7 +321,7 @@
         <v-divider />
 
         <!-- Course Management -->
-        <v-list-item v-if="project" class="pl-2">
+        <v-list-item v-if="meta.project" class="pl-2">
           <v-list-item-avatar class="mr-2">
             <v-icon>mdi-school-outline</v-icon>
           </v-list-item-avatar>
@@ -330,8 +330,8 @@
             <v-row>
               <v-col>
                 <AutoCompleteCourse
-                  v-model="course"
-                  :project="project"
+                  v-model="meta.course"
+                  :project="meta.project"
                   item-value="id"
                   outlined
                 />
@@ -339,15 +339,15 @@
 
               <v-col cols="auto" class="align-self-center">
                 <DialogSelectCourse
-                  v-model="course"
-                  :project="project"
+                  v-model="meta.course"
+                  :project="meta.project"
                   item-value="id"
                 />
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
                 <DialogCreateCourse
-                  :project="project"
+                  :project="meta.project"
                   @create:course="onCourseCreated"
                 />
               </v-col>
@@ -369,7 +369,10 @@
                 <v-select-validated
                   v-model="feeType"
                   :items="feeTypes"
-                  :rules="{ required: true, has_course: { course } }"
+                  :rules="{
+                    required: true,
+                    has_course: { course: meta.course },
+                  }"
                   label="Payment Mode"
                   hide-details="auto"
                   outlined
@@ -460,16 +463,16 @@ import { isValidDate, shallowDiff, toDate } from '../../utils/utilities'
 import { DTOEvent } from '../../store/events'
 import { FeeType } from '../../../backend/src/event/enums/fee-type.enum'
 import { EventTimeThreshold } from '../../../backend/src/event/enums/event-time-threshold.enum'
-import { EventRecurrenceDto } from '../../../backend/src/event/dto/event-recurrence.dto'
 import { Grade } from '../../../backend/src/user/enums/grade.enum'
 import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { contiguousGradeRanges, gradeGroups, grades } from '../../utils/events'
-import { EventUpdateModes } from '../../interfaces/events/event-update-modes.interface'
+import { EventUpdateModesAndFile } from '../../interfaces/events/event-update-modes.interface'
 import { UpdateEventsDto } from '../../../backend/src/event/dto/update-events.dto'
 import { UpdateEventDto } from '../../../backend/src/event/dto/update-event.dto'
 import { RRuleOptions } from '../../interfaces/events/event-recurrence.interface'
 import { Project } from '../../../backend/src/project/project.entity'
 import { Course } from '../../../backend/src/course/course.entity'
+import { EventRecurrenceDto } from '../../../backend/src/event/dto/event-recurrence.dto'
 import { File as FileEntity } from '../../../backend/src/file/file.entity'
 import DialogUpdateEventType from './DialogUpdateEventType.vue'
 import DialogForm from './DialogForm.vue'
@@ -544,6 +547,8 @@ export default class DialogUpdateEvent extends Vue {
     cutoffOffset: 0,
     lateThreshold: EventTimeThreshold.AFTER_START,
     lateOffset: 0,
+    project: null as number | null,
+    course: null as number | null,
     permissions: {
       grades: [
         Grade.KINDERGARTEN,
@@ -564,11 +569,9 @@ export default class DialogUpdateEvent extends Vue {
     },
   }
 
-  rrule: EventRecurrenceDto | null = null
+  rrule: DTO<EventRecurrenceDto> | null = null
   rruleOrSet: RRuleSet | RRule | null = null
-  originalRRule: null | EventRecurrenceDto = null
-  project: number | null = null
-  course: number | null = null
+  originalRRule: null | DTO<EventRecurrenceDto> = null
 
   get intEvent(): DTOEvent {
     return this.internalData!
@@ -583,7 +586,13 @@ export default class DialogUpdateEvent extends Vue {
   }
 
   get error() {
-    return this.$accessor.events.error
+    if (this.$accessor.events.isErrored) {
+      return this.$accessor.events.error!
+    } else if (this.$accessor.files.isErrored) {
+      return this.$accessor.files.error!
+    }
+
+    return false
   }
 
   get gradeGroups() {
@@ -627,13 +636,13 @@ export default class DialogUpdateEvent extends Vue {
     }
 
     // Project
-    if ((this.project || null) !== (this.event.project?.id || null)) {
-      dto.project = this.project
+    if ((this.meta.project || null) !== (this.event.project?.id || null)) {
+      dto.project = this.meta.project
     }
 
     // Course
-    if ((this.course || null) !== (this.event.course?.id || null)) {
-      dto.course = this.course
+    if ((this.meta.course || null) !== (this.event.course?.id || null)) {
+      dto.course = this.meta.course
     }
 
     return shallowDiff(this.event, dto)
@@ -643,17 +652,19 @@ export default class DialogUpdateEvent extends Vue {
    * Mastermind that determines the appropriate update actions
    * based on changes made to the event metadata, dates, or rrule.
    */
-  get changeset(): EventUpdateModes {
+  get changeset(): EventUpdateModesAndFile {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { dtstart, ...rule } = this.rruleChanges
     const rruleOptsChanged = Object.keys(rule).length !== 0
-    const { dtstart: changedStart, ...meta } = this.metaChanges
+    const changedStart = this.metaChanges.dtstart
+    const meta = this.meta
+    const rrule = this.rrule!
 
     // Changing the date of an event eliminates the "all" option, and
     // changing the rrule options eliminates "single", so force a future update.
     if (rruleOptsChanged && changedStart) {
       return {
-        future: Object.assign({}, meta, { rrule: this.rrule }),
+        future: Object.assign({}, meta, { rrule }),
       }
     }
 
@@ -661,9 +672,9 @@ export default class DialogUpdateEvent extends Vue {
     // Since the rrule is now different, single-event updates are not allowed.
     if (rruleOptsChanged) {
       return {
-        future: Object.assign({}, meta, { rrule: this.rrule }),
+        future: Object.assign({}, meta, { rrule }),
         all: Object.assign({}, meta, {
-          rrule: { ...this.rrule, dtstart: this.originalRRule!.dtstart },
+          rrule: { ...rrule, dtstart: this.originalRRule!.dtstart },
         }),
       }
     }
@@ -675,7 +686,7 @@ export default class DialogUpdateEvent extends Vue {
           dtstart: this.metaChanges.dtstart,
         }),
         future: Object.assign({}, meta, {
-          rrule: { ...this.rrule, dtstart: changedStart },
+          rrule: { ...rrule, dtstart: changedStart },
         }),
       }
     }
@@ -707,10 +718,10 @@ export default class DialogUpdateEvent extends Vue {
    * This could actually be changed with some minor backend tweaks
    * due to a late refactoring of how payments work.
    */
-  @Watch('project')
+  @Watch('meta.project')
   onProjectChange(project: number | null) {
     if (project === null) {
-      this.course = null
+      this.meta.course = null
     }
   }
 
@@ -741,11 +752,9 @@ export default class DialogUpdateEvent extends Vue {
     this.meta.lateOffset = this.intEvent.lateOffset
     this.meta.permissions.grades = this.intEvent.permissions?.grades || []
     this.meta.permissions.sexes = this.intEvent.permissions?.sexes || []
-
-    // Picture url
-    if (this.event.picture) {
-      this.meta.picture = this.intEvent.picture
-    }
+    this.meta.project = this.intEvent?.project?.id || null
+    this.meta.course = this.intEvent?.course?.id || null
+    this.meta.picture = this.intEvent.picture
 
     // Copy event fee
     const fee = this.intEvent.fee || this.intEvent.course?.fee
@@ -757,9 +766,6 @@ export default class DialogUpdateEvent extends Vue {
     // Serialize RRule string to object
     this.rrule = this.getRRuleOptions(this.intEvent)
     this.originalRRule = Object.assign({}, this.rrule)
-
-    this.project = this.intEvent?.project?.id || 0
-    this.course = this.intEvent?.course?.id || 0
   }
 
   /**
@@ -778,7 +784,7 @@ export default class DialogUpdateEvent extends Vue {
       options = rrule.origOptions
     }
 
-    return this.cleanRRule(options)
+    return (this.cleanRRule(options) as unknown) as DTO<EventRecurrenceDto>
   }
 
   /**
@@ -853,11 +859,11 @@ export default class DialogUpdateEvent extends Vue {
   }
 
   onProjectCreated(project: Project) {
-    this.project = project.id
+    this.meta.project = project.id
   }
 
   onCourseCreated(course: Course) {
-    this.course = course.id
+    this.meta.course = course.id
   }
 
   /**
@@ -894,7 +900,8 @@ export default class DialogUpdateEvent extends Vue {
     }
 
     if (this.changeset.future) {
-      await this.update('future', this.changeset.future)
+      // If we got here we removed any files.
+      await this.update('future', this.changeset.future as DTO<UpdateEventsDto>)
     }
   }
 

@@ -57,10 +57,19 @@ export const shallowDiff = <T extends Record<string, any>>(
  */
 export const parseAxiosError = (error: AxiosError): StateError => {
   if (error.response) {
+    let message: string
+    switch (error.response.status) {
+      case 413:
+        message = 'File too large'
+        break
+      default:
+        message = error.message
+    }
+
     return {
       url: error.config.url,
       status: error.response.status,
-      message: error.message,
+      message,
     }
   }
 

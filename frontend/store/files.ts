@@ -1,11 +1,11 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { File as FileEntity } from '@backend/file/file.entity'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { FileAttachment } from '../../backend/src/file-attachment/file-attachment.entity'
 import { FileField } from '../../backend/src/file-fields/file-field.entity'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
-import { parseAxiosError } from '../utils/utilities'
 import { Uploads } from '../interfaces/uploads.interface'
+import { parseAxiosError } from '../utils/utilities'
 
 export const state = () => ({
   status: StateStatus.UNLOADED,
@@ -19,6 +19,7 @@ export const state = () => ({
 
 export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
+  isErrored: (state) => state.status === StateStatus.ERROR,
 })
 
 export const mutations = mutationTree(state, {
