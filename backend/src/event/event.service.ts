@@ -216,6 +216,7 @@ export class EventService {
 
     // No RRule changes, update topical data and return.
     if (!rrule) {
+      console.log('no rule changes');
       return this.setEventData(pivot, pivot.recurrence.events, dtend, meta);
     }
 
@@ -223,7 +224,10 @@ export class EventService {
 
     // Checks if we're making an update to the entire event stream.
     if (isSameDay(pivot.dtstart, oldSchedule.dtstart)) {
+      console.log('UPDATING ALL');
       return this.updateAllEvents(pivot.recurrence, updateEventsDto);
+    } else {
+      console.log('FUTURE UPDATE');
     }
 
     const oldRRuleCutoff = subDays(getMinDate(rrule.dtstart, pivot.dtstart), 1);

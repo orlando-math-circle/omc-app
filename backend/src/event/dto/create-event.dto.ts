@@ -27,7 +27,7 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsString()
-  readonly locationTitle? = 'Online';
+  readonly locationTitle?: string = 'Online';
 
   @IsOptional()
   @IsString()

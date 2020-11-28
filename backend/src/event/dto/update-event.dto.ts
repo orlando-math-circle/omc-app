@@ -20,7 +20,7 @@ export class UpdateEventDto {
 
   @IsOptional()
   @IsString()
-  description?: string;
+  description?: string | null;
 
   @IsOptional()
   @IsString()
@@ -28,36 +28,36 @@ export class UpdateEventDto {
 
   @IsOptional()
   @IsString()
-  location?: string;
+  location?: string | null;
 
   @IsOptional()
   @IsString()
-  picture?: string;
+  picture?: string | null;
 
   @IsOptional()
   @IsString()
-  color?: string;
+  color?: string | null;
 
   @IsOptional()
   @Type(() => EventPermissionsDto)
   @ValidateNested()
-  readonly permissions?: EventPermissionsDto;
+  permissions?: EventPermissionsDto;
 
   @IsOptional()
   @IsEnum(EventTimeThreshold)
-  readonly cutoffThreshold?: EventTimeThreshold;
+  cutoffThreshold?: EventTimeThreshold;
 
   @IsOptional()
   @IsNumber()
-  readonly cutoffOffset?: number;
+  cutoffOffset?: number;
 
   @IsOptional()
   @IsEnum(EventTimeThreshold)
-  readonly lateThreshold?: EventTimeThreshold;
+  lateThreshold?: EventTimeThreshold;
 
   @IsOptional()
   @IsNumber()
-  readonly lateOffset?: number;
+  lateOffset?: number;
 
   @IsOptional()
   @Type(() => Date)

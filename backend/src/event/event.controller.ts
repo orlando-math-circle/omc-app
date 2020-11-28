@@ -61,6 +61,7 @@ export class EventController {
     @Param('id') id: number,
     @Body() updateEventsDto: UpdateEventsDto,
   ) {
+    console.log('Updating future events');
     return this.eventService.updateFutureEvents(id, updateEventsDto);
   }
 
