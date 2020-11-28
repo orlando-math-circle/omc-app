@@ -116,6 +116,8 @@
         <v-icon>{{ item.icon }}</v-icon>
       </v-btn>
     </v-bottom-navigation>
+
+    <snackbar></snackbar>
   </v-app>
 </template>
 

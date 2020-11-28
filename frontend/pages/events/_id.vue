@@ -3,7 +3,7 @@
     <!-- Event Picture -->
     <v-col cols="12">
       <v-card>
-        <v-img max-height="300" :src="picture">
+        <v-img max-height="200" :src="picture">
           <v-toolbar flat class="picture--toolbar">
             <v-btn icon @click="$router.back()">
               <v-sheet class="pa-2 rounded">
@@ -297,8 +297,8 @@ enum RegisterStep {
   head: {
     title: 'Event Details',
   },
-  fetch({ app: { $accessor }, route }) {
-    Promise.all([
+  async fetch({ app: { $accessor }, route }) {
+    await Promise.all([
       $accessor.events.findOne(route.params.id),
       $accessor.registrations.getStatuses(route.params.id),
     ])
@@ -479,6 +479,12 @@ export default class EventPage extends Vue {
     }
 
     await this.$accessor.registrations.getStatuses(this.$route.params.id)
+
+    this.$accessor.snackbar.show({
+      text: 'Registration Complete',
+      color: '#66bb6a',
+    })
+    this.step = RegisterStep.SELECTION
   }
 }
 </script>

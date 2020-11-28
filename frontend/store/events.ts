@@ -118,5 +118,20 @@ export const actions = actionTree(
         commit('setError', error)
       }
     },
+
+    async delete(
+      { commit },
+      { id, mode }: { id: number | string; mode: 'single' | 'future' | 'all' }
+    ) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$delete(`/event/${id}/${mode}`)
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
   }
 )

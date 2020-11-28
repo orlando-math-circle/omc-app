@@ -1,5 +1,5 @@
 <template>
-  <v-card width="270" :to="link">
+  <v-card width="270" :to="'/events/' + event.id">
     <v-img class="align-end" height="150px" :src="background"></v-img>
 
     <div class="card--bottom">
@@ -39,7 +39,6 @@ import { formatDate } from '~/utils/utilities'
 @Component
 export default class EventBlock extends Vue {
   @Prop() event!: Event
-  @Prop() link?: string
 
   get date() {
     const d = formatDate(this.event.dtstart, 'd-MMM-h:mm aaaa')

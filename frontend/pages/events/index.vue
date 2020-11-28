@@ -31,6 +31,7 @@
       </v-col>
     </v-row>
 
+    <!-- Chip Project Filters -->
     <v-row>
       <v-col>
         <v-chip-group
@@ -46,21 +47,37 @@
       </v-col>
     </v-row>
 
+    <!-- Event Slots -->
     <v-row>
       <v-col>
-        <h2>{{ header }}</h2>
+        <h2 class="mb-3">{{ header }}</h2>
+
+        <div v-if="!eventsForDate.length" class="subheader">
+          No events scheduled
+        </div>
+
+        <event-spread
+          v-for="event in eventsForDate"
+          :key="event.id + '_spread'"
+          :event="event"
+          class="mb-3"
+        >
+        </event-spread>
       </v-col>
     </v-row>
 
-    <v-row>
+    <!-- Calendar View Events -->
+    <v-row v-if="type">
       <v-col>
+        <h2 class="mb-3">{{ type }}</h2>
+
         <v-slide-group class="mb-4">
-          <v-slide-item v-for="event in eventsForDate" :key="event.id">
-            <event-block
-              :event="event"
-              :link="`/events/${event.id}`"
-              class="mr-4"
-            ></event-block>
+          <v-slide-item
+            v-for="event in events"
+            :key="event.id + '_block'"
+            class="padded-block"
+          >
+            <event-block class="mr-4" :event="event"></event-block>
           </v-slide-item>
         </v-slide-group>
       </v-col>
@@ -79,8 +96,8 @@ import Calendar from '~/components/Calendar.vue'
       title: 'Events',
     }
   },
-  fetch({ app: { $accessor } }) {
-    $accessor.projects.findAll()
+  async fetch({ app: { $accessor } }) {
+    await $accessor.projects.findAll()
   },
 })
 export default class EventsPage extends Vue {
@@ -118,17 +135,23 @@ export default class EventsPage extends Vue {
   }
 
   get header() {
-    const date = format(this.dateNative, 'EEEE, LLLL do')
-
-    if (!this.eventsForDate.length) {
-      return `Nothing scheduled for ${date}`
-    }
-
-    return `Events on ${date}`
+    return format(this.dateNative, 'EEEE, LLLL do')
   }
 
   get projects() {
     return this.$accessor.projects.projects
+  }
+
+  get type() {
+    switch (this.calendar.type) {
+      case 'simple':
+      case 'month':
+        return 'Events this month'
+      case 'week':
+        return 'Events this week'
+      case '4-day':
+        return 'Events in the next 4 days'
+    }
   }
 
   onFilterChange(indices: number[]) {
@@ -144,3 +167,20 @@ export default class EventsPage extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+// Fixes mobile scrolling issue
+// https://github.com/vuetifyjs/vuetify/issues/10673#issuecomment-674203098
+::v-deep .v-slide-group__wrapper {
+  touch-action: auto !important;
+}
+
+.padded-block {
+  margin: 15px 0;
+}
+
+.subheader {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+</style>

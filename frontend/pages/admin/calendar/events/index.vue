@@ -16,7 +16,10 @@
       </v-col>
 
       <v-col cols="auto" class="ml-auto">
-        <dialog-create-event @created="onEventCreated">
+        <dialog-create-event
+          :date="calendar.date"
+          @event:create="onEventCreated"
+        >
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" color="primary" v-on="on">Create Event</v-btn>
           </template>
@@ -29,6 +32,7 @@
         <calendar
           ref="calendar"
           v-model="calendar.date"
+          click-redirect-base="/admin/calendar/events"
           :type.sync="calendar.type"
         />
       </v-col>
@@ -62,7 +66,7 @@
 
 <script lang="ts">
 import { format, isSameDay, parseISO } from 'date-fns'
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Ref, Vue } from 'nuxt-property-decorator'
 import { formatDate } from '../../../../utils/utilities'
 import Calendar from '~/components/Calendar.vue'
 
@@ -71,9 +75,7 @@ import Calendar from '~/components/Calendar.vue'
   transition: 'admin',
 })
 export default class CalendarAdminPage extends Vue {
-  $refs!: {
-    calendar: InstanceType<typeof Calendar>
-  }
+  @Ref('calendar') readonly cal!: Calendar
 
   headers = [
     { text: 'Id', value: 'id' },
@@ -125,7 +127,7 @@ export default class CalendarAdminPage extends Vue {
   }
 
   async onEventCreated() {
-    await this.$refs.calendar.refresh()
+    await this.cal.refresh()
   }
 }
 </script>

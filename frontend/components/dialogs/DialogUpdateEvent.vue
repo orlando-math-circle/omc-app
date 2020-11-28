@@ -300,17 +300,17 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <AutoCompleteProject
+                <auto-complete-project
                   v-model="meta.project"
                   item-value="id"
                   outlined
                 />
               </v-col>
               <v-col cols="auto" class="align-self-center">
-                <DialogSelectProject v-model="meta.project" />
+                <dialog-select-project v-model="meta.project" />
               </v-col>
               <v-col cols="auto" class="align-self-center">
-                <DialogSelectProject @create:project="onProjectCreated" />
+                <dialog-select-project @create:project="onProjectCreated" />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -327,7 +327,7 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <AutoCompleteCourse
+                <auto-complete-course
                   v-model="meta.course"
                   :project="meta.project"
                   item-value="id"
@@ -336,7 +336,7 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <DialogSelectCourse
+                <dialog-select-course
                   v-model="meta.course"
                   :project="meta.project"
                   item-value="id"
@@ -344,7 +344,7 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <DialogCreateCourse
+                <dialog-create-course
                   :project="meta.project"
                   @create:course="onCourseCreated"
                 />
@@ -422,6 +422,49 @@
         </v-list-item>
 
         <v-divider />
+
+        <!-- Color Picker -->
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
+            <v-icon>mdi-palette-outline</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-text-field-validated
+              :value="meta.color"
+              class="ma-0 pa-0 shrink-append"
+              mask="'#XXXXXXXX'"
+              hide-details="auto"
+              label="Color (Optional)"
+              outlined
+            >
+              <template #append>
+                <v-menu
+                  v-model="colorMenu"
+                  top
+                  nudge-bottom="105"
+                  nudge-left="16"
+                  :close-on-content-click="false"
+                >
+                  <template #activator="{ on }">
+                    <div :style="swatch" v-on="on"></div>
+                  </template>
+
+                  <v-card>
+                    <v-card-text class="pa-0">
+                      <v-color-picker
+                        v-model="meta.color"
+                        flat
+                      ></v-color-picker>
+                    </v-card-text>
+                  </v-card>
+                </v-menu>
+              </template>
+            </v-text-field-validated>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider />
       </v-list>
     </v-card-text>
 
@@ -488,6 +531,7 @@ export default class DialogUpdateEvent extends Vue {
 
   internalData: DTOEvent | null = null
   grades = grades
+  colorMenu = false
   success = false
 
   dates = {
@@ -543,6 +587,7 @@ export default class DialogUpdateEvent extends Vue {
     name: '',
     description: '',
     location: '',
+    color: '',
     locationTitle: '',
     picture: '' as File | string,
     cutoffThreshold: EventTimeThreshold.AFTER_END,
@@ -597,6 +642,17 @@ export default class DialogUpdateEvent extends Vue {
     return false
   }
 
+  get swatch() {
+    return {
+      height: '40px',
+      width: '40px',
+      backgroundColor: this.meta.color,
+      cursor: 'pointer',
+      borderRadius: this.colorMenu ? '50%' : '4px',
+      transition: 'border-radius 200ms ease-in-out',
+    }
+  }
+
   get gradeGroups() {
     return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
   }
@@ -625,6 +681,7 @@ export default class DialogUpdateEvent extends Vue {
     const dto: DTO<UpdateEventDto> = {
       name: this.meta.name,
       description: this.meta.description || null,
+      color: this.meta.color,
       picture: this.meta.picture as any, // No ideal way to make it like Files
       location: this.meta.location || null,
       locationTitle: this.meta.locationTitle,
@@ -775,6 +832,7 @@ export default class DialogUpdateEvent extends Vue {
     this.meta.name = this.intEvent.name
     this.meta.description = this.intEvent.description || ''
     this.meta.location = this.intEvent.location || ''
+    this.meta.color = this.intEvent.color || '#000000'
     this.meta.locationTitle = this.intEvent.locationTitle
     this.meta.cutoffThreshold = this.intEvent.cutoffThreshold
     this.meta.cutoffOffset = this.intEvent.cutoffOffset
@@ -989,5 +1047,11 @@ export default class DialogUpdateEvent extends Vue {
   height: 100%;
   font-weight: 700;
   font-size: 1.3rem;
+}
+
+.shrink-append {
+  ::v-deep .v-input__append-inner {
+    margin-top: 8px !important;
+  }
 }
 </style>

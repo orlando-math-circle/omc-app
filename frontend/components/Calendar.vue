@@ -1,15 +1,11 @@
 <template>
   <div>
     <!-- Simple Date-Picker Calendar -->
-    <!-- :allowed-dates="(date) => dates.includes(date)" -->
     <v-date-picker
       v-if="internalType === 'simple'"
       v-model="date"
       :events="dates"
-      :event-color="
-        (date) =>
-          date[9] % 3 ? '#44d9e6' : date[9] % 2 ? '#ff4299' : '#fee266'
-      "
+      :event-color="dateToColor"
       full-width
       no-title
       elevation="2"
@@ -69,6 +65,7 @@ export default class Calendar extends Vue {
   @Prop({ required: true }) value!: string
   @PropSync('type', { default: 'simple' }) internalType!: string
   @Prop() projectFilterIds?: number[]
+  @Prop({ default: '/events' }) clickRedirectBase!: string
 
   $refs!: {
     calendar: InstanceType<typeof VCalendar>
@@ -143,7 +140,13 @@ export default class Calendar extends Vue {
   }
 
   onClickEvent({ event }: { event: Event }) {
-    this.$router.push(`/events/${event.id}`)
+    this.$router.push(`${this.clickRedirectBase}/${event.id}`)
+  }
+
+  dateToColor(date: string) {
+    const event = this.events.find((e) => e.dtstart.substr(0, 10) === date)
+
+    return event?.color || '#000000'
   }
 
   async onChange({ start, end }: VCalendarChange) {

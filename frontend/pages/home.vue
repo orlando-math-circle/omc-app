@@ -20,7 +20,7 @@
           </v-slide-group>
         </v-col>
 
-        <v-col class="pb-4">
+        <v-col v-else class="pb-4">
           <span>No upcoming events.</span>
         </v-col>
       </v-row>
@@ -105,6 +105,12 @@ export default class HomePage extends Vue {
 </script>
 
 <style lang="scss" scoped>
+// Fixes mobile scrolling issue
+// https://github.com/vuetifyjs/vuetify/issues/10673#issuecomment-674203098
+::v-deep .v-slide-group__wrapper {
+  touch-action: auto !important;
+}
+
 .padded-block {
   margin: 15px 0;
 }

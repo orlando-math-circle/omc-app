@@ -305,7 +305,11 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-project v-model="project" outlined />
+                <auto-complete-project
+                  v-model="project"
+                  item-value="id"
+                  outlined
+                />
               </v-col>
               <v-col cols="auto" class="align-self-center">
                 <dialog-select-project v-model="project" />
@@ -414,6 +418,49 @@
         </v-list-item>
 
         <v-divider />
+
+        <!-- Color Picker -->
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
+            <v-icon>mdi-palette-outline</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-text-field-validated
+              :value="meta.color"
+              class="ma-0 pa-0 shrink-append"
+              mask="'#XXXXXXXX'"
+              hide-details="auto"
+              label="Color (Optional)"
+              outlined
+            >
+              <template #append>
+                <v-menu
+                  v-model="colorMenu"
+                  top
+                  nudge-bottom="105"
+                  nudge-left="16"
+                  :close-on-content-click="false"
+                >
+                  <template #activator="{ on }">
+                    <div :style="swatch" v-on="on"></div>
+                  </template>
+
+                  <v-card>
+                    <v-card-text class="pa-0">
+                      <v-color-picker
+                        v-model="meta.color"
+                        flat
+                      ></v-color-picker>
+                    </v-card-text>
+                  </v-card>
+                </v-menu>
+              </template>
+            </v-text-field-validated>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider />
       </v-list>
     </v-card-text>
 
@@ -469,6 +516,7 @@ export default class DialogCreateEvent extends Vue {
 
   success = false
   grades = grades
+  colorMenu = false
 
   dates = {
     allday: false,
@@ -524,8 +572,9 @@ export default class DialogCreateEvent extends Vue {
   meta = {
     name: '',
     description: '',
+    color: '#000000',
     location: '',
-    locationTitle: '',
+    locationTitle: 'Online',
     cutoffThreshold: EventTimeThreshold.AFTER_END,
     cutoffOffset: 0,
     lateThreshold: EventTimeThreshold.AFTER_START,
@@ -564,6 +613,17 @@ export default class DialogCreateEvent extends Vue {
 
   get gradeGroups() {
     return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
+  }
+
+  get swatch() {
+    return {
+      height: '40px',
+      width: '40px',
+      backgroundColor: this.meta.color,
+      cursor: 'pointer',
+      borderRadius: this.colorMenu ? '50%' : '4px',
+      transition: 'border-radius 200ms ease-in-out',
+    }
   }
 
   beforeMount() {
@@ -701,5 +761,11 @@ export default class DialogCreateEvent extends Vue {
 <style lang="scss" scoped>
 .v-card__text {
   padding: 16px 0;
+}
+
+.shrink-append {
+  ::v-deep .v-input__append-inner {
+    margin-top: 8px !important;
+  }
 }
 </style>

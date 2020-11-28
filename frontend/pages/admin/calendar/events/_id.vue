@@ -26,9 +26,24 @@
               </v-list-item>
             </template>
           </dialog-update-event>
+
+          <v-list-item @click="onDeleteMenu">
+            <v-list-item-icon>
+              <v-icon>mdi-trash-can</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-menu>
     </admin-header>
+
+    <dialog-delete-event
+      ref="deleteModeSelector"
+      @delete:confirm="onDeleteConfirm"
+    />
 
     <v-row>
       <v-col>
@@ -83,7 +98,8 @@
 
 <script lang="ts">
 import { format, isSameDay, isSameWeek, parseISO } from 'date-fns'
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Ref, Vue } from 'nuxt-property-decorator'
+import DialogDeleteEvent from '../../../../components/dialogs/DialogDeleteEvent.vue'
 
 @Component({
   layout: 'admin',
@@ -95,6 +111,8 @@ import { Component, Vue } from 'nuxt-property-decorator'
   },
 })
 export default class AdminEventEditPage extends Vue {
+  @Ref('deleteModeSelector') readonly modeDialog!: DialogDeleteEvent
+
   breadcrumbs = [
     {
       text: 'Dashboard',
@@ -149,6 +167,41 @@ export default class AdminEventEditPage extends Vue {
     if (isSameDay(start, end)) {
       return `${format(start, 'h:mm aaaa')} till ${format(end, 'h:mm aaaa')}`
     }
+  }
+
+  /**
+   * Gateway method for determining if opening the delete
+   * mode picker is necessary.
+   */
+  async onDeleteMenu() {
+    if (this.event.recurrence) {
+      return this.modeDialog.open()
+    }
+
+    await this.delete('single')
+  }
+
+  /**
+   * Callback from the deletion dialog for recurring events.
+   */
+  async onDeleteConfirm(mode: 'single' | 'future' | 'all') {
+    await this.delete(mode)
+  }
+
+  /**
+   * Asks the backend to delete the event with the provided method
+   * and redirects back to the calendar after.
+   */
+  async delete(mode: 'single' | 'future' | 'all') {
+    await this.$accessor.events.delete({ id: this.$route.params.id, mode })
+
+    if (this.$accessor.events.isErrored) {
+      return this.$accessor.snackbar.show({
+        text: this.$accessor.events.error?.message || 'Something went wrong :(',
+      })
+    }
+
+    this.$router.push('/admin/calendar/events')
   }
 
   async onEventRefresh(id: string) {
