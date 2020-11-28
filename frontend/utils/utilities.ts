@@ -58,12 +58,14 @@ export const shallowDiff = <T extends Record<string, any>>(
 export const parseAxiosError = (error: AxiosError): StateError => {
   if (error.response) {
     let message: string
-    switch (error.response.status) {
-      case 413:
-        message = 'File too large'
-        break
-      default:
-        message = error.message
+
+    if (
+      error.response.status === 409 &&
+      error.config.url?.includes('register')
+    ) {
+      message = 'An account with this email already exists.'
+    } else {
+      message = getErrorMessage(error.response.status)
     }
 
     return {
@@ -74,6 +76,21 @@ export const parseAxiosError = (error: AxiosError): StateError => {
   }
 
   return { message: error.message }
+}
+
+export const getErrorMessage = (status: number) => {
+  switch (status) {
+    case 413:
+      return 'The upload is too large.'
+    case 409:
+      return 'The resource already exists in the database.'
+    case 404:
+      return 'The resource was not found.'
+    case 400:
+      return 'The request was not accepted by the server, ensure the necessary information was provided and try again, or contact an administrator.'
+    default:
+      return 'An unexpected error occured, please try again later.'
+  }
 }
 
 /**

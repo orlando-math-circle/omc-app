@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 100%">
+  <div class="fill-calc">
     <v-toolbar flat color="transparent">
       <v-btn icon to="/">
         <v-icon large>mdi-chevron-left</v-icon>
@@ -7,8 +7,8 @@
     </v-toolbar>
 
     <v-container fill-height>
-      <v-row align="start" justify="center" no-gutters>
-        <v-col cols="10" md="6">
+      <v-row>
+        <v-col>
           <h2>Registration</h2>
           <span class="subheader">Welcome to Orlando Math Circle</span>
           <span class="d-flex subheader"
@@ -16,14 +16,10 @@
             <nuxt-link class="pl-2" to="/login">Log in</nuxt-link></span
           >
 
+          <alert-error v-if="error" :error="error" class="mt-3"> </alert-error>
+
           <v-form-validated @submit:form="onSubmit">
             <v-row>
-              <alert-error
-                v-if="$accessor.auth.error"
-                :error="$accessor.auth.error"
-              >
-              </alert-error>
-
               <v-col>
                 <v-text-field-validated
                   v-model="dto.first"
@@ -157,7 +153,7 @@
               Sign up
             </v-btn>
 
-            <div>
+            <div class="mb-5">
               By continuing to register you are agreeing to our
               <a
                 href="https://www.orlandomathcircle.org/privacy-policy/"
@@ -177,6 +173,7 @@
 import { Vue, Component } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 import { Sex } from '../../backend/src/user/enums/sex.enum'
+import { StateStatus } from '../interfaces/state.interface'
 import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.dto'
 
 @Component({
@@ -235,21 +232,29 @@ export default class RegisterPage extends Vue {
 
   passwordConfirm = ''
 
+  get error() {
+    return this.$accessor.auth.isErrored && this.$accessor.auth.error!
+  }
+
+  beforeMount() {
+    // Clear residual errors from login.
+    this.$accessor.auth.setStatus(StateStatus.WAITING)
+
+    console.log(this.$accessor.auth.error, this.$accessor.auth.status)
+  }
+
   async onSubmit() {
-    try {
-      await this.$accessor.auth.register(this.dto as CreateAccountDto)
-      this.$router.push('/home')
-    } catch (error) {
-      console.log(error)
-    }
+    await this.$accessor.auth.register(this.dto as CreateAccountDto)
+
+    if (this.error) return
+
+    this.$router.push('/home')
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.example {
-  a {
-    text-decoration: none;
-  }
+.fill-calc {
+  height: calc(100% - 64px);
 }
 </style>

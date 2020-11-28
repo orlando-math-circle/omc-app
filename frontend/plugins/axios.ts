@@ -1,7 +1,7 @@
 import { Plugin } from '@nuxt/types'
 import { initializeAxios } from '../utils/axios'
 
-const plugin: Plugin = ({ $axios, app }) => {
+const plugin: Plugin = ({ $axios, app, redirect }) => {
   /**
    * Attaches $axios to the Nuxt axios instance.
    */
@@ -15,7 +15,6 @@ const plugin: Plugin = ({ $axios, app }) => {
     if (app.$accessor.auth.token) {
       config.headers.common.Authorization = `Bearer ${app.$accessor.auth.token}`
     } else {
-      console.log('Removing token')
       delete config.headers.common.Authorization
     }
 
@@ -30,8 +29,10 @@ const plugin: Plugin = ({ $axios, app }) => {
 
     // Issue with the current access token.
     if (error.response?.status === 401) {
-      app.$accessor.auth.logout()
-      app.router?.push('/')
+      if (app.$accessor.auth.loggedIn) {
+        app.$accessor.auth.logout()
+        redirect('/')
+      }
     }
 
     console.error(

@@ -1,9 +1,7 @@
 <template>
   <v-app>
-    <v-main>
-      <div class="wave-top">
-        <nuxt />
-      </div>
+    <v-main class="wave-top">
+      <nuxt />
     </v-main>
   </v-app>
 </template>
@@ -31,10 +29,6 @@ export default class LandingLayout extends Vue {}
 }
 
 .wave-top {
-  position: relative;
-  height: 100%;
-  z-index: 0;
-
   &::before {
     content: '';
     position: absolute;
@@ -45,7 +39,6 @@ export default class LandingLayout extends Vue {}
     background-size: cover;
     background-image: url('~assets/images/welcome-wave.svg');
     overflow: visible;
-    z-index: -1;
   }
 }
 </style>

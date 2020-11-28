@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios'
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { Account } from '../../backend/src/account/account.entity'
 import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.dto'
@@ -30,6 +31,7 @@ export const state = () => ({
 
 export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
+  isErrored: (state) => state.status === StateStatus.ERROR,
   loggedIn: (state) => !!state.token,
   accountUsers: (state) => (state.account?.users as unknown) as User[],
   isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN),
@@ -47,7 +49,7 @@ export const mutations = mutationTree(state, {
       state.error = null
     }
   },
-  setError(state, error: any) {
+  setError(state, error: AxiosError) {
     state.status = StateStatus.ERROR
     state.error = parseAxiosError(error)
   },

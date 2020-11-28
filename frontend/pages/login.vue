@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 100%">
+  <div class="fill-calc">
     <v-toolbar flat color="transparent">
       <v-btn icon to="/">
         <v-icon large>mdi-chevron-left</v-icon>
@@ -7,23 +7,29 @@
     </v-toolbar>
 
     <v-container fill-height>
-      <v-row align="end" justify="center" no-gutters>
-        <v-col cols="10" md="6">
+      <v-row>
+        <v-col>
           <h2>Sign in</h2>
 
-          <v-alert v-if="authError" type="error" color="accent">
-            Email or password incorrect.
-          </v-alert>
+          <v-expand-transition>
+            <v-alert v-if="error" type="error" color="secondary">
+              <span v-if="error.status === 401">
+                Email or password incorrect
+              </span>
+            </v-alert>
+          </v-expand-transition>
 
           <v-form-validated @submit:form="login">
             <v-text-field-validated
               v-model="email"
               label="Email"
+              name="email"
               type="email"
               autocomplete="email"
               rules="required|email"
               prepend-inner-icon="mdi-email-outline"
               required
+              outlined
             ></v-text-field-validated>
 
             <v-text-field-validated
@@ -35,15 +41,21 @@
               autocomplete="current-password"
               prepend-inner-icon="mdi-lock-outline"
               required
+              outlined
               @click:append="showPassword = !showPassword"
             ></v-text-field-validated>
 
-            <v-row no-gutters>
-              <v-col align="center">
-                <v-checkbox v-model="remember" label="Remember me?" />
+            <v-row no-gutters class="mb-5">
+              <v-col cols="6" class="action">
+                <v-checkbox
+                  v-model="remember"
+                  label="Remember me?"
+                  hide-details
+                  dense
+                />
               </v-col>
 
-              <v-col align="center" justify="center" class="forgot">
+              <v-col cols="6" class="action">
                 <nuxt-link to="/forgot">Forgot password?</nuxt-link>
               </v-col>
             </v-row>
@@ -52,7 +64,7 @@
               Log in
             </v-btn>
             <div class="or-separator">or</div>
-            <v-btn block outlined color="accent" to="/register">Sign up</v-btn>
+            <v-btn block color="secondary" to="/register">Sign up</v-btn>
           </v-form-validated>
         </v-col>
       </v-row>
@@ -81,8 +93,8 @@ export default class LoginPage extends Vue {
     return this.$accessor.auth.isLoading
   }
 
-  get authError() {
-    return this.$accessor.auth.error
+  get error() {
+    return this.$accessor.auth.isErrored && this.$accessor.auth.error!
   }
 
   async login() {
@@ -95,6 +107,7 @@ export default class LoginPage extends Vue {
     if (this.$accessor.auth.error) return
 
     if (this.$accessor.auth.complete) {
+      console.log('login complete')
       this.$router.push('/')
     } else {
       this.$router.push('/switcher')
@@ -104,10 +117,19 @@ export default class LoginPage extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.forgot {
+::v-deep .v-input--selection-controls {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.fill-calc {
+  height: calc(100% - 64px);
+}
+
+.action {
   display: flex;
   align-self: center;
-  margin-left: 15px;
+  justify-content: center;
   height: 100%;
 }
 

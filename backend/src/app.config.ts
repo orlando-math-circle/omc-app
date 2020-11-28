@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi';
 import {
+  ADMIN_EMAIL,
   DEFAULT_AVATAR_FOLDER,
   DEFAULT_EVENT_PICTURE,
   FILE_DIRECTORY,
@@ -14,6 +15,7 @@ import {
 const configSchema = Joi.object({
   SECRET: Joi.string().required(),
   USE_RRULE_CACHE: Joi.boolean().default(false),
+  [ADMIN_EMAIL]: Joi.string(),
   [PAYPAL_SANDBOXED]: Joi.boolean().default(true),
   [PAYPAL_CLIENT_ID]: Joi.string().required(),
   [PAYPAL_SECRET_KEY]: Joi.string().required(),

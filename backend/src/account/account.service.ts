@@ -5,13 +5,16 @@ import {
   QueryOrderMap,
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { BCRYPT_ROUNDS } from '../app.constants';
+import { ADMIN_EMAIL, BCRYPT_ROUNDS } from '../app.constants';
+import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import { Account } from './account.entity';
 import { CreateAccountDto } from './dtos/create-account.dto';
 
@@ -21,7 +24,9 @@ export class AccountService {
     @InjectRepository(Account)
     private readonly accountRepository: EntityRepository<Account>,
     private readonly emailService: EmailService,
+    private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly config: ConfigService,
   ) {}
 
   /**
@@ -30,16 +35,29 @@ export class AccountService {
    * @param createAccountDto properties of the primary user
    */
   async create(createAccountDto: CreateAccountDto) {
+    const existingUser = await this.userService.findOne({
+      email: createAccountDto.email,
+    });
+
+    if (existingUser) {
+      throw new ConflictException();
+    }
+
     const account = new Account();
     const user = new User();
-
     this.accountRepository.persist(user);
 
     user.assign(createAccountDto);
-
     user.password = await bcrypt.hash(user.password, BCRYPT_ROUNDS);
+
     account.primaryUser = user;
     account.users.add(user);
+
+    // Check if there is an admin override.
+    const adminEmail = this.config.get(ADMIN_EMAIL);
+    if (adminEmail && user.email === adminEmail) {
+      user.roles = [Roles.ADMIN];
+    }
 
     await this.accountRepository.persistAndFlush(account);
     account.users.populated(true);
