@@ -92,7 +92,7 @@
               <v-list-item-title>Ends</v-list-item-title>
 
               <v-radio-group v-model="type" class="pl-2">
-                <!-- Infinitely recurring events is disabled -->
+                <!-- Infinitely recurring events are disabled -->
                 <!-- <v-radio value="never">
                   <template #label>
                     <span class="inline-height">Never</span>
@@ -107,7 +107,7 @@
                         <v-dialog
                           ref="dateDialog"
                           v-model="dateDialog"
-                          :return-value.sync="untilISO"
+                          :return-value.sync="options.until"
                           width="290px"
                         >
                           <template #activator="{ on, attrs }">
@@ -122,7 +122,7 @@
                             />
                           </template>
 
-                          <v-date-picker v-model="untilISO" scrollable>
+                          <v-date-picker v-model="until" scrollable>
                             <v-spacer />
 
                             <v-btn text @click="dateDialog = false"
@@ -130,7 +130,7 @@
                             </v-btn>
                             <v-btn
                               text
-                              @click="datePickerDialog.save(untilISO)"
+                              @click="datePickerDialog.save(options.until)"
                             >
                               Ok
                             </v-btn>
@@ -188,19 +188,11 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch } from 'vue-property-decorator'
 import { Frequency, ByWeekday, Options } from 'rrule'
-import moment from 'moment'
-import { parseISO } from 'date-fns'
-
-export interface RecurrenceOpts {
-  interval: number
-  freq: Frequency
-  dtstart: Date | string | null
-  until: Date | null
-  count: number | null
-  byweekday: ByWeekday | ByWeekday[] | null
-  bysetpos: number | null
-  bymonthday: number | number[] | null
-}
+import { format, parseISO } from 'date-fns'
+import {
+  EventRecurrenceDto,
+  EventRecurrenceOptions,
+} from '../../interfaces/events/event-recurrence.interface'
 
 export interface Weekday {
   text: string
@@ -299,33 +291,35 @@ export default class RecurrenceDialog extends Vue {
     monthType: MonthType.ABSOLUTE,
   }
 
-  options: RecurrenceOpts = {
+  options: EventRecurrenceOptions = {
     interval: 1,
     freq: Frequency.DAILY,
-    dtstart: parseISO(this.dateString),
-    until: null,
+    dtstart: '',
+    until: '',
     count: 10,
-    byweekday: null,
-    bysetpos: null,
-    bymonthday: null,
+    byweekday: [],
+    bysetpos: 1,
+    bymonthday: 1,
   }
 
   get date() {
     return parseISO(this.dateString)
   }
 
-  get untilISO(): string {
-    return this.options.until!.toISOString().substring(0, 10)
+  // The v-date-picker component will not accept time.
+  // Warning: This is also changed to a local date!
+  get until() {
+    return format(new Date(this.options.until), 'yyyy-MM-dd')
   }
 
-  set untilISO(iso: string) {
-    this.options.until = new Date(iso)
+  set until(date: string) {
+    this.options.until = parseISO(date).toISOString()
   }
 
   get formattedUntilDate() {
-    return this.options.until
-      ? moment(this.options.until).format('dddd, MMMM D')
-      : ''
+    if (!this.options.until) return ''
+
+    return format(new Date(this.options.until), 'LLL do, yyyy')
   }
 
   get monthTypes() {
@@ -367,7 +361,7 @@ export default class RecurrenceDialog extends Vue {
         ? new Date(now.getFullYear() + 1, 0, 1)
         : new Date(now.getFullYear(), month + 1, 1)
 
-    this.options.until = nextMonth
+    this.options.until = nextMonth.toISOString()
 
     const weekday = this.weekdays[this.date.getDay()].value
 
@@ -397,6 +391,7 @@ export default class RecurrenceDialog extends Vue {
     switch (type) {
       case RecurrenceSelections.NONREPEATING:
         this.$emit('input', null)
+        this.$emit('change:rule')
         break
       case RecurrenceSelections.CUSTOM:
         this.dialog = true
@@ -411,33 +406,34 @@ export default class RecurrenceDialog extends Vue {
     this.rule.prevSelected = old
   }
 
-  customRuleToText(rule: Partial<RecurrenceOpts>) {
+  customRuleToText(rule: EventRecurrenceOptions) {
     const retval = ['Repeats']
     const freq = this.frequencies.find((f) => f.value === rule.freq)
 
-    if (rule.interval) {
-      retval.push(`every ${rule.interval} ${freq!.singular}`)
+    if (rule.interval !== 1) {
+      retval.push(`every ${rule.interval} ${freq!.plural}`)
     } else {
       retval.push(freq!.relative)
     }
 
     if (rule.byweekday && rule.freq === Frequency.WEEKLY) {
-      // This is super dangerous code with possible undefined stuff everywhere.
-      const days = Array.isArray(rule.byweekday)
-        ? rule.byweekday.map(
-            (w) => this.weekdays.find((wo) => wo.value === w)!.short
-          )
-        : typeof rule.byweekday === 'string'
-        ? [this.weekdays.find((wd) => wd.value === rule.byweekday)]
-        : []
+      const days: string[] = []
+
+      for (let i = 0; i < this.weekdays.length; i++) {
+        for (let j = 0; j < rule.byweekday.length; j++) {
+          if (this.weekdays[i].value === rule.byweekday[j]) {
+            days.push(this.weekdays[i].short)
+          }
+        }
+      }
 
       retval.push(`on ${days.join(', ')}`)
     }
 
-    if (rule.until) {
-      retval.push(`until ${rule.until.toDateString()}`)
-    } else if (rule.count) {
-      retval.push(`for ${rule.count} times`)
+    if (this.type === RecurrenceTerminator.UNTIL && rule.until) {
+      retval.push(`until ${format(new Date(rule.until), 'LLL do, yyyy')}`)
+    } else if (this.type === RecurrenceTerminator.COUNT && rule.count) {
+      retval.push(`${rule.count} times`)
     }
 
     return retval.join(' ')
@@ -455,40 +451,52 @@ export default class RecurrenceDialog extends Vue {
   }
 
   onSetRule() {
-    const retval: Partial<RecurrenceOpts> = {
-      freq: this.options.freq,
-      dtstart: this.date.toISOString(),
-    }
+    let dto: EventRecurrenceDto
 
-    if (this.type === RecurrenceTerminator.UNTIL) {
-      retval.until = this.options.until
-    } else if (this.type === RecurrenceTerminator.COUNT) {
-      retval.count = this.options.count
+    switch (this.type) {
+      case RecurrenceTerminator.UNTIL:
+        dto = {
+          freq: this.options.freq,
+          dtstart: this.date.toISOString(),
+          until: this.options.until,
+        }
+        break
+      case RecurrenceTerminator.COUNT:
+        dto = {
+          freq: this.options.freq,
+          dtstart: this.date.toISOString(),
+          count: this.options.count,
+        }
+
+        break
+      default:
+        throw new Error('Unexpected recurrence terminating behavior')
     }
 
     if (this.options.interval > 1) {
-      retval.interval = this.options.interval
+      dto.interval = this.options.interval
     }
 
     // Weekly
     if (this.options.freq === 2) {
-      retval.byweekday = this.options.byweekday
+      dto.byweekday = this.options.byweekday
     }
 
     // Monthly
     if (this.options.freq === 1) {
       if (this.freq.monthType === MonthType.ABSOLUTE) {
-        retval.bymonthday = this.options.bymonthday
+        dto.bymonthday = this.options.bymonthday
       } else {
-        retval.bysetpos = this.options.bysetpos
-        retval.byweekday = this.options.byweekday
+        dto.bysetpos = this.options.bysetpos
+        dto.byweekday = this.options.byweekday
       }
     }
 
     this.pristine = false
     this.rule.selected = RecurrenceSelections.DEFINED
 
-    this.$emit('input', retval)
+    this.$emit('input', dto)
+    this.$emit('change:rule')
 
     this.dialog = false
   }

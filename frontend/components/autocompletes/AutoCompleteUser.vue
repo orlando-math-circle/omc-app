@@ -13,7 +13,7 @@
     clearable
     outlined
     v-bind="$attrs"
-    @input="$emit('input', $event)"
+    @input="$emit('input', $event || null)"
   >
     <template #selection="data">
       <v-chip v-bind="data.attrs">

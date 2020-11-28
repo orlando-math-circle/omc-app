@@ -56,7 +56,7 @@ export const mutations = mutationTree(state, {
 export const actions = actionTree(
   { state, getters, mutations },
   {
-    async create({ commit }, createEventDto: CreateEventDto) {
+    async create({ commit }, createEventDto: DTO<CreateEventDto>) {
       try {
         commit('setStatus', StateStatus.BUSY)
 
@@ -103,7 +103,7 @@ export const actions = actionTree(
         type,
       }: {
         id: number | string
-        dto: UpdateEventDto | UpdateEventsDto
+        dto: DTO<UpdateEventDto> | DTO<UpdateEventsDto>
         type: 'single' | 'future' | 'all'
       }
     ) {

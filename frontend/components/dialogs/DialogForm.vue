@@ -21,9 +21,11 @@
         </v-btn>
       </v-toolbar>
 
-      <v-card-subtitle>
+      <v-card-subtitle v-if="$slots.footer">
         <slot name="subtitle"></slot>
       </v-card-subtitle>
+
+      <slot name="image"></slot>
 
       <v-form-validated v-slot="data" @submit:form="submit">
         <slot v-bind="{ ...data, closing }"></slot>
@@ -37,7 +39,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 @Component
 export default class DialogForm extends Vue {
-  @Prop({ default: 540 }) width?: number
+  @Prop({ default: 570 }) width?: number
   @Prop({ default: true }) expands!: boolean
 
   dialog = false

@@ -440,7 +440,6 @@ import { addDays, format, isBefore, isSameDay, parse, parseISO } from 'date-fns'
 import { Options } from 'rrule'
 import { Grade } from '../../../backend/src/user/enums/grade.enum'
 import { Sex } from '../../../backend/src/user/enums/sex.enum'
-import { CreateEventDto } from '../../../backend/src/event/dto/create-event.dto'
 import { Project } from '../../../backend/src/project/project.entity'
 import { EventTimeThreshold } from '../../../backend/src/event/enums/event-time-threshold.enum'
 import RecurrenceDialog from '../events/RecurrenceDialog.vue'
@@ -638,19 +637,26 @@ export default class DialogCreateEvent extends Vue {
       console.error(this.$accessor.files.error)
     }
 
-    const createEventDto: CreateEventDto = Object.assign(
+    const dto = Object.assign(
       {
-        dtend: toDate(
-          this.dates.end.date,
-          this.dates.allday ? '23:59' : this.times.end.time
-        ),
         rrule: this.rrule || undefined,
         project: this.project || undefined,
         course: this.course || undefined,
         ...this.meta,
       },
+      this.dates.allday
+        ? { dtend: toDate(this.dates.start.date, '23:59').toISOString() }
+        : {
+            dtend: toDate(
+              this.dates.end.date,
+              this.times.end.time
+            ).toISOString(),
+          },
       !this.rrule && {
-        dtstart: toDate(this.dates.start.date, this.times.start.time),
+        dtstart: toDate(
+          this.dates.start.date,
+          this.times.start.time
+        ).toISOString(),
       },
       this.feeType !== 'free' && {
         feeType: this.feeType,
@@ -662,7 +668,11 @@ export default class DialogCreateEvent extends Vue {
       url && { picture: url }
     )
 
-    await this.$accessor.events.create(createEventDto)
+    if (this.dates.allday) {
+      // Incomplete, allday is not accurate
+    }
+
+    await this.$accessor.events.create(dto)
 
     if (this.$accessor.events.error) {
       console.error(this.$accessor.events.error)

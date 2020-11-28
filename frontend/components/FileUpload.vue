@@ -124,10 +124,11 @@ export default class FileUpload extends Vue {
   @Ref('cropper') readonly cropperEl!: HTMLImageElement
   @Prop({ default: 'file' }) field!: string
   @Prop({ default: false }) multiple!: boolean
+  @Prop({ default: 'upload' }) initialMode!: 'upload' | 'url'
 
   dialog = false
   url = ''
-  window: 'upload' | 'url' = 'upload'
+  window: 'upload' | 'url' = this.initialMode
   files: Uploads = this.multiple ? [] : null
   cropper: Cropper | null = null
   objectURL: string | null = null
@@ -158,7 +159,6 @@ export default class FileUpload extends Vue {
 
   beforeMount() {
     if (typeof this.value === 'string') {
-      this.window = 'url'
       this.url = this.value
     } else if (
       this.value instanceof File ||
@@ -225,7 +225,9 @@ export default class FileUpload extends Vue {
   }
 
   get attributes() {
-    return Object.assign({}, this.$attrs, this.multiple && { multiple: true })
+    // Werid typescript nonsense.
+    const attrs = this.$attrs as object
+    return Object.assign({}, attrs, this.multiple && { multiple: true })
   }
 }
 </script>

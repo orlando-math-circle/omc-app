@@ -1,11 +1,37 @@
-import { Frequency, ByWeekday } from 'rrule'
+import { Frequency, ByWeekday, Options } from 'rrule'
 
-export interface EventRecurrenceDto {
+export interface EventRecurrenceOptions {
+  interval: number
   freq: Frequency
-  dtstart: Date
-  until?: Date
-  interval?: number
-  count?: number
-  bysetpos?: number | number[]
-  byweekday?: ByWeekday | ByWeekday[]
+  dtstart: string
+  until: string
+  count: number
+  byweekday: ByWeekday[]
+  bysetpos: number
+  bymonthday: number
 }
+
+export interface RRuleOptions extends Partial<Options> {
+  [index: string]: any
+}
+
+export interface RecurrenceDtoBase {
+  interval?: number
+  freq: Frequency
+  dtstart: string
+  until?: string
+  count?: number
+  byweekday?: ByWeekday[]
+  bysetpos?: number
+  bymonthday?: number
+}
+
+export interface CountRecurrenceDto extends RecurrenceDtoBase {
+  count: number
+}
+
+export interface UntilRecurrenceDto extends RecurrenceDtoBase {
+  until: string
+}
+
+export type EventRecurrenceDto = CountRecurrenceDto | UntilRecurrenceDto

@@ -36,7 +36,10 @@ export const difference = (origObj: object, newObj: object) => {
  * @param o1 Object
  * @param o2 Object
  */
-export const shallowDiff = (o1: Record<string, any>, o2: Record<string, any>) =>
+export const shallowDiff = <T extends Record<string, any>>(
+  o1: Record<string, any>,
+  o2: T
+): Partial<T> =>
   Object.keys(o2).reduce((diff, key) => {
     if (isEqual(o1[key], o2[key])) return diff
 

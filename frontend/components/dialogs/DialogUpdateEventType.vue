@@ -7,9 +7,13 @@
 
       <v-card-text>
         <v-radio-group v-model="type">
-          <v-radio label="This event" value="single"></v-radio>
-          <v-radio label="This and future events" value="future"></v-radio>
-          <v-radio label="All events" value="all"></v-radio>
+          <v-radio v-if="changeset.single" label="This event" value="single" />
+          <v-radio
+            v-if="changeset.future"
+            label="This and future events"
+            value="future"
+          />
+          <v-radio v-if="changeset.all" label="All events" value="all" />
         </v-radio-group>
       </v-card-text>
 
@@ -24,16 +28,29 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { EventUpdateModes } from '~/interfaces/events/event-update-modes.interface'
 
 @Component
 export default class DialogUpdateEventType extends Vue {
-  dialog = false
+  @Prop({ required: true }) readonly changeset!: EventUpdateModes
 
-  type = 'single'
+  dialog = false
+  type = ''
 
   onSubmit() {
-    this.$emit('submit:type', this.type)
+    switch (this.type) {
+      case 'single':
+        this.$emit('submit:type', this.type, this.changeset.single)
+        break
+      case 'future':
+        this.$emit('submit:type', this.type, this.changeset.future)
+        break
+      case 'all':
+        this.$emit('submit:type', this.type, this.changeset.all)
+        break
+    }
+
     this.dialog = false
   }
 

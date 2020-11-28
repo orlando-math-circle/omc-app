@@ -1,16 +1,17 @@
 <template>
   <v-autocomplete
-    v-model="model"
-    :items="$store.state.courses.courses"
-    :loading="isLoading"
+    :value="value"
+    :items="$accessor.courses.courses"
+    :loading="bouncing || $accessor.courses.isLoading"
     :search-input.sync="search"
     label="Course"
     item-text="name"
-    return-object
     placeholder="Search for a course"
     hide-details="auto"
     clearable
+    outlined
     v-bind="$attrs"
+    @input="$emit('input', $event || null)"
   />
 </template>
 
@@ -20,25 +21,13 @@ import { throttle } from 'lodash'
 
 @Component
 export default class AutoCompleteCourse extends Vue {
-  @Prop() value!: number | null
+  @Prop() value!: any
   @Prop() project!: number
+  @Prop({ default: 250 }) wait!: number
 
   search = ''
   bouncing = false
-
-  get model() {
-    return this.value
-  }
-
-  set model(value: any) {
-    this.$emit('input', value)
-  }
-
-  get isLoading() {
-    return this.bouncing || this.$accessor.courses.isLoading
-  }
-
-  findAllThrottled = throttle(async () => await this.findAll(), 2500)
+  findAllThrottled = throttle(async () => await this.findAll(), this.wait)
 
   @Watch('search')
   async onSearch() {

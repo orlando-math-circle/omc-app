@@ -16,7 +16,7 @@ export const mutations = mutationTree(state, {
   setSnack(state, snack: SnackbarPayload) {
     state.text = snack.text
     state.color = snack.color || null
-    state.timeout = snack.timeout || null
+    state.timeout = snack.timeout || 2500
   },
 })
 

@@ -1,18 +1,18 @@
 <template>
-  <v-autocomplete
+  <VAutocompleteValidated
     :value="value"
     :items="$accessor.projects.projects"
-    :loading="isLoading"
+    :loading="bouncing || $accessor.projects.isLoading"
     :search-input.sync="search"
     label="Project"
     item-text="name"
-    item-value="id"
     placeholder="Search for a project"
     hide-details="auto"
     clearable
+    outlined
     v-bind="$attrs"
-    @change="onChange"
-  ></v-autocomplete>
+    @input="$emit('input', $event || null)"
+  ></VAutocompleteValidated>
 </template>
 
 <script lang="ts">
@@ -21,25 +21,17 @@ import { throttle } from 'lodash'
 
 @Component
 export default class AutoCompleteProject extends Vue {
-  @Prop() value!: number | null
+  @Prop() value!: any
+  @Prop({ default: 250 }) wait!: number
 
   search = ''
   bouncing = false
-
-  get isLoading() {
-    return this.bouncing || this.$accessor.projects.isLoading
-  }
-
-  findAllThrottled = throttle(async () => await this.findAll(), 250)
+  findAllThrottled = throttle(async () => await this.findAll(), this.wait)
 
   @Watch('search')
   async onSearch() {
     this.bouncing = true
     await this.findAllThrottled()
-  }
-
-  onChange(id: number) {
-    this.$emit('input', id)
   }
 
   async findAll() {
