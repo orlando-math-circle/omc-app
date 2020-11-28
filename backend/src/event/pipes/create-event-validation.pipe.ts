@@ -38,7 +38,7 @@ export class CreateEventValidationPipe implements PipeTransform {
     }
 
     // Must have both feeType and fee when adding or updating a fee.
-    if (!!value.feeType && !!value.fee) {
+    if (!!value.feeType !== !!value.fee) {
       throw new BadRequestException('Malformed fee mutation');
     }
 

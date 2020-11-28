@@ -144,12 +144,16 @@ export class EventService {
       ),
     ]);
 
-    await this.recurrenceRepository.populate(recurrences, 'events.course', {
-      events: {
-        dtstart: { $lte: end },
-        $or: [{ dtend: { $gte: start } }, { dtend: null }],
+    await this.recurrenceRepository.populate(
+      recurrences,
+      ['events.course', 'events.fee', 'events.project', 'events.author'],
+      {
+        events: {
+          dtstart: { $lte: end },
+          $or: [{ dtend: { $gte: start } }, { dtend: null }],
+        },
       },
-    });
+    );
 
     let reference: Event;
     for (const recurrence of recurrences) {
@@ -487,10 +491,14 @@ export class EventService {
    */
   public async deleteSingleEvent(id: number) {
     const event = await this.eventRepository.findOneOrFail(id, ['recurrence']);
-    const rruleSet = event.recurrence.getSchedule();
 
-    rruleSet.exdate(event.dtstart);
-    event.recurrence.rrule = rruleSet.toString();
+    // If there is a recurrence, we need to add an exclusion.
+    if (event.recurrence) {
+      const rruleSet = event.recurrence.getSchedule();
+
+      rruleSet.exdate(event.dtstart);
+      event.recurrence.rrule = rruleSet.toString();
+    }
 
     return this.eventRepository.remove(event).flush();
   }
