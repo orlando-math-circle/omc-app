@@ -76,7 +76,12 @@ export default class BirthdayPicker extends Vue {
 
   @Watch('birthday', { deep: true })
   setDate(birthday: this['birthday']) {
-    if (!birthday.year || !birthday.month || !birthday.date) return
+    if (
+      typeof birthday.year !== 'number' ||
+      typeof birthday.month !== 'number' ||
+      typeof birthday.date !== 'number'
+    )
+      return
 
     const date = new Date(
       birthday.year as number,
@@ -94,7 +99,10 @@ export default class BirthdayPicker extends Vue {
    * with an invalid number of days in the month.
    */
   get dayRules() {
-    if (!this.birthday.month || !this.birthday.year) {
+    if (
+      typeof this.birthday.month !== 'number' ||
+      typeof this.birthday.year !== 'number'
+    ) {
       return {
         required: true,
         min_value: 1,
