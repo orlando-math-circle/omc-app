@@ -180,7 +180,10 @@ export class AuthService {
     if (!payload || !('email' in payload))
       throw new BadRequestException('Malformed Token');
 
-    const user = await this.userService.findOneOrFail({ email: payload.email });
+    const user = await this.userService.findOneOrFail({
+      email: payload.email,
+      locked: false,
+    });
 
     if (user.emailVerified) throw new GoneException();
 
