@@ -115,7 +115,7 @@
 
             <template #[`item.grade`]="{ item }">
               {{
-                typeof item.grade !== 'number'
+                typeof item.grade === 'number'
                   ? grades[item.grade].text
                   : 'No Grade'
               }}
