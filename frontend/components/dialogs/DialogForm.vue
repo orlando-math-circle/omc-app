@@ -4,10 +4,11 @@
     :fullscreen="expands ? $vuetify.breakpoint.mobile : false"
     :max-width="width"
     persistent
+    @input="onInput"
   >
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" v-on="on">Add Event</v-btn>
+        <v-btn v-bind="attrs" color="secondary" v-on="on">Create</v-btn>
       </slot>
     </template>
 
@@ -44,6 +45,10 @@ export default class DialogForm extends Vue {
 
   dialog = false
   closing = false
+
+  onInput(value: boolean) {
+    this.$emit('dialog:state', value)
+  }
 
   close(delay?: number) {
     if (delay) {

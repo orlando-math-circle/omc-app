@@ -16,6 +16,7 @@ import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { Invoice } from '../invoice/invoice.entity';
 import { Grade } from './enums/grade.enum';
+import { ReminderFreq } from './enums/reminder-freq.enum';
 import { Sex } from './enums/sex.enum';
 
 @Entity()
@@ -58,6 +59,13 @@ export class User extends BaseEntity<User, 'id'> {
 
   @Property({ nullable: true })
   avatar?: string;
+
+  @Enum({
+    type: () => ReminderFreq,
+    array: true,
+    nullable: true,
+  })
+  reminders?: ReminderFreq[];
 
   @Property({ default: false })
   locked: boolean = false;

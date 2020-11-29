@@ -9,6 +9,7 @@ import {
   PAYPAL_SANDBOXED,
   PAYPAL_SECRET_KEY,
   SENDGRID_API_KEY,
+  SENDGRID_IN_DEV,
   SERVE_STATIC,
 } from './app.constants';
 
@@ -21,6 +22,7 @@ const configSchema = Joi.object({
   [PAYPAL_SECRET_KEY]: Joi.string().required(),
   [FILE_DIRECTORY]: Joi.string().required(),
   [FORM_SUBDIRECTORY]: Joi.string().default('form'),
+  [SENDGRID_IN_DEV]: Joi.boolean().default(false),
   [SENDGRID_API_KEY]: Joi.string().required(),
   [SERVE_STATIC]: Joi.boolean().default(false),
   [DEFAULT_EVENT_PICTURE]: Joi.string().default('/defaults/neon-math.jpg'),

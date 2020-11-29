@@ -13,4 +13,6 @@ export enum Grade {
   ELEVENTH = 11,
   TWELFTH = 12,
   GRADUATED = 13,
+  UNDERGRADUATE = 14,
+  POSTGRADUATE = 15,
 }

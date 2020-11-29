@@ -44,14 +44,19 @@
             <v-row>
               <v-col>
                 <validation-provider
+                  ref="birthday"
                   v-slot="{ errors }"
                   :rules="{
-                    min_age: 18,
-                    max_age: 100,
+                    min_age: { min: 18 },
+                    max_age: { max: 100 },
                   }"
                   name="Birthday"
                 >
-                  <birthday-picker v-model="dto.dob" outlined />
+                  <birthday-picker
+                    v-model="dto.dob"
+                    :error="errors.length !== 0"
+                    outlined
+                  />
 
                   <div class="v-text-field__details">
                     <div class="v-messages error--text">
@@ -170,7 +175,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Ref, Watch } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 import { Sex } from '../../backend/src/user/enums/sex.enum'
 import { StateStatus } from '../interfaces/state.interface'
@@ -187,6 +192,8 @@ import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.d
   },
 })
 export default class RegisterPage extends Vue {
+  @Ref('birthday') readonly birthday!: typeof ValidationProvider
+
   student = false
 
   genders = [
@@ -239,8 +246,11 @@ export default class RegisterPage extends Vue {
   beforeMount() {
     // Clear residual errors from login.
     this.$accessor.auth.setStatus(StateStatus.WAITING)
+  }
 
-    console.log(this.$accessor.auth.error, this.$accessor.auth.status)
+  @Watch('dto.dob')
+  onBirthdayChange() {
+    console.log(this.birthday)
   }
 
   async onSubmit() {

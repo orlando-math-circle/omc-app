@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { Roles } from '../../app.roles';
 import { Grade } from '../enums/grade.enum';
+import { ReminderFreq } from '../enums/reminder-freq.enum';
 import { Sex } from '../enums/sex.enum';
 
 export class UpdateUserDto {
@@ -57,4 +58,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(Sex)
   sex?: Sex;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(() => ReminderFreq, { each: true })
+  reminders?: ReminderFreq[];
 }

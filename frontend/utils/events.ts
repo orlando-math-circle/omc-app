@@ -1,7 +1,7 @@
 import { Frequency, Options } from 'rrule'
 import { Grade } from '../../backend/src/user/enums/grade.enum'
 
-export const grades = [
+export const grades = Object.freeze([
   { text: 'Kindergarten', short: 'K', value: Grade.KINDERGARTEN },
   { text: '1st Grade', short: '1st', value: Grade.FIRST },
   { text: '2nd Grade', short: '2nd', value: Grade.SECOND },
@@ -16,7 +16,7 @@ export const grades = [
   { text: '11th Grade', short: '11th', value: Grade.ELEVENTH },
   { text: '12th Grade', short: '12th', value: Grade.TWELFTH },
   { text: 'Graduated', short: 'G', value: Grade.GRADUATED },
-]
+])
 
 export const contiguousGradeRanges = (grades: Grade[]) => {
   const levels = [...grades].sort((a, b) => a - b)

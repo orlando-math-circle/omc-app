@@ -7,7 +7,7 @@
         Create or manage users within your account.
       </v-card-subtitle>
 
-      <v-list>
+      <v-list rounded>
         <v-list-item v-for="usr in users" :key="usr.id">
           <v-list-item-avatar>
             <v-img :src="$avatar(usr)" />
@@ -15,22 +15,50 @@
 
           <v-list-item-content>
             <v-list-item-title>
-              {{ usr.first }} {{ usr.last }}
+              {{ usr.name }}
             </v-list-item-title>
-            <v-list-item-subtitle v-if="usr.grade !== 13"
-              >Grade {{ usr.grade }}</v-list-item-subtitle
-            >
-            <v-list-item-subtitle v-else>Adult</v-list-item-subtitle>
+            <v-list-item-subtitle>
+              <span>{{ sex(usr) }}</span>
+              <span v-if="typeof usr.grade === 'number'">
+                <v-icon x-small>mdi-circle-medium</v-icon>
+                {{ grades[usr.grade].text }}
+              </span>
+            </v-list-item-subtitle>
           </v-list-item-content>
 
           <v-list-item-action>
-            <v-btn icon @click="$refs.editDialog.open(usr)">
-              <v-icon>mdi-cog-outline</v-icon>
-            </v-btn>
+            <v-menu offset-y transition="slide-y-transition">
+              <template #activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-cog-outline</v-icon>
+                </v-btn>
+              </template>
 
-            <v-btn icon @click="$refs.deleteDialog.open(usr)">
-              <v-icon>mdi-delete-outline</v-icon>
-            </v-btn>
+              <v-list dense nav>
+                <v-list-item @click="$refs.editDialog.open(usr)">
+                  <v-list-item-icon>
+                    <v-icon>mdi-account-edit</v-icon>
+                  </v-list-item-icon>
+
+                  <v-list-item-content>
+                    <v-list-item-title>Edit</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item
+                  v-if="primary && primary.id !== usr.id"
+                  @click="$refs.deleteDialog.open(usr)"
+                >
+                  <v-list-item-icon>
+                    <v-icon>mdi-delete-alert-outline</v-icon>
+                  </v-list-item-icon>
+
+                  <v-list-item-content>
+                    <v-list-item-title>Delete</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </v-list-item-action>
         </v-list-item>
       </v-list>
@@ -38,9 +66,9 @@
       <v-card-actions>
         <v-spacer></v-spacer>
 
-        <dialog-user-create v-slot="{ on, attrs }">
+        <dialog-create-user v-slot="{ on, attrs }">
           <v-btn color="primary" v-bind="attrs" v-on="on">Add User</v-btn>
-        </dialog-user-create>
+        </dialog-create-user>
       </v-card-actions>
     </v-card>
 
@@ -105,7 +133,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { User } from '@backend/user/user.entity'
+import { User } from '../../../backend/src/user/user.entity'
+import { grades } from '../../utils/events'
+import { sexes } from '../../utils/constants'
 import DialogUserEdit from '~/components/dialogs/DialogUserEdit.vue'
 import DialogConfirm from '~/components/dialogs/DialogConfirm.vue'
 
@@ -121,12 +151,23 @@ export default class AccountSettingsPage extends Vue {
     deleteDialog: InstanceType<typeof DialogConfirm>
   }
 
+  grades = grades
+  sexes = sexes
+
   get user() {
-    return this.$accessor.auth.user
+    return this.$accessor.auth.user!
   }
 
   get users() {
-    return this.$accessor.auth.account?.users || []
+    return ((this.$accessor.auth.account?.users as unknown) as User[]) || []
+  }
+
+  get primary() {
+    return this.$accessor.auth.account?.primaryUser
+  }
+
+  sex(user: User) {
+    return this.sexes.find((sex) => sex.value === user.sex)?.text
   }
 
   async onDeleteConfirm(user: User) {

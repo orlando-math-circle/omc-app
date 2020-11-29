@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Grade } from '../enums/grade.enum';
+import { ReminderFreq } from '../enums/reminder-freq.enum';
 import { Sex } from '../enums/sex.enum';
 
 export class CreateUserDto {
@@ -24,4 +25,9 @@ export class CreateUserDto {
   @Type(() => Date)
   @IsDate()
   readonly dob!: Date | string;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(() => ReminderFreq, { each: true })
+  readonly reminders?: ReminderFreq[];
 }

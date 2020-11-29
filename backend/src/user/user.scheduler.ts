@@ -33,6 +33,7 @@ export class UserScheduler {
     );
 
     for (const user of users) {
+      // We only increment years until they would graduate high school.
       const grade = Math.min(
         Grade.GRADUATED,
         user.grade + differenceInYears(schoolYear, user.gradeSetAt),

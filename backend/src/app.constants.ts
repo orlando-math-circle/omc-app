@@ -16,6 +16,7 @@ export const DEFAULT_AVATAR_FOLDER = 'DEFAULT_AVATAR_FOLDER';
 /**
  * SendGrid API
  */
+export const SENDGRID_IN_DEV = 'SENDGRID_IN_DEV';
 export const SENDGRID_API_KEY = 'SENDGRID_API_KEY';
 
 /**

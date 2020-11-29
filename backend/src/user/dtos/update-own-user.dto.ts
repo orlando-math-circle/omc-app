@@ -1,7 +1,8 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
 import { DefaultAvatar } from '../enums/default-avatar.enum';
 import { Grade } from '../enums/grade.enum';
+import { ReminderFreq } from '../enums/reminder-freq.enum';
 
 export class UpdateOwnUserDto {
   @IsOptional()
@@ -24,4 +25,9 @@ export class UpdateOwnUserDto {
   @IsOptional()
   @IsEnum(Grade)
   grade?: Grade;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(() => ReminderFreq, { each: true })
+  reminders?: ReminderFreq[];
 }

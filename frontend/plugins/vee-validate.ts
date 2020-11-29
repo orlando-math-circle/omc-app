@@ -51,11 +51,9 @@ extend('min_age', {
   validate: (value, { min }: any) => {
     const diff = differenceInYears(new Date(), new Date(value))
 
-    console.log(`Min: ${min}\nDiff: ${diff}\nValidate: ${diff >= min}`)
-
     return diff >= min
   },
-  message: 'Age is too low',
+  message: 'Please have a parent or guardian register in your stead.',
 })
 
 extend('max_age', {
@@ -63,11 +61,9 @@ extend('max_age', {
   validate: (value, { max }: any) => {
     const diff = differenceInYears(new Date(), new Date(value))
 
-    console.log(`Max: ${max}\nDiff: ${diff}\nValidate: ${diff <= max}`)
-
     return diff < max
   },
-  message: 'Age is too high.',
+  message: 'Please select a valid birthday.',
 })
 
 extend('required', {

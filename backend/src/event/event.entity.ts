@@ -20,6 +20,7 @@ import { Course } from '../course/course.entity';
 import { EventFee } from '../event-fee/event-fee.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { Project } from '../project/project.entity';
+import { ReminderFreq } from '../user/enums/reminder-freq.enum';
 import { User } from '../user/user.entity';
 import { EventPermissionsDto } from './dto/event-permissions.dto';
 import { EventTimeThreshold } from './enums/event-time-threshold.enum';
@@ -62,6 +63,9 @@ export class Event extends BaseEntity<Event, 'id'> {
 
   @Property()
   lateOffset: number = 0;
+
+  @Property({ default: [] })
+  notified: ReminderFreq[];
 
   @Property({ onUpdate: () => new Date(), hidden: true })
   updatedAt: Date = new Date();

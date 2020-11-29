@@ -15,8 +15,10 @@
 
     <v-col cols="3">
       <v-text-field-validated
+        ref="dateField"
         v-model.number="birthday.date"
-        type="number"
+        type="tel"
+        maxlength="2"
         :rules="dayRules"
         name="Date"
         label="Day"
@@ -27,8 +29,10 @@
 
     <v-col cols="3">
       <v-text-field-validated
+        ref="yearField"
         v-model.number="birthday.year"
-        type="number"
+        type="tel"
+        maxlength="4"
         rules="required"
         name="Year"
         label="Year"
@@ -46,6 +50,8 @@ import { isValidDate } from '~/utils/utilities'
 @Component
 export default class BirthdayPicker extends Vue {
   @Prop() value!: string | null
+  @Prop({ default: new Date().getFullYear() }) readonly maxYear!: number
+  @Prop({ default: new Date().getFullYear() - 100 }) readonly minYear!: number
 
   months = [
     { text: 'January', value: 0 },
@@ -70,7 +76,7 @@ export default class BirthdayPicker extends Vue {
 
   @Watch('birthday', { deep: true })
   setDate(birthday: this['birthday']) {
-    if (!birthday.month || !birthday.date || !birthday.year) return
+    if (!birthday.year || !birthday.month || !birthday.date) return
 
     const date = new Date(
       birthday.year as number,

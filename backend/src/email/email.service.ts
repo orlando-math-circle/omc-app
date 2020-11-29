@@ -1,48 +1,68 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PersonalizationData } from '@sendgrid/helpers/classes/personalization';
 import SendGrid from '@sendgrid/mail';
-import { SENDGRID_API_KEY } from '../app.constants';
-import { User } from '../user/user.entity';
+import { SENDGRID_API_KEY, SENDGRID_IN_DEV } from '../app.constants';
 
 @Injectable()
 export class EmailService {
-  private readonly sandbox: boolean;
   private readonly logger = new Logger(EmailService.name);
+  private isSandbox: boolean;
 
-  constructor(config: ConfigService) {
-    this.sandbox = config.get('NODE_ENV') !== 'production';
-
-    if (this.sandbox) {
-      this.logger.log('Emailing in sandbox mode for development');
-      return;
-    }
-
-    SendGrid.setApiKey(config.get(SENDGRID_API_KEY));
+  constructor(private readonly config: ConfigService) {
+    this.initSendGrid();
   }
 
-  async email(user: User, subject: string, message: string) {
-    if (this.sandbox) {
-      this.logger.log(
-        `Sending to ${user.name}, subject: ${subject}, body: ${message}`,
-      );
-      return;
+  /**
+   * Configures SendGrid with the API key or switches to
+   * our lazy "SandBox" mode.
+   */
+  private initSendGrid() {
+    const override = this.config.get<boolean>(SENDGRID_IN_DEV);
+
+    this.isSandbox = !override && this.config.get('NODE_END') !== 'production';
+
+    if (this.isSandbox) {
+      this.logger.log('Emailing in sandbox mode for development');
+    } else {
+      this.logger.log('Enabling SendGrid');
+      SendGrid.setApiKey(this.config.get(SENDGRID_API_KEY));
     }
+  }
+
+  /**
+   * Sends an email or emails using the SendGrid API
+   *
+   * @param users Personalization data
+   */
+  async email(
+    users: PersonalizationData | PersonalizationData[],
+    subject: string,
+    html?: string,
+    template_id?: string,
+    templateData?: Record<string, any>,
+  ) {
+    // eslint-disable-next-line prefer-rest-params
+    if (this.isSandbox) return this.sandbox(...arguments);
 
     try {
       await SendGrid.send({
-        to: {
-          name: user.name,
-          email: user.email,
-        },
+        personalizations: Array.isArray(users) ? users : [users],
         from: {
           name: 'Orlando Math Circle',
-          email: 'test@omc.gilberts.dev',
+          email: 'info@omc.gilberts.dev',
         },
-        subject: subject,
-        html: message,
+        subject,
+        html: html || undefined,
+        templateId: template_id,
+        dynamicTemplateData: templateData,
       });
     } catch (error) {
       this.logger.error(`Failed: ${error}`);
     }
+  }
+
+  private sandbox(...args: any) {
+    this.logger.log(args);
   }
 }

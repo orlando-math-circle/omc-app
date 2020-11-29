@@ -67,7 +67,7 @@ export class AccountService {
     });
 
     this.emailService.email(
-      user,
+      { to: user.email },
       'Email Verification',
       `Please visit click <a href="http://localhost:8000/verify?token=${token}">here</a> or copy the following link to verify your email address.<br/>
       <a href="http://localhost:8000/verify?token=${token}">http://localhost:8000/verify?token=${token}</a>`,
