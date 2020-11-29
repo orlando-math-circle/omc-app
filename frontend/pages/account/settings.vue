@@ -1,5 +1,17 @@
 <template>
   <div>
+    <v-card v-if="user.omcEmail" class="mb-4">
+      <v-card-title>OMC Email</v-card-title>
+
+      <v-card-subtitle>
+        You have been given an OMC organization email.
+      </v-card-subtitle>
+
+      <v-card-text>
+        <link-copy :text="user.omcEmail"></link-copy>
+      </v-card-text>
+    </v-card>
+
     <v-card class="mb-4">
       <v-card-title>Account Users</v-card-title>
 

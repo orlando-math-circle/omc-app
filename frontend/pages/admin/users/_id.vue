@@ -86,11 +86,22 @@
                         ></v-text-field-validated>
                       </v-col>
 
-                      <v-col cols="12">
+                      <v-col cols="12" lg="6">
                         <v-text-field-validated
                           v-model="user.email"
                           name="Email"
                           label="Email (Optional)"
+                          hide-details="auto"
+                          rules="email"
+                          outlined
+                        ></v-text-field-validated>
+                      </v-col>
+
+                      <v-col cols="12" lg="6">
+                        <v-text-field-validated
+                          v-model="user.omcEmail"
+                          name="OMC Email"
+                          label="OMC Email (Optional)"
                           hide-details="auto"
                           rules="email"
                           outlined
@@ -355,6 +366,7 @@ export default class UserPage extends Vue {
       dob: user.dob,
       grade: user.grade,
       email: user.email,
+      omcEmail: user.omcEmail,
       emailVerified: user.emailVerified,
       locked: user.locked,
       password: user.password,
