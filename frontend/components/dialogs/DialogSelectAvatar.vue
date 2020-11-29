@@ -40,7 +40,7 @@
                 >
                   <v-img :src="avatarToImage(avatar)">
                     <v-scroll-y-transition>
-                      <div v-if="active" class="flex-grow-1 text-center">
+                      <div v-if="active" class="flex-grow-1 text-center active">
                         Selected
                       </div>
                     </v-scroll-y-transition>
@@ -122,3 +122,11 @@ export default class DialogSelectAvatar extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.active {
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 3px #000;
+}
+</style>
