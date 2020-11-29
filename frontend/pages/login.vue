@@ -107,7 +107,6 @@ export default class LoginPage extends Vue {
     if (this.$accessor.auth.error) return
 
     if (this.$accessor.auth.complete) {
-      console.log('login complete')
       this.$router.push('/')
     } else {
       this.$router.push('/switcher')

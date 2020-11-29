@@ -6,11 +6,13 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 import { Roles } from '../../app.roles';
 import { Gender } from '../enums/gender.enum';
 import { Grade } from '../enums/grade.enum';
 import { ReminderFreq } from '../enums/reminder-freq.enum';
+import { IndustryDto } from './industry.dto';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -67,4 +69,9 @@ export class UpdateUserDto {
   @IsArray()
   @IsEnum(ReminderFreq, { each: true })
   reminders?: ReminderFreq[];
+
+  @IsOptional()
+  @Type(() => IndustryDto)
+  @ValidateNested()
+  industry?: IndustryDto;
 }

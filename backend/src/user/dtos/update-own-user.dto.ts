@@ -1,17 +1,26 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { DefaultAvatar } from '../enums/default-avatar.enum';
 import { Grade } from '../enums/grade.enum';
 import { ReminderFreq } from '../enums/reminder-freq.enum';
+import { IndustryDto } from './industry.dto';
 
 export class UpdateOwnUserDto {
   @IsOptional()
   @IsString()
-  first?: string;
+  readonly first?: string;
 
   @IsOptional()
   @IsString()
-  last?: string;
+  readonly last?: string;
 
   @IsOptional()
   @IsEnum(DefaultAvatar)
@@ -20,14 +29,19 @@ export class UpdateOwnUserDto {
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  dob?: Date | string;
+  readonly dob?: Date | string;
 
   @IsOptional()
   @IsEnum(Grade)
-  grade?: Grade;
+  readonly grade?: Grade;
 
   @IsOptional()
   @IsArray()
   @IsEnum(ReminderFreq, { each: true })
-  reminders?: ReminderFreq[];
+  readonly reminders?: ReminderFreq[];
+
+  @IsOptional()
+  @Type(() => IndustryDto)
+  @ValidateNested()
+  industry?: IndustryDto;
 }

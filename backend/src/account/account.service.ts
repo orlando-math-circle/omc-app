@@ -8,6 +8,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { classToPlain } from 'class-transformer';
 import { ADMIN_EMAIL, BCRYPT_ROUNDS } from '../app.constants';
 import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
@@ -47,8 +48,14 @@ export class AccountService {
     const user = new User();
     this.accountRepository.persist(user);
 
+    if (createAccountDto.industry) {
+      createAccountDto.industry = classToPlain(createAccountDto.industry);
+    }
+
     user.assign(createAccountDto);
     user.password = await bcrypt.hash(user.password, BCRYPT_ROUNDS);
+
+    console.log(user.industry);
 
     account.primaryUser = user;
     account.users.add(user);

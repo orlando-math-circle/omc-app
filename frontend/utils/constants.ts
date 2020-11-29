@@ -59,8 +59,8 @@ export const education = Object.freeze({
     { text: '12th Grade', value: Grade.TWELFTH },
   ],
   College: [
-    { text: 'Undergraduate', value: 'Undergrad' },
-    { text: 'Postgraduate', value: 'Postgrad' },
+    { text: 'Undergraduate', value: Grade.UNDERGRADUATE },
+    { text: 'Postgraduate', value: Grade.POSTGRADUATE },
   ],
 })
 

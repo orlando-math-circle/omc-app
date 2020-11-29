@@ -15,6 +15,7 @@ import { EventRegistration } from '../event-registration/event-registration.enti
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { Invoice } from '../invoice/invoice.entity';
+import { IndustryDto } from './dtos/industry.dto';
 import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';
@@ -69,6 +70,9 @@ export class User extends BaseEntity<User, 'id'> {
     nullable: true,
   })
   reminders?: ReminderFreq[];
+
+  @Property({ nullable: true })
+  industry?: IndustryDto;
 
   @Property({ default: false })
   locked: boolean = false;

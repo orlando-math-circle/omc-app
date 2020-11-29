@@ -112,7 +112,7 @@
                         <birthday-picker v-model="user.dob" outlined />
                       </v-col>
 
-                      <v-col col="12" xl="4">
+                      <v-col cols="12" xl="4">
                         <v-select-validated
                           v-model="user.gender"
                           :items="genders"
@@ -123,7 +123,7 @@
                         />
                       </v-col>
 
-                      <v-col col="12" xl="4">
+                      <v-col cols="12" xl="4">
                         <v-select-validated
                           v-model="user.grade"
                           :items="grades"
@@ -134,7 +134,7 @@
                         />
                       </v-col>
 
-                      <v-col col="12" xl="4">
+                      <v-col cols="12" xl="4">
                         <v-select-validated
                           v-model="user.roles"
                           :items="roles"
@@ -143,6 +143,33 @@
                           multiple
                           outlined
                         />
+                      </v-col>
+
+                      <v-col v-if="user.industry" cols="12" xl="4">
+                        <v-text-field-validated
+                          v-model="user.industry.profession"
+                          label="Profession (Optional)"
+                          hide-details="auto"
+                          outlined
+                        ></v-text-field-validated>
+                      </v-col>
+
+                      <v-col v-if="user.industry" cols="12" xl="4">
+                        <v-text-field-validated
+                          v-model="user.industry.jobTitle"
+                          label="Job Title (Optional)"
+                          hide-details="auto"
+                          outlined
+                        ></v-text-field-validated>
+                      </v-col>
+
+                      <v-col v-if="user.industry" cols="12" xl="4">
+                        <v-text-field-validated
+                          v-model="user.industry.company"
+                          label="Company or Workplace (Optional)"
+                          hide-details="auto"
+                          outlined
+                        ></v-text-field-validated>
                       </v-col>
                     </v-row>
 
@@ -293,6 +320,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { format } from 'date-fns'
+import { cloneDeep } from 'lodash'
 import { DTOUser } from '../../../store/users'
 import { UpdateUserDto } from '../../../../backend/src/user/dtos/update-user.dto'
 import { shallowDiff } from '../../../utils/utilities'
@@ -307,8 +335,18 @@ import { genders, roles } from '../../../utils/constants'
   async asyncData({ app: { $accessor }, route }) {
     await $accessor.users.getUser(route.params.id)
 
+    const user = cloneDeep($accessor.users.user)!
+
+    if (!user.industry) {
+      user.industry = {
+        profession: '',
+        jobTitle: '',
+        company: '',
+      }
+    }
+
     return {
-      user: { ...$accessor.users.user },
+      user,
     }
   },
 })
@@ -372,6 +410,7 @@ export default class UserPage extends Vue {
       password: user.password,
       roles: user.roles,
       gender: user.gender,
+      industry: user.industry,
     }
 
     // Obtain the differences from the old user and the dto.
@@ -395,7 +434,15 @@ export default class UserPage extends Vue {
   async onReset() {
     await this.$accessor.users.getUser(this.$route.params.id)
 
-    this.user = { ...this.$accessor.users.user } as DTOUser
+    this.user = cloneDeep(this.$accessor.users.user) as DTOUser
+
+    if (!this.user.industry) {
+      this.user.industry = {
+        profession: '',
+        jobTitle: '',
+        company: '',
+      }
+    }
   }
 
   async onSubmit() {

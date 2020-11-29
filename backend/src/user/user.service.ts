@@ -25,6 +25,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
+import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -125,6 +126,10 @@ export class UserService {
 
     if (Object.keys(this.avatars).includes(dto.avatar)) {
       dto.avatar = this.avatars[dto.avatar];
+    }
+
+    if (dto.industry) {
+      dto.industry = classToPlain(dto.industry);
     }
 
     if ('password' in dto) {

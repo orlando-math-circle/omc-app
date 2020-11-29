@@ -42,7 +42,7 @@
             </v-row>
 
             <v-row>
-              <v-col>
+              <v-col class="py-0">
                 <validation-provider
                   ref="birthday"
                   v-slot="{ errors }"
@@ -123,33 +123,35 @@
             </v-text-field-validated>
 
             <v-checkbox-validated
-              v-model="professional"
+              v-model="industry"
               label="Are you an industry professional?"
               hide-details
             ></v-checkbox-validated>
 
             <v-expand-transition>
-              <div v-show="professional">
+              <div v-show="industry" class="mt-3">
                 <v-text-field-validated
+                  v-model="professional.profession"
                   label="Profession (Optional)"
+                  outlined
                 ></v-text-field-validated>
 
                 <v-text-field-validated
+                  v-model="professional.jobTitle"
                   label="Job Title (Optional)"
+                  outlined
                 ></v-text-field-validated>
 
                 <v-text-field-validated
+                  v-model="professional.company"
                   label="Company or Workplace (Optional)"
+                  outlined
                 ></v-text-field-validated>
               </div>
             </v-expand-transition>
 
             <v-checkbox
-              label="Receive emails about upcoming events"
-              hide-details
-            ></v-checkbox>
-
-            <v-checkbox
+              v-model="notifyDefault"
               label="Receive emails reminding me of registered events"
               hide-details
             ></v-checkbox>
@@ -175,11 +177,13 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Ref, Watch } from 'nuxt-property-decorator'
+import { Vue, Component } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
 import { Gender } from '../../backend/src/user/enums/gender.enum'
 import { StateStatus } from '../interfaces/state.interface'
-import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.dto'
+import { genders } from '../utils/constants'
+import { ReminderFreq } from '../../backend/src/user/enums/reminder-freq.enum'
+import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.dto'
 
 @Component({
   layout: 'landing',
@@ -192,40 +196,16 @@ import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.d
   },
 })
 export default class RegisterPage extends Vue {
-  @Ref('birthday') readonly birthday!: typeof ValidationProvider
+  genders = genders
+  passwordConfirm = ''
+  notifyDefault = true
 
-  student = false
-
-  genders = [
-    { text: 'Female', value: 'female' },
-    { text: 'Male', value: 'male' },
-  ]
-
-  educationLevels = {
-    'Middle School': [
-      { text: '6th Grade', value: 6 },
-      { text: '7th Grade', value: 7 },
-      { text: '8th Grade', value: 8 },
-    ],
-    'High School': [
-      { text: '9th Grade', value: 9 },
-      { text: '10th Grade', value: 10 },
-      { text: '11th Grade', value: 11 },
-      { text: '12th Grade', value: 12 },
-    ],
-    College: [
-      { text: 'Undergraduate', value: 'Undergrad' },
-      { text: 'Postgraduate', value: 'Postgrad' },
-    ],
+  industry = false
+  professional = {
+    profession: '' as string | null,
+    jobTitle: '' as string | null,
+    company: '' as string | null,
   }
-
-  agreements = {
-    release: false,
-  }
-
-  education: keyof this['educationLevels'] = 'Middle School'
-
-  professional = false
 
   dto = {
     first: '',
@@ -237,8 +217,6 @@ export default class RegisterPage extends Vue {
     grade: 0,
   }
 
-  passwordConfirm = ''
-
   get error() {
     return this.$accessor.auth.isErrored && this.$accessor.auth.error!
   }
@@ -248,13 +226,15 @@ export default class RegisterPage extends Vue {
     this.$accessor.auth.setStatus(StateStatus.WAITING)
   }
 
-  @Watch('dto.dob')
-  onBirthdayChange() {
-    console.log(this.birthday)
-  }
-
   async onSubmit() {
-    await this.$accessor.auth.register(this.dto as CreateAccountDto)
+    await this.$accessor.auth.register(
+      Object.assign(
+        {},
+        this.dto,
+        this.notifyDefault && { reminders: [ReminderFreq.HOUR] },
+        this.industry && { industry: this.professional }
+      ) as CreateAccountDto
+    )
 
     if (this.error) return
 
