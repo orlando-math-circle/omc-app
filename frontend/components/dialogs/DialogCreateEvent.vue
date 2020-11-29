@@ -161,9 +161,9 @@
 
               <v-col cols="12">
                 <v-select
-                  v-model="meta.permissions.sexes"
-                  :items="sexes"
-                  label="Sex"
+                  v-model="meta.permissions.genders"
+                  :items="genders"
+                  label="Gender"
                   outlined
                   multiple
                   hide-details="auto"
@@ -486,18 +486,19 @@ import { Vue, Component, Prop, Ref } from 'nuxt-property-decorator'
 import { addDays, format, isBefore, isSameDay, parse, parseISO } from 'date-fns'
 import { Options } from 'rrule'
 import { Grade } from '../../../backend/src/user/enums/grade.enum'
-import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { Project } from '../../../backend/src/project/project.entity'
 import { EventTimeThreshold } from '../../../backend/src/event/enums/event-time-threshold.enum'
 import RecurrenceDialog from '../events/RecurrenceDialog.vue'
 import { Uploads } from '../../interfaces/uploads.interface'
 import { FeeType } from '../../../backend/src/event/enums/fee-type.enum'
+import { Gender } from '../../../backend/src/user/enums/gender.enum'
 import DialogForm from './DialogForm.vue'
 import { gradeGroups, contiguousGradeRanges, grades } from '~/utils/events'
 import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
 import { Course } from '~/../backend/src/course/course.entity'
 import Calendar from '~/components/Calendar.vue'
+import { genders } from '~/utils/constants'
 
 export type RRuleOptions = Partial<Options>
 
@@ -542,10 +543,7 @@ export default class DialogCreateEvent extends Vue {
     times: [] as string[],
   }
 
-  sexes = [
-    { text: 'Male', value: 'male' },
-    { text: 'Female', value: 'female' },
-  ]
+  genders = genders
 
   rrule = null as EventRecurrenceDto | null
 
@@ -595,7 +593,7 @@ export default class DialogCreateEvent extends Vue {
         Grade.ELEVENTH,
         Grade.TWELFTH,
       ],
-      sexes: [Sex.MALE, Sex.FEMALE],
+      genders: [Gender.MALE, Gender.FEMALE],
     },
   }
 

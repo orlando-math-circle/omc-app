@@ -103,9 +103,9 @@
 
                       <v-col col="12" xl="4">
                         <v-select-validated
-                          v-model="user.sex"
-                          :items="sexes"
-                          label="Sex"
+                          v-model="user.gender"
+                          :items="genders"
+                          label="Gender"
                           rules="required"
                           outlined
                           hide-details="auto"
@@ -116,6 +116,7 @@
                         <v-select-validated
                           v-model="user.grade"
                           :items="grades"
+                          label="Grade"
                           rules="required"
                           hide-details="auto"
                           outlined
@@ -282,11 +283,10 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { format } from 'date-fns'
 import { DTOUser } from '../../../store/users'
-import { Sex } from '../../../../backend/src/user/enums/sex.enum'
 import { UpdateUserDto } from '../../../../backend/src/user/dtos/update-user.dto'
 import { shallowDiff } from '../../../utils/utilities'
 import { grades } from '../../../utils/events'
-import { Roles } from '../../../../backend/src/app.roles'
+import { genders, roles } from '../../../utils/constants'
 
 @Component({
   layout: 'admin',
@@ -306,6 +306,8 @@ export default class UserPage extends Vue {
   showPassword = false
   password = ''
   grades = grades
+  genders = genders
+  roles = roles
   panel = [0]
 
   breadcrumbs = [
@@ -320,16 +322,6 @@ export default class UserPage extends Vue {
     {
       text: 'Edit User',
     },
-  ]
-
-  sexes = [
-    { text: 'Male', value: Sex.MALE },
-    { text: 'Female', value: Sex.FEMALE },
-  ]
-
-  roles = [
-    { text: 'Administrator', value: Roles.ADMIN },
-    { text: 'Volunteer', value: Roles.VOLUNTEER },
   ]
 
   formatDate(date: string, formatString: string) {
@@ -367,7 +359,7 @@ export default class UserPage extends Vue {
       locked: user.locked,
       password: user.password,
       roles: user.roles,
-      sex: user.sex,
+      gender: user.gender,
     }
 
     // Obtain the differences from the old user and the dto.

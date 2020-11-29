@@ -280,10 +280,10 @@
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
 import { contiguousGradeRanges, gradeGroups } from '../../utils/events'
 import { User } from '../../../backend/src/user/user.entity'
-import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { EventRegistrationStatus } from '../../../backend/src/event-registration/dtos/event-registration-status.dto'
 import { EventRegistration } from '../../../backend/src/event-registration/event-registration.entity'
 import DialogConfirm from '../../components/dialogs/DialogConfirm.vue'
+import { Gender } from '../../../backend/src/user/enums/gender.enum'
 import { grades } from '~/utils/events'
 import { formatDate } from '~/utils/utilities'
 
@@ -379,7 +379,7 @@ export default class EventPage extends Vue {
   get perms() {
     if (!this.event.permissions) return
 
-    const { sexes, grades } = this.event.permissions
+    const { genders, grades } = this.event.permissions
 
     let title: string | null = null
     let subtitle: string | null = null
@@ -393,8 +393,8 @@ export default class EventPage extends Vue {
     }
 
     // If both male and female are selected, don't show anything.
-    if (sexes?.length === 1) {
-      const str = sexes[0] === Sex.MALE ? 'Boys Only' : 'Girls Only'
+    if (genders?.length === 1) {
+      const str = genders[0] === Gender.MALE ? 'Boys Only' : 'Girls Only'
 
       subtitle = str
     } else {

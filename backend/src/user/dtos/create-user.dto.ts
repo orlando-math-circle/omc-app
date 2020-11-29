@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Gender } from '../enums/gender.enum';
 import { Grade } from '../enums/grade.enum';
 import { ReminderFreq } from '../enums/reminder-freq.enum';
-import { Sex } from '../enums/sex.enum';
 
 export class CreateUserDto {
   @IsString()
@@ -15,8 +15,8 @@ export class CreateUserDto {
   @IsEnum(Grade)
   readonly grade?: Grade;
 
-  @IsEnum(Sex)
-  readonly sex!: Sex;
+  @IsEnum(Gender)
+  readonly gender!: Gender;
 
   @IsOptional()
   @IsString()

@@ -236,9 +236,9 @@ export class Event extends BaseEntity<Event, 'id'> {
   public hasPermission(user: User) {
     if (!this.permissions) return true;
 
-    const { grades, sexes } = this.permissions;
+    const { grades, genders } = this.permissions;
 
-    if (!sexes?.includes(user.sex)) return false;
+    if (!genders?.includes(user.gender)) return false;
 
     if (!grades?.includes(user.grade)) return false;
 

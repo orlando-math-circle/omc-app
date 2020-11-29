@@ -72,10 +72,10 @@
             </v-row>
 
             <v-select-validated
-              v-model="dto.sex"
+              v-model="dto.gender"
               :items="genders"
               rules="required"
-              label="Sex"
+              label="Gender"
               outlined
             >
               <template #append-outer>
@@ -177,7 +177,7 @@
 <script lang="ts">
 import { Vue, Component, Ref, Watch } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { Sex } from '../../backend/src/user/enums/sex.enum'
+import { Gender } from '../../backend/src/user/enums/gender.enum'
 import { StateStatus } from '../interfaces/state.interface'
 import { CreateAccountDto } from '~/../backend/src/account/dtos/create-account.dto'
 
@@ -231,7 +231,7 @@ export default class RegisterPage extends Vue {
     first: '',
     last: '',
     password: '',
-    sex: null as Sex | null,
+    gender: null as Gender | null,
     dob: null as Date | null,
     email: '',
     grade: 0,

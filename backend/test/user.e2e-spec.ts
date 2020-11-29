@@ -15,8 +15,8 @@ import { EmailModule } from '../src/email/email.module';
 import { FileModule } from '../src/file/file.module';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
 import { UpdateUserDto } from '../src/user/dtos/update-user.dto';
+import { Gender } from '../src/user/enums/gender.enum';
 import { Grade } from '../src/user/enums/grade.enum';
-import { Sex } from '../src/user/enums/sex.enum';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
@@ -35,7 +35,7 @@ describe('Users', () => {
     first: 'Jane',
     last: 'Doe',
     grade: Grade.GRADUATED,
-    sex: Sex.FEMALE,
+    gender: Gender.FEMALE,
     email: 'jane@doe.com',
     password: 'apple',
     dob: new Date(Date.UTC(1995, 0, 1)),
@@ -44,7 +44,7 @@ describe('Users', () => {
   const secondAccountDto: CreateAccountDto = {
     first: 'Jack',
     last: 'Doe',
-    sex: Sex.FEMALE,
+    gender: Gender.FEMALE,
     grade: Grade.GRADUATED,
     email: 'jack@doe.com',
     password: 'banana',
@@ -123,7 +123,7 @@ describe('Users', () => {
       const dto: CreateUserDto = {
         first: 'First',
         last: 'Last',
-        sex: Sex.MALE,
+        gender: Gender.MALE,
         dob: new Date(Date.UTC(1995, 0, 1)),
       };
 

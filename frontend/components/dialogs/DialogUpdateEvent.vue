@@ -156,9 +156,9 @@
 
               <v-col cols="12">
                 <v-select
-                  v-model="meta.permissions.sexes"
-                  :items="sexes"
-                  label="Sex"
+                  v-model="meta.permissions.genders"
+                  :items="genders"
+                  label="Gender"
                   outlined
                   multiple
                   hide-details="auto"
@@ -505,7 +505,6 @@ import { DTOEvent } from '../../store/events'
 import { FeeType } from '../../../backend/src/event/enums/fee-type.enum'
 import { EventTimeThreshold } from '../../../backend/src/event/enums/event-time-threshold.enum'
 import { Grade } from '../../../backend/src/user/enums/grade.enum'
-import { Sex } from '../../../backend/src/user/enums/sex.enum'
 import { contiguousGradeRanges, gradeGroups, grades } from '../../utils/events'
 import {
   AddFile,
@@ -516,9 +515,11 @@ import { UpdateEventDto } from '../../../backend/src/event/dto/update-event.dto'
 import { RRuleOptions } from '../../interfaces/events/event-recurrence.interface'
 import { Project } from '../../../backend/src/project/project.entity'
 import { Course } from '../../../backend/src/course/course.entity'
+import { Gender } from '../../../backend/src/user/enums/gender.enum'
 import { EventRecurrenceDto } from '../../../backend/src/event/dto/event-recurrence.dto'
 import { File as FileEntity } from '../../../backend/src/file/file.entity'
 import { CreateEventFeeDto } from '../../../backend/src/event-fee/dto/create-event-fee.dto'
+import { genders } from '../../utils/constants'
 import DialogUpdateEventType from './DialogUpdateEventType.vue'
 import DialogForm from './DialogForm.vue'
 import { DTO } from '~/interfaces/date-to-string.interface'
@@ -531,6 +532,7 @@ export default class DialogUpdateEvent extends Vue {
 
   internalData: DTOEvent | null = null
   grades = grades
+  genders = genders
   colorMenu = false
   success = false
 
@@ -557,11 +559,6 @@ export default class DialogUpdateEvent extends Vue {
     },
     times: [] as string[],
   }
-
-  sexes = [
-    { text: 'Male', value: 'male' },
-    { text: 'Female', value: 'female' },
-  ]
 
   timeThresholds = [
     { text: 'Never', value: EventTimeThreshold.NEVER },
@@ -612,7 +609,7 @@ export default class DialogUpdateEvent extends Vue {
         Grade.ELEVENTH,
         Grade.TWELFTH,
       ],
-      sexes: [Sex.MALE, Sex.FEMALE],
+      genders: [Gender.MALE, Gender.FEMALE],
     },
   }
 
@@ -839,7 +836,7 @@ export default class DialogUpdateEvent extends Vue {
     this.meta.lateThreshold = this.intEvent.lateThreshold
     this.meta.lateOffset = this.intEvent.lateOffset
     this.meta.permissions.grades = this.intEvent.permissions?.grades || []
-    this.meta.permissions.sexes = this.intEvent.permissions?.sexes || []
+    this.meta.permissions.genders = this.intEvent.permissions?.genders || []
     this.meta.project = this.intEvent.project?.id || null
     this.meta.course = this.intEvent.course?.id || null
     this.meta.picture = this.intEvent.picture

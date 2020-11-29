@@ -62,9 +62,9 @@
       </v-expand-transition>
 
       <v-select-validated
-        v-model="dto.sex"
-        label="Sex"
-        :items="sexes"
+        v-model="dto.gender"
+        label="Gender"
+        :items="genders"
         outlined
       ></v-select-validated>
 
@@ -159,10 +159,10 @@
 <script lang="ts">
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
 import { CreateUserDto } from '../../../backend/src/user/dtos/create-user.dto'
+import { Gender } from '../../../backend/src/user/enums/gender.enum'
 import { Grade } from '../../../backend/src/user/enums/grade.enum'
 import { ReminderFreq } from '../../../backend/src/user/enums/reminder-freq.enum'
-import { Sex } from '../../../backend/src/user/enums/sex.enum'
-import { education, reminders, sexes } from '../../utils/constants'
+import { education, genders, reminders } from '../../utils/constants'
 import { grades } from '../../utils/events'
 import DialogForm from './DialogForm.vue'
 
@@ -171,7 +171,7 @@ export default class DialogUserCreate extends Vue {
   @Ref('dialog') readonly dialog!: DialogForm
 
   success = false
-  sexes = sexes
+  genders = genders
   grades = grades
   education = education
   reminders = reminders
@@ -182,7 +182,7 @@ export default class DialogUserCreate extends Vue {
     last: '',
     dob: '',
     email: '' as string | null,
-    sex: Sex.MALE,
+    gender: Gender.MALE,
     grade: null as Grade | null,
     reminders: [] as ReminderFreq[],
   }
@@ -226,7 +226,7 @@ export default class DialogUserCreate extends Vue {
         first: this.dto.first,
         last: this.dto.last,
         dob: this.dto.dob,
-        sex: this.dto.sex,
+        gender: this.dto.gender,
         reminders: this.dto.reminders,
       },
       this.dto.email?.length && { email: this.dto.email },

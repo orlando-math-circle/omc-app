@@ -8,9 +8,9 @@ import {
   IsString,
 } from 'class-validator';
 import { Roles } from '../../app.roles';
+import { Gender } from '../enums/gender.enum';
 import { Grade } from '../enums/grade.enum';
 import { ReminderFreq } from '../enums/reminder-freq.enum';
-import { Sex } from '../enums/sex.enum';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -39,6 +39,10 @@ export class UpdateUserDto {
   email?: string;
 
   @IsOptional()
+  @IsString()
+  omcEmail?: string;
+
+  @IsOptional()
   @IsBoolean()
   locked?: boolean;
 
@@ -56,8 +60,8 @@ export class UpdateUserDto {
   roles?: Roles[];
 
   @IsOptional()
-  @IsEnum(Sex)
-  sex?: Sex;
+  @IsEnum(Gender)
+  gender?: Gender;
 
   @IsOptional()
   @IsArray()

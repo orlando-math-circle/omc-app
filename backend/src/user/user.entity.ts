@@ -15,9 +15,9 @@ import { EventRegistration } from '../event-registration/event-registration.enti
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { Invoice } from '../invoice/invoice.entity';
+import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';
-import { Sex } from './enums/sex.enum';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -33,11 +33,14 @@ export class User extends BaseEntity<User, 'id'> {
   @Property()
   dob!: Date;
 
-  @Enum(() => Sex)
-  sex!: Sex;
+  @Enum(() => Gender)
+  gender!: Gender;
 
   @Property({ nullable: true, unique: true })
   email?: string;
+
+  @Property({ nullable: true })
+  omcEmail?: string;
 
   @Property({ nullable: true })
   emailVerified?: boolean;

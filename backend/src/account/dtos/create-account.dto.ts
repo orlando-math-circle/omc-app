@@ -1,6 +1,6 @@
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Gender } from '../../user/enums/gender.enum';
 import { Grade } from '../../user/enums/grade.enum';
-import { Sex } from '../../user/enums/sex.enum';
 
 export class CreateAccountDto {
   @IsString()
@@ -16,8 +16,8 @@ export class CreateAccountDto {
   @IsOptional()
   readonly grade?: Grade;
 
-  @IsEnum(Sex)
-  readonly sex!: Sex;
+  @IsEnum(Gender)
+  readonly gender!: Gender;
 
   @IsString()
   readonly password!: string;

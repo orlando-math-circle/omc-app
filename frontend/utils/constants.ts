@@ -1,3 +1,5 @@
+import { Roles } from '../../backend/src/app.roles'
+import { Gender } from '../../backend/src/user/enums/gender.enum'
 import { Grade } from '../../backend/src/user/enums/grade.enum'
 import { ReminderFreq } from '../../backend/src/user/enums/reminder-freq.enum'
 
@@ -26,12 +28,14 @@ export const weekdays = [
   'Saturday',
 ]
 
-export const sexes = Object.freeze([
-  {
-    text: 'Female',
-    value: 'female',
-  },
-  { text: 'Male', value: 'male' },
+export const genders = Object.freeze([
+  { text: 'Male', value: Gender.MALE },
+  { text: 'Female', value: Gender.FEMALE },
+])
+
+export const roles = Object.freeze([
+  { text: 'Administrator', value: Roles.ADMIN },
+  { text: 'Volunteer', value: Roles.VOLUNTEER },
 ])
 
 export const education = Object.freeze({

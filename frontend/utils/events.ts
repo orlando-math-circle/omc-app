@@ -16,6 +16,8 @@ export const grades = Object.freeze([
   { text: '11th Grade', short: '11th', value: Grade.ELEVENTH },
   { text: '12th Grade', short: '12th', value: Grade.TWELFTH },
   { text: 'Graduated', short: 'G', value: Grade.GRADUATED },
+  { text: 'Undergraduate', short: 'UG', value: Grade.UNDERGRADUATE },
+  { text: 'Postgraduate', short: 'PG', value: Grade.POSTGRADUATE },
 ])
 
 export const contiguousGradeRanges = (grades: Grade[]) => {

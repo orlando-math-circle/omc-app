@@ -18,7 +18,7 @@
               {{ usr.name }}
             </v-list-item-title>
             <v-list-item-subtitle>
-              <span>{{ sex(usr) }}</span>
+              <span>{{ gender(usr) }}</span>
               <span v-if="typeof usr.grade === 'number'">
                 <v-icon x-small>mdi-circle-medium</v-icon>
                 {{ grades[usr.grade].text }}
@@ -135,7 +135,7 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { User } from '../../../backend/src/user/user.entity'
 import { grades } from '../../utils/events'
-import { sexes } from '../../utils/constants'
+import { genders } from '../../utils/constants'
 import DialogUserEdit from '~/components/dialogs/DialogUserEdit.vue'
 import DialogConfirm from '~/components/dialogs/DialogConfirm.vue'
 
@@ -152,7 +152,7 @@ export default class AccountSettingsPage extends Vue {
   }
 
   grades = grades
-  sexes = sexes
+  genders = genders
 
   get user() {
     return this.$accessor.auth.user!
@@ -166,8 +166,8 @@ export default class AccountSettingsPage extends Vue {
     return this.$accessor.auth.account?.primaryUser
   }
 
-  sex(user: User) {
-    return this.sexes.find((sex) => sex.value === user.sex)?.text
+  gender(user: User) {
+    return this.genders.find((gender) => gender.value === user.gender)?.text
   }
 
   async onDeleteConfirm(user: User) {

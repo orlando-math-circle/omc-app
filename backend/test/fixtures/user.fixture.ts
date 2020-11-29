@@ -5,8 +5,8 @@ import { isNumber } from 'lodash';
 import request from 'supertest';
 import { CreateAccountDto } from '../../src/account/dtos/create-account.dto';
 import { Roles } from '../../src/app.roles';
+import { Gender } from '../../src/user/enums/gender.enum';
 import { Grade } from '../../src/user/enums/grade.enum';
-import { Sex } from '../../src/user/enums/sex.enum';
 import { User } from '../../src/user/user.entity';
 
 export class UserFixtures {
@@ -45,7 +45,7 @@ export class UserFixtures {
       last,
       email: email || `${first}@${last}.com`.toLowerCase(),
       dob,
-      sex: Sex.FEMALE,
+      gender: Gender.FEMALE,
       password: 'apple',
       grade: grade || undefined,
     };
