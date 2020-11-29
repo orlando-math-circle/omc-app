@@ -93,8 +93,12 @@ export default class DialogSelectAvatar extends Vue {
     if (this.upload && this.file) {
       const url = (await this.$accessor.files.filesToURL(this.file)) as string
 
-      if (this.$accessor.files.error) {
-        console.error(this.$accessor.files.error)
+      if (this.$accessor.files.isErrored) {
+        this.$accessor.snackbar.show({
+          text: this.$accessor.files.error!.message,
+          timeout: 7000,
+        })
+        return
       }
 
       await this.$accessor.users.update({
