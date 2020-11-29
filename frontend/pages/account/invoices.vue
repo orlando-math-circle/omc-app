@@ -1,7 +1,9 @@
 <template>
-  <v-card>
+  <v-card :loading="$fetchState.pending">
     <v-card-title>Payment History</v-card-title>
-    <v-card-subtitle>Recent transactions</v-card-subtitle>
+    <v-card-subtitle>
+      View a list of the transactions made on your account.
+    </v-card-subtitle>
 
     <v-card-text v-if="invoices.length === 0">
       <v-alert type="info">No invoices found</v-alert>
@@ -24,6 +26,23 @@
               {{ format(invoice.purchasedAt, 'EEEE, MMMM do, yyyy') }}
             </v-list-item-subtitle>
           </v-list-item-content>
+
+          <v-list-item-action v-if="invoice.event">
+            <v-tooltip>
+              <template #activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  :to="'/events/' + invoice.event"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi-open-in-new</v-icon>
+                </v-btn>
+              </template>
+
+              <span>View Event</span>
+            </v-tooltip>
+          </v-list-item-action>
         </v-list-item>
 
         <v-divider
@@ -59,7 +78,7 @@ export default class AccountInvoicesPage extends Vue {
   }
 
   async fetch() {
-    await this.$accessor.invoices.findByEvent
+    await this.$accessor.invoices.findByAccount()
   }
 }
 </script>
