@@ -59,7 +59,7 @@ export const mutations = mutationTree(state, {
   setComplete(state, complete: boolean) {
     state.complete = complete
   },
-  setUser(state, user: User) {
+  setUser(state, user: User | null) {
     state.user = user
   },
   setAccount(state, account: Account) {
@@ -123,6 +123,7 @@ export const actions = actionTree(
           await this.$axios.$post('/logout')
         }
 
+        commit('setUser', null)
         commit('setToken', null)
         this.app.$accessor.auth.setCookie({ name: COOKIE_JWT, value: null })
         this.app.$accessor.auth.setCookie({
