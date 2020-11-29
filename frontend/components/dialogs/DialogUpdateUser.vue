@@ -55,6 +55,15 @@
                 required
                 outlined
               ></v-text-field-validated>
+
+              <v-select-validated
+                v-model="dto.gender"
+                :items="genders"
+                label="Gender"
+                rules="required"
+                outlined
+                hide-details="auto"
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -69,16 +78,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { genders } from '../../utils/constants'
 
 @Component
 export default class DialogUpdateUser extends Vue {
   dialog = false
+  genders = genders
 
   dto = {
     first: '',
     last: '',
     email: '',
     dob: null as string | null,
+    gender: null,
   }
 
   onSubmit() {

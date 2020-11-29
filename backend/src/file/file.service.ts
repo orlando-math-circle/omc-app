@@ -8,7 +8,6 @@ import rimraf from 'rimraf';
 import { promisify } from 'util';
 import { FILE_DIRECTORY } from '../app.constants';
 import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
 import { File } from './file.entity';
 import { MulterFile } from './interfaces/multer-file.interface';
 

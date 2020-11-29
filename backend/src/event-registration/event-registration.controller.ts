@@ -84,7 +84,7 @@ export class EventRegistrationController {
     return this.registrationService.createOrder(id, account, users);
   }
 
-  // @UserAuth('event-registration', 'create:own')
+  @UserAuth('event-registration', 'create:own')
   @Post('/order/capture/:eventId/:invoiceId')
   captureOrder(@Param() { eventId, invoiceId }: FindEventWithInvoiceDto) {
     return this.registrationService.captureOrder(invoiceId, eventId);

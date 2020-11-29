@@ -133,6 +133,22 @@ export const actions = actionTree(
         commit('setError', error)
       }
     },
+    async deleteAttachment({ commit, state }, id: number | string) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$delete('/attachment/' + id)
+
+        const numId = typeof id === 'string' ? +id : id
+        commit(
+          'setAttachments',
+          state.attachments.filter((a) => a.id !== numId)
+        )
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
     async findAllFields({ commit }) {
       try {
         commit('setStatus', StateStatus.BUSY)

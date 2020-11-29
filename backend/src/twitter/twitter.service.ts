@@ -1,4 +1,4 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import { HttpService, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import FormData from 'form-data';
 
@@ -6,6 +6,7 @@ const OMC_HANDLE = 'orlandomathcir';
 
 @Injectable()
 export class TwitterService {
+  private readonly logger = new Logger(TwitterService.name);
   private token: string;
 
   constructor(
@@ -47,7 +48,7 @@ export class TwitterService {
         .toPromise();
       this.token = resp.data.access_token;
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
     }
   }
 }

@@ -5,6 +5,7 @@ import {
   DEFAULT_EVENT_PICTURE,
   FILE_DIRECTORY,
   FORM_SUBDIRECTORY,
+  FRONTEND_URL,
   PAYPAL_CLIENT_ID,
   PAYPAL_SANDBOXED,
   PAYPAL_SECRET_KEY,
@@ -16,6 +17,7 @@ import {
 const configSchema = Joi.object({
   SECRET: Joi.string().required(),
   USE_RRULE_CACHE: Joi.boolean().default(false),
+  [FRONTEND_URL]: Joi.string().default('http://localhost:8080'),
   [ADMIN_EMAIL]: Joi.string(),
   [PAYPAL_SANDBOXED]: Joi.boolean().default(true),
   [PAYPAL_CLIENT_ID]: Joi.string().required(),

@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -7,6 +8,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { AccessService } from '../auth/access.service';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
 import { FileInterceptor } from '../file-fields/interceptors/file.interceptor';
@@ -16,7 +18,10 @@ import { FileAttachmentService } from './file-attachment.service';
 
 @Controller('attachment')
 export class FileAttachmentController {
-  constructor(private readonly attachmentService: FileAttachmentService) {}
+  constructor(
+    private readonly attachmentService: FileAttachmentService,
+    private readonly as: AccessService,
+  ) {}
 
   @UserAuth('file-attachment', 'create:own')
   @Post(':name')
@@ -52,5 +57,15 @@ export class FileAttachmentController {
   @Get('user/:id')
   findByUser(@Param('id') id: number) {
     return this.attachmentService.findAll({ user: { id } }, ['file']);
+  }
+
+  @UserAuth('file-attachment', 'delete:own')
+  @Delete(':id')
+  delete(@Param('id') id: number, @Usr() user: User) {
+    if (this.as.can(user, 'delete:any', 'file-attachment')) {
+      return this.attachmentService.delete(id);
+    }
+
+    return this.attachmentService.delete(id, user);
   }
 }

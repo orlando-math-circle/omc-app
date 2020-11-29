@@ -1,9 +1,14 @@
 import { EntityRepository, FilterQuery, Populate } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { FILE_DIRECTORY } from '../app.constants';
 import { FileFieldService } from '../file-fields/file-field.service';
 import { File } from '../file/file.entity';
-import { FileService } from '../file/file.service';
 import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { User } from '../user/user.entity';
 import { FileAttachment } from './file-attachment.entity';
@@ -14,7 +19,7 @@ export class FileAttachmentService {
     @InjectRepository(FileAttachment)
     private readonly attachmentRepository: EntityRepository<FileAttachment>,
     private readonly fileFieldService: FileFieldService,
-    private readonly fileService: FileService,
+    private readonly config: ConfigService,
   ) {}
 
   async create(field: string, multerFile: MulterFile, user: User) {
@@ -22,10 +27,14 @@ export class FileAttachmentService {
       field: await this.fileFieldService.findOneOrFail({
         name: field,
       }),
-      file: new File(multerFile, user),
       user,
     });
 
+    attachment.file = new File(multerFile, user);
+    attachment.file.root = multerFile.path.replace(
+      this.config.get(FILE_DIRECTORY),
+      '',
+    );
     attachment.user.populated();
     attachment.file.populated();
 
@@ -46,5 +55,18 @@ export class FileAttachmentService {
     populate?: P,
   ) {
     return this.attachmentRepository.find(where, { populate });
+  }
+
+  async delete(where: FilterQuery<FileAttachment>, scanUser?: User) {
+    const attachment = await this.attachmentRepository.findOneOrFail(where, [
+      'user',
+      'file',
+    ]);
+
+    if (scanUser && attachment.user.id !== scanUser.id) {
+      throw new ForbiddenException();
+    }
+
+    await this.attachmentRepository.remove(attachment).flush();
   }
 }

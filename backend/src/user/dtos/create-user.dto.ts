@@ -36,7 +36,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsArray()
-  @IsEnum(() => ReminderFreq, { each: true })
+  @IsEnum(ReminderFreq, { each: true })
   readonly reminders?: ReminderFreq[];
 
   @IsOptional()

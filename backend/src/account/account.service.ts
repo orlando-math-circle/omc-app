@@ -9,7 +9,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
-import { ADMIN_EMAIL, BCRYPT_ROUNDS } from '../app.constants';
+import { ADMIN_EMAIL, BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
 import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
@@ -54,9 +54,6 @@ export class AccountService {
 
     user.assign(createAccountDto);
     user.password = await bcrypt.hash(user.password, BCRYPT_ROUNDS);
-
-    console.log(user.industry);
-
     account.primaryUser = user;
     account.users.add(user);
 
@@ -75,9 +72,13 @@ export class AccountService {
 
     this.emailService.email(
       { to: user.email },
-      'Email Verification',
-      `Please visit click <a href="http://localhost:8000/verify?token=${token}">here</a> or copy the following link to verify your email address.<br/>
-      <a href="http://localhost:8000/verify?token=${token}">http://localhost:8000/verify?token=${token}</a>`,
+      'OMC: Email Verification',
+      undefined,
+      'd-f182620740c14eaf9f20e9203a77568a',
+      {
+        name: user.name,
+        url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
+      },
     );
 
     return this.authService.login(account, user);
