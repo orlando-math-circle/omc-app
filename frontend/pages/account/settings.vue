@@ -87,52 +87,24 @@
     <v-card>
       <v-card-title>Notifications</v-card-title>
 
-      <v-card-subtitle
-        >Change the frequency and type of notification emails.</v-card-subtitle
-      >
+      <v-card-subtitle>
+        Change the frequency or disable reminder emails for registered events.
+      </v-card-subtitle>
 
-      <v-list class="mx-3">
-        <v-list-item-group>
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title>Upcoming Events</v-list-item-title>
-              <v-list-item-subtitle
-                >Newsletter-style emails.</v-list-item-subtitle
-              >
-            </v-list-item-content>
-
-            <v-list-item-action>
-              <v-checkbox :value="false"></v-checkbox>
-            </v-list-item-action>
-          </v-list-item>
-
-          <v-divider />
-
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title>
-                <v-select
-                  label="Reminders"
-                  :items="[
-                    '1 Day Before',
-                    '1 Week Before',
-                    '1 Hour Before',
-                    '15 Minutes Before',
-                  ]"
-                  chips
-                  hide-details
-                >
-                </v-select>
-              </v-list-item-title>
-              <v-list-item-subtitle>Notification emails.</v-list-item-subtitle>
-            </v-list-item-content>
-
-            <v-list-item-action>
-              <v-checkbox :value="false"></v-checkbox>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
+      <v-card-text>
+        <v-select
+          :value="user.reminders"
+          :items="reminders"
+          label="Reminders"
+          multiple
+          chips
+          clearable
+          hide-details
+          outlined
+          @input="onChangeReminders"
+        >
+        </v-select>
+      </v-card-text>
     </v-card>
 
     <dialog-confirm ref="deleteDialog" @confirm="onDeleteConfirm">
@@ -147,7 +119,8 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { User } from '../../../backend/src/user/user.entity'
 import { grades } from '../../utils/events'
-import { genders } from '../../utils/constants'
+import { genders, reminders } from '../../utils/constants'
+import { ReminderFreq } from '../../../backend/src/user/enums/reminder-freq.enum'
 import DialogUserEdit from '~/components/dialogs/DialogUserEdit.vue'
 import DialogConfirm from '~/components/dialogs/DialogConfirm.vue'
 
@@ -165,6 +138,31 @@ export default class AccountSettingsPage extends Vue {
 
   grades = grades
   genders = genders
+  reminders = reminders
+
+  emails = {
+    reminders: [] as ReminderFreq[],
+  }
+
+  async onChangeReminders(reminders: ReminderFreq[]) {
+    await this.$accessor.users.updateOwn({
+      id: this.user.id,
+      updateOwnUserDto: { reminders },
+    })
+
+    if (this.$accessor.users.isErrored) {
+      this.$accessor.snackbar.show({
+        text: this.$accessor.users.error!.message,
+        timeout: 10000,
+      })
+    } else {
+      await this.$accessor.auth.getMe()
+
+      this.$accessor.snackbar.show({
+        text: 'Successfully Updated',
+      })
+    }
+  }
 
   get user() {
     return this.$accessor.auth.user!

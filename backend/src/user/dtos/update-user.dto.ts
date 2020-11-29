@@ -65,6 +65,6 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsArray()
-  @IsEnum(() => ReminderFreq, { each: true })
+  @IsEnum(ReminderFreq, { each: true })
   reminders?: ReminderFreq[];
 }
