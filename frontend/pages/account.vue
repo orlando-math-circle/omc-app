@@ -1,53 +1,39 @@
 <template>
   <div>
-    <template v-if="user == null || account == null">
-      <v-row>
-        <v-col>
-          <v-alert border="left" elevation="2" type="warning">
-            There was an issue retrieving your account information. If reloading
-            the page does not solve the problem, please contact an
-            administrator.
-          </v-alert>
-        </v-col>
-      </v-row>
-    </template>
+    <v-row>
+      <v-col>
+        <v-card class="avatar--offset">
+          <avatar-picker :url="$avatar(user)" />
 
-    <template v-else>
-      <v-row>
-        <v-col>
-          <v-card class="avatar--offset">
-            <avatar-picker :url="$avatar(user)" />
+          <div class="d-flex flex-row">
+            <v-spacer />
 
-            <div class="d-flex flex-row">
-              <v-spacer />
+            <dialog-select-avatar
+              v-slot="{ on, attrs }"
+              :user="user"
+              @update:avatar="onUpdateAvatar"
+            >
+              <v-btn text class="ma-2" v-bind="attrs" v-on="on">
+                Edit Avatar
+              </v-btn>
+            </dialog-select-avatar>
+          </div>
 
-              <dialog-select-avatar
-                v-slot="{ on, attrs }"
-                :user="user"
-                @update:avatar="onUpdateAvatar"
-              >
-                <v-btn text class="ma-2" v-bind="attrs" v-on="on">
-                  Edit Avatar
-                </v-btn>
-              </dialog-select-avatar>
-            </div>
+          <div class="d-flex flex-column align-center justify-center my-3">
+            <div class="text-h4 user--name">{{ user.name }}</div>
+            <div v-if="role" class="text-h5 user--role">{{ role }}</div>
+          </div>
 
-            <div class="d-flex flex-column align-center justify-center my-3">
-              <div class="text-h4 user--name">{{ user.name }}</div>
-              <div v-if="role" class="text-h5 user--role">{{ role }}</div>
-            </div>
+          <v-tabs show-arrows centered grow>
+            <v-tab to="/account/settings">Settings</v-tab>
+            <v-tab to="/account/invoices">Invoices</v-tab>
+            <v-tab to="/account/forms">Forms</v-tab>
+          </v-tabs>
+        </v-card>
+      </v-col>
+    </v-row>
 
-            <v-tabs show-arrows centered grow>
-              <v-tab to="/account/settings">Settings</v-tab>
-              <v-tab to="/account/invoices">Invoices</v-tab>
-              <v-tab to="/account/forms">Forms</v-tab>
-            </v-tabs>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <nuxt-child></nuxt-child>
-    </template>
+    <nuxt-child></nuxt-child>
   </div>
 </template>
 
@@ -59,14 +45,20 @@ import { Roles } from '../../backend/src/app.roles'
   head: {
     title: 'Account',
   },
+  async fetch({ app: { $accessor } }) {
+    await Promise.all([
+      $accessor.auth.getAccount(),
+      $accessor.files.findMyAttachments('REDUCED_LUNCH_FIELD'),
+    ])
+  },
 })
 export default class AccountPage extends Vue {
   get user() {
-    return this.$accessor.auth.user
+    return this.$accessor.auth.user!
   }
 
   get account() {
-    return this.$accessor.auth.account
+    return this.$accessor.auth.account!
   }
 
   get role() {
@@ -81,13 +73,6 @@ export default class AccountPage extends Vue {
 
   onUpdateAvatar() {
     this.$accessor.auth.getMe()
-  }
-
-  async fetch() {
-    await Promise.all([
-      this.$accessor.auth.getAccount(),
-      this.$accessor.files.findMyAttachments('REDUCED_LUNCH_FIELD'),
-    ])
   }
 }
 </script>

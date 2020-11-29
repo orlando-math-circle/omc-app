@@ -15,10 +15,11 @@ import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
-import { BCRYPT_ROUNDS } from '../app.constants';
+import { BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 import {
   AuthPayload,
   ResetPayload,
@@ -50,6 +51,13 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Upon successful authentication, this method wwill send the JWT and
+   * if the token is complete or not to the user.
+   *
+   * @param account Account
+   * @param user User
+   */
   async login(account: Account, user: User) {
     const payload =
       account.users.length > 1 ? { aid: account.id } : { uid: user.id };
@@ -63,6 +71,12 @@ export class AuthService {
     };
   }
 
+  /**
+   * Forceful logout method that scrambles a hash used only
+   * for invalidating an account's JWT.
+   *
+   * @param account Account
+   */
   async logout(account: Account) {
     await this.accountService.update(account, {
       logoutHash: crypto.randomBytes(10).toString('hex'),
@@ -195,22 +209,62 @@ export class AuthService {
   }
 
   /**
-   * Creates a password reset link for valid emails, otherwise does nothing.
-   * The response should always be the same to prevent user fishing.
+   * Emails a user a new verification token.
    *
-   * @param email email address for sending the password reset link
+   * @param user User needing verified
    */
-  public async forgotPassword(email: string) {
-    const user = await this.userService.findOne({ email });
+  public async resendVerifyEmail(user: User) {
+    if (!user.email) {
+      throw new BadRequestException(
+        "Cannot verify an email that doesn't exist",
+      );
+    }
 
-    if (!user) return;
+    if (user.emailVerified) {
+      throw new GoneException('You are already verified');
+    }
 
-    const token = this.signJWT(
-      { uid: user.id },
-      `${user.password}${this.config.get('SECRET')}`,
+    const token = this.signJWT({ email: user.email }, null, {
+      expiresIn: '2 days',
+    });
+
+    this.emailService.email(
+      { to: user.email },
+      'OMC: Email Verification',
+      undefined,
+      'd-f182620740c14eaf9f20e9203a77568a',
+      {
+        name: user.name,
+        url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
+      },
+    );
+  }
+
+  /**
+   * Changes the account password if supplied the previous one.
+   *
+   * @param changePasswordDto Query information
+   * @param account account password to change
+   */
+  public async changePassword(
+    { curPassword, newPassword }: ChangePasswordDto,
+    account: Account,
+  ) {
+    const isMatch = await bcrypt.compare(
+      curPassword,
+      account.primaryUser.password,
     );
 
-    this.emailService.email({ to: user.email }, 'Forgot Password', token);
+    if (!isMatch) {
+      throw new BadRequestException('Password incorrect');
+    }
+
+    account.primaryUser.password = await bcrypt.hash(
+      newPassword,
+      BCRYPT_ROUNDS,
+    );
+
+    await this.em.flush();
   }
 
   /**
@@ -243,12 +297,40 @@ export class AuthService {
   }
 
   /**
+   * Creates a password reset link for valid emails, otherwise does nothing.
+   * The response should always be the same to prevent user fishing.
+   *
+   * @param email email address for sending the password reset link
+   */
+  public async forgotPassword(email: string) {
+    const user = await this.userService.findOne({ email });
+
+    if (!user) return;
+
+    const token = this.signJWT(
+      { uid: user.id },
+      `${user.password}${this.config.get('SECRET')}`,
+    );
+
+    this.emailService.email(
+      { to: user.email },
+      'OMC: Password Reset',
+      undefined,
+      'd-58bb9c551bee49dabbd026a675c27fdf',
+      {
+        name: user.name,
+        url: `${this.config.get(FRONTEND_URL)}/forgot?token=${token}`,
+      },
+    );
+  }
+
+  /**
    * Changes the password of a user using a valid reset token.
    *
    * @param token token for resetting the user's password
    * @param password new password the user wants
    */
-  public async resetUserPassword(token: string, password: string) {
+  public async resetPassword(token: string, password: string) {
     const user = await this.getValidResetTokenUser(token);
 
     user.password = await bcrypt.hash(password, BCRYPT_ROUNDS);

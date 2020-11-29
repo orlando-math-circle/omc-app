@@ -96,7 +96,7 @@
           >
             Thank you for registering! Please click the link in the verification
             email to confirm your account so you may register to events.
-            <a href="#">Resend the verification email</a>.<br /><br />
+            <a @click="resend">Resend the verification email</a>.<br /><br />
             In the meantime you may
             <nuxt-link to="/account/settings"
               >add users to your account</nuxt-link
@@ -175,6 +175,22 @@ export default class DefaultLayout extends Vue {
     if (this.$accessor.auth.user) return
 
     await this.$store.dispatch('auth/getMe')
+  }
+
+  async resend() {
+    await this.$accessor.auth.resendVerifyEmail()
+
+    if (this.$accessor.auth.isErrored) {
+      this.$accessor.snackbar.show({
+        text: this.$accessor.auth.error!.message,
+        timeout: 10000,
+      })
+    } else {
+      this.$accessor.snackbar.show({
+        text:
+          'Verification Email Resent. You may change your email on the account page if you entered it incorrectly',
+      })
+    }
   }
 
   logout() {

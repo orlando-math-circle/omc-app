@@ -84,7 +84,7 @@
       </v-card-actions>
     </v-card>
 
-    <v-card>
+    <v-card class="mb-4">
       <v-card-title>Notifications</v-card-title>
 
       <v-card-subtitle>
@@ -105,6 +105,64 @@
         >
         </v-select>
       </v-card-text>
+    </v-card>
+
+    <v-card class="mb-4">
+      <v-card-title>Change Password</v-card-title>
+
+      <v-card-subtitle>Change the password on the account.</v-card-subtitle>
+
+      <v-form-validated @submit:form="onChangePassword">
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field-validated
+                v-model="passwords.curPassword"
+                label="Original Password"
+                type="password"
+                rules="required"
+                autocomplete="current-password"
+                outlined
+                hide-details="auto"
+              ></v-text-field-validated>
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field-validated
+                v-model="passwords.newPassword"
+                label="New Password"
+                type="password"
+                rules="required"
+                autocomplete="new-password"
+                vid="password"
+                outlined
+                hide-details="auto"
+              ></v-text-field-validated>
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field-validated
+                v-model="passwords.confirm"
+                label="Confirm New Password"
+                type="password"
+                autocomplete="new-password"
+                rules="required|password:@password"
+                outlined
+                hide-details="auto"
+              ></v-text-field-validated>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn
+            :loading="$accessor.users.isLoading"
+            color="primary"
+            type="submit"
+            >Change Password
+          </v-btn>
+        </v-card-actions>
+      </v-form-validated>
     </v-card>
 
     <dialog-confirm ref="deleteDialog" @confirm="onDeleteConfirm">
@@ -142,6 +200,42 @@ export default class AccountSettingsPage extends Vue {
 
   emails = {
     reminders: [] as ReminderFreq[],
+  }
+
+  passwords = {
+    confirm: '',
+    curPassword: '',
+    newPassword: '',
+  }
+
+  async onChangePassword() {
+    await this.$accessor.auth.changePassword({
+      curPassword: this.passwords.curPassword,
+      newPassword: this.passwords.newPassword,
+    })
+
+    if (this.$accessor.auth.isErrored) {
+      if (this.$accessor.auth.error?.status === 400) {
+        return this.$accessor.snackbar.show({
+          text: 'Current password is incorrect',
+          timeout: 10000,
+        })
+      }
+      return this.$accessor.snackbar.show({
+        text: this.$accessor.users.error!.message,
+        timeout: 10000,
+      })
+    }
+
+    await this.$accessor.auth.getMe()
+
+    this.passwords.confirm = ''
+    this.passwords.curPassword = ''
+    this.passwords.newPassword = ''
+
+    this.$accessor.snackbar.show({
+      text: 'Successfully Updated',
+    })
   }
 
   async onChangeReminders(reminders: ReminderFreq[]) {

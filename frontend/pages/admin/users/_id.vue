@@ -172,23 +172,6 @@
                         ></v-text-field-validated>
                       </v-col>
                     </v-row>
-
-                    <v-row no-gutters>
-                      <v-col>
-                        <v-checkbox
-                          v-model="user.emailVerified"
-                          class="ma-0"
-                          label="Email Verified"
-                          hide-details
-                        ></v-checkbox>
-                      </v-col>
-
-                      <v-slide-x-transition>
-                        <v-col v-if="!user.emailVerified">
-                          <v-btn>Send Verification Email</v-btn>
-                        </v-col>
-                      </v-slide-x-transition>
-                    </v-row>
                   </v-col>
                 </v-row>
               </v-form-validated>
@@ -226,6 +209,21 @@
               <v-expansion-panel-header>Actions</v-expansion-panel-header>
 
               <v-expansion-panel-content>
+                <div class="my-2">
+                  <div class="title">Verify User Email</div>
+                  <div class="subtitle mb-2">
+                    Bypasses normal verification requirements for a user.
+                  </div>
+
+                  <v-checkbox
+                    v-model="user.emailVerified"
+                    class="ma-0"
+                    label="Email Verified"
+                    hide-details
+                    @change="onVerify"
+                  ></v-checkbox>
+                </div>
+
                 <div class="my-2">
                   <div class="title">Reset User Password</div>
                   <div class="subtitle mb-2">
@@ -428,6 +426,24 @@ export default class UserPage extends Vue {
     this.$accessor.snackbar.show({
       text: 'User password changed',
       timeout: 2000,
+    })
+  }
+
+  async onVerify(value: boolean) {
+    await this.$accessor.users.update({
+      id: this.user!.id,
+      updateUserDto: { emailVerified: value },
+    })
+
+    if (this.$accessor.users.isErrored) {
+      return this.$accessor.snackbar.show({
+        text: this.$accessor.users.error!.message,
+        timeout: 10000,
+      })
+    }
+
+    this.$accessor.snackbar.show({
+      text: `User ${value ? 'Verified' : 'Unverified'}`,
     })
   }
 

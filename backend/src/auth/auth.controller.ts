@@ -5,8 +5,9 @@ import { FindUserDto } from '../user/dtos/find-user.dto';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
 import { Acc } from './decorators/account.decorator';
-import { AccountAuth } from './decorators/auth.decorator';
+import { AccountAuth, UserAuth } from './decorators/auth.decorator';
 import { Usr } from './decorators/user.decorator';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { VerifyTokenDto } from './dtos/verify-token.dto';
@@ -33,9 +34,10 @@ export class AuthController {
     return this.authService.switchUser(account, id);
   }
 
-  @Post('forgot')
-  forgotPassword(@Body() { email }: ForgotPasswordDto) {
-    return this.authService.forgotPassword(email);
+  @UserAuth()
+  @Post('/verify/resend')
+  async verifyEmailResend(@Usr() user: User) {
+    return this.authService.resendVerifyEmail(user);
   }
 
   @Post('/verify/email')
@@ -48,8 +50,22 @@ export class AuthController {
     await this.authService.getValidResetTokenUser(token);
   }
 
-  @Post('reset')
+  @UserAuth()
+  @Post('/password/change')
+  async changePassword(
+    @Acc() account: Account,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(changePasswordDto, account);
+  }
+
+  @Post('/password/forgot')
+  forgotPassword(@Body() { email }: ForgotPasswordDto) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('/password/reset')
   resetPassword(@Body() { token, password }: ResetPasswordDto) {
-    return this.authService.resetUserPassword(token, password);
+    return this.authService.resetPassword(token, password);
   }
 }

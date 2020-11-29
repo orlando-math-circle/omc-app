@@ -48,7 +48,7 @@ export class EmailScheduler {
         const user = registration.user;
 
         // User doesn't want, or can't receive emails.
-        if (!user.reminders || !user.email) continue;
+        if (!user.reminders || !user.email || !user.emailVerified) continue;
 
         // User didn't want this type of notification.
         if (!user.reminders.includes(freq)) continue;

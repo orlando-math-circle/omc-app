@@ -2,6 +2,8 @@ import { AxiosError } from 'axios'
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { Account } from '../../backend/src/account/account.entity'
 import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.dto'
+import { ChangePasswordDto } from '../../backend/src/auth/dtos/change-password.dto'
+import { ResetPasswordDto } from '../../backend/src/auth/dtos/reset-password.dto'
 import { Roles } from '../../backend/src/app.roles'
 import { User } from '../../backend/src/user/user.entity'
 import { StateError } from '../interfaces/state-error.interface'
@@ -205,6 +207,67 @@ export const actions = actionTree(
         commit('setStatus', StateStatus.BUSY)
 
         await this.$axios.$post('/verify/email', { token })
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async resendVerifyEmail({ commit }): Promise<void> {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$post('/verify/resend')
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async changePassword(
+      { commit },
+      changePasswordDto: ChangePasswordDto
+    ): Promise<void> {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$post('/password/change', changePasswordDto)
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async forgotPassword({ commit }, email: string): Promise<void> {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$post('/password/forgot', { email })
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async verifyResetPassword({ commit }, token: string): Promise<void> {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$post('/verify/reset', { token })
+
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async resetPassword(
+      { commit },
+      resetPasswordDto: ResetPasswordDto
+    ): Promise<void> {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$post('/password/reset', resetPasswordDto)
 
         commit('setStatus', StateStatus.WAITING)
       } catch (error) {
