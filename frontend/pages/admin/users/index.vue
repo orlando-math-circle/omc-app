@@ -128,9 +128,9 @@
                 :color="getRoleColor(role)"
                 label
                 dark
-                class="font-weight-bold"
+                class="font-weight-bold mr-2"
               >
-                {{ role.toUpperCase() }}
+                {{ role.charAt(0).toUpperCase() }}
               </v-chip>
             </template>
 
