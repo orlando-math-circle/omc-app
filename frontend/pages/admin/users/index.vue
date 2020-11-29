@@ -114,7 +114,11 @@
             </template>
 
             <template #[`item.grade`]="{ item }">
-              {{ grades[item.grade].text }}
+              {{
+                typeof item.grade !== 'number'
+                  ? grades[item.grade].text
+                  : 'No Grade'
+              }}
             </template>
 
             <template #[`item.roles`]="{ item }">
