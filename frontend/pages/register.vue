@@ -214,7 +214,6 @@ export default class RegisterPage extends Vue {
     gender: null as Gender | null,
     dob: null as Date | null,
     email: '',
-    grade: 0,
   }
 
   get error() {
