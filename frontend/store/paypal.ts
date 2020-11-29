@@ -1,4 +1,4 @@
-import { actionTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { Invoice } from '../../backend/src/invoice/invoice.entity'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
@@ -7,6 +7,11 @@ import { parseAxiosError } from '../utils/utilities'
 export const state = () => ({
   status: StateStatus.UNLOADED,
   error: null as StateError | null,
+})
+
+export const getters = getterTree(state, {
+  isLoading: (state) => state.status === StateStatus.BUSY,
+  isErrored: (state) => state.status === StateStatus.ERROR,
 })
 
 export const mutations = mutationTree(state, {
@@ -26,21 +31,43 @@ export const mutations = mutationTree(state, {
 export const actions = actionTree(
   { state },
   {
-    create(
-      _actionTree,
+    async create(
+      { commit },
       { eventId, users }: { eventId: number; users: number[] }
     ) {
-      return this.$axios.$post(`/registration/order/create/${eventId}`, {
-        users,
-      })
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const resp = await this.$axios.$post(
+          `/registration/order/create/${eventId}`,
+          {
+            users,
+          }
+        )
+
+        commit('setStatus', StateStatus.WAITING)
+
+        return resp
+      } catch (error) {
+        commit('setError', error)
+      }
     },
-    capture(
-      _actionTree,
+    async capture(
+      { commit },
       { eventId, orderId }: { eventId: number; orderId: number }
     ) {
-      return this.$axios.$post<Invoice[]>(
-        `/registration/order/capture/${eventId}/${orderId}`
-      )
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const resp = await this.$axios.$post<Invoice[]>(
+          `/registration/order/capture/${eventId}/${orderId}`
+        )
+        commit('setStatus', StateStatus.WAITING)
+
+        return resp
+      } catch (error) {
+        commit('setError', error)
+      }
     },
   }
 )

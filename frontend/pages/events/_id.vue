@@ -115,7 +115,7 @@
                   <v-list-item-title>{{ status.user.name }}</v-list-item-title>
 
                   <v-list-item-subtitle v-if="!status.eligible">
-                    Ineligible
+                    Not Eligible
                   </v-list-item-subtitle>
 
                   <v-list-item-subtitle v-else-if="status.user.grade">
@@ -237,7 +237,7 @@
           </v-stepper-content>
 
           <v-stepper-content class="pa-0" step="2">
-            <v-card>
+            <v-card :loading="$accessor.paypal.isLoading">
               <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
               <v-card-text>

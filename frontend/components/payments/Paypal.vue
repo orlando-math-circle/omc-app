@@ -1,12 +1,5 @@
 <template>
-  <div>
-    <div v-if="loading">
-      <v-progress-circular indeterminate />
-    </div>
-    <div v-if="!completed" ref="buttons"></div>
-
-    <v-alert v-else type="success"> Payment successfully completed. </v-alert>
-  </div>
+  <div ref="buttons"></div>
 </template>
 
 <script lang="ts">
@@ -20,13 +13,15 @@ export default class PayPal extends Vue {
   @Prop() readonly users!: number[]
 
   loaded = false
-  loading = false
   completed = false
 
   onLoad() {
     this.loaded = true
     paypal
       .Buttons({
+        style: {
+          size: 'responsive',
+        },
         createOrder: async () => {
           const order = await this.$accessor.paypal.create({
             eventId: this.event,
@@ -35,14 +30,19 @@ export default class PayPal extends Vue {
 
           return order.id
         },
-        onApprove: async (data: any) => {
-          this.loading = true
+        onApprove: async (data: any, actions: { restart: () => void }) => {
           const invoices = await this.$accessor.paypal.capture({
             eventId: this.event,
             orderId: data.orderID,
           })
 
-          this.loading = false
+          if (this.$accessor.paypal.isErrored) {
+            console.log(this.$accessor.paypal.error)
+
+            actions.restart()
+            return
+          }
+
           this.completed = true
           this.$emit('payment:complete', invoices)
         },
