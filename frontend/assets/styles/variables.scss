@@ -20,7 +20,11 @@ $material-light: (
   // 'app-bar': #44d9e6,
   'app-bar': #ffffff,
   'background': #f2f5f8,
-  'primary-text-percent': 1
+  'primary-text-percent': 1,
+  'text': (
+    'link': #ff4299,
+    'link-hover': darken(#ff4299, 10%),
+  )
 );
 
 // Dark Theme
@@ -40,4 +44,8 @@ $material-dark: (
     'body': $dark-component-background,
   ),
   'bg-color': $dark-component-background,
+  'text': (
+    'link': #ff4299,
+    'link-hover': darken(#ff4299, 10%),
+  ),
 );

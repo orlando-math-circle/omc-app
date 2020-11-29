@@ -1,17 +1,18 @@
 <template>
   <v-app dark class="wave">
     <v-navigation-drawer v-model="drawer" fixed temporary app>
-      <v-list>
+      <v-list nav dense>
         <v-list-item
           v-for="(item, i) in items"
           :key="i"
           :to="item.to"
-          router
+          link
           exact
         >
-          <v-list-item-action>
+          <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
+          </v-list-item-icon>
+
           <v-list-item-content>
             <v-list-item-title v-text="item.title" />
           </v-list-item-content>
@@ -90,16 +91,16 @@
             v-if="user && user.email && !user.emailVerified"
             type="info"
             elevation="2"
+            color="#4f84fb"
+            dismissible
           >
             Thank you for registering! Please click the link in the verification
-            email to confirm your account.
+            email to confirm your account so you may register to events.
             <a href="#">Resend the verification email</a>.<br /><br />
-            You will need to confirm your email address before you'll be able to
-            register to events. In the meantime you may
+            In the meantime you may
             <nuxt-link to="/account/settings"
               >add users to your account</nuxt-link
-            >
-            and register manually in person at events.
+            >.
           </v-alert>
           <nuxt />
         </div>
