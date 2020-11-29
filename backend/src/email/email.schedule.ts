@@ -29,7 +29,6 @@ export class EmailScheduler {
     return roundToNearestMinutes(new Date(), { nearestTo: 15 });
   }
 
-  @Timeout(5000)
   @Cron('*/15 * * * *')
   @UseRequestContext()
   public async sendEmailReminders() {

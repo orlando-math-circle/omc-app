@@ -1,7 +1,7 @@
 import { MikroORM } from '@mikro-orm/core';
 import { UseRequestContext } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, Timeout } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { differenceInYears } from 'date-fns';
 import { Grade } from './enums/grade.enum';
 import { User } from './user.entity';
@@ -12,8 +12,7 @@ export class UserScheduler {
 
   constructor(private readonly orm: MikroORM) {}
 
-  @Timeout(10000)
-  // Every weekday at 08:00
+  // Every weekday at 8:00 AM
   @Cron('0 8 * * 1-5')
   @UseRequestContext()
   private async updateGradeLevels() {
