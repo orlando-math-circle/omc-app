@@ -26,7 +26,6 @@ export const state = () => ({
   token: null as string | null,
   complete: false,
   remember: true,
-  justRegistered: false,
 })
 
 export const getters = getterTree(state, {
@@ -70,9 +69,6 @@ export const mutations = mutationTree(state, {
   },
   setRemember(state, remember: boolean) {
     state.remember = remember
-  },
-  setJustRegistered(state, value: boolean) {
-    state.justRegistered = value
   },
 })
 
@@ -175,7 +171,6 @@ export const actions = actionTree(
           value: complete,
         })
 
-        commit('setJustRegistered', true)
         commit('setStatus', StateStatus.WAITING)
       } catch (error) {
         commit('setError', error)

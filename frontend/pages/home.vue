@@ -91,16 +91,6 @@ export default class HomePage extends Vue {
   format(date: string) {
     return formatDate(date, 'MMMM do, yyyy')
   }
-
-  mounted() {
-    if (this.$accessor.auth.justRegistered) {
-      this.$accessor.snackbar.show({
-        text: 'Thank you for registering!',
-        timeout: 5000,
-      })
-      this.$accessor.auth.setJustRegistered(false)
-    }
-  }
 }
 </script>
 
