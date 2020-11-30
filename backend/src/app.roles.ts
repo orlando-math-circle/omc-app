@@ -73,6 +73,7 @@ ac.grant(Roles.DEFAULT)
   .deleteAny('volunteer-work')
   .createAny('volunteer-job')
   .updateAny('volunteer-job')
-  .deleteAny('volunteer-job');
+  .deleteAny('volunteer-job')
+  .createAny('email');
 
 export default ac;

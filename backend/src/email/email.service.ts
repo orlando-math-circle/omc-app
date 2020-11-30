@@ -1,16 +1,41 @@
+import { User } from './../user/user.entity';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PersonalizationData } from '@sendgrid/helpers/classes/personalization';
 import SendGrid from '@sendgrid/mail';
 import { SENDGRID_API_KEY, SENDGRID_IN_DEV } from '../app.constants';
+import { EntityManager } from '@mikro-orm/core';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private isSandbox: boolean;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly em: EntityManager,
+  ) {
     this.initSendGrid();
+  }
+
+  /**
+   * Builds a custom email.
+   *
+   * @param userIds
+   * @param subject
+   * @param body
+   * @param from
+   */
+  public async custom(userIds: number[], subject: string, body: string) {
+    const users = await this.em.find(User, {
+      id: userIds,
+    });
+
+    const personalizations = users
+      .filter((u) => !!u.email)
+      .map((u) => ({ to: u.email }));
+
+    return this.email(personalizations, subject, body);
   }
 
   /**

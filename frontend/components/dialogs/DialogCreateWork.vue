@@ -8,7 +8,7 @@
     <template #title>Create Work</template>
 
     <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="attrs" v-on="on"></slot>
+      <slot name="activator" v-bind="{ on, attrs }"></slot>
     </template>
 
     <v-card-text>
@@ -43,6 +43,17 @@
             hide-details="auto"
           />
         </v-col>
+
+        <v-col cols="12">
+          <v-select-validated
+            v-model="dto.status"
+            rules="required"
+            :items="workStatuses"
+            label="Status"
+            outlined
+            hide-details="auto"
+          />
+        </v-col>
       </v-row>
     </v-card-text>
 
@@ -65,6 +76,8 @@
 
 <script lang="ts">
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
+import { VolunteerWorkStatus } from '../../../backend/src/volunteer-work/enums/work-status.enum'
+import { workStatuses } from '../../utils/constants'
 import DialogForm from './DialogForm.vue'
 
 @Component
@@ -72,11 +85,13 @@ export default class DialogCreateWork extends Vue {
   @Ref('dialogEl') readonly dialog!: DialogForm
 
   success = false
+  workStatuses = workStatuses
 
   dto = {
     project: null as null | number,
     user: null as null | number,
     hours: 0,
+    status: VolunteerWorkStatus.APPROVED,
   }
 
   get isLoading() {

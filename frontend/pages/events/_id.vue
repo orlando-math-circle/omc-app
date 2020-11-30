@@ -114,7 +114,15 @@
                 <v-list-item-content>
                   <v-list-item-title>{{ status.user.name }}</v-list-item-title>
 
-                  <v-list-item-subtitle v-if="!status.eligible">
+                  <v-list-item-subtitle
+                    v-if="
+                      status.registration && status.registration.volunteering
+                    "
+                  >
+                    Volunteering
+                  </v-list-item-subtitle>
+
+                  <v-list-item-subtitle v-else-if="!status.eligible">
                     Not Eligible
                   </v-list-item-subtitle>
 
@@ -152,6 +160,11 @@
           <v-stepper-content class="pa-0" step="1">
             <v-card>
               <v-card-title>Registration</v-card-title>
+
+              <v-card-subtitle
+                >Select the account users you wish to register to the
+                event.</v-card-subtitle
+              >
 
               <v-card-text>
                 <v-list rounded>
@@ -259,8 +272,79 @@
       </v-stepper>
     </v-col>
 
-    <!-- Registration -->
-    <v-col cols="12"> </v-col>
+    <v-col v-if="unregisteredVolunteers.length && !isClosed" cols="12">
+      <v-card>
+        <v-card-title>Volunteering</v-card-title>
+
+        <v-card-subtitle
+          >When registering to volunteer, you may also optionally select a job.
+          The list is not exhaustive, and you can submit a volunteer work order
+          on the account page anytime.</v-card-subtitle
+        >
+
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <v-select
+                v-model="volunteer"
+                :items="unregisteredVolunteers"
+                outlined
+                item-value="user.id"
+                label="Select User"
+                hide-details="auto"
+              >
+                <template #selection="data">
+                  <v-chip v-bind="data.attrs">
+                    <v-avatar left>
+                      <v-img :src="$avatar(data.item.user)" />
+                    </v-avatar>
+
+                    {{ data.item.user.name }}
+                  </v-chip>
+                </template>
+
+                <template #item="data">
+                  <v-list-item-avatar>
+                    <v-img :src="$avatar(data.item.user)" />
+                  </v-list-item-avatar>
+
+                  <v-list-item-content>
+                    <v-list-item-title>{{
+                      data.item.user.name
+                    }}</v-list-item-title>
+                    <v-list-item-subtitle>{{
+                      data.item.user.email || 'No email'
+                    }}</v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </v-select>
+            </v-col>
+
+            <v-col cols="12">
+              <v-select
+                v-model="volunteerJob"
+                :items="jobs"
+                label="Job (Optional)"
+                outlined
+                hide-details="auto"
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn
+            :disabled="!volunteer"
+            rounded
+            block
+            color="primary"
+            @click="onVolunteer"
+          >
+            Complete Registration
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-col>
 
     <dialog-confirm ref="cancelDialog" @confirm="onCancelConfirm">
       You may re-register at any time for no charge.
@@ -275,7 +359,9 @@ import { User } from '../../../backend/src/user/user.entity'
 import { EventRegistrationStatus } from '../../../backend/src/event-registration/dtos/event-registration-status.dto'
 import { EventRegistration } from '../../../backend/src/event-registration/event-registration.entity'
 import DialogConfirm from '../../components/dialogs/DialogConfirm.vue'
+import { Roles } from '../../../backend/src/app.roles'
 import { Gender } from '../../../backend/src/user/enums/gender.enum'
+import { VolunteerJob } from '../../../backend/src/volunteer-job/volunteer-job.entity'
 import { grades } from '~/utils/events'
 import { formatDate } from '~/utils/utilities'
 
@@ -300,6 +386,8 @@ export default class EventPage extends Vue {
   @Ref('cancelDialog') readonly cancelDialog!: DialogConfirm
 
   selections: number[] = []
+  volunteer: number | null = null
+  volunteerJob: null | number = null
   step: RegisterStep = RegisterStep.SELECTION
 
   get event() {
@@ -341,6 +429,14 @@ export default class EventPage extends Vue {
     return this.selections.map((s) => this.statuses[s])
   }
 
+  get volunteerUsers() {
+    return this.statuses.filter((u) => u.user.roles.includes(Roles.VOLUNTEER))
+  }
+
+  get unregisteredVolunteers() {
+    return this.volunteerUsers.filter((u) => u.registration === false)
+  }
+
   get fee(): string | undefined {
     if (this.event?.course?.fee) {
       if (this.event.course.isLate) {
@@ -366,6 +462,27 @@ export default class EventPage extends Vue {
 
     const fee = parseFloat(this.fee) || 0
     return fee * this.usersRequiringPayment.length
+  }
+
+  get jobs() {
+    if (!this.event.project || !this.event.project.jobs?.length)
+      return [
+        {
+          text: 'Other...',
+          value: null,
+        },
+      ]
+
+    return [
+      ...((this.event.project.jobs as unknown) as VolunteerJob[]).map((j) => ({
+        text: j.name,
+        value: j.id,
+      })),
+      {
+        text: 'Other...',
+        value: null,
+      },
+    ]
   }
 
   get perms() {
@@ -467,6 +584,23 @@ export default class EventPage extends Vue {
       color: '#66bb6a',
     })
     this.step = RegisterStep.SELECTION
+  }
+
+  async onVolunteer() {
+    await this.$accessor.registrations.volunteer({
+      eventId: +this.$route.params.id,
+      users: [{ userId: this.volunteer!, job: this.volunteerJob || undefined }],
+    })
+
+    if (this.$accessor.registrations.isErrored) {
+      this.$snack(
+        'An error occurred attempting to create a volunteer registration'
+      )
+    } else {
+      await this.$accessor.registrations.getStatuses(this.$route.params.id)
+      this.$snack('Registration Complete!')
+      this.volunteer = null
+    }
   }
 }
 </script>

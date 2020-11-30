@@ -1,9 +1,11 @@
 import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { User } from '../user/user.entity';
 import { Populate } from './../app.utils';
 import { CreateWorkDto } from './dto/create-work.dto';
 import { UpdateWorkDto } from './dto/update-work.dto';
+import { VolunteerWorkStatus } from './enums/work-status.enum';
 import { VolunteerWork } from './volunteer-work.entity';
 
 @Injectable()
@@ -18,8 +20,18 @@ export class VolunteerWorkService {
    *
    * @param createWorkDto Entity data.
    */
-  async create(createWorkDto: CreateWorkDto) {
+  async create(createWorkDto: CreateWorkDto, nonAdmin?: User) {
     const work = this.volunteerWorkRepository.create(createWorkDto);
+
+    if (nonAdmin) {
+      if (!nonAdmin.account.users.contains(nonAdmin)) {
+        throw new BadRequestException();
+      }
+
+      work.status = VolunteerWorkStatus.PENDING;
+    } else {
+      work.status = VolunteerWorkStatus.APPROVED;
+    }
 
     await this.volunteerWorkRepository.persist(work).flush();
 

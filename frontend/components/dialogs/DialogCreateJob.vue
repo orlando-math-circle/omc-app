@@ -107,7 +107,9 @@ export default class DialogCreateJob extends Vue {
 
   async onSubmit() {
     if (this.isStatic) {
-      return this.$emit('create:job', { ...this.dto })
+      this.$emit('create:job', { ...this.dto })
+      this.dialog.close()
+      return
     }
 
     await this.$accessor.volunteers.create({

@@ -41,7 +41,7 @@ export class EventController {
     return this.eventService.findOneOrFail(id, [
       'author',
       'fee',
-      'project',
+      'project.jobs',
       'course.fee',
       'recurrence',
     ]);

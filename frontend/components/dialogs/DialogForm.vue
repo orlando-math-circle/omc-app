@@ -5,6 +5,7 @@
     :max-width="width"
     persistent
     @input="onInput"
+    @click:outside="handler"
   >
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
@@ -12,7 +13,7 @@
       </slot>
     </template>
 
-    <v-card>
+    <v-card @mousedown="setMouseDown">
       <v-toolbar flat>
         <v-toolbar-title>
           <slot name="title"></slot>
@@ -36,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
 @Component
 export default class DialogForm extends Vue {
@@ -45,6 +46,7 @@ export default class DialogForm extends Vue {
 
   dialog = false
   closing = false
+  downInner = false
 
   onInput(value: boolean) {
     this.$emit('dialog:state', value)
@@ -62,6 +64,22 @@ export default class DialogForm extends Vue {
 
   submit() {
     this.$emit('submit:form')
+  }
+
+  @Watch('dialog')
+  watchDialog() {
+    this.downInner = false
+  }
+
+  setMouseDown() {
+    this.downInner = true
+  }
+
+  handler() {
+    if (this.downInner === false) {
+      this.dialog = false
+    }
+    this.downInner = false
   }
 }
 </script>

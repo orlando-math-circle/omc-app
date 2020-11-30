@@ -10,8 +10,8 @@
 
         <v-list dense nav>
           <dialog-create-work :is-static="false" @create:work="onWorkCreate">
-            <template #activator="{ on, attrs }">
-              <v-list-item v-bind="attrs" v-on="on">
+            <template #activator="cw">
+              <v-list-item v-bind="cw.attrs" v-on="cw.on">
                 <v-list-item-icon>
                   <v-icon>mdi-tag-plus</v-icon>
                 </v-list-item-icon>

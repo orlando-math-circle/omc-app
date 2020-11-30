@@ -56,16 +56,26 @@
           <v-card-title>
             <v-menu v-if="selected.length" offset-y>
               <template #activator="{ on, attrs }">
-                <v-btn v-bind="attrs" v-on="on"
+                <v-btn v-bind="attrs" color="primary" v-on="on"
                   >Actions
                   <v-icon>mdi-chevron-down</v-icon>
                 </v-btn>
               </template>
 
-              <v-list>
-                <v-list-item>
-                  <v-list-item-title>Email</v-list-item-title>
-                </v-list-item>
+              <v-list nav dense>
+                <dialog-email :users="selected">
+                  <template #activator="{ on, attrs }">
+                    <v-list-item v-bind="attrs" v-on="on">
+                      <v-list-item-icon>
+                        <v-icon>mdi-email</v-icon>
+                      </v-list-item-icon>
+
+                      <v-list-item-content>
+                        <v-list-item-title>Email</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </template>
+                </dialog-email>
               </v-list>
             </v-menu>
 
@@ -87,73 +97,14 @@
             </v-btn>
           </v-card-title>
 
-          <v-data-table-paginated
+          <data-table-users
             v-model="selected"
-            :headers="headers"
-            :items="$store.state.users.users"
+            :users="$accessor.users.users"
             :search="search"
             :loading="isLoading"
             show-select
-            @refresh="onRefresh"
           >
-            <template #[`item.id`]="{ item }">
-              # <link-copy :text="item.id"></link-copy>
-            </template>
-
-            <template #[`item.email`]="{ item }">
-              <div class="d-flex align-center py-1">
-                <v-avatar size="32px" class="elevation-1">
-                  <v-img :src="$avatar(item)" />
-                </v-avatar>
-
-                <div class="ml-2">
-                  <link-copy v-if="item.email" :text="item.email"></link-copy>
-                  <span v-else>No Email</span>
-                </div>
-              </div>
-            </template>
-
-            <template #[`item.grade`]="{ item }">
-              {{
-                typeof item.grade === 'number'
-                  ? grades[item.grade].text
-                  : 'No Grade'
-              }}
-            </template>
-
-            <template #[`item.roles`]="{ item }">
-              <v-chip
-                v-for="role in item.roles"
-                :key="role"
-                :color="getRoleColor(role)"
-                label
-                dark
-                class="font-weight-bold mr-2"
-              >
-                {{ role.charAt(0).toUpperCase() }}
-              </v-chip>
-            </template>
-
-            <template #[`item.emailVerified`]="{ item }">
-              <v-icon :class="`${item.emailVerified ? 'success--text' : ''}`">
-                {{
-                  item.emailVerified ? 'mdi-check-circle' : 'mdi-circle-outline'
-                }}
-              </v-icon>
-            </template>
-
-            <template #[`item.feeWaived`]="{ item }">
-              <v-icon :class="`${item.feeWaived ? 'success--text' : ''}`">
-                {{ item.feeWaived ? 'mdi-check-circle' : 'mdi-circle-outline' }}
-              </v-icon>
-            </template>
-
-            <template #[`item.edit`]="{ item }">
-              <v-btn icon :to="`/admin/users/${item.id}`">
-                <v-icon>mdi-open-in-new</v-icon>
-              </v-btn>
-            </template>
-          </v-data-table-paginated>
+          </data-table-users>
         </v-card>
       </v-col>
     </v-row>
@@ -188,21 +139,6 @@ export default class AdminUsersPage extends Vue {
     grades: [],
     roles: [],
   }
-
-  headers = [
-    { text: 'ID', value: 'id' },
-    { text: 'Name', value: 'name' },
-    { text: 'Email', value: 'email' },
-    { text: 'Verified', value: 'emailVerified' },
-    { text: 'Grades', value: 'grade' },
-    { text: 'Roles', value: 'roles' },
-    { text: 'Fee Waived', value: 'feeWaived' },
-    {
-      text: 'Edit',
-      value: 'edit',
-      sortable: false,
-    },
-  ]
 
   breadcrumbs = [
     {

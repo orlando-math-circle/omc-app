@@ -2,6 +2,7 @@ import { Roles } from '../../backend/src/app.roles'
 import { Gender } from '../../backend/src/user/enums/gender.enum'
 import { Grade } from '../../backend/src/user/enums/grade.enum'
 import { ReminderFreq } from '../../backend/src/user/enums/reminder-freq.enum'
+import { VolunteerWorkStatus } from '../../backend/src/volunteer-work/enums/work-status.enum'
 
 export const months = [
   'January',
@@ -17,6 +18,12 @@ export const months = [
   'November',
   'December',
 ]
+
+export const workStatuses = Object.freeze([
+  { text: 'Approved', value: VolunteerWorkStatus.APPROVED },
+  { text: 'Pending', value: VolunteerWorkStatus.PENDING },
+  { text: 'Denied', value: VolunteerWorkStatus.DENIED },
+])
 
 export const weekdays = [
   'Sunday',

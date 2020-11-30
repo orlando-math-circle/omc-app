@@ -2,6 +2,7 @@ import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { CreateRegistrationDto } from '../../backend/src/event-registration/dtos/create-registration.dto'
 import { EventRegistrationStatus } from '../../backend/src/event-registration/dtos/event-registration-status.dto'
 import { EventRegistration } from '../../backend/src/event-registration/event-registration.entity'
+import { CreateVolunteerRegistrationDto } from '../../backend/src/event-registration/dtos/create-volunteer-registration.dto'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { parseAxiosError } from '../utils/utilities'
@@ -16,6 +17,7 @@ export const state = () => ({
 
 export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
+  isErrored: (state) => state.status === StateStatus.ERROR,
 })
 
 export const mutations = mutationTree(state, {
@@ -51,6 +53,24 @@ export const actions = actionTree(
         const registration: EventRegistration = await this.$axios.$post(
           '/registration',
           createRegistrationDto
+        )
+
+        commit('setRegistration', registration)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async volunteer(
+      { commit },
+      createVolunteerRegistrationDto: CreateVolunteerRegistrationDto
+    ) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const registration: EventRegistration = await this.$axios.$post(
+          '/registration/volunteer',
+          createVolunteerRegistrationDto
         )
 
         commit('setRegistration', registration)

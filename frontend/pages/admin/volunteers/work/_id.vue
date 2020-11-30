@@ -68,6 +68,18 @@
                     persistent-hint
                   ></v-text-field>
                 </v-col>
+
+                <v-col cols="12">
+                  <v-select-validated
+                    v-model="work.status"
+                    :items="workStatuses"
+                    rules="required"
+                    outlined
+                    hide-details="auto"
+                    label="Work Status"
+                    persistent-hint
+                  ></v-select-validated>
+                </v-col>
               </v-row>
             </v-card-text>
 
@@ -97,6 +109,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { VolunteerWork } from '../../../../../backend/src/volunteer-work/volunteer-work.entity'
 import { UpdateWorkDto } from '../../../../../backend/src/volunteer-work/dto/update-work.dto'
 import { shallowDiff } from '../../../../utils/utilities'
+import { workStatuses } from '../../../../utils/constants'
 
 @Component({
   layout: 'admin',
@@ -115,9 +128,9 @@ import { shallowDiff } from '../../../../utils/utilities'
 })
 export default class VolunteerWorkAdminPage extends Vue {
   work: null | VolunteerWork = null
-
   user: null | number = null
   project: null | number = null
+  workStatuses = workStatuses
 
   breadcrumbs = [
     {

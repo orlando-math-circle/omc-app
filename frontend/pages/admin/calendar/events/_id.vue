@@ -90,6 +90,12 @@
               </v-avatar>
             </div>
           </div>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+
+            <v-btn :to="`/events/${event.id}`">Visit on App</v-btn>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>

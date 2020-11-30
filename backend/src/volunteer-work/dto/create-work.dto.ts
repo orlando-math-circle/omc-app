@@ -1,6 +1,7 @@
-import { IsNumber } from 'class-validator';
+import { IsEnum, IsNumber } from 'class-validator';
 import { Project } from '../../project/project.entity';
 import { User } from '../../user/user.entity';
+import { VolunteerWorkStatus } from './../enums/work-status.enum';
 
 export class CreateWorkDto {
   @IsNumber()
@@ -11,4 +12,7 @@ export class CreateWorkDto {
 
   @IsNumber()
   project?: number | Project;
+
+  @IsEnum(VolunteerWorkStatus)
+  status!: VolunteerWorkStatus;
 }

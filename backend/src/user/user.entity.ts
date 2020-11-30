@@ -1,3 +1,4 @@
+import { VolunteerWork } from './../volunteer-work/volunteer-work.entity';
 import {
   BaseEntity,
   Collection,
@@ -98,6 +99,19 @@ export class User extends BaseEntity<User, 'id'> {
   }
 
   /**
+   * Obtains the cumulative volunteer hours if the work relation is loaded.
+   */
+  @Property({ persist: false })
+  get volunteerHours() {
+    if (!this.work.isInitialized()) return null;
+
+    return this.work
+      .getItems()
+      .map((w) => w.hours)
+      .reduce((a, b) => a + b, 0);
+  }
+
+  /**
    * Relationships
    */
 
@@ -111,6 +125,9 @@ export class User extends BaseEntity<User, 'id'> {
     orphanRemoval: true,
   })
   registrations = new Collection<EventRegistration>(this);
+
+  @OneToMany(() => VolunteerWork, (w) => w.user, { eager: true })
+  work = new Collection<VolunteerWork>(this);
 
   @OneToMany(() => Invoice, (i) => i.user, { eager: false })
   invoices = new Collection<Invoice>(this);

@@ -1,3 +1,5 @@
+import { User } from './../user/user.entity';
+import { AccessService } from './../auth/access.service';
 import {
   Body,
   Controller,
@@ -13,15 +15,24 @@ import { CreateWorkDto } from './dto/create-work.dto';
 import { FindAllWorksDto } from './dto/find-all-works.dto';
 import { UpdateWorkDto } from './dto/update-work.dto';
 import { VolunteerWorkService } from './volunteer-work.service';
+import { Usr } from '../auth/decorators/user.decorator';
+import { expr } from '@mikro-orm/core';
 
 @Controller('volunteer-work')
 export class VolunteerWorkController {
-  constructor(private readonly volunteerWorkService: VolunteerWorkService) {}
+  constructor(
+    private readonly volunteerWorkService: VolunteerWorkService,
+    private readonly as: AccessService,
+  ) {}
 
   @UserAuth('volunteer-work', 'create:own')
   @Post()
-  create(@Body() createWorkDto: CreateWorkDto) {
-    return this.volunteerWorkService.create(createWorkDto);
+  create(@Body() createWorkDto: CreateWorkDto, @Usr() user: User) {
+    if (this.as.can(user, 'create:any', 'volunteer-work')) {
+      return this.volunteerWorkService.create(createWorkDto);
+    } else {
+      return this.volunteerWorkService.create(createWorkDto);
+    }
   }
 
   @UserAuth('volunteer-work', 'read:any')
@@ -34,7 +45,10 @@ export class VolunteerWorkController {
   @Get()
   findAll(@Query() { limit, offset, contains, orderBy }: FindAllWorksDto) {
     return this.volunteerWorkService.findAll(
-      {},
+      Object.assign(
+        {},
+        contains && { [expr('lower(status)')]: { $like: `%${contains}%` } },
+      ),
       // This no work good, big sad, try again later.
       // contains
       //   ? {
