@@ -108,7 +108,7 @@
                 :key="status.user.id"
               >
                 <v-list-item-avatar>
-                  <v-img :src="avatar(status.user)" />
+                  <v-img :src="$avatar(status.user)" />
                 </v-list-item-avatar>
 
                 <v-list-item-content>
@@ -167,7 +167,7 @@
                     >
                       <template #default="{ active }">
                         <v-list-item-avatar>
-                          <v-img :src="avatar(status.user)" />
+                          <v-img :src="$avatar(status.user)" />
                         </v-list-item-avatar>
 
                         <v-list-item-content>
@@ -424,17 +424,6 @@ export default class EventPage extends Vue {
     return !!(this.event?.isClosed || this.event?.course?.isClosed)
   }
 
-  avatar(user: User) {
-    if (!user.avatar)
-      return `${this.$config.staticBase}${this.$config.avatarBase}/${
-        user.id % 10
-      }.png`
-
-    if (user.avatar.startsWith('http')) return user.avatar
-
-    return this.$config.staticBase + user.avatar
-  }
-
   grade(user: User) {
     if (!user.grade) return null
 
@@ -472,6 +461,7 @@ export default class EventPage extends Vue {
 
     await this.$accessor.registrations.getStatuses(this.$route.params.id)
 
+    this.selections = []
     this.$accessor.snackbar.show({
       text: 'Registration Complete',
       color: '#66bb6a',
