@@ -34,10 +34,6 @@ export class VolunteerJob extends BaseEntity<VolunteerJob, 'id'> {
   @Property()
   createdAt: Date = new Date();
 
-  /**
-   * Relationships
-   */
-
   @ManyToOne(() => Project)
   project!: Project;
 }

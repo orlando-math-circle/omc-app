@@ -12,8 +12,10 @@
         <template #activator="tooltip">
           <slot
             name="activator"
-            v-bind="{ ...attrs, ...tooltip.attrs }"
-            v-on="{ ...on, ...tooltip.on }"
+            v-bind="{
+              attrs: { ...attrs, ...tooltip.attrs },
+              on: { ...tooltip.on, ...on },
+            }"
           ></slot>
         </template>
 
@@ -56,11 +58,10 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-btn>Add Job</v-btn>
       <v-spacer />
 
       <v-btn text @click="dialog.close()">Cancel</v-btn>
-      <v-btn text type="submit" :loading="isLoading">
+      <v-btn text type="submit" :loading="isLoading" color="secondary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
             mdi-check

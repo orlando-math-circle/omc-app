@@ -1,5 +1,6 @@
 import {
   BaseEntity,
+  Cascade,
   Collection,
   Entity,
   OneToMany,
@@ -40,6 +41,6 @@ export class Project extends BaseEntity<Project, 'id'> {
   @OneToMany(() => Event, (e) => e.project)
   events = new Collection<Event>(this);
 
-  @OneToMany(() => VolunteerJob, (j) => j.project)
+  @OneToMany(() => VolunteerJob, (j) => j.project, { cascade: [Cascade.ALL] })
   jobs = new Collection<VolunteerJob>(this);
 }

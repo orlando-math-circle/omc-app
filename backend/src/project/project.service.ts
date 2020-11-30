@@ -30,8 +30,8 @@ export class ProjectService {
     return project;
   }
 
-  findOneOrFail(where: FilterQuery<Project>) {
-    return this.projectRepository.findOneOrFail(where);
+  findOneOrFail(where: FilterQuery<Project>, populate?: Populate<Project>) {
+    return this.projectRepository.findOneOrFail(where, populate);
   }
 
   findAll(
@@ -59,5 +59,17 @@ export class ProjectService {
     return project;
   }
 
-  // async delete(id: number, )
+  /**
+   * Deletes a single project
+   *
+   * @param where Query for selecting the project
+   */
+  async delete(where: FilterQuery<Project>) {
+    const project = await this.projectRepository.findOneOrFail(where, [
+      'jobs',
+      'courses',
+    ]);
+
+    await this.projectRepository.remove(project).flush();
+  }
 }

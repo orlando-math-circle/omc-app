@@ -1,7 +1,17 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { CreateJobDto } from './dto/create-job.dto';
 import { FindAllJobsDto } from './dto/find-all-jobs.dto';
+import { UpdateJobDto } from './dto/update-job.dto';
 import { VolunteerJobService } from './volunteer-job.service';
 
 @Controller('volunteer-job')
@@ -12,6 +22,12 @@ export class VolunteerJobController {
   @Post()
   create(@Body() createJobDto: CreateJobDto) {
     return this.volunteerJobService.create(createJobDto);
+  }
+
+  @UserAuth('volunteer-job', 'read:any')
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.volunteerJobService.findOneOrFail(id, ['project']);
   }
 
   @UserAuth('volunteer-job', 'read:any')
@@ -33,5 +49,17 @@ export class VolunteerJobController {
       offset,
       orderBy,
     );
+  }
+
+  @UserAuth('volunteer-job', 'update:any')
+  @Patch(':id')
+  update(@Param('id') id: number, @Body() updateJobDto: UpdateJobDto) {
+    return this.volunteerJobService.update(id, updateJobDto);
+  }
+
+  @UserAuth('volunteer-job', 'delete:any')
+  @Delete(':id')
+  async delete(@Param('id') id: number) {
+    return this.volunteerJobService.delete(id);
   }
 }

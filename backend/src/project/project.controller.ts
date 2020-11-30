@@ -2,6 +2,7 @@ import { FilterQuery } from '@mikro-orm/core';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -28,7 +29,7 @@ export class ProjectController {
 
   @Get(':id')
   findOne(@Param() { id }: FindProjectDto) {
-    return this.projectService.findOneOrFail(id);
+    return this.projectService.findOneOrFail(id, ['jobs', 'events']);
   }
 
   @Get()
@@ -53,5 +54,11 @@ export class ProjectController {
     @Body() updateProjectDto: UpdateProjectDto,
   ) {
     return this.projectService.update(id, updateProjectDto);
+  }
+
+  @UserAuth('project', 'delete:any')
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.projectService.delete(id);
   }
 }

@@ -1,5 +1,6 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { CreateJobDto } from '../../backend/src/volunteer-job/dto/create-job.dto'
+import { UpdateJobDto } from '../../backend/src/volunteer-job/dto/update-job.dto'
 import { FindAllJobsDto } from '../../backend/src/volunteer-job/dto/find-all-jobs.dto'
 import { VolunteerJob } from '../../backend/src/volunteer-job/volunteer-job.entity'
 import { StateError } from '../interfaces/state-error.interface'
@@ -16,6 +17,7 @@ export const state = () => ({
 
 export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
+  isErrored: (state) => state.status === StateStatus.ERROR,
 })
 
 export const mutations = mutationTree(state, {
@@ -58,6 +60,18 @@ export const actions = actionTree(
         commit('setError', error)
       }
     },
+    async findOne({ commit }, id: number | string) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const job = await this.$axios.$get('/volunteer-job/' + id)
+
+        commit('setJob', job)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
     async findAll({ commit }, findAllJobsDto?: FindAllJobsDto) {
       try {
         commit('setStatus', StateStatus.BUSY)
@@ -71,6 +85,35 @@ export const actions = actionTree(
         commit('setStatus', StateStatus.WAITING)
 
         return jobs
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async update(
+      { commit },
+      { id, updateJobDto }: { id: number | string; updateJobDto: UpdateJobDto }
+    ) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const job = await this.$axios.$patch(
+          '/volunteer-job/' + id,
+          updateJobDto
+        )
+
+        commit('setJob', job)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
+    async delete({ commit }, id: number | string) {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        await this.$axios.$delete('/volunteer-job/' + id)
+
+        commit('setStatus', StateStatus.WAITING)
       } catch (error) {
         commit('setError', error)
       }

@@ -12,7 +12,6 @@ export class CreateJobDto {
   @IsNumber()
   hours?: number;
 
-  @IsOptional()
   @IsNumber()
-  project?: number;
+  project: number;
 }
