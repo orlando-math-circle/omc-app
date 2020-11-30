@@ -2,6 +2,7 @@ import {
   EntityData,
   EntityRepository,
   FilterQuery,
+  Populate,
   QueryOrderMap,
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -116,8 +117,11 @@ export class AccountService {
    * Finds an individual account or returns a `404 NotFoundException`
    * @param id id of the account to find
    */
-  async findOneOrFail(id: number) {
-    return this.accountRepository.findOneOrFail(id);
+  async findOneOrFail(
+    where: FilterQuery<Account>,
+    populate?: Populate<Account>,
+  ) {
+    return this.accountRepository.findOneOrFail(where, populate);
   }
 
   /**

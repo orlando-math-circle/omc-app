@@ -1,6 +1,6 @@
 <template>
-  <v-container class="pa-6">
-    <v-row no-gutters class="mb-6">
+  <div>
+    <v-row no-gutters>
       <v-col>
         <v-row>
           <v-col>
@@ -69,7 +69,7 @@
         </v-card>
       </v-col>
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">

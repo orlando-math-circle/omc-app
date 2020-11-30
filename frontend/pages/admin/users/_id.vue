@@ -224,13 +224,13 @@
                   ></v-checkbox>
                 </div>
 
-                <div class="my-2">
-                  <div class="title">Reset User Password</div>
+                <div v-if="account && account.id" class="my-2">
+                  <div class="title">Reset Account Password</div>
                   <div class="subtitle mb-2">
-                    Sends the user an email prompting them to reset their
-                    password.
+                    Sends the primary user on their account an email prompting
+                    them to reset their password.
                   </div>
-                  <v-btn class="mb-2" color="primary">
+                  <v-btn class="mb-2" color="primary" @click="onResetEmail">
                     <v-icon left>mdi-email</v-icon>
                     Send Reset Password Email
                   </v-btn>
@@ -324,6 +324,8 @@ import { UpdateUserDto } from '../../../../backend/src/user/dtos/update-user.dto
 import { shallowDiff } from '../../../utils/utilities'
 import { grades } from '../../../utils/events'
 import { genders, roles } from '../../../utils/constants'
+import { Account } from '../../../../backend/src/account/account.entity'
+import { DTO } from '../../../interfaces/date-to-string.interface'
 
 @Component({
   layout: 'admin',
@@ -331,7 +333,10 @@ import { genders, roles } from '../../../utils/constants'
     title: 'Edit User',
   },
   async asyncData({ app: { $accessor }, route }) {
-    await $accessor.users.getUser(route.params.id)
+    await Promise.all([
+      $accessor.users.getUser(route.params.id),
+      $accessor.auth.getAccountByUser(route.params.id),
+    ])
 
     const user = cloneDeep($accessor.users.user)!
 
@@ -345,11 +350,13 @@ import { genders, roles } from '../../../utils/constants'
 
     return {
       user,
+      account: cloneDeep($accessor.auth.account),
     }
   },
 })
 export default class UserPage extends Vue {
   user: DTOUser | null = null
+  account: DTO<Account> | null = null
   showPassword = false
   password = ''
   grades = grades
@@ -415,6 +422,17 @@ export default class UserPage extends Vue {
     const diff: any = shallowDiff(old, dto)
 
     return diff
+  }
+
+  async onResetEmail() {
+    if (!this.user || !this.user.email) return
+
+    await this.$accessor.auth.forgotPassword(this.user.email)
+
+    this.$accessor.snackbar.show({
+      text: 'Sent',
+      timeout: 2000,
+    })
   }
 
   async changePassword() {

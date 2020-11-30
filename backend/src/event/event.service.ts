@@ -175,12 +175,10 @@ export class EventService {
 
       // If we still don't have a reference, the recurrence somehow has no events.
       if (!reference) {
-        throw new InternalServerErrorException(
-          'Event recurrence lacks any events',
-        );
+        this.recurrenceRepository.remove(recurrence);
+      } else {
+        this.getRecurrenceEvents(recurrence, reference, start, end);
       }
-
-      this.getRecurrenceEvents(recurrence, reference, start, end);
     }
 
     await this.recurrenceRepository.flush();

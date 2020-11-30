@@ -240,7 +240,7 @@ export class Event extends BaseEntity<Event, 'id'> {
 
     if (genders && !genders.includes(user.gender)) return false;
 
-    if (grades && !grades.includes(user.grade)) return false;
+    if (grades && user.grade && !grades.includes(user.grade)) return false;
 
     return true;
   }

@@ -202,6 +202,18 @@ export const actions = actionTree(
         commit('setError', error)
       }
     },
+    async getAccountByUser({ commit }, id: number | string): Promise<void> {
+      try {
+        commit('setStatus', StateStatus.BUSY)
+
+        const account = await this.$axios.$get('/account/user/' + id)
+
+        commit('setAccount', account)
+        commit('setStatus', StateStatus.WAITING)
+      } catch (error) {
+        commit('setError', error)
+      }
+    },
     async verify({ commit }, token: string): Promise<void> {
       try {
         commit('setStatus', StateStatus.BUSY)

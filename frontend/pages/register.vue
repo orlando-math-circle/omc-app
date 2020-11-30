@@ -85,8 +85,8 @@
                   </template>
 
                   <span
-                    >We only collect this information for our girls-only and
-                    boys-only events.</span
+                    >We only collect this information for our focused
+                    events.</span
                   >
                 </v-tooltip>
               </template>

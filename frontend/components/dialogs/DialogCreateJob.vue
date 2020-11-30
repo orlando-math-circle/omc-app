@@ -10,14 +10,11 @@
     <template #activator="{ on, attrs }">
       <v-tooltip bottom>
         <template #activator="tooltip">
-          <v-btn
+          <slot
+            name="activator"
             v-bind="{ ...attrs, ...tooltip.attrs }"
-            large
-            icon
             v-on="{ ...on, ...tooltip.on }"
-          >
-            <v-icon>mdi-folder-plus-outline</v-icon>
-          </v-btn>
+          ></slot>
         </template>
 
         <span>Create Job</span>
@@ -49,7 +46,7 @@
           <v-text-field-validated
             v-model.number="dto.hours"
             type="number"
-            label="Hours"
+            label="Volunteer Hours"
             hint="Hours to award on job completion"
             outlined
             hide-details="auto"
@@ -59,6 +56,7 @@
     </v-card-text>
 
     <v-card-actions>
+      <v-btn>Add Job</v-btn>
       <v-spacer />
 
       <v-btn text @click="dialog.close()">Cancel</v-btn>

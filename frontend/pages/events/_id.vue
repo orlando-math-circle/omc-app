@@ -255,14 +255,6 @@
               </v-card-actions>
             </v-card>
           </v-stepper-content>
-
-          <v-stepper-content class="pa-0" step="3">
-            <v-card>
-              <v-card-title> Confirmation </v-card-title>
-
-              <v-card-text>Confirmation</v-card-text>
-            </v-card>
-          </v-stepper-content>
         </v-stepper-items>
       </v-stepper>
     </v-col>

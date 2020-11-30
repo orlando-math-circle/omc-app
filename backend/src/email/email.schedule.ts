@@ -1,7 +1,7 @@
 import { MikroORM } from '@mikro-orm/core';
 import { UseRequestContext } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, Timeout } from '@nestjs/schedule';
 import { add, format, roundToNearestMinutes } from 'date-fns';
 import { Event } from '../event/event.entity';
 import { ReminderFreq } from '../user/enums/reminder-freq.enum';
@@ -29,6 +29,7 @@ export class EmailScheduler {
     return roundToNearestMinutes(new Date(), { nearestTo: 15 });
   }
 
+  // @Timeout(5000)
   @Cron('*/15 * * * *')
   @UseRequestContext()
   public async sendEmailReminders() {

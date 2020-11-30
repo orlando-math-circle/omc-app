@@ -69,6 +69,10 @@
             <v-col>
               <v-row>
                 <v-col>
+                  <div class="title">Volunteer Jobs</div>
+
+                  <span v-if="!jobs.length">No jobs</span>
+
                   <v-chip-group column>
                     <template v-for="(job, i) in jobs">
                       <v-chip
@@ -80,42 +84,30 @@
                       </v-chip>
                     </template>
                   </v-chip-group>
-
-                  <v-select
-                    v-if="false"
-                    :items="jobs"
-                    label="Jobs"
-                    chips
-                    item-text="name"
-                    return-object
-                    multiple
-                    outlined
-                  >
-                    <template #item="{ item, on, attrs }">
-                      <v-list-item v-attrs="attrs" ripple v-on="on">
-                        <v-list-item-content>
-                          {{ item.name }}
-                        </v-list-item-content>
-
-                        <v-list-item-action>
-                          <v-icon> mdi-close-circle</v-icon>
-                        </v-list-item-action>
-                      </v-list-item>
-                    </template>
-                  </v-select>
                 </v-col>
 
-                <v-col cols="auto" class="align-self-center">
-                  <dialog-create-job @create:job="onCreateJob" />
-                </v-col>
+                <v-col cols="auto" class="align-self-center"> </v-col>
               </v-row>
             </v-col>
           </v-row>
         </v-card-text>
 
         <v-card-actions>
+          <dialog-create-job @create:job="onCreateJob">
+            <template #activator="{ on, attrs }">
+              <v-btn text v-bind="attrs" v-on="on">Create Job</v-btn>
+            </template>
+          </dialog-create-job>
+
           <v-spacer></v-spacer>
-          <v-btn text type="submit" :disabled="!passes" :loading="isLoading">
+
+          <v-btn
+            text
+            type="submit"
+            :disabled="!passes"
+            :loading="isLoading"
+            color="secondary"
+          >
             Create
           </v-btn>
         </v-card-actions>
