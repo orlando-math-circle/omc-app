@@ -63,7 +63,6 @@
                 v-model="dto.grade"
                 :items="grades"
                 label="Grade"
-                rules="required"
                 hide-details="auto"
                 outlined
               ></v-select-validated>
