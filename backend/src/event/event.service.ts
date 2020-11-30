@@ -488,7 +488,10 @@ export class EventService {
    * @param id ID of the event being removed.
    */
   public async deleteSingleEvent(id: number) {
-    const event = await this.eventRepository.findOneOrFail(id, ['recurrence']);
+    const event = await this.eventRepository.findOneOrFail(id, [
+      'recurrence',
+      'registrations',
+    ]);
 
     // If there is a recurrence, we need to add an exclusion.
     if (event.recurrence) {
@@ -510,7 +513,7 @@ export class EventService {
   public async deleteFutureEvents(id: number) {
     const pivot = await this.eventRepository.findOneOrFail(
       id,
-      ['recurrence.events'],
+      ['recurrence.events.registrations', 'registrations'],
       { recurrence: { events: { dtstart: QueryOrder.ASC } } },
     );
     const schedule = pivot.recurrence.getSchedule();
@@ -547,7 +550,7 @@ export class EventService {
    */
   public async deleteAllEvents(id: number) {
     const event = await this.eventRepository.findOneOrFail(id, [
-      'recurrence.events',
+      'recurrence.events.registrations',
     ]);
 
     this.recurrenceRepository.remove(event.recurrence);

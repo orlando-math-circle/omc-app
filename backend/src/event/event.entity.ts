@@ -1,5 +1,6 @@
 import {
   BaseEntity,
+  Cascade,
   Collection,
   Entity,
   Enum,
@@ -95,7 +96,10 @@ export class Event extends BaseEntity<Event, 'id'> {
   @ManyToOne(() => EventRecurrence, { nullable: true })
   recurrence?: EventRecurrence;
 
-  @OneToMany(() => EventRegistration, (r) => r.event)
+  @OneToMany(() => EventRegistration, (r) => r.event, {
+    cascade: [Cascade.ALL],
+    orphanRemoval: true,
+  })
   registrations = new Collection<EventRegistration>(this);
 
   @ManyToOne(() => Course, { nullable: true, eager: true })
