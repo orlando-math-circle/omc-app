@@ -19,6 +19,7 @@ import { SystemModule } from './system/system.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { UserModule } from './user/user.module';
 import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
+import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
     FileAttachmentModule,
     SystemModule,
     VolunteerJobModule,
+    VolunteerWorkModule,
   ],
 })
 export class AppModule {}

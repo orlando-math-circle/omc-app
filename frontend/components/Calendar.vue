@@ -5,7 +5,7 @@
       v-if="internalType === 'simple'"
       v-model="date"
       :events="dates"
-      :event-color="dateToColor"
+      event-color="#ff4299"
       full-width
       no-title
       elevation="2"
@@ -35,6 +35,7 @@
           class="calendar"
           :type="internalType"
           :events="events"
+          :event-color="calendarColor"
           :loading="$store.getters['events/isLoading']"
           :short-weekdays="false"
           @click:event="onClickEvent"
@@ -104,6 +105,22 @@ export default class Calendar extends Vue {
     return `${months[this.today.getMonth()]}, ${this.today.getFullYear()}`
   }
 
+  get colors() {
+    const retval: Record<string, string> = {}
+
+    for (const event of this.events) {
+      Object.assign(retval, {
+        [event.dtstart.substr(0, 10)]: event.color || '#000000',
+      })
+    }
+
+    return retval
+  }
+
+  calendarColor(date: Event) {
+    return date.color || '#000000'
+  }
+
   @Watch('projectFilterIds')
   async onChangeProjectFilterIds() {
     await this.$fetch()
@@ -141,12 +158,6 @@ export default class Calendar extends Vue {
 
   onClickEvent({ event }: { event: Event }) {
     this.$router.push(`${this.clickRedirectBase}/${event.id}`)
-  }
-
-  dateToColor(date: string) {
-    const event = this.events.find((e) => e.dtstart.substr(0, 10) === date)
-
-    return event?.color || '#000000'
   }
 
   async onChange({ start, end }: VCalendarChange) {

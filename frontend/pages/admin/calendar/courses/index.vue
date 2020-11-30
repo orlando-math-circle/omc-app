@@ -1,40 +1,47 @@
 <template>
   <div>
-    <v-row no-gutters class="mb-6">
-      <v-col>
-        <v-row>
-          <v-col>
-            <h1>Course</h1>
-          </v-col>
-        </v-row>
+    <admin-header title="Courses" :breadcrumbs="breadcrumbs">
+      <v-menu offset-y transition="slide-y-transition">
+        <template #activator="{ on, attrs }">
+          <v-btn v-bind="attrs" color="primary" v-on="on">
+            Actions <v-icon>mdi-chevron-down</v-icon>
+          </v-btn>
+        </template>
 
-        <v-row>
-          <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
-          </v-col>
-        </v-row>
-      </v-col>
+        <v-list dense nav>
+          <dialog-create-course @create:course="onCourseCreate">
+            <template #activator="{ on, attrs }">
+              <v-list-item v-bind="attrs" v-on="on">
+                <v-list-item-icon>
+                  <v-icon>mdi-tag-plus</v-icon>
+                </v-list-item-icon>
 
-      <v-col cols="auto" align-self="center">
-        <dialog-create-course @create:course="onCreate"></dialog-create-course>
-      </v-col>
-    </v-row>
+                <v-list-item-content>
+                  <v-list-item-title>Create Course</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </dialog-create-course>
+        </v-list>
+      </v-menu>
+    </admin-header>
 
     <v-row>
       <v-col>
-        <v-card>
+        <v-card :loading="isLoading">
           <v-card-title>
-            <v-spacer></v-spacer>
-
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              placeholder="filter for id, name, email, etc"
+              placeholder="Search..."
               label="Search"
               single-line
               solo
               hide-details
             ></v-text-field>
+            <v-btn class="ml-3" icon large @click="onRefresh(null)">
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
           </v-card-title>
 
           <v-data-table-paginated
@@ -110,6 +117,10 @@ export default class AdminCoursesPage extends Vue {
     return formatDate(date, formatString)
   }
 
+  async onCourseCreate() {
+    await this.onRefresh(null)
+  }
+
   async onCreate() {
     await this.$fetch()
   }
@@ -117,9 +128,5 @@ export default class AdminCoursesPage extends Vue {
   async onRefresh(options: any) {
     await this.$accessor.courses.findAll(options)
   }
-
-  // async fetch() {
-  //   await this.$accessor.courses.findAll()
-  // }
 }
 </script>

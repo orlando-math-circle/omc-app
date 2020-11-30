@@ -25,6 +25,15 @@
 
     <v-card-text>
       <v-row>
+        <v-col v-if="!isStatic" cols="12">
+          <auto-complete-project
+            v-model="project"
+            :rules="{ required: !isStatic }"
+            item-value="id"
+            outlined
+          ></auto-complete-project>
+        </v-col>
+
         <v-col cols="12">
           <v-text-field-validated
             v-model="dto.name"
@@ -75,14 +84,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Ref, Vue } from 'nuxt-property-decorator'
 import DialogForm from './DialogForm.vue'
 
 @Component
 export default class DialogCreateJob extends Vue {
   @Ref('dialogEl') readonly dialog!: DialogForm
+  @Prop({ default: true }) readonly isStatic!: boolean
 
   success = false
+  project: null | number = null
 
   dto = {
     name: '',
@@ -94,8 +105,21 @@ export default class DialogCreateJob extends Vue {
     return this.$accessor.volunteers.isLoading
   }
 
-  onSubmit() {
-    this.$emit('create:job', { ...this.dto })
+  async onSubmit() {
+    if (this.isStatic) {
+      return this.$emit('create:job', { ...this.dto })
+    }
+
+    await this.$accessor.volunteers.create({
+      ...this.dto,
+      ...{ project: this.project! },
+    })
+
+    if (this.$accessor.volunteers.isErrored) {
+      return this.$snack('Error while creating new job :(')
+    }
+
+    this.$emit('create:job', this.$accessor.volunteers.job)
     this.dialog.close()
   }
 }

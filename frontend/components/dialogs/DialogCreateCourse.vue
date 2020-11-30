@@ -23,19 +23,36 @@
         <v-card-text>
           <alert-error v-if="error" :error="error" />
 
-          <v-text-field-validated
-            v-model="dto.name"
-            label="Course Name"
-            rules="required"
-            required
-            outlined
-          ></v-text-field-validated>
+          <v-row>
+            <v-col v-if="!project" cols="12">
+              <auto-complete-project
+                v-model="newProject"
+                :rules="{ required: !project }"
+                item-value="id"
+                outlined
+              ></auto-complete-project>
+            </v-col>
 
-          <v-textarea-validated
-            v-model="dto.description"
-            label="Course Description"
-            outlined
-          />
+            <v-col cols="12">
+              <v-text-field-validated
+                v-model="dto.name"
+                label="Name"
+                rules="required"
+                hide-details="auto"
+                required
+                outlined
+              ></v-text-field-validated>
+            </v-col>
+
+            <v-col cols="12">
+              <v-textarea-validated
+                v-model="dto.description"
+                label="Description (Optional)"
+                hide-details="auto"
+                outlined
+              />
+            </v-col>
+          </v-row>
         </v-card-text>
 
         <v-card-actions>
@@ -59,9 +76,10 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 @Component
 export default class DialogCreateCourse extends Vue {
-  @Prop() project!: number
+  @Prop() readonly project?: number
 
   dialog = false
+  newProject: number | null = null
 
   dto = {
     name: '',
@@ -76,7 +94,7 @@ export default class DialogCreateCourse extends Vue {
     const dto = {
       name: this.dto.name,
       description: this.dto.description,
-      project: this.project,
+      project: this.project ? this.project : this.newProject!,
     }
 
     const course = await this.$accessor.courses.create(dto)

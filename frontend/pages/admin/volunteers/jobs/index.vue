@@ -1,31 +1,37 @@
 <template>
-  <v-container class="pa-6">
-    <v-row no-gutters class="mb-6">
-      <v-col>
-        <v-row>
-          <v-col>
-            <h1>Volunteer Jobs</h1>
-          </v-col>
-        </v-row>
+  <div>
+    <admin-header title="Volunteer Jobs" :breadcrumbs="breadcrumbs">
+      <v-menu offset-y transition="slide-y-transition">
+        <template #activator="{ on, attrs }">
+          <v-btn v-bind="attrs" color="primary" v-on="on">
+            Actions <v-icon>mdi-chevron-down</v-icon>
+          </v-btn>
+        </template>
 
-        <v-row>
-          <v-col>
-            <breadcrumbs class="pa-0" :items="breadcrumbs"></breadcrumbs>
-          </v-col>
-        </v-row>
-      </v-col>
+        <v-list dense nav>
+          <dialog-create-job :is-static="false" @create:job="onCreateJob">
+            <template #activator="{ on, attrs }">
+              <v-list-item v-bind="attrs" v-on="on">
+                <v-list-item-icon>
+                  <v-icon>mdi-tag-plus</v-icon>
+                </v-list-item-icon>
 
-      <v-col cols="auto" aalign-self="center">
-        <v-btn>Create Job</v-btn>
-      </v-col>
-    </v-row>
+                <v-list-item-content>
+                  <v-list-item-title>Create Job</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </dialog-create-job>
+        </v-list>
+      </v-menu>
+    </admin-header>
 
     <v-row>
       <v-col>
-        <v-data-table-paginated :items="jobs"></v-data-table-paginated>
+        <data-table-jobs :jobs="jobs" />
       </v-col>
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -35,6 +41,9 @@ import { Component, Vue } from 'nuxt-property-decorator'
   layout: 'admin',
   head: {
     title: 'Jobs',
+  },
+  async fetch({ app: { $accessor } }) {
+    await $accessor.volunteers.findAll()
   },
 })
 export default class AdminJobsPage extends Vue {
@@ -52,7 +61,11 @@ export default class AdminJobsPage extends Vue {
     return this.$accessor.volunteers.jobs
   }
 
-  async fetch() {
+  onCreateJob() {
+    this.refresh()
+  }
+
+  async refresh() {
     await this.$accessor.volunteers.findAll()
   }
 }

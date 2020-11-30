@@ -7,7 +7,6 @@
     no-filter
     label="User"
     item-text="name"
-    return-object
     placeholder="Search for a user..."
     hide-details="auto"
     clearable
