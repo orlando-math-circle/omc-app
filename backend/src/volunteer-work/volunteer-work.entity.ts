@@ -21,6 +21,9 @@ export class VolunteerWork extends BaseEntity<VolunteerWork, 'id'> {
   @Enum(() => VolunteerWorkStatus)
   status: VolunteerWorkStatus;
 
+  @Property({ nullable: true, columnType: 'text' })
+  notes?: string;
+
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 

@@ -307,6 +307,7 @@
               <v-col>
                 <auto-complete-project
                   v-model="project"
+                  label="Project (Optional)"
                   item-value="id"
                   outlined
                 />

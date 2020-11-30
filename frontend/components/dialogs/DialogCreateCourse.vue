@@ -27,6 +27,7 @@
             <v-col v-if="!project" cols="12">
               <auto-complete-project
                 v-model="newProject"
+                label="Project (Optional)"
                 :rules="{ required: !project }"
                 item-value="id"
                 outlined

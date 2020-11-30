@@ -4,7 +4,6 @@
     :items="$accessor.projects.projects"
     :loading="bouncing || $accessor.projects.isLoading"
     :search-input.sync="search"
-    label="Project"
     item-text="name"
     placeholder="Search for a project"
     hide-details="auto"

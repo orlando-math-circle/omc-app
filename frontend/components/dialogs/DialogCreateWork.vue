@@ -45,6 +45,15 @@
         </v-col>
 
         <v-col cols="12">
+          <v-text-field-validated
+            v-model.number="dto.notes"
+            label="Notes"
+            outlined
+            hide-details="auto"
+          />
+        </v-col>
+
+        <v-col cols="12">
           <v-select-validated
             v-model="dto.status"
             rules="required"
@@ -91,6 +100,7 @@ export default class DialogCreateWork extends Vue {
     project: null as null | number,
     user: null as null | number,
     hours: 0,
+    notes: '',
     status: VolunteerWorkStatus.APPROVED,
   }
 
