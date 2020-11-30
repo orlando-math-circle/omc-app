@@ -41,8 +41,10 @@ export class FileService {
         size: metadata.size,
         mimetype: metadata.mimetype,
         destination: metadata.destination,
-        path: metadata.path,
-        root: metadata.path.replace(this.config.get(FILE_DIRECTORY), ''),
+        path: metadata.path.replace(/\\/g, '/'),
+        root: metadata.path
+          .replace(/\\/g, '/')
+          .replace(this.config.get(FILE_DIRECTORY), ''),
         author: userOrId,
       }),
     );
