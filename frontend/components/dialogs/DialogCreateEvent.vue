@@ -334,6 +334,7 @@
               <v-col>
                 <auto-complete-course
                   v-model="course"
+                  item-value="id"
                   :project="project"
                   outlined
                 />
