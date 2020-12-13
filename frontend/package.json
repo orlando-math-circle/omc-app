@@ -30,7 +30,7 @@
     "nuxt-property-decorator": "2.8.8",
     "nuxt-typed-vuex": "0.1.22",
     "rrule": "2.6.6",
-    "vee-validate": "3.4.5",
+    "vee-validate": "4.0.5",
     "vue-apexcharts": "1.6.0",
     "vuetify-loader": "1.6.0"
   },
