@@ -9,6 +9,7 @@ import {
   PAYPAL_CLIENT_ID,
   PAYPAL_SANDBOXED,
   PAYPAL_SECRET_KEY,
+  PORT,
   SENDGRID_API_KEY,
   SENDGRID_IN_DEV,
   SERVE_STATIC,
@@ -17,6 +18,7 @@ import {
 } from './app.constants';
 
 const configSchema = Joi.object({
+  [PORT]: Joi.number().default(3000),
   SECRET: Joi.string().required(),
   USE_RRULE_CACHE: Joi.boolean().default(false),
   [FRONTEND_URL]: Joi.string().default('http://localhost:8080'),
