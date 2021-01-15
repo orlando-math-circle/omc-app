@@ -15,7 +15,7 @@ export const config: Options = {
     // new FileSubscriber() disabled for now.
   ],
   dbName: process.env.DATABASE_NAME || 'omc',
-  clientUrl: process.env.DATABASE_URL || undefined,
+  host: process.env.DATABASE_HOST || '127.0.0.1',
   user: process.env.DATABASE_USER || 'postgres',
   password: process.env.DATABASE_PASS || 'postgres',
   cache: { enabled: process.env.DATABASE_CACHE === 'true' },
