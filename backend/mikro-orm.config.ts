@@ -24,6 +24,9 @@ export const config: Options = {
       ssl: process.env.DATABASE_SSL === 'true' || false
     }
   },
+  migrations: {
+    disableForeignKeys: false
+  },
   findOneOrFailHandler: (entityName: string) => {
     return new NotFoundException(`${entityName} not found`);
   },
