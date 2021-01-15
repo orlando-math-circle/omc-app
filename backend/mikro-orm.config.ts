@@ -19,6 +19,11 @@ export const config: Options = {
   user: process.env.DATABASE_USER || 'postgres',
   password: process.env.DATABASE_PASS || 'postgres',
   cache: { enabled: process.env.DATABASE_CACHE === 'true' },
+  driverOptions: {
+    connection: {
+      ssl: process.env.DATABASE_SSL === 'true' || false
+    }
+  },
   findOneOrFailHandler: (entityName: string) => {
     return new NotFoundException(`${entityName} not found`);
   },
