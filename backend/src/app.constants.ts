@@ -21,6 +21,12 @@ export const SENDGRID_IN_DEV = 'SENDGRID_IN_DEV';
 export const SENDGRID_API_KEY = 'SENDGRID_API_KEY';
 
 /**
+ * Twitter API
+ */
+export const TWITTER_KEY = 'TWITTER_KEY';
+export const TWITTER_SECRET = 'TWITTER_SECRET';
+
+/**
  * File Storage
  */
 export const FILE_DIRECTORY = 'FILE_DIRECTORY';

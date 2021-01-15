@@ -11,7 +11,9 @@ import {
   PAYPAL_SECRET_KEY,
   SENDGRID_API_KEY,
   SENDGRID_IN_DEV,
-  SERVE_STATIC
+  SERVE_STATIC,
+  TWITTER_KEY,
+  TWITTER_SECRET
 } from './app.constants';
 
 const configSchema = Joi.object({
@@ -22,6 +24,8 @@ const configSchema = Joi.object({
   [PAYPAL_SANDBOXED]: Joi.boolean().default(true),
   [PAYPAL_CLIENT_ID]: Joi.string().required(),
   [PAYPAL_SECRET_KEY]: Joi.string().required(),
+  [TWITTER_KEY]: Joi.string().required(),
+  [TWITTER_SECRET]: Joi.string().required(),
   [FILE_DIRECTORY]: Joi.string().required(),
   [FORM_SUBDIRECTORY]: Joi.string().default('form'),
   [SENDGRID_IN_DEV]: Joi.boolean().default(false),
