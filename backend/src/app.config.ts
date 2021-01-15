@@ -11,7 +11,7 @@ import {
   PAYPAL_SECRET_KEY,
   SENDGRID_API_KEY,
   SENDGRID_IN_DEV,
-  SERVE_STATIC,
+  SERVE_STATIC
 } from './app.constants';
 
 const configSchema = Joi.object({
