@@ -26,7 +26,7 @@ const configSchema = Joi.object({
   [PAYPAL_SECRET_KEY]: Joi.string().required(),
   [TWITTER_KEY]: Joi.string().required(),
   [TWITTER_SECRET]: Joi.string().required(),
-  [FILE_DIRECTORY]: Joi.string().required(),
+  [FILE_DIRECTORY]: Joi.string().default('../../uploads'),
   [FORM_SUBDIRECTORY]: Joi.string().default('form'),
   [SENDGRID_IN_DEV]: Joi.boolean().default(false),
   [SENDGRID_API_KEY]: Joi.string().required(),
