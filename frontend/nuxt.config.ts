@@ -112,7 +112,7 @@ const config: NuxtConfig = {
    ** See https://axios.nuxtjs.org/options
    */
   axios: {
-    baseURL: process.env.AXIOS_BASE_URL || 'http://localhost:3030/',
+    baseURL: process.env.AXIOS_BASE_URL || 'http://localhost:3000/',
     browserBaseURL: process.env.AXIOS_BROWSER_BASE_URL || undefined,
     proxyHeaders: false,
   },
