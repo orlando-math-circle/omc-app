@@ -59,7 +59,7 @@ The last set of configurations on this page are the `Inbound port rules` which d
 
 The rest of the pages consist of more advanced features that aren't required to be changed or can be changed at a later date when necessary. Of note, the `Standard B2s` instance comes with 8 GiB of temporary storage by default. While not an immediate concern, eventually the uploads will consume that free space and require the instance to be affixed with a managed storage drive.
 
-So click on `Review + create` and it may ask for additional contact information such as the preferred email address and phone number for support issues. Once the information is entered, click on `Create` where the review button was at the bottom of the page and allow for the instance to be generated. It should take only a couple of minutes for deployment to complete.
+Click on `Review + create` and it may ask for additional contact information such as the preferred email address and phone number for support issues. Once the information is entered, click on `Create` where the review button was at the bottom of the page and allow for the instance to be generated. It should take only a couple of minutes for deployment to complete.
 
 <img src="images/production/azure_setup_5.png" alt="Azure Instance Details" />
 
@@ -122,7 +122,7 @@ While still on the management page for the database, on the left hand side under
 
 <img src="images/production/azure_pg_6.png" />
 
-Using the `Admin username`, the `Server name` and the password I set during the setup procedure, I am able to connect to the database using my preferred client, DataGrip. By default, PostgreSQL uses a port of 5432. Azure provides a guuide on [configuring a firewall rule](https://docs.microsoft.com/en-us/azure/postgresql/quickstart-create-server-database-portal#configure-a-firewall-rule) and [connecting to the server with psql](https://docs.microsoft.com/en-us/azure/postgresql/quickstart-create-server-database-portal#connect-to-the-server-with-psql) CLI and making a new database manually if you do not have a database management tool.
+Using the `Admin username`, the `Server name` and the password I set during the setup procedure, I am able to connect to the database using my preferred client, DataGrip. By default, PostgreSQL uses a port of 5432. Azure provides a guide on [configuring a firewall rule](https://docs.microsoft.com/en-us/azure/postgresql/quickstart-create-server-database-portal#configure-a-firewall-rule) and [connecting to the server with psql](https://docs.microsoft.com/en-us/azure/postgresql/quickstart-create-server-database-portal#connect-to-the-server-with-psql) CLI and making a new database manually if you do not have a database management tool.
 
 <img src="images/production/azure_pg_7.png" />
 
@@ -184,19 +184,9 @@ Node.js, the JavaScript server runtime, is installed using a small tool and a co
 
 <img src="images/production/azure_terminal_2.png" alt="Azure Instance Details" />
 
-### Installing PM2
-
-PM2 is a tool for monitoring Node.js applications and restarting them if they crash. Install it as follows.
-
-```
-npm i -g pm2
-```
-
-PM2 will be configured later.
-
 ### Downloading the Application
 
-Now the actual application needs to be downloaded and the dependencies installed. The location of the where the code goes is not important, so I will be putting it in the `/home` directory of the primary admin user. For enhanced security, an `app` user could be created that only has the necessary permissions to run the application and nothing else, but is not covered here.
+Now the actual application needs to be downloaded and the dependencies installed. Where the code is downloaded is not important, so I will be putting it in the `/home` directory of the primary admin user. For enhanced security, an `app` user could be created that only has the necessary permissions to run the application and nothing else, but this is not covered here.
 
 In the preferred directory to house the code, run the following command.
 
@@ -279,7 +269,7 @@ SECRET=<random string with no spaces>
 FRONTEND_URL=https://app.johng.dev
 ADMIN_EMAIL=<your email>
 SENDGRID_IN_DEV=true
-SENDGRID_API_KEY=
+SENDGRID_API_KEY=<provided by SendGrid>
 SERVE_STATIC=true
 DATABASE_NAME=<as configured previously>
 DATABASE_HOST=<as given by Azure>
@@ -308,21 +298,17 @@ npx mikro-orm schema:create -r --fk-checks
 
 If an error appears, it will describe the nature of the connection problem, otherwise the database and tables are all setup.
 
-Now it should be possible to test that everything is working correctly by building and starting the backend. Run these commands in sequence in the `/backend` subdirectory and `Nest application successfully started` should appear.
+Now it should be possible to test that everything is working correctly by building and starting the backend. Run these commands in the `/backend` subdirectory and `Nest application successfully started` should appear.
 
 ```
-npm run build
-```
-
-```
-npm run start
+npm run build && npm run start
 ```
 
 <img src="images/production/setup_2.png" />
 
 ### Installing Nginx
 
-The backend and frontend run by default on the local ports of 3000 and 8080 respectively. In order to expose those ports to the internet and map them to their respective domains NGINX provide a proxy for doing just that. Run the following commands to update the Ubuntu repositories and then install Nginx.
+The backend and frontend run by default on the local ports of 3000 and 8080 respectively. In order to expose those ports to the internet and map them to their respective domains NGINX acts as a proxy. Run the following commands to update the Ubuntu repositories and then install Nginx.
 
 ```
 sudo apt update && sudo apt install nginx
@@ -555,7 +541,7 @@ It will print out the command you need to copy and paste to enable the startup s
 
 ### Final Steps
 
-There are a couple remaining steps to setting up the application. By default the backend is expecting to host static files itself. Ideally this may be best handled by Nginx for caching reasons if the new team wishes to undertake this change. Files are not stored within the directory containing the application code as it's meant to be a volatile directory where changes to the code can mess with directories. Thus, by default the backend will create an `uploads` directory at the same level as the folder where the code is stored and we need to copy the default avatar images into there.
+There are a couple remaining steps to setting up the application. By default the backend is expecting to host static files itself. Ideally this may be best handled by Nginx for caching reasons if the new team wishes to undertake this change. Uploads are not stored within the directory containing the application code as it's meant to be a volatile directory where changes to the code can mess with directories. Thus, by default the backend will create an `uploads` directory at the same level as the folder where the code is stored and we need to copy the default avatar images into there.
 
 ```
 cp -R ~/app/images/defaults ~/uploads
