@@ -560,3 +560,7 @@ There are a couple remaining steps to setting up the application. By default the
 ```
 cp -R ~/app/images/defaults ~/uploads
 ```
+
+Lastly, in order to create an administrator account either a regular account can be made and the database modified to change a users roles to `{admin}`, or the `ADMIN_EMAIL` setting in the backend `.env` file is set so that a user registering with that exact email will be promoted to admin during registration.
+
+Once an admin account exists, other admins can be promoted from the admin panel.
