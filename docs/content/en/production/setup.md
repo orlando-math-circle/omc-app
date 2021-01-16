@@ -557,3 +557,6 @@ It will print out the command you need to copy and paste to enable the startup s
 
 There are a couple remaining steps to setting up the application. By default the backend is expecting to host static files itself. Ideally this may be best handled by Nginx for caching reasons if the new team wishes to undertake this change. Files are not stored within the directory containing the application code as it's meant to be a volatile directory where changes to the code can mess with directories. Thus, by default the backend will create an `uploads` directory at the same level as the folder where the code is stored and we need to copy the default avatar images into there.
 
+```
+cp -R ~/app/images/defaults ~/uploads
+```
