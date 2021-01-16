@@ -12,13 +12,13 @@ items:
   - Datagrip
 ---
 
-These are the recommended procedures for setting up a development environment for working on the application. This documentation is written to be opinionated to maintain a consistent experience. Experienced users may find it more comfortable to utilize tools they are more comfortable or familiar with.
+These are the recommended procedures for setting up a development environment for working on the application. This documentation is written to be verbose and opinionated to maintain a consistent experience and for inexperienced users. Some may find it more comfortable to utilize tools they are more comfortable or familiar and still be appropriate.
 
 This guide will go over the following tools:
 
 <list :items="items"></list>
 
-If you are on Windows, take a look at the [Linux on Windows](/development/wsl) section if you are interested in an alternative installation method using Linux.
+If you are on Windows, take a look at the [Linux on Windows](/development/wsl) section if you are interested in utilizing a Linux terminal within Windows.
 
 <alert>
 
@@ -77,13 +77,15 @@ console.log(`My name is ${name}`);
 
 ## Git
 
-This application is stored on GitHub in the spirit of open, extensible software. GitHub can be operated using GUIs, or graphical clients that allow you to manage project changes, however it's recommended to learn some basic git commands. Git is not as intuitive as other pieces of software, but Visual Studio Code provides some GUI-based functionality making pulling and pushing changes easy.
+This application is stored on GitHub in the spirit of open and extensible software. GitHub can be operated graphically, e.g. using [GitHub Desktop](https://desktop.github.com/), however it's recommended to utilize a standard git installation.
+
+Visual Studio Code will read information from Git and make available to you who recently changed the code you're looking at, let you create and manage commits and branches, and easily sync changes.
 
 ### Windows
 
-Visit the [Git](https://git-scm.com/download/win) website and download the appropriate version of Git for your system. They don't make 32bit processors anymore, but if you're running on exceptionally old hardware you may need to double check.
+Visit the [Git](https://git-scm.com/download/win) website and download the appropriate version of Git for your system. If your hardware is old enough to be 32-bit then a lot of the software here may be incompatible or too resource intensive.
 
-The installation will ask you a lot of questions, however you can hit next to accept all of the defaults. If you don't know what an option means, it's better to reinstall git knowing why you need to change the option than to be confused why something isn't working in the first place.
+The installation will ask you a lot of questions, however you may accept the defaults. If you don't know what an option means, it's better to reinstall git knowing why you need to change the option than to be confused why something isn't working in the first place.
 
 Opening PowerShell or a Command Prompt window and typing the following should show a version.
 
@@ -105,6 +107,8 @@ If git is not found, the installation may differ slightly based on your operatin
 
 ### Basic Git Commands
 
+This section goes over basic Git commands and are not specific to the project. A better guide may be [git - the simple guide](https://rogerdudler.github.io/git-guide/) by Roger Dudler. It's also not required by any means, but I recommend the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) convention for writing commit messages. Our team did not follow it all that well, but it is simple to follow if you are unsure what to write and is a popular standard.
+
 #### Cloning a Repository
 
 Obtaining a repository is the first major command for git. Visit a GitHub page and find the obvious green **Code** button. Then, click on the symbol to the right of the text field containing the repository url to copy it, and then run the following command.
@@ -116,6 +120,8 @@ git clone https://github.com/duckies/omc-app.git <folder>
 ```
 
 You can optionally specify the name of a folder after the url if you don't want the folder to be the name of the repository.
+
+Note that Git will ask you for your password every time you commit changes using the `HTTPS` method. At the time of writing this, entering your GitHub password is considered deprecated. It is recommended to use the `SSH` method and [adding an SSH key to GitHub](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/working-with-ssh-key-passphrases) which has the benefit of never asking you for a password. Also see [Which remote URL should I use?](https://docs.github.com/en/free-pro-team@latest/github/using-git/which-remote-url-should-i-use#cloning-with-ssh-urls) that describes these methods and more.
 
 #### Managing Branches
 
@@ -210,7 +216,7 @@ Docker allows us to deploy Postgres, NGINX, and Redis in seconds. It is not a re
 
 ## Windows
 
-<alert type="warning">
+<alert>
 
 You will need to know what edition of Windows you have: Home, Pro, Enterprise, or Education. You can find out how to determine this [here](https://support.microsoft.com/en-us/help/13443/windows-which-version-am-i-running).
 

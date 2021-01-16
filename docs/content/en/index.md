@@ -22,8 +22,10 @@ This website contains documentation pertaining to the Orlando Math Circle event 
 Note that the following materials may contain outdated material. The requirements have evolved through meetings and the development of the application.
 
 - <a href="downloads/Orlando Math Circle Pitch.pdf">Sponsor Pitch Presentation</a>
-- <a href="downloads/SD1_Final_Design_Document_OMC.pdf">Senior Design 1 - Design Document</a>
+- <a href="downloads/SD1 Final Design Document.pdf">Senior Design 1 - Design Document</a>
 - <a href="downloads/CDR Presentation.pdf">Senior Design 2 - Critical Design Review</a>
+- <a href="downloads/SD2 Final Design Document.pdf">Senior Design 2 - Final Design Document</a>
+- <a href="downloads/Final Presentation.pdf">Final Presentation</a>
 
 ## Acknowledgments
 
