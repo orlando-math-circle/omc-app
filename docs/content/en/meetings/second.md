@@ -3,7 +3,7 @@ title: Second Meeting
 subtitle: "Meeting Time: Saturday, September 12, 2020 at 1:00PM EST."
 description: Second meeting with Sheina, Matt, and Margarita.
 category: Meetings
-position: 11
+position: 9
 ---
 
 The format of the meeting consisted of clarifications on event registration, payments, and the beginnings of the UI.

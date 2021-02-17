@@ -1,7 +1,7 @@
 ---
 title: Event Registration
 description: Developer stream of thought for implementing event registrations.
-category: Design Notes
+category: Research
 position: 8
 ---
 

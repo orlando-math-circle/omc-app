@@ -1,8 +1,8 @@
 ---
-title: "Linux on Windows"
+title: Linux on Windows
 description: The alternative approach to installing Node.js on Windows using WSL.
-category: Development
-position: 3
+category: Tools
+position: 4
 ---
 
 <alert type="warning">
@@ -11,7 +11,7 @@ Out of an abundance of caution, it's recommended to [create a system restore poi
 
 </alert>
 
-For Windows users it's worth considering the Windows Subsystem for Linux (WSL) for your development experience. The OMC application will be running in a Linux production environment meaning some procedures may need to be different for Windows machines. The guides will attempt to be thorough, but some Windows-only workarounds may be overlooked. It can be said with complete confidence that Windows will support all of the features discussed, but some occasional weirdness may need to be rectified using a quick Google search.
+For Windows users it's worth considering the Windows Subsystem for Linux (WSL) for your development experience. The OMC application will be running in a Linux production environment meaning some procedures may need to be different for Windows machines. The guides will attempt to be thorough, but some Windows-only workarounds may be overlooked. It can be said with complete confidence that Windows will support running the application, but some occasional weirdness may need to be rectified using a quick Google search.
 
 If you are not familiar with Linux, WSL is also a great way of learning this essential skill.
 

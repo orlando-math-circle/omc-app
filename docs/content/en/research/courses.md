@@ -1,7 +1,7 @@
 ---
 title: Courses
 description: Developer stream of thought for implementing event groupings.
-category: Design Notes
+category: Research
 position: 7
 ---
 

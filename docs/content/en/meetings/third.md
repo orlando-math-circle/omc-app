@@ -3,7 +3,7 @@ title: Third Meeting
 subtitle: "Meeting Time: Saturday, October 6th, 2020 at 10:00PM EST."
 description: Third meeting with Sheina, Matt, and Margarita.
 category: Meetings
-position: 12
+position: 10
 ---
 
 This meeting held topics such as next steps, registration, permissions, and the student tutorial sequence.

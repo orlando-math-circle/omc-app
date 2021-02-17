@@ -1,5 +1,5 @@
 ---
-title: Non-Profit Cost Analysis
+title: Cost Analysis
 subtitle: "Further investigations into benefits available to the OMC non-profit."
 description: "Further investigations into benefits available to the OMC non-profit."
 category: Research

@@ -1,9 +1,9 @@
 ---
-title: "Installation"
-description: Tools and setting them up for developing the application.
-category: Development
+title: Development
+description: Setup procedures for downloading and installing the application and associated tools in a development environment.
+category: Installation
 position: 2
-items:
+tools:
   - Node.js
   - Git
   - Visual Studio Code
@@ -16,7 +16,7 @@ These are the recommended procedures for setting up a development environment fo
 
 This guide will go over the following tools:
 
-<list :items="items"></list>
+<list :items="tools"></list>
 
 If you are on Windows, take a look at the [Linux on Windows](/development/wsl) section if you are interested in utilizing a Linux terminal within Windows.
 

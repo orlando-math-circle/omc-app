@@ -1,8 +1,8 @@
 ---
-title: Setup
-description: Setup procedures for the production environment.
-category: Production
-position: 4
+title: Production
+description: Setup procedures for downloading and installing the application in a production environment on Azure.
+category: Installation
+position: 3
 ---
 
 This page describes the resources and general setup processes for setting up the app in a production environment.
@@ -19,9 +19,9 @@ The following items will be required before setting up the application.
 
 1. Azure Portal with configured subscription. The subscription is merely the payment grouping that has the credits available for use.
 2. Domain Management. The application is designed to operate with the frontend on a primary domain and the api on an entirely separate domain, e.g. `app.orlandomathcircle.org` and `api.orlandomathcircle.org`, and need to be configured using A records to the virtual machine. SendGrid emailing will use a few records to ensure email authentication.
-2. PayPal API credentials. The OMC personnel who owns the Orlando Math Circle PayPal account needs to follow the steps to [Obtain PayPal Credentials](https://developer.paypal.com/docs/api/overview/#get-credentials) through registering the application on the developer dashboard. This yields a `Client ID` and `Client Key`. Both identifiers are necessary to make PayPal payments. For safety during testing, developers can use their own PayPal developer credentials in a Sandbox mode to not risk accidentially using real money.
-2. Twitter API Credentials. Someone within the OMC organization needs to apply to utilize the Twitter API. They utilize an [approval process](https://developer.twitter.com/en/apply-for-access) and provide a `Client Key` and `Client Secret` similar to PayPal.
-3. SendGrid API Credentials. This tutorial will go through setting up SendGrid as it is part of Azure.
+3. PayPal API credentials. The OMC personnel who owns the Orlando Math Circle PayPal account needs to follow the steps to [Obtain PayPal Credentials](https://developer.paypal.com/docs/api/overview/#get-credentials) through registering the application on the developer dashboard. This yields a `Client ID` and `Client Key`. Both identifiers are necessary to make PayPal payments. For safety during testing, developers can use their own PayPal developer credentials in a Sandbox mode to not risk accidentially using real money.
+4. Twitter API Credentials. Someone within the OMC organization needs to apply to utilize the Twitter API. They utilize an [approval process](https://developer.twitter.com/en/apply-for-access) and provide a `Client Key` and `Client Secret` similar to PayPal.
+5. SendGrid API Credentials. This tutorial will go through setting up SendGrid as it is part of Azure.
 
 ## Azure
 
@@ -86,6 +86,7 @@ Once at the directory listing, click on `Add` at the top and click create undern
 For the `Project details` section, fill it out similarly to the virtual machine.
 
 Under `Server details` start fill out the sections as appropriate:
+
 - Give the server a name, though it does not matter. I chose `omc-db`.
 - Do not change `Data source`.
 - Ensure the `Location` is set to `(US) East US`.
@@ -105,7 +106,7 @@ If the image is too small to see, open it in a new tab to view it in full size.
 
 1. Slide the `vCore` setting until it says `1 vCore`. This is the number of CPU cores the database server will utilize. One is sufficient for a small application.
 2. Slide the `Storage` setting to the far left until it says `5 GB`. 5 Gigabytes of database storage is a lot for the app and will likely not be reached. This will scale if necessary due to the following setting, but setting this as low as possible cuts back on unnecessary costs.
-3. Ensure the `Storage Auto-growth` setting remains on **Yes**. In the event the database is nearly reaching the 5 GB size limit, it will grow automatically. 
+3. Ensure the `Storage Auto-growth` setting remains on **Yes**. In the event the database is nearly reaching the 5 GB size limit, it will grow automatically.
 4. Leave the `Backup Retention Period` set to **7 Days**. Backups and retention policies can be modified by OMC if it is determined necessary.
 
 Click on `OK` at the bottom to return to the PostgreSQL creation page. Fill out the `Administrator account` section as desired with the desired login credentials for the web administrator.
@@ -164,6 +165,7 @@ The application uses emailing templates to send emails in a structured way, howe
 </alert>
 
 ## Virtual Machine Setup
+
 Once the virtual machine is operational, some software needs to be installed in order to run the application.
 
 ### Installing Node.js
@@ -173,6 +175,7 @@ Node.js, the JavaScript server runtime, is installed using a small tool and a co
 - Visit the [NVM Installation Script](https://github.com/nvm-sh/nvm#installing-and-updating) page and copy the first link and run it in the terminal on the virtual machine. This installs the `Node Version Manager`, making it easy to install Node.js.
 - Once that is finished, reopen the terminal and connect to the virtual machine once again.
 - Run the following command.
+
   ```
   nvm install 14
   ```
@@ -232,7 +235,7 @@ Then using your preferred editor, edit the file. I will be utilizing the termina
 nano .env
 ```
 
-Unless you are changing other defaults, which are discussed in the ***(TBA Configuration Explanation Page)***, the frontend needs to know how to connect to the backend API and what the domain is for the frontend.
+Unless you are changing other defaults, which are discussed in the **_(TBA Configuration Explanation Page)_**, the frontend needs to know how to connect to the backend API and what the domain is for the frontend.
 
 <alert type="warning">
 
@@ -348,9 +351,9 @@ Copy the following information into the server block. Be sure to set the correct
 server {
   listen 80;
   listen [::]:80;
-  
+
   server_name api.johng.dev;
-  
+
   gzip            on;
   gzip_types      text/plain application/xml text/css application/javascript;
   gzip_min_length 1000;
@@ -391,7 +394,7 @@ map $sent_http_content_type $expires {
 server {
   listen 80;
   listen [::]:80;
-  
+
   server_name app.johng.dev;
 
   gzip on;
@@ -419,7 +422,7 @@ server {
 
 Then we want to make sure that Nginx will accept the configuration. Run `sudo nginx -t` and make sure there are no errors. Nginx is particular about the format of the server block files.
 
-If the configuration is valid we can reload Nginx. 
+If the configuration is valid we can reload Nginx.
 
 ```
 sudo systemctl reload nginx
@@ -449,7 +452,7 @@ sudo nano /etc/nginx/sites-available/api.johng.dev
 sudo nano /etc/nginx/sites-available/app.johng.dev
 ```
 
-Remove the following lines from *both* files.
+Remove the following lines from _both_ files.
 
 ```
   listen 80;
