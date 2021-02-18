@@ -9,8 +9,145 @@ The application incorporates PayPal, SendGrid, and Twitter through their respect
 
 ## PayPal
 
+There are important features related to the three account types PayPal provides: Developer, Personal, and Business.
+
+1. If you are running the application in development mode and using the PayPal sandbox, there is no difference between using your personal PayPal account and creating a new developer account.
+2. Business accounts are the only kind of accounts that can process real transactions.
+3. The owner of the account is the payment recipient.
+
+In effect, a developer can use any account to make sandboxed payments to test the application. However, the production PayPal account **must** be the Orlando Math Circle paypal account upgraded to a business account (if it isn't already).
+
+<img src="images/installation/services/paypal-1.png" alt="PayPal" />
+
+> This image was taken logged in on my personal PayPal account.
+
+### Credential Acquisition
+
+You can begin the process for obtaining API credentials on the [PayPal Developer](https://developer.paypal.com/home/) website.
+
+<ol>
+  <li>At the top of the page click on `Log in to Dashboard`.</li>
+  <li>If you are using a personal or business PayPal account, enter those credentials to continue. Otherwise, you may click on `Sign Up` to create a developer account.</li>
+  <li>
+  Ensure at the top of the page you are in the correct mode for your purpose. If you are looking to create credentials for testing ensure `Sandbox` is selected, and `Live` for real transactions.
+  <img src="images/installation/services/paypal-2.png" alt="PayPal" />
+  </li>
+  <li>
+  Click on `Create App` and enter an appropriate name for the application. When registering an application in sandbox mode they will create a fake PayPal business account for you. In a live environment, the Orlando Math Circle business account will need to be picked.
+
+  <img src="images/installation/services/paypal-3.png" alt="PayPal" />
+  </li>
+  <li>
+  Once the application is registered you will be provided API credentials. The two pieces of information necessary to operate the application are the `Client ID` and the `Secret`.
+
+  <alert type="warning">
+
+The client id is not sensitive information and more of an identifier. The secret is sensitive and should never be shared in a live environment.
+
+  </alert>
+
+  <img src="images/installation/services/paypal-4.png" alt="PayPal" />
+  </li>
+
+  <li>
+    For the client id, it needs to be stored in the `.env` files for both the frontend and the backend. The secret key only needs to be installed for the backend. See the respective <a href="/installation/development">development</a> or <a href="/installation/production">production</a> installation guide for adding the client id and secret key.
+  </li>
+</ol>
+
+### Configuration
+
+- The frontend has a environment variable called `PAYPAL_CLIENT_ID` that should be added to the `.env` file in the frontend directory.
+- The backend has three environment variables to configure in the `.env` file in the backend directory.
+
+```[backend/.env]
+PAYPAL_CLIENT_ID=
+PAYPAL_SECRET_KEY=
+```
+
+Note that the backend has an optional environment variable called `PAYPAL_SANDBOXED` that is set to true by default. While true the application will not use live currency. `PAYPAL_SANDBOXED=false` must be set in the backend `.env` file in order to use live currency along with the appropriate credentials.
+
+## SendGrid
+
+Unlike PayPal, SendGrid has a larger breadth of configuration options and has more complex requirements in a production environment. The <a href="/installation/production#postgresql-procurement">SendGrid Account Creation</a> section of the production guide covers how to use Azure to create a SendGrid account, connect it to a domain, and generate authentication credentials necessary for the application.
+
+There are some issues with this approach for development. Azure provides a free SendGrid account that would work well during development. However, SendGrid in production is configured for domain authentication. Essentially, this means that SendGrid would be authorized to send an email claiming it came from any address so long as it was part of the domain, e.g. `help@orlandomathcircle.org` and `no-reply@orlandomathcircle.org` would both be viewed in Gmail as valid, authenticated senders. This setup procedure requires both a domain and some intricate domain record configuration. Domains aren't expensive, largely \$12 or less for a year if the development team wishes to buy a temporary domain for testing the application, but this is not required. There are two approaches I would recommend:
+
+1. Create a SendGrid account through Azure but follow the setup guide in SendGrid for authenticating a single email. This would allow you to send emails saying they came from your personal email for testing purposes. The only downsides to this approach is adding a configurable way of changing the email sender in the application and emailing templates, covered in the next section.
+
+2. Enable the Sandbox mode for emailing provided in the application. When `SENDGRID_IN_DEV` is set to true in the `backend/.env` file emails are printed to the console instead of actually being sent. The emailing experience is not something that needs to be constantly tested, so the production SendGrid API credentials could be used when doing tests to ensure emails are being sent correctly.
+
+### Emailing Templates
+
+SendGrid provides an optional feature called [Dynamic Emailing Templates](https://sendgrid.com/solutions/email-api/dynamic-email-templates/). Essentially, this allows you to store pre-defined HTML templates and use handlebar variable replacement, e.g. `Hello {{ user.name }},` from SendGrid.
+
+It then provides a template id, e.g. `d-f182620740c14eaf9f20e9203a77568a` that can be used in the backend. in the following screenshot the `AccountService` is sending an email to the user, with a subject of `OMC: Email Verification`, undefined for custom HTML (poorly designed, I know!), the template id, and then any information that is used in the handlebar replacements in the template. The screenshot is sending the user a verification email with a link to confirm their account.
+
+```js[account.service.ts]
+this.emailService.email(
+  { to: user.email },
+  "OMC: Email Verification",
+  undefined,
+  "d-f182620740c14eaf9f20e9203a77568a",
+  {
+    name: user.name,
+    url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`
+  }
+);
+```
+
+Emailing was not completely fleshed out before the team had to leave the application. The screenshot above is an exact exerpt, meaning it is using a template id that no longer exists and will not work. The templates are useful because emails are difficult to design due to extreme compatibility limitations with using emails, e.g. they're usually exceptionally narrow and don't support modern browser features (notably in Outlook).
+
+It's recommended to ask for the credentials from the webmaster to create templates and probably configure the application to supply them as environment variables instead of hardcoded magic strings. Alternatively, you can use an email templating platform such as [Mjml](https://mjml.io/) then then you could do something seen below. The advantage of this being that all email providers support raw HTML input and the backend would be able to hold more control over the emails without needing to pass SendGrid login information around.
+
+```js[mjml.example.ts]
+import mjml2html from 'mjml';
+
+/**
+* Converts a mjml template to a string representing of HTML for
+* verifying a user
+*/
+const verifyTemplate = (user: User. link: string) => mjml2html(`
+  <mjml>
+    <mj-body>
+      <mj-section>
+        <mj-column>
+          <mj-text>
+            Hello ${user.name}!
+
+            Please visit <a href="${link}">${link}</a> to verify your email.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-body>
+  </mjml>
+`)
+```
+
+## Twitter
+
+Registering an application with Twitter has the biggest administrative hurdle. Twitter requires that you [apply for access](https://developer.twitter.com/en/apply-for-access) and describing your _exact_ use-case. While we were developing the application I had described that I am a developer creating an application for the Orlando Math Circle non-profit only requesting to lookup tweets from the Orlando Math Circle account.
+
+This request was marked insufficient and required more clarification. I then described exactly that the homepage of the mobile application would utilize tweets from the organization formatted as news posts and when clicked, took you directly to Twitter. I was clear to describe that no tweets would be made using the API, and tweets would not be stored or archived anywhere.
+
+This had seemed sufficient and I was approved to pull 500,000 tweets monthly. Assuming the homepage only pulled the last 20 tweets from OMC, that would require 25,000 visits. However, this is further reduced because caching was applied to that route that lasts 60 seconds. This means if multiple people request the `/twitter` route within a minute, it will send the cached tweets instead of constantly asking Twitter for the same tweets in rapid succession.
+
+### Credential Acquisition
+
+Once approved for the Twitter API, an application is generated for your described use-case. I am not able to show the process, but in the projects area of the developer portal there will be an area to create an API key and secret.
+
 <alert type="info">
 
-This page is incomplete!
+Save the credentials somewhere as Twitter will not show them to you again. You may regenerate the credentials, but any applications using those old credentials will no longer connect.
 
 </alert>
+
+<img src="images/installation/services/twitter-1.png" alt="Twitter" />
+
+### Configuration
+
+The backend configuration file `backend/.env` should be configured with the key and secret gotten from the last step.
+
+```[backend/.env]
+TWITTER_KEY=
+TWITTER_SECRET=
+```
