@@ -646,6 +646,7 @@ Is is not convenient to manually start the frontend and backend. The virtual mac
 
 <ol>
 <li>
+
 While still on the `app` user, run the following command to install pm2 globally.
 
 ```bash
@@ -687,8 +688,8 @@ There are a couple remaining steps to setting up the application.
 
 By default the backend is expecting to host static files itself. Ideally this may be best handled by Nginx for caching reasons if the new team wishes to undertake this change. Uploads are not stored within the directory containing the application code as it's meant to be a volatile directory where changes to the code can mess with directories. Thus, by default the backend will create an `uploads` directory at the same level as the folder where the code is stored and we need to copy the default avatar images into there.
 
-```
-cp -R ~/app/images/defaults ~/uploads
+```bash
+cp -R ~/app/images ~/uploads
 ```
 
 Lastly, in order to create an administrator account either a regular account can be made and the database modified to change a users roles to `{admin}`, or the `ADMIN_EMAIL` setting in the backend `.env` file is set so that a user registering with that exact email will be promoted to admin during registration.
