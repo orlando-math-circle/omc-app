@@ -9,7 +9,7 @@ This page describes the resources and general setup processes for setting up the
 
 <alert type="warning">
 
-This is not meant to be followed along by high school users. The technologies used require paid Azure resources.
+This is not meant to be followed along by high school users but may prove educational to study. The technologies used require paid Azure resources.
 
 </alert>
 
@@ -168,106 +168,118 @@ The application uses emailing templates to send emails in a structured way, howe
 
 Once the virtual machine is operational, some software needs to be installed in order to run the application.
 
-### Installing Node.js
+### 1. Creating an App User
 
-Node.js, the JavaScript server runtime, is installed using a small tool and a couple of commands.
+It is highly recommended to create a user on the Ubuntu machine that will own and run the code. The setup procedure and working on the server in the future is greatly simplified if a specific user representing the application owns and runs the code. Note that this user may have already been created for you by another.
 
-- Visit the [NVM Installation Script](https://github.com/nvm-sh/nvm#installing-and-updating) page and copy the first link and run it in the terminal on the virtual machine. This installs the `Node Version Manager`, making it easy to install Node.js.
-- Once that is finished, reopen the terminal and connect to the virtual machine once again.
-- Run the following command.
+<ol>
+  <li>
+  
+  Create a new user on the server with name `app`.
 
-  ```
-  nvm install 14
-  ```
-
-- Double check that Node.js is now installed and set to the correct version.
-  ```
-  node -v
-  ```
-
-<img src="images/production/azure_terminal_2.png" alt="Azure Instance Details" />
-
-### Downloading the Application
-
-Now the actual application needs to be downloaded and the dependencies installed. Where the code is downloaded is not important, so I will be putting it in the `/home` directory of the primary admin user. For enhanced security, an `app` user could be created that only has the necessary permissions to run the application and nothing else, but this is not covered here.
-
-In the preferred directory to house the code, run the following command.
-
+```bash
+sudo useradd -m app
 ```
+
+  </li>
+  <li>Switch to the app user.
+
+```bash
+sudo su app
+```
+
+  </li>
+</ol>
+
+From here on out, whenever a `sudo` command is necessary you want to be on your regular Ubuntu account. Whenever you are working on the app in `~/app` or starting and restarting the app you should switch to the app account.
+
+### 2. Installing Node.js
+
+Node.js, the JavaScript server runtime, is installed using a small tool and a couple of commands. It is important you are on the user meant to run the application.
+
+<ol>
+  <li>
+  
+  Visit the [NVM Installation Script](https://github.com/nvm-sh/nvm#installing-and-updating) page and copy the first link and run it in the terminal on the virtual machine. This installs the `Node Version Manager`, making it easy to install Node.js.</li>
+  <li>Once that is finished, reopen the terminal and connect to the virtual machine once again.</li>
+  <li>
+  Run the following command
+
+```bash
+nvm install 14
+```
+
+  </li>
+  <li>
+    Double check that Node.js is now installed and reports the correct version.
+
+```bash
+node -v
+```
+
+  </li>
+</ol>
+
+### 3. Download the Source Code
+
+Now the actual application needs to be downloaded and the dependencies installed. Where the code is downloaded is not important, so I will be putting it in the `/home` directory of the app user.
+
+<ol>
+
+<li>
+
+Clone the repository into the `~/app` folder.
+
+```bash
 git clone https://github.com/duckies/omc-app.git app
 ```
 
-Then navigate into the newly created folder.
+</li>
 
-```
-cd app
-```
+<li>
 
 Run the sequence of commands to install the dependencies in the `frontend` and `backend` folders.
 
-```
-cd backend
-```
-
-```
-npm install
+```bash
+cd ~/app/backend && npm install
+cd ../frontend && npm install
 ```
 
-```
-cd ../frontend
-```
+</li>
+</ol>
 
-```
-npm install
-```
+### 4. Configure the Application
 
-### Configuring the Application
+Since the application is split into the _frontend_ and _backend_ servers we need to input configuration data unique to the server so the application knows how to connect to the database and external services, what the domains are, and which operational behaviors to elicit.
 
-The application requires 2 configuration files to be created in order to know how to operate. While we are in the frontend folder create a file called `.env`.
+To do this, we will be creating `.env` files which contain environment variables in the `~/app/frontend` and `~/app/backend` folders.
 
-```
-touch .env
-```
+<ol>
+  <li>Input the configuration for the frontend then save and close the file.
 
-Then using your preferred editor, edit the file. I will be utilizing the terminal so I will quickly do this using nano, though utilizing a FTP program such as [WinSCP](https://winscp.net/eng/download.php) and editing it with a text editor is also possible.
-
-```
-nano .env
+```bash
+nano ~/app/frontend/.env
 ```
 
-Unless you are changing other defaults, which are discussed in the **_(TBA Configuration Explanation Page)_**, the frontend needs to know how to connect to the backend API and what the domain is for the frontend.
-
-<alert type="warning">
-
-It is expected that the Orlando Math Circle application will be available at `app.orlandomathcircle.org` and the backend API at `api.orlandomathcircle.org`. However, for the tutorial I will be using a personal domain, `johng.dev` and the respective `app.johng.dev` and `api.johng.dev`. So replace the domain where appropriate.
-
-</alert>
-
-Fill the contents of the `.env` file using your editor with the following:
-
-```env
+```bash
 STATIC_BASE=https://api.johng.dev
 AXIOS_BROWSER_BASE_URL=https://api.johng.dev
 PAYPAL_CLIENT_ID=<provided by PayPal>
 ```
 
-Now navigate to the backend folder and start a new `.env` there as well.
+<alert type="warning">
 
-```
-cd ../backend
-```
+It is expected that the Orlando Math Circle application will be available at `mobile.orlandomathcircle.org` and the backend API at `api.orlandomathcircle.org`. However, for the tutorial I will be using a personal domain, `johng.dev` and the respective `app.johng.dev` and `api.johng.dev`. So replace the domain where appropriate.
 
-```
-touch .env
-```
+</alert>
+  </li>
+  <li>The backend has many more variables to configure.
 
-```
-nano .env
+```bash
+nano ~/app/backend.env
 ```
 
-Fill the contents of tthe `.env` file using your editor with the following then save and close the file.
-
-```env
+```bash
 SECRET=<random string with no spaces>
 FRONTEND_URL=https://app.johng.dev
 ADMIN_EMAIL=<your email>
@@ -292,62 +304,87 @@ The application will not accept real PayPal payments by default and requires `PA
 SendGrid will also not send emails unless `SENDGRID_IN_DEV` is set to `false`. When set to true, emails are printed to the console.
 
 </alert>
+</li>
+<li>
 
 Run the following command while in the `/backend` subdirectory to attempt to connect to the database and create all of the necessary tables.
 
-```
+```bash
 npx mikro-orm schema:create -r --fk-checks
 ```
 
 If an error appears, it will describe the nature of the connection problem, otherwise the database and tables are all setup.
 
+</li>
+<li>
+
 Now it should be possible to test that everything is working correctly by building and starting the backend. Run these commands in the `/backend` subdirectory and `Nest application successfully started` should appear.
 
-```
+```bash
 npm run build && npm run start
 ```
 
 <img src="images/production/setup_2.png" />
 
-### Installing Nginx
+</li>
+</ol>
 
-The backend and frontend run by default on the local ports of 3000 and 8080 respectively. In order to expose those ports to the internet and map them to their respective domains NGINX acts as a proxy. Run the following commands to update the Ubuntu repositories and then install Nginx.
+### 5. Installing Nginx
 
-```
+The backend and frontend run by default on the local ports of 3000 and 8080 respectively. In order to expose those ports to the internet and map them to their respective domains NGINX acts as a proxy.
+
+<ol>
+  <li>
+Run the following commands to update the Ubuntu repositories and then install Nginx.
+
+```bash
 sudo apt update && sudo apt install nginx
 ```
 
+  </li>
+  <li>
+
 Test that Nginx is running by looking for `active (running)` after the following command. You can also visit the IP address of the virtual machine and you should see a `Welcome to nginx!` message.
 
-```
-systemctl status nginx
+```bash
+sudo systemctl status nginx
 ```
 
-Next we need to connect the virtual machine to the domains for the frontend and backend. In your domain registrar, add a new `A` record for the `app` and `api` subdomain both pointing to the IP of the virtual machine. Before continuing the DNS needs to propagate these changes, to ensure they are already propagated you may use the `dig api.<domain>` command to ensure the `A` record and IP address are listed correctly.
+  </li>
+  <li>
 
+Next we need to connect the virtual machine to the domains for the frontend and backend. In your domain registrar, add a new `A` record for the `app` and `api` subdomain both pointing to the IP of the virtual machine. Before continuing the DNS needs to propagate these changes, to ensure they are already propagated you may use the `dig <subdomain>.<domain>` command to ensure the `A` record and IP address are listed correctly.
+
+This step is unique to your registrar and is not difficult to do find through Google if you need assistance.
+
+  </li>
+  <li>
 Once that is done, we need to tell Nginx about these two domains.
 
-```
+```bash
 sudo touch /etc/nginx/sites-available/api.johng.dev
 sudo touch /etc/nginx/sites-available/app.johng.dev
 ```
 
-Then we need to link these files from the available sites to the enabled sites.
+  </li>
+  <li>
+Create a symlink from the available sites to the enabled sites. This is what tells Nginx which server blocks to use.
 
-```
+```bash
 sudo ln -s /etc/nginx/sites-available/api.johng.dev /etc/nginx/sites-enabled/
 sudo ln -s /etc/nginx/sites-available/app.johng.dev /etc/nginx/sites-enabled/
 ```
 
-We now need to configure each server block.
-
-```
-sudo nano /etc/nginx/sites-available/api.johng.dev
-```
+  </li>
+  <li>
 
 Copy the following information into the server block. Be sure to set the correct `server_name`.
 
+```bash
+sudo nano /etc/nginx/sites-available/api.johng.dev
 ```
+
+```nginx
 server {
   listen 80;
   listen [::]:80;
@@ -378,13 +415,16 @@ server {
 }
 ```
 
+  </li>
+  <li>
+
 Then do the same for the other file.
 
-```
+```bash
 sudo nano /etc/nginx/sites-available/app.johng.dev
 ```
 
-```
+```nginx
 map $sent_http_content_type $expires {
   "text/html" epoch;
   "text/html; charset=utf-8" epoch;
@@ -420,54 +460,81 @@ server {
 }
 ```
 
+  </li>
+  <li>
+
 Then we want to make sure that Nginx will accept the configuration. Run `sudo nginx -t` and make sure there are no errors. Nginx is particular about the format of the server block files.
 
 If the configuration is valid we can reload Nginx.
 
-```
+```bash
 sudo systemctl reload nginx
 ```
 
-From here we want to setup LetsEncrypt to enable SSL.
+  </li>
+</ol>
 
-```
+### 6. Configuring LetsEncrypt
+
+Default HTTP traffic is not secure. If for no other reason, PayPal will not allow HTTP traffic to their service and modern browsers such as Chrome will show obtrusive warnings to users on websites that have not properly adopted HTTPS traffic. We can acheive this for free and easily using [LetsEncrypt](https://letsencrypt.org/).
+
+<ol>
+<li>
+
+Install the _Certbot_ tool used to generate LetsEncrypt certificates.
+
+```bash
 sudo apt install certbot python3-certbot-nginx
 ```
 
-Once that is installed we can run Certbot for both domains.
+</li>
+<li>
 
-```
+Run Certbot and supply both subdomains.
+
+```bash
 sudo certbot --nginx -d api.johng.dev -d app.johng.dev
 ```
+
+</li>
+<li>
 
 It will ask for some basic information and terms of service agreeances. However, if everything is successful it will complete the registraion for both domains. It will ask if you want to redirect HTTP traffic to HTTPS traffic, and we do, but we'll modify this ourselves so select option 1.
 
 <img src="images/production/setup_3.png" />
 
-Here we will open both block files again and make some minor changes.
+</li>
+<li>
 
-```
+We now need to open both block files again and remove the ability to connect on the unsecured HTTP traffic.
+
+```bash
 sudo nano /etc/nginx/sites-available/api.johng.dev
-...
 sudo nano /etc/nginx/sites-available/app.johng.dev
 ```
 
 Remove the following lines from _both_ files.
 
-```
-  listen 80;
-  listen [::]:80;
+```nginx
+listen 80;
+listen [::]:80;
 ```
 
-Then we need to remove the default configuration file from the list of enabled sites by removing its symlink. The default configuration file will still be available under `/etc/nginx/sites-available` for reference.
+</li>
+<li>
 
-```
+The default configuration file is no longer necessary and can be disabled by removing its symlink. It will still be available under `/etc/nginx/sites-available` for reference.
+
+```bash
 sudo rm /etc/nginx/sites-enabled/default
 ```
 
-Next, we the present configuration will not allow any non-SSL (HTTPS) traffic. We will want to ensure that we redirect HTTP to HTTPS and also allow Certbot to renew using only HTTP using a third server block.
+</li>
+<li>
 
-```
+The present configuration will not allow any non-SSL (HTTPS) traffic. The issue with this is if a user does not specify `https://` in the url they will receive an error. Similarly, Certbot renews the certificate using regular HTTP. We can kill two birds with one stone using a catch-all Nginx server block that will allow Certbot challenges and redirecting all other traffic to HTTPS.
+
+```bash
 sudo touch /etc/nginx/sites-available/certbot
 sudo nano /etc/nginx/sites-available/certbot
 ```
@@ -489,53 +556,72 @@ server {
 }
 ```
 
+</li>
+<li>
+
 Create a symlink to enable the new block.
 
-```
+```bash
 sudo ln -s /etc/nginx/sites-available/certbot /etc/nginx/sites-enabled/
 ```
 
+</li>
+<li>
+
 Ensure that the configuration is valid.
 
-```
+```bash
 sudo nginx -t
 ```
 
+</li>
+<li>
+
 Restart Nginx
 
-```
+```bash
 sudo systemctl reload nginx
 ```
 
+</li>
+<li>
+
 LetsEncrypt certificates only last 90 days or so, so we want to make sure the Certbot installed the services to auto-renew the certificate for us. Verify that the following service reports `active (waiting)`.
 
-```
+```bash
 sudo systemctl status certbot.timer
 ```
 
+</li>
+<li>
+
 Also make sure the following dry-run of a Certbot renewal works correctly. This ensures our Nginx sites are configured properly.
 
-```
+```bash
 sudo certbot renew --dry-run
 ```
 
+</li>
+<li>
+
 We can quickly test that everything is setup by starting the backend server and going to `https://api.johng.dev/`.
 
-```
-cd ~/app/backend # Or wherever it was installed
-```
-
-```
-npm run start
+```bash
+cd ~/app/backend && npm run build && npm run start
 ```
 
-The following text should be displayed when visiting `https://api.johng.dev/` (or similar for your domain).
+The following text should be displayed when visiting the API subdomain.
 
-```
+```JSON
 {"statusCode":404,"message":"Cannot GET /","error":"Not Found"}
 ```
 
-This is a JSON API response, meaning the backend is successfully operational. Also ensure that the little lock icon by the address bar indicates a secure SSL connection. You should be able to now open a second terminal while the backend code is running and test that `https://app.johng.dev/` is working by starting the frontend.
+This is a JSON API response, meaning the backend is successfully operational. Also ensure that the little lock icon by the address bar indicates a secure SSL connection.
+
+</li>
+<li>
+
+Open a second terminal while the backend is still running and test that `https://app.johng.dev/` is working by starting the frontend.
 
 <alert type="warning">
 
@@ -544,43 +630,62 @@ The frontend may take a considerable amount of time to build. So while it may ap
 </alert>
 
 ```
-cd ~/app/frontend
-```
-
-```
-npm run build && npm run start
+cd ~/app/frontend && npm run build && npm run start
 ```
 
 <img src="images/production/setup_4.png" />
 
 Now visit `https://app.johng.dev` (`https://app.orlandomathcircle.org`) in the browser and it should show the app landing page. Also verify that the browser indicates the connection is secure.
 
+</li>
+</ol>
+
 ### Configuring PM2
 
-The virtual machine can manage starting and restarting the frontend and backend on its own through the use of the PM2 Node.js library. From anywhere, we can install PM2 globally.
+Is is not convenient to manually start the frontend and backend. The virtual machine can manage starting and restarting both on its own through the use of the [PM2 Node.js library](https://pm2.keymetrics.io/).
 
-```
+<ol>
+<li>
+While still on the `app` user, run the following command to install pm2 globally.
+
+```bash
 npm install -g pm2
 ```
 
-We can now add the frontend and backend to be managed by PM2. Stop the currently running frontend and backend before running the next commands.
+</li>
+<li>
 
-```
+Now we can instruct PM2 to manage starting the frontend and backend.
+
+<alert type="warning">
+
+Stop the the frontend and backend if they are currently running before executing the following commands.
+
+</alert>
+
+```bash
 cd ~/app/backend && pm2 start npm --name "backend" -- start
 cd ~/app/frontend && pm2 start npm --name "frontend" -- start
 ```
 
+</li>
+<li>
+
 PM2 will now ensure that the frontend and backend stay running and restart if they close for whatever reason. Logs for each can be viewed with `pm2 logs <name|id|all>`. However, PM2 will need to configure a startup script to handle the case when the virtual machine itself restarts or crashes and reboots.
 
-```
+```bash
 pm2 startup
 ```
 
-It will print out the command you need to copy and paste to enable the startup script. Run that command and you're done.
+It will print out the command you need to copy and paste to enable the startup script. The command is a `sudo` command and cannot be run on the `app` user so switch to your regular account. It is visible in the command that pm2 will be started as the `app` user when the system restarts.
+
+</li>
 
 ### Final Steps
 
-There are a couple remaining steps to setting up the application. By default the backend is expecting to host static files itself. Ideally this may be best handled by Nginx for caching reasons if the new team wishes to undertake this change. Uploads are not stored within the directory containing the application code as it's meant to be a volatile directory where changes to the code can mess with directories. Thus, by default the backend will create an `uploads` directory at the same level as the folder where the code is stored and we need to copy the default avatar images into there.
+There are a couple remaining steps to setting up the application.
+
+By default the backend is expecting to host static files itself. Ideally this may be best handled by Nginx for caching reasons if the new team wishes to undertake this change. Uploads are not stored within the directory containing the application code as it's meant to be a volatile directory where changes to the code can mess with directories. Thus, by default the backend will create an `uploads` directory at the same level as the folder where the code is stored and we need to copy the default avatar images into there.
 
 ```
 cp -R ~/app/images/defaults ~/uploads
