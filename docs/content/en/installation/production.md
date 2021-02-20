@@ -459,6 +459,42 @@ Remove the following lines from _both_ files.
   listen [::]:80;
 ```
 
+Then we need to remove the default configuration file from the list of enabled sites by removing its symlink. The default configuration file will still be available under `/etc/nginx/sites-available` for reference.
+
+```
+sudo rm /etc/nginx/sites-enabled/default
+```
+
+Next, we the present configuration will not allow any non-SSL (HTTPS) traffic. We will want to ensure that we redirect HTTP to HTTPS and also allow Certbot to renew using only HTTP using a third server block.
+
+```
+sudo touch /etc/nginx/sites-available/certbot
+sudo nano /etc/nginx/sites-available/certbot
+```
+
+Paste and save the following. Note that `server_name _;` is not an error but a catch-all.
+
+```nginx
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+
+  server_name _;
+
+  location /.well-known/acme-challenge/ {
+    try_files $uri =404;
+  }
+
+  return 301 https://$host$request_uri;
+}
+```
+
+Create a symlink to enable the new block.
+
+```
+sudo ln -s /etc/nginx/sites-available/certbot /etc/nginx/sites-enabled/
+```
+
 Ensure that the configuration is valid.
 
 ```
