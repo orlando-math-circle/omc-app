@@ -1,0 +1,55 @@
+---
+title: Backend
+description: Videos and instructionals on the backend technologies.
+category: Tutorials
+position: 11
+---
+
+These videos are a progression showing the basic concepts of the NestJS backend in practice. As explained in the <a href="tutorials/introduction">tutorial introduction</a> these are not requirements or meant to be implied as best practices. They are meant to help explain the thought process going into how the first team developed the application.
+
+## NestJS Part 1 - Basics
+
+<style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style><div class='embed-container'><iframe src='https://www.youtube.com/embed/wPT7_jb5Rn0' frameborder='0' allowfullscreen></iframe></div>
+
+NestJS provides powerful injection capabilities, a modular project structure that leads to <a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself" target="_blank">DRY</a> code, and ties together all of the important fundamentals necessary for developing a server. The [NestJS documentation](https://docs.nestjs.com/) is a great place to visit when a new technique or solution is needed to a common problem.
+
+This introductory video covers basics of [modules](https://docs.nestjs.com/modules), [controllers](https://docs.nestjs.com/controllers), [providers (services)](https://docs.nestjs.com/providers) and the [validation technique](https://docs.nestjs.com/techniques/validation) employed by this application through a basic in-memory example of the [CRUD](https://www.codecademy.com/articles/what-is-crud) actions.
+
+## NestJS Part 2 - Database
+
+<style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style><div class='embed-container'><iframe src='https://www.youtube.com/embed/AOS-uxRd93k' frameborder='0' allowfullscreen></iframe></div>
+
+PostgreSQL provides a modern and performant DBMS (database) with features we desired such as JSON datatype support, meaning we could store amorphous blobs of JSON into the database similar to MongoDB if necessary. However, databases are inherently complex with intricate indexing decisions and query optimizations. For the nature of this application most of that is largely irrelevant, allowing us to utilize a developer-friendly ORM (Object Relational Mapper) with [MikroORM](https://mikro-orm.io/). ORMs translate the database tables into objects usable by the language the server is operating in, and back again.
+
+MikroORM is highly extensible and supports fallback to [Knex.js](http://knexjs.org/) which can build SQL queries using easily-understood methods, and further fallback to raw SQL. One distinguishing feature of MikroORM is it wraps all changes in a single transaction meaning that either the entire request succeeds, regardless of how many changes are made, or no changes are made if anything fails.
+
+This video covers [defining entities](https://mikro-orm.io/docs/defining-entities), working with `persist()` and `flush()` in the [entity manager](https://mikro-orm.io/docs/entity-manager) and basic explanations of the [unit of work](https://mikro-orm.io/docs/unit-of-work).
+
+## NestJS Part 3 - Relationships
+
+<style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style><div class='embed-container'><iframe src='https://www.youtube.com/embed/677-rFZj1GE' frameborder='0' allowfullscreen></iframe></div>
+
+In this video we devlve into [modeling entity relationships](https://mikro-orm.io/docs/relationships), a little on [collections](https://mikro-orm.io/docs/collections), and [cascading](https://mikro-orm.io/docs/cascading) and associated pitfalls. MikroORM supports the following relationships:
+
+<ul>
+<li>
+
+[Many To One](https://mikro-orm.io/docs/relationships#manytoone) - Many instances of the current Entity refer to One instance of the referred Entity.
+
+</li>
+<li>
+
+[One To Many](https://mikro-orm.io/docs/relationships#onetomany) - One instance of the current Entity has Many instances (references) to the referred Entity.
+
+</li>
+<li>
+
+[One To One](https://mikro-orm.io/docs/relationships#onetoone) - One instance of the current Entity refers to One instance of the referred Entity.
+
+</li>
+<li>
+
+[Many to Many](https://mikro-orm.io/docs/relationships#manytomany) - Many instances of the current Entity refers to Many instances of the referred Entity.
+
+</li>
+</ul>

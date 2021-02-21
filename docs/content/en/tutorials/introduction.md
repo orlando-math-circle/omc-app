@@ -1,0 +1,65 @@
+---
+title: Introduction
+description: The basics of the technologies used within the application.
+category: Tutorials
+position: 10
+---
+
+This section provides resources for the base technologies and explanations of the design fundamentals of the application.
+
+<alert type="info">
+
+These resources are not requirements or ubiquitous best practices. This information is provided as-is in the hopes they are helpful to anyone who may need them, or to provide valuable insights as to how and why the application was built the way it was.
+
+</alert>
+
+## Technologies
+
+The individual technologies that make up the application and recommended resources.
+
+<ul>
+<li>
+
+JavaScript is the programming language of the server and browser environment.
+
+Tutorial: [The Modern JavaScript Tutorial](https://javascript.info/)
+Interactive and Game-based Learning: [Computing | Khan Academy](https://www.khanacademy.org/computing)
+
+</li>
+<li>
+
+TypeScript is an extension of JavaScript that provides types to the language to help catch more errors before ever running the code often without needing to do anything but write regular JavaScript.
+
+Tutorial: [TypeScript Deep Dive: Why TypeScript?](https://basarat.gitbook.io/typescript/getting-started/why-typescript), [TypeScript Deep Dive: TypeScript's Type System](https://basarat.gitbook.io/typescript/type-system)
+Reference Guide: [TypeScript Docs](https://www.typescriptlang.org/docs/)
+
+</li>
+<li>
+
+Promises and Async/Await are the way to handle asynchronous actions such as collecting external data, communicating with the database, or the frontend requesting something of the backend.
+
+Tutorial: [MDN Web Docs: Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises), [MDN Web Docs: Async/Await](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await), [Jake Archibald: In The Loop](https://www.youtube.com/watch?v=cCOL7MC4Pl0)
+
+</li>
+<li>
+
+HTML and CSS, the scaffolding and styling of web pages. Regardless of how much JavaScript you pour into a page, at the end of all of those calculations you're left with HTML, CSS, and of course any multimedia.
+
+Tutorial: [MDN: Structuring the web with HTML](https://developer.mozilla.org/en-US/docs/Learn/HTML), [The Ultimate Guide to CSS](https://medium.com/level-up-web/the-ultimate-guide-to-css-103b0f883de3)
+
+</li>
+<li>
+
+[NestJS](https://nestjs.com/), an opinionated wrapper that extends on the [Express.js](https://expressjs.com/) API framework. Covered more in-depth in the <a href="/tutorials/backend">backend</a> section.
+
+</li>
+<li>
+
+[NuxtJS](https://nuxtjs.org/), a wrapper on the [Vue.js](https://vuejs.org/) framework for building component-based websites. Covered more in-depth in the <a href="/tutorials/frontend">frontend</a> section.
+
+</li>
+</ul>
+
+## Further Reading
+
+Dozens of pages are spent describing the reasoning and core functionalities of our chosen technologies in the design documents.
