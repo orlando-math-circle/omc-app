@@ -2,10 +2,10 @@
 title: Backend
 description: Videos and instructionals on the backend technologies.
 category: Tutorials
-position: 11
+position: 10
 ---
 
-These videos are a progression showing the basic concepts of the NestJS backend in practice. As explained in the <a href="tutorials/introduction">tutorial introduction</a> these are not requirements or meant to be implied as best practices. They are meant to help explain the thought process going into how the first team developed the application.
+These videos are a progression showing the basic concepts of the NestJS backend in practice. As explained in <a href="tutorials/stack">stack</a> these are not requirements or meant to be implied as best practices. They are meant to help explain the thought process going into how the first team developed the application.
 
 ## NestJS Part 1 - Basics
 

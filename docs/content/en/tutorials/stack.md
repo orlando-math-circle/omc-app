@@ -1,8 +1,8 @@
 ---
-title: Introduction
+title: Stack
 description: The basics of the technologies used within the application.
 category: Tutorials
-position: 10
+position: 9
 ---
 
 This section provides resources for the base technologies and explanations of the design fundamentals of the application.
@@ -56,6 +56,16 @@ Tutorial: [MDN: Structuring the web with HTML](https://developer.mozilla.org/en-
 <li>
 
 [NuxtJS](https://nuxtjs.org/), a wrapper on the [Vue.js](https://vuejs.org/) framework for building component-based websites. Covered more in-depth in the <a href="/tutorials/frontend">frontend</a> section.
+
+</li>
+<li>
+
+[PostgreSQL](https://www.postgresql.org/) and [MikroORM](https://mikro-orm.io/) form the data layer of the application with a decorator-based entity scaffolding, schema migration system, powerful querying tools, and peace of mind through the unit of work and implicit transactions.
+
+</li>
+<li>
+
+[NGINX](https://www.nginx.com/) is a web server and reverse proxy allowing for configuring the behaviors of the webservers through a powerful and descriptive block system.
 
 </li>
 </ul>
