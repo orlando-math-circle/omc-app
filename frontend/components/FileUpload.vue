@@ -98,7 +98,7 @@
         </v-toolbar>
 
         <div class="cropper-wrapper">
-          <img ref="cropper" :src="objectURL" />
+          <image ref="cropper" :src="objectURL" />
         </div>
 
         <v-card-actions>

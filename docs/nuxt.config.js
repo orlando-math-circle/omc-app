@@ -3,10 +3,22 @@ import { withDocus } from "docus";
 export default withDocus({
   docus: {
     colors: {
-      primary: "#E25F55"
+      primary: "#8E75FF",
+      code: "#06B6D4"
     }
   },
-  env: {
-    GITHUB_TOKEN: process.env.GITHUB_TOKEN
+  components: true,
+  router: {
+    base: "/omc-app/"
+  },
+  /**
+   * Workaround for subdirectory routing breaking anchors.
+   *
+   * @see https://github.com/nuxt/content/issues/376
+   */
+  hooks: {
+    "vue-renderer:ssr:templateParams": function(params) {
+      params.HEAD = params.HEAD.replace('<base href="/omc-app/">', "");
+    }
   }
 });

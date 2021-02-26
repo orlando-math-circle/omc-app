@@ -1,10 +1,11 @@
 {
   "title": "OMC Documentation",
+  "url": "https://duckies.github.io/omc-app",
   "github": {
     "repo": "duckies/omc-app",
     "branch": "master",
     "dir": "docs",
     "releases": false
   },
-  "url": "https://duckies.github.io/omc-app"
+  "twitter": "@orlandomathcir"
 }
