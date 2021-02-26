@@ -1,9 +1,10 @@
 {
-  "title": "Orlando Math Circle",
-  "github": "duckies/omc-app",
-  "url": "https://duckies.github.io/omc-app",
-  "logo": {
-    "light": "images/logo-light.svg",
-    "dark": "images/logo-dark.svg"
-  }
+  "title": "OMC Documentation",
+  "github": {
+    "repo": "duckies/omc-app",
+    "branch": "master",
+    "dir": "docs",
+    "releases": false
+  },
+  "url": "https://duckies.github.io/omc-app"
 }
