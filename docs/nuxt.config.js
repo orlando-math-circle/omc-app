@@ -7,7 +7,6 @@ export default withDocus({
       code: "#06B6D4"
     }
   },
-  components: true,
   router: {
     base: "/omc-app/"
   },
