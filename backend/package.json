@@ -29,7 +29,7 @@
     "@mikro-orm/nestjs": "4.2.0",
     "@mikro-orm/postgresql": "4.3.3-dev.6",
     "@mikro-orm/sql-highlighter": "1.0.1",
-    "@nestjs/common": "7.5.5",
+    "@nestjs/common": "7.6.5",
     "@nestjs/config": "0.6.1",
     "@nestjs/core": "7.5.5",
     "@nestjs/jwt": "7.2.0",
