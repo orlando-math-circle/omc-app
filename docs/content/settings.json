@@ -7,5 +7,10 @@
     "dir": "docs",
     "releases": false
   },
-  "twitter": "@orlandomathcir"
+  "twitter": "@orlandomathcir",
+  "algolia": {
+    "apiKey": "c79d7b2e5577a0b94115688d1f6608b6",
+    "indexName": "omc",
+    "langAttribute": "language"
+  }
 }
