@@ -1,16 +1,5 @@
 {
-  "title": "OMC Documentation",
-  "url": "https://duckies.github.io/omc-app",
-  "github": {
-    "repo": "duckies/omc-app",
-    "branch": "master",
-    "dir": "docs",
-    "releases": false
-  },
-  "twitter": "@orlandomathcir",
-  "algolia": {
-    "apiKey": "c79d7b2e5577a0b94115688d1f6608b6",
-    "indexName": "omc",
-    "langAttribute": "language"
-  }
+  "title": "OMC Docs",
+  "url": "https://orlando-math-circle.github.io/omc-app",
+  "repo": "orlando-math-circle/omc-app"
 }

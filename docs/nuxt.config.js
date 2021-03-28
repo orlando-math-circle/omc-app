@@ -3,15 +3,13 @@ import { withDocus } from "docus";
 export default withDocus({
   docus: {
     colors: {
-      primary: "#8E75FF",
-      code: "#06B6D4"
+      primary: "#8E75FF"
     }
   },
   router: {
     base: "/omc-app/"
   },
-  /**
-   * Workaround for subdirectory routing breaking anchors.
+  /* Workaround for subdirectory routing breaking anchors.
    *
    * @see https://github.com/nuxt/content/issues/376
    */
