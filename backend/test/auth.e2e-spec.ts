@@ -332,25 +332,28 @@ describe('Auth', () => {
     });
   });
 
-  describe('POST /forgot', () => {
+  describe('POST /password/forgot', () => {
     it('should still succeed on invalid emails', async () => {
       await request(app.getHttpServer())
-        .post('/forgot')
+        .post('/password/forgot')
         .send({ email: 'not@real.com' })
         .expect(201);
     });
 
     it('should send an email to the user', async () => {
-      const spy = jest.spyOn(EmailService.prototype, 'email');
+      const spy = jest.spyOn(EmailService.prototype, 'send');
 
       await request(app.getHttpServer())
-        .post('/forgot')
+        .post('/password/forgot')
         .send({ email: 'jane@doe.com' })
         .expect(201);
 
       expect(spy).toBeCalled();
-      expect(typeof spy.mock.calls[0][1]).toBe('string');
-      forgotToken = spy.mock.calls[0][2];
+      const email = spy.mock.calls[0][0].toSendGridRequest();
+
+      forgotToken = email.dynamicTemplateData.url.split('=')[1];
+
+      expect(email.to).toBe('jane@doe.com');
     });
   });
 
@@ -385,14 +388,16 @@ describe('Auth', () => {
     });
   });
 
-  describe('POST /reset', () => {
+  describe('POST /password/reset', () => {
     it("should change the user's password", async () => {
       const beforeUser = await orm.em.findOne(User, { id: 1 });
 
       expect(beforeUser).toBeDefined();
 
+      const initialPassword = beforeUser.password;
+
       await request(app.getHttpServer())
-        .post('/reset')
+        .post('/password/reset')
         .send({ token: forgotToken, password: 'banana' })
         .expect(201);
 
@@ -402,7 +407,7 @@ describe('Auth', () => {
       const user = await orm.em.findOne(User, { id: 1 });
 
       expect(user).toBeDefined();
-      expect(user.password).not.toBe('banana');
+      expect(user.password).not.toBe(initialPassword);
       expect(beforeUser.password).not.toBe(user.password);
     });
   });
