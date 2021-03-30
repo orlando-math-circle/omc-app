@@ -17,6 +17,10 @@ import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
 import { BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
 import { Email } from '../email/email.class';
+import {
+  SENDGRID_RESET_TEMPLATE,
+  SENDGRID_VERIFY_TEMPLATE,
+} from '../email/email.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -230,8 +234,8 @@ export class AuthService {
     });
 
     this.emailService.send(
-      new Email(user.email, 'OMC Email Verification', {
-        templateId: 'd-f182620740c14eaf9f20e9203a77568a',
+      new Email(user.email, 'Verify Your Email', {
+        templateId: SENDGRID_VERIFY_TEMPLATE,
         templateData: {
           name: user.name,
           url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
@@ -313,8 +317,8 @@ export class AuthService {
     );
 
     this.emailService.send(
-      new Email(user.email, 'OMC Password Reset', {
-        templateId: 'd-58bb9c551bee49dabbd026a675c27fdf',
+      new Email(user.email, 'Reset Your Password', {
+        templateId: SENDGRID_RESET_TEMPLATE,
         templateData: {
           name: user.name,
           url: `${this.config.get(FRONTEND_URL)}/forgot?token=${token}`,

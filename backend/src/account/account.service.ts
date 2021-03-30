@@ -15,6 +15,7 @@ import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
 import { Email } from '../email/email.class';
+import { SENDGRID_VERIFY_TEMPLATE } from '../email/email.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -73,8 +74,8 @@ export class AccountService {
     });
 
     this.emailService.send(
-      new Email(user.email, 'OMC Email Verification', {
-        templateId: 'd-e3e3d4a4a44b47c28bed4628f6e7fb14',
+      new Email(user.email, 'Verify Your Email', {
+        templateId: SENDGRID_VERIFY_TEMPLATE,
         templateData: {
           first_name: user.first,
           verify_link: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,

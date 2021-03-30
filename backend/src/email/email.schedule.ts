@@ -8,6 +8,7 @@ import { Event } from '../event/event.entity';
 import { ReminderFreq } from '../user/enums/reminder-freq.enum';
 import { User } from '../user/user.entity';
 import { Email } from './email.class';
+import { SENDGRID_REMIND_TEMPLATE } from './email.constants';
 import { EmailService } from './email.service';
 
 type Ranges = {
@@ -87,19 +88,20 @@ export class EmailScheduler {
       const personalizations: PersonalizationData[] = users.map((u) => ({
         to: u.email,
         dynamicTemplateData: {
-          name: u.name,
-          unsubscribe: 'test',
+          first_name: u.first,
+          unsubscribe_link: 'example1',
+          manage_link: 'example2',
         },
       }));
 
       await this.emailService.send(
-        new Email(personalizations, 'OMC Event Reminder', {
-          templateId: 'd-6544dfe341564100a02cef9cf9ef1842',
+        new Email(personalizations, 'Event Reminder', {
+          templateId: SENDGRID_REMIND_TEMPLATE,
           templateData: {
-            event: event.name,
-            date: format(event.dtstart, 'EEEE, LLLL do, yyyy'),
-            time: format(event.dtstart, 'h:mm aaaa'),
-            location: event.location,
+            event_title: event.name,
+            event_description: event.description,
+            event_location: event.location,
+            event_time: format(event.dtstart, 'EEEE, LLLL do, yyyy h:mm aaaa'),
           },
         }),
       );
