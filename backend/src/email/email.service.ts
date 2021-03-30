@@ -22,7 +22,7 @@ export class EmailService {
     try {
       await this.mailer.send(email.toSendGridRequest());
     } catch (error) {
-      this.logger.error(`Failed: ${error}`);
+      this.logger.error(error);
     }
   }
 }

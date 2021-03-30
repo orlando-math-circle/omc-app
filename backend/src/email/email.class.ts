@@ -190,7 +190,7 @@ export class Email {
    * @throws {BadRequestException} Throws if the email is not qualified.
    */
   public validate() {
-    if (!this.to || !this.personalizations) {
+    if (!this.to && !this.personalizations) {
       throw new BadRequestException('Email lacks recipient(s)');
     }
 
@@ -198,7 +198,7 @@ export class Email {
       throw new BadRequestException('Email lacks sender');
     }
 
-    if (!this.html || !this.template) {
+    if (!this.html && !this.template) {
       throw new BadRequestException('Email lacks HTML and template');
     }
   }
