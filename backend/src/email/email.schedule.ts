@@ -1,11 +1,13 @@
 import { MikroORM } from '@mikro-orm/core';
 import { UseRequestContext } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, Timeout } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
+import { PersonalizationData } from '@sendgrid/helpers/classes/personalization';
 import { add, format, roundToNearestMinutes } from 'date-fns';
 import { Event } from '../event/event.entity';
 import { ReminderFreq } from '../user/enums/reminder-freq.enum';
 import { User } from '../user/user.entity';
+import { Email } from './email.class';
 import { EmailService } from './email.service';
 
 type Ranges = {
@@ -82,23 +84,24 @@ export class EmailScheduler {
     }
 
     for (const [event, { freq, users }] of map) {
-      await this.emailService.email(
-        users.map((user) => ({
-          to: user.email,
-          dynamicTemplateData: {
-            name: user.name,
-            unsubscribe: 'test',
-          },
-        })),
-        'OMC Event Reminder',
-        null,
-        'd-6544dfe341564100a02cef9cf9ef1842',
-        {
-          event: event.name,
-          date: format(event.dtstart, 'EEEE, LLLL do, yyyy'),
-          time: format(event.dtstart, 'h:mm aaaa'),
-          location: event.location,
+      const personalizations: PersonalizationData[] = users.map((u) => ({
+        to: u.email,
+        dynamicTemplateData: {
+          name: u.name,
+          unsubscribe: 'test',
         },
+      }));
+
+      await this.emailService.send(
+        new Email(personalizations, 'OMC Event Reminder', {
+          templateId: 'd-6544dfe341564100a02cef9cf9ef1842',
+          templateData: {
+            event: event.name,
+            date: format(event.dtstart, 'EEEE, LLLL do, yyyy'),
+            time: format(event.dtstart, 'h:mm aaaa'),
+            location: event.location,
+          },
+        }),
       );
 
       event.notified.push(freq);

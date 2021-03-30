@@ -14,6 +14,7 @@ import { ADMIN_EMAIL, BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
 import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
+import { Email } from '../email/email.class';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -71,15 +72,14 @@ export class AccountService {
       expiresIn: '2 days',
     });
 
-    this.emailService.email(
-      { to: user.email },
-      'OMC: Email Verification',
-      undefined,
-      'd-f182620740c14eaf9f20e9203a77568a',
-      {
-        name: user.name,
-        url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
-      },
+    this.emailService.send(
+      new Email(user.email, 'OMC Email Verification', {
+        templateId: 'd-e3e3d4a4a44b47c28bed4628f6e7fb14',
+        templateData: {
+          first_name: user.first,
+          verify_link: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
+        },
+      }),
     );
 
     return this.authService.login(account, user);

@@ -16,6 +16,7 @@ import jwt from 'jsonwebtoken';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
 import { BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
+import { Email } from '../email/email.class';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -228,15 +229,14 @@ export class AuthService {
       expiresIn: '2 days',
     });
 
-    this.emailService.email(
-      { to: user.email },
-      'OMC: Email Verification',
-      undefined,
-      'd-f182620740c14eaf9f20e9203a77568a',
-      {
-        name: user.name,
-        url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
-      },
+    this.emailService.send(
+      new Email(user.email, 'OMC Email Verification', {
+        templateId: 'd-f182620740c14eaf9f20e9203a77568a',
+        templateData: {
+          name: user.name,
+          url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
+        },
+      }),
     );
   }
 
@@ -312,15 +312,14 @@ export class AuthService {
       `${user.password}${this.config.get('SECRET')}`,
     );
 
-    this.emailService.email(
-      { to: user.email },
-      'OMC: Password Reset',
-      undefined,
-      'd-58bb9c551bee49dabbd026a675c27fdf',
-      {
-        name: user.name,
-        url: `${this.config.get(FRONTEND_URL)}/forgot?token=${token}`,
-      },
+    this.emailService.send(
+      new Email(user.email, 'OMC Password Reset', {
+        templateId: 'd-58bb9c551bee49dabbd026a675c27fdf',
+        templateData: {
+          name: user.name,
+          url: `${this.config.get(FRONTEND_URL)}/forgot?token=${token}`,
+        },
+      }),
     );
   }
 
