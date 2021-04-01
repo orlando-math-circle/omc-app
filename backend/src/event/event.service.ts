@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DEFAULT_EVENT_PICTURE } from '../app.constants';
+import { ConfigSchema } from '../app.config';
 import {
   addMinutes,
   getMinDate,
@@ -41,7 +41,7 @@ export class EventService {
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
     private readonly courseService: CourseService,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService<ConfigSchema>,
   ) {}
 
   /**
@@ -85,7 +85,7 @@ export class EventService {
     }
 
     if (!event.picture) {
-      event.picture = this.config.get(DEFAULT_EVENT_PICTURE);
+      event.picture = this.config.get('DEFAULT_EVENT_PICTURE');
     }
 
     await this.eventRepository.persist(event).flush();
@@ -398,7 +398,9 @@ export class EventService {
     let recurrence: EventRecurrence;
 
     if (typeof idOrRecurrence === 'number') {
-      pivot = await this.eventRepository.findOneOrFail(
+      // This may not be the ideal pivot as we need the earliest
+      // event in a recurrence, regardless of the event selected.
+      const event = await this.eventRepository.findOneOrFail(
         idOrRecurrence,
         [
           'fee',
@@ -411,7 +413,8 @@ export class EventService {
         },
       );
 
-      recurrence = pivot.recurrence;
+      recurrence = event.recurrence;
+      pivot = event.recurrence.events[0];
     } else {
       recurrence = idOrRecurrence;
       pivot = recurrence.events[0];
@@ -440,6 +443,7 @@ export class EventService {
     const pivotCache = this.eventRepository.create({ ...pivot });
 
     if (!rrule) {
+      console.log(pivot, recurrence.events, dtend, meta);
       return this.setEventData(pivot, recurrence.events, dtend, meta);
     }
 

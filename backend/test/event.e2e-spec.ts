@@ -4,11 +4,11 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { addMonths } from 'date-fns';
+import Joi from 'joi';
 import moment from 'moment';
 import RRule, { Frequency } from 'rrule';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
-import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { isBeforeDay } from '../src/app.utils';
 import { AuthModule } from '../src/auth/auth.module';
@@ -44,8 +44,18 @@ describe('Events', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          validationSchema: testSchema,
+          validationSchema: Joi.object({
+            SECRET: Joi.string().default('test-secret'),
+            PAYPAL_SANDBOXED: Joi.boolean().default(true),
+            SENDGRID_SANDBOXED: Joi.boolean().default(true),
+            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            DEFAULT_EVENT_PICTURE: Joi.string().default(
+              '/defaults/neon-math.jpg',
+            ),
+            DEFAULT_AVATAR_FOLDER: Joi.string().default('/defaults/avatars'),
+          }),
           isGlobal: true,
+          ignoreEnvFile: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,

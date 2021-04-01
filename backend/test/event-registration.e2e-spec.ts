@@ -3,9 +3,9 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import Joi from 'joi';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
-import { testSchema } from '../src/app.config';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { CourseModule } from '../src/course/course.module';
@@ -19,7 +19,6 @@ import { SearchPipe } from '../src/shared/pipes/search.pipe';
 import { SortingPipe } from '../src/shared/pipes/sorting.pipe';
 import { UserModule } from '../src/user/user.module';
 import { VolunteerJobModule } from '../src/volunteer-job/volunteer-job.module';
-import { UserFixtures } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
 describe('Event Registrations', () => {
@@ -30,15 +29,25 @@ describe('Event Registrations', () => {
    * Testing Data
    */
 
-  let userFixtures: UserFixtures;
-  let token: string;
+  // let userFixtures: UserFixtures;
+  // let token: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          validationSchema: testSchema,
+          validationSchema: Joi.object({
+            SECRET: Joi.string().default('test-secret'),
+            PAYPAL_SANDBOXED: Joi.boolean().default(true),
+            SENDGRID_SANDBOXED: Joi.boolean().default(true),
+            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            DEFAULT_EVENT_PICTURE: Joi.string().default(
+              '/defaults/neon-math.jpg',
+            ),
+            DEFAULT_AVATAR_FOLDER: Joi.string().default('/defaults/avatars'),
+          }),
           isGlobal: true,
+          ignoreEnvFile: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
@@ -57,7 +66,7 @@ describe('Event Registrations', () => {
     app = moduleRef.createNestApplication();
     orm = moduleRef.get<MikroORM>(MikroORM);
 
-    userFixtures = new UserFixtures(app, orm);
+    // userFixtures = new UserFixtures(app, orm);
 
     const generator = orm.getSchemaGenerator();
     await generator.ensureDatabase();
@@ -85,7 +94,8 @@ describe('Event Registrations', () => {
      * Seeding Data
      */
 
-    token = await userFixtures.createAccount();
+    // Commented to avoid linting errors until these tests are written.
+    // token = await userFixtures.createAccount();
   });
 
   afterEach(() => {

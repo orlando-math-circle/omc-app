@@ -2,44 +2,12 @@
  * Base Configuration
  */
 
-export const PORT = 'PORT';
-export const USE_RRULE_CACHE = 'USE_RRULE_CACHE';
-export const SERVE_STATIC = 'SERVE_STATIC';
-export const ADMIN_EMAIL = 'ADMIN_EMAIL';
-export const FRONTEND_URL = 'FRONTEND_URL';
-
-/**
- * Defaults
- */
-export const DEFAULT_EVENT_PICTURE = 'DEFAULT_EVENT_PICTURE';
-export const DEFAULT_AVATAR_FOLDER = 'DEFAULT_AVATAR_FOLDER';
-
-/**
- * SendGrid API
- */
-export const SENDGRID_IN_DEV = 'SENDGRID_IN_DEV';
-export const SENDGRID_API_KEY = 'SENDGRID_API_KEY';
-
-/**
- * Twitter API
- */
-export const TWITTER_KEY = 'TWITTER_KEY';
-export const TWITTER_SECRET = 'TWITTER_SECRET';
-
-/**
- * File Storage
- */
-export const FILE_DIRECTORY = 'FILE_DIRECTORY';
-export const FORM_SUBDIRECTORY = 'FORM_SUBDIRECTORY';
 export const STORAGE_TOKEN = 'STORAGE_TOKEN';
 export const REDUCED_LUNCH_FIELD = 'REDUCED_LUNCH_FIELD';
 
 /**
  * PayPal
  */
-export const PAYPAL_SANDBOXED = 'PAYPAL_SANDBOXED';
-export const PAYPAL_CLIENT_ID = 'PAYPAL_CLIENT_ID';
-export const PAYPAL_SECRET_KEY = 'PAYPAL_SECRET_KEY';
 export const PAYPAL_EXP_THRESHOLD = 500;
 export const PAYPAL_SANDBOX_BASEURL = 'https://api.sandbox.paypal.com';
 export const PAYPAL_SANDBOX_WEBURL = 'https://www.sandbox.paypal.com';
