@@ -11,7 +11,7 @@ import { CONFIGURATION_SERVICE_TOKEN } from '@nestjs/config/dist/config.constant
 import { transformException } from '@nestjs/platform-express/multer/multer/multer.utils';
 import multer from 'multer';
 import { extname } from 'path';
-import { FILE_DIRECTORY } from '../../app.constants';
+import { ConfigSchema } from '../../app.config';
 import { FileStorage } from '../file.storage';
 
 type MulterInstance = any;
@@ -30,8 +30,10 @@ export function FileInterceptor(
     protected multer: MulterInstance;
     private fileStorage: FileStorage;
 
-    constructor(@Inject(CONFIGURATION_SERVICE_TOKEN) config: ConfigService) {
-      const fileStorage = new FileStorage(config.get(FILE_DIRECTORY), folder);
+    constructor(
+      @Inject(CONFIGURATION_SERVICE_TOKEN) config: ConfigService<ConfigSchema>,
+    ) {
+      const fileStorage = new FileStorage(config.get('FILE_DIRECTORY'), folder);
 
       this.multer = multer({
         storage: multer.diskStorage({

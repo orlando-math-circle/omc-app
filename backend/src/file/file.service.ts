@@ -6,7 +6,7 @@ import fs from 'fs';
 import { basename, extname, resolve } from 'path';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { FILE_DIRECTORY } from '../app.constants';
+import { ConfigSchema } from '../app.config';
 import { User } from '../user/user.entity';
 import { File } from './file.entity';
 import { MulterFile } from './interfaces/multer-file.interface';
@@ -22,9 +22,9 @@ export class FileService {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: EntityRepository<File>,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService<ConfigSchema>,
   ) {
-    this.path = resolve(config.get(FILE_DIRECTORY));
+    this.path = resolve(config.get('FILE_DIRECTORY'));
   }
 
   async create(
@@ -44,7 +44,7 @@ export class FileService {
         path: metadata.path.replace(/\\/g, '/'),
         root: metadata.path
           .replace(/\\/g, '/')
-          .replace(this.config.get(FILE_DIRECTORY), ''),
+          .replace(this.config.get('FILE_DIRECTORY'), ''),
         author: userOrId,
       }),
     );

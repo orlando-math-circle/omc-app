@@ -15,7 +15,8 @@ import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
-import { BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
+import { ConfigSchema } from '../app.config';
+import { BCRYPT_ROUNDS } from '../app.constants';
 import { Email } from '../email/email.class';
 import {
   SENDGRID_RESET_TEMPLATE,
@@ -42,7 +43,7 @@ export class AuthService {
     @Inject(forwardRef(() => AccountService))
     private readonly accountService: AccountService,
     private readonly emailService: EmailService,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService<ConfigSchema>,
     private readonly em: EntityManager,
   ) {}
 
@@ -238,7 +239,7 @@ export class AuthService {
         templateId: SENDGRID_VERIFY_TEMPLATE,
         templateData: {
           name: user.name,
-          url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
+          url: `${this.config.get('FRONTEND_URL')}/verify?token=${token}`,
         },
       }),
     );
@@ -321,7 +322,7 @@ export class AuthService {
         templateId: SENDGRID_RESET_TEMPLATE,
         templateData: {
           name: user.name,
-          url: `${this.config.get(FRONTEND_URL)}/forgot?token=${token}`,
+          url: `${this.config.get('FRONTEND_URL')}/forgot?token=${token}`,
         },
       }),
     );

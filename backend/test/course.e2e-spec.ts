@@ -3,9 +3,9 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import Joi from 'joi';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
-import { testSchema } from '../src/app.config';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -37,8 +37,18 @@ describe('Courses', () => {
     const module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          validationSchema: testSchema,
+          validationSchema: Joi.object({
+            SECRET: Joi.string().default('test-secret'),
+            PAYPAL_SANDBOXED: Joi.boolean().default(true),
+            SENDGRID_SANDBOXED: Joi.boolean().default(true),
+            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            DEFAULT_EVENT_PICTURE: Joi.string().default(
+              '/defaults/neon-math.jpg',
+            ),
+            DEFAULT_AVATAR_FOLDER: Joi.string().default('/defaults/avatars'),
+          }),
           isGlobal: true,
+          ignoreEnvFile: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         AccountModule,

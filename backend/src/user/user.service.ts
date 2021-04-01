@@ -11,11 +11,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import bcrypt from 'bcrypt';
+import { classToPlain } from 'class-transformer';
 import { eachWeekOfInterval, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
-import { BCRYPT_ROUNDS, DEFAULT_AVATAR_FOLDER } from '../app.constants';
+import { BCRYPT_ROUNDS } from '../app.constants';
 import { isBetweenInclusive, Populate, PopulateFail } from '../app.utils';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
@@ -25,7 +26,6 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
-import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -37,7 +37,7 @@ export class UserService {
     config: ConfigService,
   ) {
     for (let i = 0; i < 10; i++) {
-      this.avatars[i] = `${config.get(DEFAULT_AVATAR_FOLDER)}/${i}.png`;
+      this.avatars[i] = `${config.get('DEFAULT_AVATAR_FOLDER')}/${i}.png`;
     }
   }
 
