@@ -10,6 +10,6 @@ export class EmailController {
   @UserAuth('email', 'create:any')
   @Post()
   async email(@Body() { userIds, subject, body }: CreateEmailDto) {
-    // return this.emailService.custom(userIds, subject, body);
+    return this.emailService.sendBulk(userIds, subject, body);
   }
 }
