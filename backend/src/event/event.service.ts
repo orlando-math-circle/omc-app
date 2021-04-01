@@ -443,7 +443,6 @@ export class EventService {
     const pivotCache = this.eventRepository.create({ ...pivot });
 
     if (!rrule) {
-      console.log(pivot, recurrence.events, dtend, meta);
       return this.setEventData(pivot, recurrence.events, dtend, meta);
     }
 
