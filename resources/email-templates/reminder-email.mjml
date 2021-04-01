@@ -1,0 +1,99 @@
+<mjml>
+  <mj-head>
+    <mj-title>Event Reminder</mj-title>
+    <mj-font name="Roboto" href="https://fonts.googleapis.com/css?family=Roboto" />
+    <mj-attributes>
+      <mj-all font-family="Roboto, Helvetica, Arial, sans-serif" />
+      <mj-text font-weight="400" font-size="16px" color="#000000" line-height="24px" font-family="Roboto, Helvetica, Arial, sans-serif" />
+      <mj-class name="bg-blue" background-color="#44D9E6" />
+      <mj-class name="bg-pink" background-color="#FF4299" />
+      <mj-class name="link" color="#FF4299" />
+    </mj-attributes>
+
+    <mj-style inline="inline">
+      .body-section {
+        -webkit-box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15);
+        -moz-box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15);
+        box-shadow: 1px 4px 11px 0px rgba(0, 0, 0, 0.15);
+      }
+
+      .links a {
+        color: #232533;
+        padding-right: 32px;
+        text-decoration: none;
+      }
+    </mj-style>
+  </mj-head>
+
+  <mj-body mj-class="bg-blue" width="600px">
+    <mj-section full-width="full-width" padding-bottom="0">
+      <mj-column width="100%">
+        <mj-image src="http://cdn.mcauto-images-production.sendgrid.net/e6ff301b0c92b432/40f4ef64-1344-4a05-ae9c-91fc187ee650/1200x377.png" width="600px" alt="" padding="0" href="https://mobile.orlandomathcircle.org/" />
+      </mj-column>
+    </mj-section>
+    <mj-wrapper padding-top="0" padding-bottom="0" css-class="body-section">
+      <mj-section background-color="#ffffff" padding-left="15px" padding-right="15px">
+        <mj-column width="100%">
+          <mj-text color="#212b35" font-weight="bold" font-size="20px">
+            Event reminder
+          </mj-text>
+          <mj-text color="#637381" font-size="16px">
+            Hi {{first_name}},
+          </mj-text>
+          <mj-text color="#637381" font-size="16px">
+            This is a reminder of an upcoming event you are registered to.
+          </mj-text>
+          <mj-divider border-color="#DFE3E8" border-width="1px" />
+          <mj-text color="#212b35" font-weight="bold" font-size="20px">
+            {{event_title}}
+          </mj-text>
+          <mj-text>
+            {{event_description}}
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <mj-section background-color="#ffffff" padding="0 15px 15px 15px">
+        <mj-column width="50%">
+          <mj-text color="#212b35" font-weight="bold" font-size="15px">
+            Event Location
+          </mj-text>
+          <mj-text>
+            {{event_location}}
+          </mj-text>
+        </mj-column>
+        <mj-column width="50%">
+          <mj-text color="#212b35" font-weight="bold" font-size="15px">
+            Event Time
+          </mj-text>
+          <mj-text>
+            {{event_time}}
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <mj-section background-color="#ffffff" padding="0 15px 15px 15px">
+        <mj-column width="100%">
+          <mj-button mj-class="bg-pink" color="#ffffff" font-size="17px" font-weight="bold" href="{{event_link}}" width="300px">
+            View Event
+          </mj-button>
+          <mj-text>
+            <a href="{{unsubscribe_link}}" target="_blank">Unsubscribe</a> or <a href="{{manage_link}}">manage</a> your notification preferences.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+
+    <mj-wrapper full-width="full-width">
+      <mj-section padding-top="0">
+        <mj-column>
+          <mj-text css-class="links" font-size="14px" align="center" line-height="32px">
+            <a href="https://www.orlandomathcircle.org" target="_blank">Website</a>
+            <a href="https://mobile.orlandomathcircle.org" target="_blank"> Event Calendar </a>
+            <a href="https://www.orlandomathcircle.org/privacy-policy/" target="_blank">Privacy</a>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+
+  </mj-body>
+</mjml>

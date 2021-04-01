@@ -4,12 +4,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
+import Joi from 'joi';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { AccountService } from '../src/account/account.service';
 import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
-import { testSchema } from '../src/app.config';
 import { AuthModule } from '../src/auth/auth.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -54,8 +54,18 @@ describe('Auth', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          validationSchema: testSchema,
+          validationSchema: Joi.object({
+            SECRET: Joi.string().default('test-secret'),
+            PAYPAL_SANDBOXED: Joi.boolean().default(true),
+            SENDGRID_SANDBOXED: Joi.boolean().default(true),
+            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            DEFAULT_EVENT_PICTURE: Joi.string().default(
+              '/defaults/neon-math.jpg',
+            ),
+            DEFAULT_AVATAR_FOLDER: Joi.string().default('/defaults/avatars'),
+          }),
           isGlobal: true,
+          ignoreEnvFile: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
@@ -332,25 +342,28 @@ describe('Auth', () => {
     });
   });
 
-  describe('POST /forgot', () => {
+  describe('POST /password/forgot', () => {
     it('should still succeed on invalid emails', async () => {
       await request(app.getHttpServer())
-        .post('/forgot')
+        .post('/password/forgot')
         .send({ email: 'not@real.com' })
         .expect(201);
     });
 
     it('should send an email to the user', async () => {
-      const spy = jest.spyOn(EmailService.prototype, 'email');
+      const spy = jest.spyOn(EmailService.prototype, 'send');
 
       await request(app.getHttpServer())
-        .post('/forgot')
+        .post('/password/forgot')
         .send({ email: 'jane@doe.com' })
         .expect(201);
 
       expect(spy).toBeCalled();
-      expect(typeof spy.mock.calls[0][1]).toBe('string');
-      forgotToken = spy.mock.calls[0][2];
+      const email = spy.mock.calls[0][0].toSendGridRequest();
+
+      forgotToken = email.dynamicTemplateData.url.split('=')[1];
+
+      expect(email.to).toBe('jane@doe.com');
     });
   });
 
@@ -385,14 +398,16 @@ describe('Auth', () => {
     });
   });
 
-  describe('POST /reset', () => {
+  describe('POST /password/reset', () => {
     it("should change the user's password", async () => {
       const beforeUser = await orm.em.findOne(User, { id: 1 });
 
       expect(beforeUser).toBeDefined();
 
+      const initialPassword = beforeUser.password;
+
       await request(app.getHttpServer())
-        .post('/reset')
+        .post('/password/reset')
         .send({ token: forgotToken, password: 'banana' })
         .expect(201);
 
@@ -402,7 +417,7 @@ describe('Auth', () => {
       const user = await orm.em.findOne(User, { id: 1 });
 
       expect(user).toBeDefined();
-      expect(user.password).not.toBe('banana');
+      expect(user.password).not.toBe(initialPassword);
       expect(beforeUser.password).not.toBe(user.password);
     });
   });

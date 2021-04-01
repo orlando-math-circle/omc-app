@@ -1,11 +1,14 @@
 import { MikroORM } from '@mikro-orm/core';
 import { UseRequestContext } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, Timeout } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
+import { PersonalizationData } from '@sendgrid/helpers/classes/personalization';
 import { add, format, roundToNearestMinutes } from 'date-fns';
 import { Event } from '../event/event.entity';
 import { ReminderFreq } from '../user/enums/reminder-freq.enum';
 import { User } from '../user/user.entity';
+import { Email } from './email.class';
+import { SENDGRID_REMIND_TEMPLATE } from './email.constants';
 import { EmailService } from './email.service';
 
 type Ranges = {
@@ -82,23 +85,25 @@ export class EmailScheduler {
     }
 
     for (const [event, { freq, users }] of map) {
-      await this.emailService.email(
-        users.map((user) => ({
-          to: user.email,
-          dynamicTemplateData: {
-            name: user.name,
-            unsubscribe: 'test',
-          },
-        })),
-        'OMC Event Reminder',
-        null,
-        'd-6544dfe341564100a02cef9cf9ef1842',
-        {
-          event: event.name,
-          date: format(event.dtstart, 'EEEE, LLLL do, yyyy'),
-          time: format(event.dtstart, 'h:mm aaaa'),
-          location: event.location,
+      const personalizations: PersonalizationData[] = users.map((u) => ({
+        to: u.email,
+        dynamicTemplateData: {
+          first_name: u.first,
+          unsubscribe_link: 'example1',
+          manage_link: 'example2',
         },
+      }));
+
+      await this.emailService.send(
+        new Email(personalizations, 'Event Reminder', {
+          templateId: SENDGRID_REMIND_TEMPLATE,
+          templateData: {
+            event_title: event.name,
+            event_description: event.description,
+            event_location: event.location,
+            event_time: format(event.dtstart, 'EEEE, LLLL do, yyyy h:mm aaaa'),
+          },
+        }),
       );
 
       event.notified.push(freq);

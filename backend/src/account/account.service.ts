@@ -10,10 +10,13 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
-import { ADMIN_EMAIL, BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
+import { ConfigSchema } from '../app.config';
+import { BCRYPT_ROUNDS } from '../app.constants';
 import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
+import { Email } from '../email/email.class';
+import { SENDGRID_VERIFY_TEMPLATE } from '../email/email.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -28,7 +31,7 @@ export class AccountService {
     private readonly emailService: EmailService,
     private readonly userService: UserService,
     private readonly authService: AuthService,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService<ConfigSchema>,
   ) {}
 
   /**
@@ -59,7 +62,7 @@ export class AccountService {
     account.users.add(user);
 
     // Check if there is an admin override.
-    const adminEmail = this.config.get(ADMIN_EMAIL);
+    const adminEmail = this.config.get('ADMIN_EMAIL');
     if (adminEmail && user.email === adminEmail) {
       user.roles = [Roles.ADMIN];
     }
@@ -71,15 +74,16 @@ export class AccountService {
       expiresIn: '2 days',
     });
 
-    this.emailService.email(
-      { to: user.email },
-      'OMC: Email Verification',
-      undefined,
-      'd-f182620740c14eaf9f20e9203a77568a',
-      {
-        name: user.name,
-        url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
-      },
+    this.emailService.send(
+      new Email(user.email, 'Verify Your Email', {
+        templateId: SENDGRID_VERIFY_TEMPLATE,
+        templateData: {
+          first_name: user.first,
+          verify_link: `${this.config.get(
+            'FRONTEND_URL',
+          )}/verify?token=${token}`,
+        },
+      }),
     );
 
     return this.authService.login(account, user);

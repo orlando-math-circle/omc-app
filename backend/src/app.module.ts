@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import MikroORMConfig from '../mikro-orm.config';
 import { AccountModule } from './account/account.module';
-import ConfigSchema from './app.config';
+import { validate } from './app.config';
 import { AuthModule } from './auth/auth.module';
 import { CourseModule } from './course/course.module';
 import { EmailModule } from './email/email.module';
@@ -25,8 +25,8 @@ import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      validationSchema: ConfigSchema,
       isGlobal: true,
+      validate,
     }),
     MikroOrmModule.forRoot(MikroORMConfig),
     EmailModule,

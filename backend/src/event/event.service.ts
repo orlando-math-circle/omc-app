@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DEFAULT_EVENT_PICTURE } from '../app.constants';
+import { ConfigSchema } from '../app.config';
 import {
   addMinutes,
   getMinDate,
@@ -41,7 +41,7 @@ export class EventService {
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
     private readonly courseService: CourseService,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService<ConfigSchema>,
   ) {}
 
   /**
@@ -85,7 +85,7 @@ export class EventService {
     }
 
     if (!event.picture) {
-      event.picture = this.config.get(DEFAULT_EVENT_PICTURE);
+      event.picture = this.config.get('DEFAULT_EVENT_PICTURE');
     }
 
     await this.eventRepository.persist(event).flush();

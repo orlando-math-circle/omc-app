@@ -15,7 +15,13 @@ import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
-import { BCRYPT_ROUNDS, FRONTEND_URL } from '../app.constants';
+import { ConfigSchema } from '../app.config';
+import { BCRYPT_ROUNDS } from '../app.constants';
+import { Email } from '../email/email.class';
+import {
+  SENDGRID_RESET_TEMPLATE,
+  SENDGRID_VERIFY_TEMPLATE,
+} from '../email/email.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -37,7 +43,7 @@ export class AuthService {
     @Inject(forwardRef(() => AccountService))
     private readonly accountService: AccountService,
     private readonly emailService: EmailService,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService<ConfigSchema>,
     private readonly em: EntityManager,
   ) {}
 
@@ -228,15 +234,14 @@ export class AuthService {
       expiresIn: '2 days',
     });
 
-    this.emailService.email(
-      { to: user.email },
-      'OMC: Email Verification',
-      undefined,
-      'd-f182620740c14eaf9f20e9203a77568a',
-      {
-        name: user.name,
-        url: `${this.config.get(FRONTEND_URL)}/verify?token=${token}`,
-      },
+    this.emailService.send(
+      new Email(user.email, 'Verify Your Email', {
+        templateId: SENDGRID_VERIFY_TEMPLATE,
+        templateData: {
+          name: user.name,
+          url: `${this.config.get('FRONTEND_URL')}/verify?token=${token}`,
+        },
+      }),
     );
   }
 
@@ -312,15 +317,14 @@ export class AuthService {
       `${user.password}${this.config.get('SECRET')}`,
     );
 
-    this.emailService.email(
-      { to: user.email },
-      'OMC: Password Reset',
-      undefined,
-      'd-58bb9c551bee49dabbd026a675c27fdf',
-      {
-        name: user.name,
-        url: `${this.config.get(FRONTEND_URL)}/forgot?token=${token}`,
-      },
+    this.emailService.send(
+      new Email(user.email, 'Reset Your Password', {
+        templateId: SENDGRID_RESET_TEMPLATE,
+        templateData: {
+          name: user.name,
+          url: `${this.config.get('FRONTEND_URL')}/forgot?token=${token}`,
+        },
+      }),
     );
   }
 
