@@ -1,8 +1,8 @@
-import { Roles } from '../../backend/src/app.roles'
-import { Gender } from '../../backend/src/user/enums/gender.enum'
-import { Grade } from '../../backend/src/user/enums/grade.enum'
-import { ReminderFreq } from '../../backend/src/user/enums/reminder-freq.enum'
-import { VolunteerWorkStatus } from '../../backend/src/volunteer-work/enums/work-status.enum'
+import { Roles } from '@omc/server/app.roles'
+import { Gender } from '@omc/server/user/enums/gender.enum'
+import { Grade } from '@omc/server/user/enums/grade.enum'
+import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
+import { VolunteerWorkStatus } from '@omc/server/volunteer-work/enums/work-status.enum'
 
 export const months = [
   'January',

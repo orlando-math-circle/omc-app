@@ -1,40 +1,23 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "es2018",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "lib": ["esnext", "esnext.asynciterable", "dom"],
+    "target": "ES2018",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["ESNext", "ESNext.AsyncIterable", "DOM"],
     "esModuleInterop": true,
     "allowJs": true,
     "sourceMap": true,
     "strict": true,
     "noEmit": true,
     "experimentalDecorators": true,
-    "baseUrl": "../",
-    "paths": {
-      "~/*": ["./frontend/*"],
-      "@/*": ["./frontend/*"],
-      "@backend/*": ["./backend/src/*"]
-    },
-    "typeRoots": [
-      "./frontend/types",
-      "./frontend/node_modules/@types",
-      "./frontend/node_modules/vuetify/types"
-    ],
     "types": [
-      "@types/node",
       "@nuxt/types",
       "@nuxtjs/axios",
+      "@types/node",
       "cookie-universal-nuxt",
       "vuetify"
     ]
   },
-  "exclude": [
-    "node_modules",
-    "assets/.nuxt",
-    ".nuxt",
-    "dist",
-    "docs",
-    "backend"
-  ]
+  "exclude": [".nuxt", "node_modules"]
 }

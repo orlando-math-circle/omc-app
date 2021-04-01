@@ -158,10 +158,10 @@
 
 <script lang="ts">
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
-import { CreateUserDto } from '../../../backend/src/user/dtos/create-user.dto'
-import { Gender } from '../../../backend/src/user/enums/gender.enum'
-import { Grade } from '../../../backend/src/user/enums/grade.enum'
-import { ReminderFreq } from '../../../backend/src/user/enums/reminder-freq.enum'
+import { CreateUserDto } from '@omc/server/user/dtos/create-user.dto'
+import { Gender } from '@omc/server/user/enums/gender.enum'
+import { Grade } from '@omc/server/user/enums/grade.enum'
+import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
 import { education, genders, reminders } from '../../utils/constants'
 import { grades } from '../../utils/events'
 import DialogForm from './DialogForm.vue'

@@ -5,7 +5,7 @@
         <v-col>
           <v-row>
             <v-col>
-              <h1>Edit User — Course # {{ this.$route.params.id }}</h1>
+              <h1>Edit User — Course # {{ $route.params.id }}</h1>
             </v-col>
           </v-row>
 
@@ -24,7 +24,7 @@
       <v-row>
         <v-col>
           <v-alert border="left" elevation="2" type="error">
-            Course with id #{{ this.$route.params.id }} was not found or the
+            Course with id #{{ $route.params.id }} was not found or the
             retrieval was not successful. Check your console for more
             information.
           </v-alert>

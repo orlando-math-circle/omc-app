@@ -85,7 +85,7 @@
 
 <script lang="ts">
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
-import { VolunteerWorkStatus } from '../../../backend/src/volunteer-work/enums/work-status.enum'
+import { VolunteerWorkStatus } from '@omc/server/volunteer-work/enums/work-status.enum'
 import { workStatuses } from '../../utils/constants'
 import DialogForm from './DialogForm.vue'
 

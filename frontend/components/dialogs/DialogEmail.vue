@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
-import { CreateEmailDto } from '../../../backend/src/email/dto/create-email.dto'
+import { CreateEmailDto } from '@omc/server/email/dto/create-email.dto'
 import { DTOUser } from '../../store/users'
 import DialogForm from './DialogForm.vue'
 

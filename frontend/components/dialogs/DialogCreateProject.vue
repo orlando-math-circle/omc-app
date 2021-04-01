@@ -118,8 +118,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { CreateJobDto } from '@backend/volunteer-job/dto/create-job.dto'
-import { CreateProjectDto } from '~/../backend/src/project/dto/create-project.dto'
+import { CreateJobDto } from '@omc/server/volunteer-job/dto/create-job.dto'
+import { CreateProjectDto } from '@omc/server/project/dto/create-project.dto'
 import { Nullable } from '~/interfaces/nullable.type'
 import { Uploads } from '~/interfaces/uploads.interface'
 

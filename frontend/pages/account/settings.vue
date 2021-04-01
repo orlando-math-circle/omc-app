@@ -175,10 +175,10 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { User } from '../../../backend/src/user/user.entity'
+import { User } from '@omc/server/user/user.entity'
+import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
 import { grades } from '../../utils/events'
 import { genders, reminders } from '../../utils/constants'
-import { ReminderFreq } from '../../../backend/src/user/enums/reminder-freq.enum'
 import DialogUserEdit from '~/components/dialogs/DialogUserEdit.vue'
 import DialogConfirm from '~/components/dialogs/DialogConfirm.vue'
 

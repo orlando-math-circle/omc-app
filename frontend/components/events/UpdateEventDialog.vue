@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { Event } from '~/../backend/src/event/event.entity'
+import { Event } from '@omc/server/event/event.entity'
 
 export default Vue.extend({
   props: {

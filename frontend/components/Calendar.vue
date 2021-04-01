@@ -57,9 +57,9 @@ import {
   endOfMonth,
 } from 'date-fns'
 import { VCalendar } from 'vuetify/src/components/VCalendar'
+import { Event } from '@omc/server/event/event.entity'
 import { VCalendarChange } from '../interfaces/calendar.interface'
 import { months } from '../utils/constants'
-import { Event } from '../../backend/src/event/event.entity'
 
 @Component
 export default class Calendar extends Vue {

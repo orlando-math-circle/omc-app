@@ -33,8 +33,8 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { format, parseISO } from 'date-fns'
+import { Event } from '@omc/server/event/event.entity'
 import { CalendarEvent } from '~/interfaces/calendar-event.interface'
-import { Event } from '~/../backend/src/event/event.entity'
 
 @Component
 export default class EventComponent extends Vue {

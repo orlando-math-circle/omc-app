@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { Event } from '../../../backend/src/event/event.entity'
+import { Event } from '@omc/server/event/event.entity'
 import { formatDate } from '~/utils/utilities'
 
 @Component

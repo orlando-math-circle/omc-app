@@ -1,16 +1,12 @@
 import { NuxtConfig } from '@nuxt/types'
-// @ts-ignore
+import path from 'path'
 import { VuetifyLoaderPlugin } from 'vuetify-loader'
 
 const config: NuxtConfig = {
   ssr: true,
-
   server: {
     port: 8080,
   },
-  /*
-   ** Headers of the page
-   */
   head: {
     titleTemplate: '%s · OMC',
     meta: [
@@ -50,24 +46,13 @@ const config: NuxtConfig = {
       },
     ],
   },
-
   publicRuntimeConfig: {
     paypalClientId: process.env.PAYPAL_CLIENT_ID || 'sb',
     staticBase: process.env.STATIC_BASE || 'http://localhost:3000',
     avatarBase: process.env.AVATAR_BASE || '/defaults/avatars',
   },
-
-  /*
-   ** Customize the progress-bar color
-   */
   loading: { color: '#44d9e6' },
-  /*
-   ** Global CSS
-   */
   css: [],
-  /*
-   ** Plugins to load before mounting the App
-   */
   plugins: [
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
@@ -80,51 +65,33 @@ const config: NuxtConfig = {
       ssr: false,
     },
   ],
-  /**
-   * Automatic importing of components
-   */
   components: true,
-  /*
-   ** Nuxt.js dev-modules
-   */
   buildModules: [
     '@nuxt/typescript-build',
     '@nuxtjs/eslint-module',
     'nuxt-typed-vuex',
-    // '@nuxtjs/html-validator',
   ],
-
   eslint: {
     cache: false,
-    lintDirtyModulesOnly: false,
   },
-  /*
-   ** Nuxt.js modules
-   */
   modules: [
     '@nuxtjs/axios',
     // '@nuxtjs/pwa',
     '@nuxtjs/dotenv',
     'cookie-universal-nuxt',
   ],
-  /*
-   ** Axios module configuration
-   ** See https://axios.nuxtjs.org/options
-   */
   axios: {
     baseURL: process.env.AXIOS_BASE_URL || 'http://localhost:3000/',
     browserBaseURL: process.env.AXIOS_BROWSER_BASE_URL || undefined,
     proxyHeaders: false,
   },
-
   vue: {
     config: {
       productionTip: false,
     },
   },
-
   build: {
-    // parallel: true,
+    parallel: true,
     // cache: true,
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
@@ -137,6 +104,13 @@ const config: NuxtConfig = {
         },
         additionalData: "@import '@/assets/styles/variables.scss'",
       },
+    },
+    extend(config) {
+      const alias = (config.resolve!.alias = config.resolve!.alias || {})
+
+      alias['@omc/server'] = path.join(__dirname, '../backend/src')
+      alias['@omc/client'] = path.resolve(__dirname)
+      alias['@omc/shared'] = path.resolve(__dirname, '../resources')
     },
   },
 }

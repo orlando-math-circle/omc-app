@@ -157,9 +157,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { FileAttachment } from '../../../backend/src/file-attachment/file-attachment.entity'
-import { User } from '../../../backend/src/user/user.entity'
-import { VolunteerWorkStatus } from '../../../backend/src/volunteer-work/enums/work-status.enum'
+import { FileAttachment } from '@omc/server/file-attachment/file-attachment.entity'
+import { User } from '@omc/server/user/user.entity'
+import { VolunteerWorkStatus } from '@omc/server/volunteer-work/enums/work-status.enum'
 
 @Component({
   head: {

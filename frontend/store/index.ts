@@ -1,22 +1,22 @@
 import { Context } from '@nuxt/types'
 import { actionTree, getAccessorType } from 'nuxt-typed-vuex'
-import {
-  COOKIE_CALENDAR_TYPE,
-  COOKIE_COMPLETE,
-  COOKIE_JWT,
-} from '../utils/constants'
 import * as auth from '~/store/auth'
 import * as courses from '~/store/courses'
 import * as events from '~/store/events'
+import * as files from '~/store/files'
 import * as invoices from '~/store/invoices'
 import * as paypal from '~/store/paypal'
 import * as projects from '~/store/projects'
 import * as registrations from '~/store/registrations'
-import * as users from '~/store/users'
-import * as files from '~/store/files'
-import * as volunteers from '~/store/volunteers'
 import * as snackbar from '~/store/snackbar'
 import * as twitter from '~/store/twitter'
+import * as users from '~/store/users'
+import * as volunteers from '~/store/volunteers'
+import {
+  COOKIE_CALENDAR_TYPE,
+  COOKIE_COMPLETE,
+  COOKIE_JWT,
+} from '~/utils/constants'
 
 export const state = () => ({})
 

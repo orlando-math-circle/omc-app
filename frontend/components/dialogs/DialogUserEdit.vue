@@ -115,13 +115,13 @@
 </template>
 
 <script lang="ts">
+import { IndustryDto } from '@omc/server/user/dtos/industry.dto'
+import { Gender } from '@omc/server/user/enums/gender.enum'
+import { Grade } from '@omc/server/user/enums/grade.enum'
+import { User } from '@omc/server/user/user.entity'
 import { Component, Vue } from 'nuxt-property-decorator'
-import { User } from '@backend/user/user.entity'
 import { genders } from '../../utils/constants'
-import { Grade } from '../../../backend/src/user/enums/grade.enum'
-import { Gender } from '../../../backend/src/user/enums/gender.enum'
 import { grades } from '../../utils/events'
-import { IndustryDto } from '../../../backend/src/user/dtos/industry.dto'
 
 @Component
 export default class DialogUserEdit extends Vue {

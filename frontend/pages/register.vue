@@ -179,11 +179,11 @@
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { Gender } from '../../backend/src/user/enums/gender.enum'
+import { Gender } from '@omc/server/user/enums/gender.enum'
+import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
+import { CreateAccountDto } from '@omc/server/account/dtos/create-account.dto'
 import { StateStatus } from '../interfaces/state.interface'
 import { genders } from '../utils/constants'
-import { ReminderFreq } from '../../backend/src/user/enums/reminder-freq.enum'
-import { CreateAccountDto } from '../../backend/src/account/dtos/create-account.dto'
 
 @Component({
   layout: 'landing',

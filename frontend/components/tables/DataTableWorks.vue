@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { VolunteerWorkStatus } from '../../../backend/src/volunteer-work/enums/work-status.enum'
+import { VolunteerWorkStatus } from '@omc/server/volunteer-work/enums/work-status.enum'
 import { DTOEvent } from '../../store/events'
 import { workStatuses } from '../../utils/constants'
 

@@ -2,11 +2,11 @@
 /* eslint-disable no-unused-vars */
 
 import { NuxtRuntimeConfig } from '@nuxt/types/config/runtime'
+import { User } from '@omc/server/user/user.entity'
 import { NuxtCookies } from 'cookie-universal-nuxt'
 import { Framework } from 'vuetify'
-import { User } from '../backend/src/user/user.entity'
-import { DTOUser } from './store/users'
 import { accessorType } from '~/store'
+import { DTOUser } from '~/store/users'
 
 declare module 'vue/types/vue' {
   interface Vue {

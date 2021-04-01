@@ -1,5 +1,5 @@
 import { Plugin } from '@nuxt/types'
-import { User } from '../../backend/src/user/user.entity'
+import { User } from '@omc/server/user/user.entity'
 
 const plugin: Plugin = (ctx, inject) => {
   inject('avatar', (user: User) => {

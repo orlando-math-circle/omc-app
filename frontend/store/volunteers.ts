@@ -1,15 +1,15 @@
+import { CreateJobDto } from '@omc/server/volunteer-job/dto/create-job.dto'
+import { FindAllJobsDto } from '@omc/server/volunteer-job/dto/find-all-jobs.dto'
+import { UpdateJobDto } from '@omc/server/volunteer-job/dto/update-job.dto'
+import { VolunteerJob } from '@omc/server/volunteer-job/volunteer-job.entity'
+import { CreateWorkDto } from '@omc/server/volunteer-work/dto/create-work.dto'
+import { FindAllWorksDto } from '@omc/server/volunteer-work/dto/find-all-works.dto'
+import { UpdateWorkDto } from '@omc/server/volunteer-work/dto/update-work.dto'
+import { VolunteerWork } from '@omc/server/volunteer-work/volunteer-work.entity'
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
-import { CreateJobDto } from '../../backend/src/volunteer-job/dto/create-job.dto'
-import { UpdateJobDto } from '../../backend/src/volunteer-job/dto/update-job.dto'
-import { UpdateWorkDto } from '../../backend/src/volunteer-work/dto/update-work.dto'
-import { FindAllJobsDto } from '../../backend/src/volunteer-job/dto/find-all-jobs.dto'
-import { FindAllWorksDto } from '../../backend/src/volunteer-work/dto/find-all-works.dto'
-import { CreateWorkDto } from '../../backend/src/volunteer-work/dto/create-work.dto'
-import { VolunteerJob } from '../../backend/src/volunteer-job/volunteer-job.entity'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { parseAxiosError } from '../utils/utilities'
-import { VolunteerWork } from '../../backend/src/volunteer-work/volunteer-work.entity'
 
 export const state = () => ({
   status: StateStatus.UNLOADED,
