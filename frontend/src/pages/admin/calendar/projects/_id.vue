@@ -134,10 +134,10 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { cloneDeep } from 'lodash'
-import { Project } from '../../../../../backend/src/project/project.entity'
+import { Project } from '@omc/server/project/project.entity'
 import { shallowDiff } from '../../../../utils/utilities'
-import { UpdateProjectDto } from '../../../../../backend/src/project/dto/update-project.dto'
-import { CreateJobDto } from '../../../../../backend/src/volunteer-job/dto/create-job.dto'
+import { UpdateProjectDto } from '@omc/server/project/dto/update-project.dto'
+import { CreateJobDto } from '@omc/server/volunteer-job/dto/create-job.dto'
 
 @Component({
   layout: 'admin',

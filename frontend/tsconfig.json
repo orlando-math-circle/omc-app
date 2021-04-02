@@ -1,5 +1,4 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "target": "ES2018",
     "module": "ESNext",
@@ -11,13 +10,22 @@
     "strict": true,
     "noEmit": true,
     "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "@omc/server/*": ["../backend/src/*"],
+      "@omc/client/*": ["../frontend/src/*"],
+      "@omc/shared/*": ["../resources/*"],
+      "~/*": ["../frontend/src/*"],
+      "@/*": ["../frontend/src/*"]
+    },
     "types": [
       "@nuxt/types",
       "@nuxtjs/axios",
       "@types/node",
-      "cookie-universal-nuxt",
-      "vuetify"
+      "cookie-universal-nuxt"
     ]
   },
-  "exclude": [".nuxt", "node_modules"]
+  "files": ["nuxt.config.ts"],
+  "include": ["src/**/*", "types/**/*"],
+  "exclude": ["node_modules"]
 }

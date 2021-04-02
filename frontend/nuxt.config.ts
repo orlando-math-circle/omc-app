@@ -4,6 +4,7 @@ import { VuetifyLoaderPlugin } from 'vuetify-loader'
 
 const config: NuxtConfig = {
   ssr: true,
+  srcDir: 'src/',
   server: {
     port: 8080,
   },
@@ -72,14 +73,9 @@ const config: NuxtConfig = {
     'nuxt-typed-vuex',
   ],
   eslint: {
-    cache: false,
+    cache: true,
   },
-  modules: [
-    '@nuxtjs/axios',
-    // '@nuxtjs/pwa',
-    '@nuxtjs/dotenv',
-    'cookie-universal-nuxt',
-  ],
+  modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
   axios: {
     baseURL: process.env.AXIOS_BASE_URL || 'http://localhost:3000/',
     browserBaseURL: process.env.AXIOS_BROWSER_BASE_URL || undefined,
@@ -101,15 +97,15 @@ const config: NuxtConfig = {
         sassOptions: {
           fiber: require('fibers'),
           indentedSyntax: true,
+          additionalData: "@import '@/assets/styles/variables.scss'",
         },
-        additionalData: "@import '@/assets/styles/variables.scss'",
       },
     },
     extend(config) {
       const alias = (config.resolve!.alias = config.resolve!.alias || {})
 
       alias['@omc/server'] = path.join(__dirname, '../backend/src')
-      alias['@omc/client'] = path.resolve(__dirname)
+      alias['@omc/client'] = path.resolve(__dirname, './src')
       alias['@omc/shared'] = path.resolve(__dirname, '../resources')
     },
   },

@@ -101,9 +101,9 @@
 <script lang="ts">
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'nuxt-property-decorator'
-import { VolunteerJob } from '../../../../../backend/src/volunteer-job/volunteer-job.entity'
-import { UpdateJobDto } from '../../../../../backend/src/volunteer-job/dto/update-job.dto'
-import { shallowDiff } from '../../../../utils/utilities'
+import { VolunteerJob } from '@omc/server/volunteer-job/volunteer-job.entity'
+import { UpdateJobDto } from '@omc/server/volunteer-job/dto/update-job.dto'
+import { shallowDiff } from '~/utils/utilities'
 
 @Component({
   layout: 'admin',

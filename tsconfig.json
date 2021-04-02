@@ -1,13 +1,12 @@
 {
-  "files": [],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@omc/server/*": ["backend/src/*"],
-      "@omc/client/*": ["frontend/*"],
+      "@omc/client/*": ["frontend/src/*"],
       "@omc/shared/*": ["resources/*"],
-      "~/*": ["frontend/*"],
-      "@/*": ["frontend/*"]
+      "~/*": ["frontend/src/*"],
+      "@/*": ["frontend/src/*"]
     }
   },
   "exclude": ["**/node_modules"]

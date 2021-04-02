@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-
 import { NuxtRuntimeConfig } from '@nuxt/types/config/runtime'
 import { User } from '@omc/server/user/user.entity'
 import { NuxtCookies } from 'cookie-universal-nuxt'

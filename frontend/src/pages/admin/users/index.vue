@@ -118,7 +118,7 @@ import {
   gradeGroups,
   grades,
 } from '../../../utils/events'
-import { Roles } from '../../../../backend/src/app.roles'
+import { Roles } from '@omc/server/app.roles'
 import { formatDate } from '~/utils/utilities'
 
 @Component({
