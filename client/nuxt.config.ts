@@ -68,9 +68,6 @@ const config: NuxtConfig = {
   ],
   components: ['~/components', '~/components/inputs'],
   buildModules: ['@nuxt/typescript-build', 'nuxt-typed-vuex'],
-  eslint: {
-    cache: true,
-  },
   typescript: {
     typeCheck: {
       eslint: {
@@ -91,7 +88,7 @@ const config: NuxtConfig = {
   },
   build: {
     parallel: true,
-    // cache: true,
+    cache: process.env.BUILD_CACHE === 'true',
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {
