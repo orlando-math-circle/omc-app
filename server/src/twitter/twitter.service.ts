@@ -1,6 +1,7 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import FormData from 'form-data';
+import { ConfigSchema } from '../app.config';
 
 const OMC_HANDLE = 'orlandomathcir';
 
@@ -10,7 +11,7 @@ export class TwitterService {
   private token: string;
 
   constructor(
-    private readonly config: ConfigService,
+    private readonly config: ConfigService<ConfigSchema>,
     private readonly http: HttpService,
   ) {}
 
