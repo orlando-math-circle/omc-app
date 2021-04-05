@@ -1,7 +1,7 @@
+import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { FileAttachment } from '@omc/server/file-attachment/file-attachment.entity'
 import { FileField } from '@omc/server/file-fields/file-field.entity'
 import { File as FileEntity } from '@omc/server/file/file.entity'
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { StateError } from '../interfaces/state-error.interface'
 import { StateStatus } from '../interfaces/state.interface'
 import { Uploads } from '../interfaces/uploads.interface'

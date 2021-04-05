@@ -254,7 +254,7 @@
               <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
               <v-card-text>
-                <paypal
+                <payment-paypal
                   :event="event.id"
                   :users="usersRequiringPayment.map((u) => u.id)"
                   @payment:complete="onPaymentComplete"
@@ -360,7 +360,7 @@ import { EventRegistration } from '@omc/server/event-registration/event-registra
 import { Roles } from '@omc/server/app.roles'
 import { Gender } from '@omc/server/user/enums/gender.enum'
 import { VolunteerJob } from '@omc/server/volunteer-job/volunteer-job.entity'
-import DialogConfirm from '../../components/dialogs/DialogConfirm.vue'
+import DialogConfirm from '~/components/dialog/Confirm.vue'
 import { contiguousGradeRanges, gradeGroups, grades } from '~/utils/events'
 import { formatDate } from '~/utils/utilities'
 

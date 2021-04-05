@@ -105,7 +105,7 @@
 <script lang="ts">
 import { format, isSameDay, isSameWeek, parseISO } from 'date-fns'
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
-import DialogDeleteEvent from '../../../../components/dialogs/DialogDeleteEvent.vue'
+import DialogDeleteEvent from '~/components/dialog/DeleteEvent.vue'
 
 @Component({
   layout: 'admin',

@@ -1,5 +1,5 @@
-import { Grade } from '@omc/server/user/enums/grade.enum'
 import { Frequency, Options } from 'rrule'
+import { Grade } from '@omc/server/user/enums/grade.enum'
 
 export const grades = Object.freeze([
   { text: 'Kindergarten', short: 'K', value: Grade.KINDERGARTEN },

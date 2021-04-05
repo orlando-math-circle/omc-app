@@ -319,13 +319,13 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { format } from 'date-fns'
 import { cloneDeep } from 'lodash'
-import { DTOUser } from '../../../store/users'
 import { UpdateUserDto } from '@omc/server/user/dtos/update-user.dto'
-import { shallowDiff } from '../../../utils/utilities'
-import { grades } from '../../../utils/events'
-import { genders, roles } from '../../../utils/constants'
 import { Account } from '@omc/server/account/account.entity'
-import { DTO } from '../../../interfaces/date-to-string.interface'
+import { DTOUser } from '~/store/users'
+import { shallowDiff } from '~/utils/utilities'
+import { grades } from '~/utils/events'
+import { genders, roles } from '~/utils/constants'
+import { DTO } from '~/interfaces/date-to-string.interface'
 
 @Component({
   layout: 'admin',

@@ -49,7 +49,7 @@
 import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
 import { CreateEmailDto } from '@omc/server/email/dto/create-email.dto'
 import { DTOUser } from '../../store/users'
-import DialogForm from './DialogForm.vue'
+import DialogForm from './Form.vue'
 
 @Component
 export default class DialogEmail extends Vue {

@@ -87,7 +87,7 @@
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
 import { VolunteerWorkStatus } from '@omc/server/volunteer-work/enums/work-status.enum'
 import { workStatuses } from '../../utils/constants'
-import DialogForm from './DialogForm.vue'
+import DialogForm from './Form.vue'
 
 @Component
 export default class DialogCreateWork extends Vue {

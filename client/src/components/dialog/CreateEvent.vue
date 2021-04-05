@@ -1,14 +1,16 @@
 <template>
   <dialog-form ref="refDialog" @submit:form="onSubmit">
-    <template #title>Edit Event</template>
+    <template #title>Create Event</template>
 
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn text v-bind="attrs" v-on="on">Edit Event</v-btn>
+        <v-btn text v-bind="attrs" v-on="on">Add Event</v-btn>
       </slot>
     </template>
 
     <v-card-text>
+      <alert-error v-if="error" class="mx-4" :error="error" />
+
       <v-list dense>
         <!-- Name -->
         <v-list-item class="pl-2">
@@ -21,25 +23,26 @@
               v-model="meta.name"
               label="Title"
               hide-details="auto"
-              vid="name"
+              vid="title"
               rules="required"
               outlined
-            />
+            >
+            </v-text-field-validated>
           </v-list-item-content>
         </v-list-item>
 
         <v-divider />
 
         <!-- All-Day Selector -->
-        <v-list-item>
-          <v-list-item-avatar>
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
             <v-icon>mdi-clock-outline</v-icon>
           </v-list-item-avatar>
 
           <v-list-item-content>All-day</v-list-item-content>
 
           <v-list-item-action>
-            <v-switch v-model="dates.allday" color="secondary" />
+            <v-switch v-model="dates.allday" color="secondary"></v-switch>
           </v-list-item-action>
         </v-list-item>
 
@@ -77,7 +80,7 @@
               </v-col>
 
               <v-col v-if="!dates.allday" cols="4">
-                <time-picker
+                <PickerTime
                   v-model="times.start.time"
                   vid="starttime"
                   :rules="{
@@ -90,7 +93,7 @@
                   }"
                   label="Start Time"
                   outlined
-                ></time-picker>
+                />
               </v-col>
 
               <v-col v-if="!dates.allday" cols="8">
@@ -117,16 +120,18 @@
               </v-col>
 
               <v-col v-if="!dates.allday" cols="4">
-                <time-picker
+                <PickerTime
                   v-model="times.end.time"
                   vid="endtime"
                   label="End Time"
                   outlined
-                ></time-picker>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
+
+        <v-divider />
 
         <!-- Permissions -->
         <v-list-item class="pl-2">
@@ -222,7 +227,7 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <recurrence-dialog
+                <DialogRecurrence
                   ref="recurrenceDialog"
                   v-model="rrule"
                   :date-string="dates.start.date"
@@ -301,16 +306,17 @@
             <v-row>
               <v-col>
                 <auto-complete-project
-                  v-model="meta.project"
+                  v-model="project"
+                  label="Project (Optional)"
                   item-value="id"
                   outlined
                 />
               </v-col>
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-project v-model="meta.project" />
+                <dialog-select-project v-model="project" />
               </v-col>
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-project @create:project="onProjectCreated" />
+                <dialog-create-project @create:project="onProjectCreated" />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -319,7 +325,7 @@
         <v-divider />
 
         <!-- Course Management -->
-        <v-list-item v-if="meta.project" class="pl-2">
+        <v-list-item v-if="project" class="pl-2">
           <v-list-item-avatar class="mr-2">
             <v-icon>mdi-school-outline</v-icon>
           </v-list-item-avatar>
@@ -328,32 +334,26 @@
             <v-row>
               <v-col>
                 <auto-complete-course
-                  v-model="meta.course"
-                  :project="meta.project"
+                  v-model="course"
                   item-value="id"
+                  :project="project"
                   outlined
                 />
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-course
-                  v-model="meta.course"
-                  :project="meta.project"
-                  item-value="id"
-                />
+                <dialog-select-course v-model="course" :project="project" />
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
                 <dialog-create-course
-                  :project="meta.project"
+                  :project="project"
                   @create:course="onCourseCreated"
                 />
               </v-col>
             </v-row>
           </v-list-item-content>
         </v-list-item>
-
-        <v-divider v-if="meta.project" />
 
         <!-- Fee Management -->
         <v-list-item class="pl-2">
@@ -367,10 +367,7 @@
                 <v-select-validated
                   v-model="feeType"
                   :items="feeTypes"
-                  :rules="{
-                    required: true,
-                    has_course: { course: meta.course },
-                  }"
+                  :rules="{ required: true, has_course: { course } }"
                   label="Payment Mode"
                   hide-details="auto"
                   outlined
@@ -413,9 +410,10 @@
 
           <v-list-item-content>
             <file-upload
-              v-model="meta.picture"
+              v-model="files"
               outlined
               label="Picture (Optional)"
+              hint="Project pictures will be used as a fallback if provided."
               persistent-hint
             />
           </v-list-item-content>
@@ -469,72 +467,59 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
 
-      <v-slide-x-transition>
-        <v-btn v-show="Object.keys(changeset).length" text @click="onReset">
-          Reset
-        </v-btn>
-      </v-slide-x-transition>
+      <v-btn text @click="dialog.close()">Cancel</v-btn>
+      <v-btn type="submit" :loading="isLoading" color="primary">
+        <v-scroll-x-transition>
+          <v-icon v-if="success" class="mr-2" color="success">
+            mdi-check
+          </v-icon>
+        </v-scroll-x-transition>
 
-      <v-btn
-        :disabled="!Object.keys(changeset).length"
-        :loading="$accessor.events.isLoading"
-        color="primary"
-        type="submit"
-      >
-        Save Changes
+        Create Event
       </v-btn>
     </v-card-actions>
-
-    <dialog-update-event-type
-      ref="typeDialog"
-      :changeset="changeset"
-      @submit:type="onSubmitType"
-    />
   </dialog-form>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
-import { Event } from '@omc/server/event/event.entity'
-import { format, isSameDay } from 'date-fns'
-import RRule, { Frequency, Options, RRuleSet, rrulestr } from 'rrule'
-import { FeeType } from '@omc/server/event/enums/fee-type.enum'
-import { EventTimeThreshold } from '@omc/server/event/enums/event-time-threshold.enum'
-import { Grade } from '@omc/server/user/enums/grade.enum'
-import { UpdateEventsDto } from '@omc/server/event/dto/update-events.dto'
-import { UpdateEventDto } from '@omc/server/event/dto/update-event.dto'
-import { Project } from '@omc/server/project/project.entity'
+import { Vue, Component, Prop, Ref } from 'nuxt-property-decorator'
+import { addDays, format, isBefore, isSameDay, parse, parseISO } from 'date-fns'
+import { Options } from 'rrule'
 import { Course } from '@omc/server/course/course.entity'
+import { Grade } from '@omc/server/user/enums/grade.enum'
+import { Project } from '@omc/server/project/project.entity'
+import { FeeType } from '@omc/server/event/enums/fee-type.enum'
 import { Gender } from '@omc/server/user/enums/gender.enum'
-import { EventRecurrenceDto } from '@omc/server/event/dto/event-recurrence.dto'
-import { File as FileEntity } from '@omc/server/file/file.entity'
-import { CreateEventFeeDto } from '@omc/server/event-fee/dto/create-event-fee.dto'
-import DialogUpdateEventType from './DialogUpdateEventType.vue'
-import DialogForm from './DialogForm.vue'
-import { isValidDate, shallowDiff, toDate } from '~/utils/utilities'
-import { DTOEvent } from '~/store/events'
-import {
-  AddFile,
-  EventUpdateModesAndFile,
-} from '~/interfaces/events/event-update-modes.interface'
-import { RRuleOptions } from '~/interfaces/events/event-recurrence.interface'
+import { EventTimeThreshold } from '@omc/server/event/enums/event-time-threshold.enum'
+import RecurrenceDialog from '../dialog/Recurrence.vue'
+import { Uploads } from '../../interfaces/uploads.interface'
+import DialogForm from './Form.vue'
+import { gradeGroups, contiguousGradeRanges, grades } from '~/utils/events'
+import { EventRecurrenceDto } from '~/interfaces/events/event-recurrence.interface'
+import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
+import Calendar from '~/components/Calendar.vue'
 import { genders } from '~/utils/constants'
-import { contiguousGradeRanges, gradeGroups, grades } from '~/utils/events'
-import { DTO } from '~/interfaces/date-to-string.interface'
+
+export type RRuleOptions = Partial<Options>
+
+export type RepeatingTypes = {
+  label: string
+  rrule?: RRuleOptions
+}
 
 @Component
-export default class DialogUpdateEvent extends Vue {
+export default class DialogCreateEvent extends Vue {
+  @Ref('recurrenceDialog') readonly recurrenceDialog!: RecurrenceDialog
+  @Ref('calendar') readonly calendar!: Calendar
   @Ref('refDialog') readonly dialog!: DialogForm
-  @Ref('typeDialog') readonly typeDialog!: DialogUpdateEventType
-  @Prop() event!: Event
+  @Prop({ default: new Date().toISOString().substr(0, 10) }) date!: string
+  @Prop({ default: format(roundDate(new Date(), 30), 'HH:mm') }) time!: string
 
-  internalData: DTOEvent | null = null
-  grades = grades
-  genders = genders
-  colorMenu = false
   success = false
+  grades = grades
+  colorMenu = false
 
   dates = {
     allday: false,
@@ -560,6 +545,10 @@ export default class DialogUpdateEvent extends Vue {
     times: [] as string[],
   }
 
+  genders = genders
+
+  rrule = null as EventRecurrenceDto | null
+
   timeThresholds = [
     { text: 'Never', value: EventTimeThreshold.NEVER },
     { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
@@ -568,31 +557,28 @@ export default class DialogUpdateEvent extends Vue {
     { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
   ]
 
-  fee = {
-    amount: null as number | null,
-    lateAmount: null as number | null,
-  }
-
-  feeType = FeeType.FREE
+  feeType: FeeType = FeeType.FREE
   feeTypes = [
     { text: 'Free', value: FeeType.FREE },
     { text: 'Pay Per Event', value: FeeType.EVENT },
     { text: 'Pay Per Course', value: FeeType.COURSE },
   ]
 
+  fee = {
+    amount: 0,
+    lateAmount: 0,
+  }
+
   meta = {
     name: '',
     description: '',
+    color: '#000000',
     location: '',
-    color: '',
-    locationTitle: '',
-    picture: '' as File | string,
+    locationTitle: 'Online',
     cutoffThreshold: EventTimeThreshold.AFTER_END,
     cutoffOffset: 0,
     lateThreshold: EventTimeThreshold.AFTER_START,
     lateOffset: 0,
-    project: null as number | null,
-    course: null as number | null,
     permissions: {
       grades: [
         Grade.KINDERGARTEN,
@@ -613,30 +599,20 @@ export default class DialogUpdateEvent extends Vue {
     },
   }
 
-  rrule: DTO<EventRecurrenceDto> | null = null
-  rruleOrSet: RRuleSet | RRule | null = null
-  originalRRule: null | DTO<EventRecurrenceDto> = null
+  project: null | number = null
+  course: null | number = null
+  files: Uploads = null
 
-  get intEvent(): DTOEvent {
-    return this.internalData!
-  }
-
-  set intEvent(value: DTOEvent) {
-    this.internalData = value
+  get error() {
+    return this.$accessor.events.error || this.$accessor.files.error
   }
 
   get isLoading() {
     return this.$accessor.events.isLoading
   }
 
-  get error() {
-    if (this.$accessor.events.isErrored) {
-      return this.$accessor.events.error!
-    } else if (this.$accessor.files.isErrored) {
-      return this.$accessor.files.error!
-    }
-
-    return false
+  get gradeGroups() {
+    return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
   }
 
   get swatch() {
@@ -650,296 +626,54 @@ export default class DialogUpdateEvent extends Vue {
     }
   }
 
-  get gradeGroups() {
-    return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
-  }
+  beforeMount() {
+    const now = new Date()
+    this.dates.start.date = this.date
+    this.dates.end.date = this.date
+    this.times.start.time = this.time
+    this.times.end.time = addTime(this.time, 1, 30)
 
-  get feeDTO(): CreateEventFeeDto {
-    return {
-      amount: (this.fee.amount || 0).toPrecision(2),
-      lateAmount: (this.fee.lateAmount || 0).toPrecision(2),
-    }
-  }
-
-  get eventFeeType() {
-    if (this.event.fee) {
-      return FeeType.EVENT
-    } else if (this.event.course?.fee) {
-      return FeeType.COURSE
-    }
-
-    return FeeType.FREE
-  }
-
-  /**
-   * Determines the meta changes made to an event.
-   */
-  get metaChanges() {
-    const dto: DTO<UpdateEventDto> = {
-      name: this.meta.name,
-      description: this.meta.description || null,
-      color: this.meta.color,
-      picture: this.meta.picture as any, // No ideal way to make it like Files
-      location: this.meta.location || null,
-      locationTitle: this.meta.locationTitle,
-      permissions: this.meta.permissions,
-      cutoffThreshold: this.meta.cutoffThreshold,
-      cutoffOffset: this.meta.cutoffOffset,
-      lateThreshold: this.meta.lateThreshold,
-      lateOffset: this.meta.lateOffset,
-    }
-
-    if (this.dates.allday) {
-      dto.dtstart = toDate(this.dates.start.date, '00:00').toISOString()
-      dto.dtend = toDate(this.dates.start.date, '23:59').toISOString()
-    } else {
-      dto.dtstart = toDate(
-        this.dates.start.date,
-        this.times.start.time
-      ).toISOString()
-      dto.dtend = toDate(this.dates.end.date, this.times.end.time).toISOString()
-    }
-
-    // Project
-    if ((this.meta.project || null) !== (this.event.project?.id || null)) {
-      dto.project = this.meta.project
-    }
-
-    // Course
-    if ((this.meta.course || null) !== (this.event.course?.id || null)) {
-      dto.course = this.meta.course
-    }
-
-    return shallowDiff(this.event, dto)
-  }
-
-  /**
-   * Mastermind that determines the appropriate update actions
-   * based on changes made to the event metadata, dates, or rrule.
-   */
-  get changeset(): EventUpdateModesAndFile {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { dtstart, ...rule } = this.rruleChanges
-    const rruleOptsChanged = Object.keys(rule).length !== 0
-    const changedStart = this.metaChanges.dtstart
-    const meta: AddFile<DTO<UpdateEventDto>> = {
-      ...this.meta,
-      dtend: this.metaChanges.dtend,
-    }
-    const rrule = this.rrule!
-
-    // If the fee type of values have changed, replace the fee.
-    const origFee = this.event.fee || this.event.course?.fee
-    const feeTypeChanged = this.eventFeeType !== this.feeType
+    // If the end time loops around to being before
+    // the starting time, increment the day.
     if (
-      feeTypeChanged ||
-      (origFee &&
-        (origFee.amount !== this.feeDTO.amount ||
-          origFee.lateAmount !== this.feeDTO.lateAmount))
+      isBefore(
+        parse(this.times.end.time, 'HH:mm', now),
+        parse(this.times.start.time, 'HH:mm', now)
+      )
     ) {
-      meta.fee = this.feeDTO
-      meta.feeType = this.feeType
+      this.dates.end.date = addDays(parseISO(this.date), 1)
+        .toISOString()
+        .substr(0, 10)
     }
 
-    // Changing the date of an event eliminates the "all" option, and
-    // changing the rrule options eliminates "single", so force a future update.
-    if (rruleOptsChanged && changedStart) {
-      return {
-        future: Object.assign({}, meta, { rrule }),
+    const hours = [
+      '12',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+    ]
+    const minutes = ['00', '15', '30', '45']
+    const times: string[] = []
+
+    for (let i = 0; i <= 23; i++) {
+      for (let j = 0; j < minutes.length; j++) {
+        times.push(`${hours[i % 12]}:${minutes[j]}${i < 12 ? 'am' : 'pm'}`)
       }
     }
 
-    // If the rrule options where changed this re-writes the rrule.
-    // Since the rrule is now different, single-event updates are not allowed.
-    if (rruleOptsChanged) {
-      return {
-        future: Object.assign({}, meta, { rrule }),
-        all: Object.assign({}, meta, {
-          rrule: {
-            ...rrule,
-            dtstart: this.originalRRule?.dtstart || this.event.dtstart,
-          },
-        }),
-      }
-    }
-
-    // Changing just the dtstart of the event eliminates the "all" option.
-    if (changedStart) {
-      return {
-        single: Object.assign({}, meta, {
-          dtstart: this.metaChanges.dtstart,
-        }),
-        future: Object.assign({}, meta, {
-          rrule: { ...rrule, dtstart: changedStart },
-        }),
-      }
-    }
-
-    if (!Object.keys(meta).length) return {}
-
-    return {
-      single: meta,
-      future: meta,
-      all: meta,
-    }
+    this.times.times = times
   }
 
   isSameDay(dateA: string, dateB: string) {
     return isSameDay(new Date(dateA), new Date(dateB))
-  }
-
-  /**
-   * @returns The properties in the rrule that have been modified.
-   */
-  get rruleChanges() {
-    if (!this.rrule || !this.originalRRule) return {}
-
-    return shallowDiff(this.originalRRule, this.rrule)
-  }
-
-  /**
-   * If the project is removed then the course should be too.
-   * This could actually be changed with some minor backend tweaks
-   * due to a late refactoring of how payments work.
-   */
-  @Watch('meta.project')
-  onProjectChange(project: number | null) {
-    if (project === null) {
-      this.meta.course = null
-    }
-  }
-
-  /**
-   * Transforms the interpreted event data into the data required
-   * for editing the events or events.
-   */
-  @Watch('event', { immediate: true, deep: true })
-  onEventUpdate(event: DTOEvent) {
-    this.intEvent = Object.assign({}, event)
-    const start = new Date(this.intEvent.dtstart)
-    const end = new Date(this.intEvent.dtend)
-
-    // Copy event date data.
-    this.dates.start.date = format(start, 'yyyy-MM-dd')
-    this.times.start.time = format(start, 'HH:mm')
-    this.dates.end.date = format(end, 'yyyy-MM-dd')
-    this.times.end.time = format(end, 'HH:mm')
-
-    // Copy event metadata
-    this.meta.name = this.intEvent.name
-    this.meta.description = this.intEvent.description || ''
-    this.meta.location = this.intEvent.location || ''
-    this.meta.color = this.intEvent.color || '#000000'
-    this.meta.locationTitle = this.intEvent.locationTitle
-    this.meta.cutoffThreshold = this.intEvent.cutoffThreshold
-    this.meta.cutoffOffset = this.intEvent.cutoffOffset
-    this.meta.lateThreshold = this.intEvent.lateThreshold
-    this.meta.lateOffset = this.intEvent.lateOffset
-    this.meta.permissions.grades = this.intEvent.permissions?.grades || []
-    this.meta.permissions.genders = this.intEvent.permissions?.genders || []
-    this.meta.project = this.intEvent.project?.id || null
-    this.meta.course = this.intEvent.course?.id || null
-    this.meta.picture = this.intEvent.picture
-
-    // Event Fee
-    if (this.intEvent.fee) {
-      const fee = this.intEvent.fee
-
-      this.feeType = FeeType.EVENT
-      this.fee.amount = +fee.amount
-      this.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
-    } else if (this.intEvent.course?.fee) {
-      const fee = this.intEvent.course.fee
-
-      this.feeType = FeeType.COURSE
-      this.fee.amount = +fee.amount
-      this.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
-    } else {
-      this.feeType = FeeType.FREE
-    }
-
-    // Serialize RRule string to object
-    this.rrule = this.getRRuleOptions(this.intEvent)
-    this.originalRRule = Object.assign({}, this.rrule)
-  }
-
-  /**
-   * Hydrates an rrule from a string into its dto options form
-   */
-  getRRuleOptions(event: DTOEvent) {
-    if (!event.recurrence) return null
-
-    let options: Partial<Options>
-
-    const rrule = rrulestr(event.recurrence.rrule)
-
-    if (rrule instanceof RRuleSet) {
-      options = rrule.rrules()[0].origOptions
-    } else {
-      options = rrule.origOptions
-    }
-
-    return (this.cleanRRule(options) as unknown) as DTO<EventRecurrenceDto>
-  }
-
-  /**
-   * Removes undefined properties from the rrule object
-   * and converts any dates into ISO strings.
-   */
-  cleanRRule(object: RRuleOptions) {
-    for (const prop in object) {
-      if (object[prop] === undefined) {
-        delete object[prop]
-      } else if (object[prop] instanceof Date) {
-        object[prop] = object[prop].toISOString()
-      }
-    }
-
-    return (object as unknown) as EventRecurrenceDto
-  }
-
-  /**
-   * Consumes a hydrated RRule and rebuilds the options
-   * structure while removing any superflous properties.
-   *
-   * This is done for diffing purposes.
-   */
-  parseRRule(options: Partial<Options>) {
-    const retval: Partial<Options> = {
-      freq: options.freq,
-      dtstart: options.dtstart,
-    }
-
-    switch (options.freq) {
-      case Frequency.WEEKLY:
-        if (options.byweekday) {
-          retval.byweekday = options.byweekday
-        }
-        break
-      case Frequency.MONTHLY:
-        // Absolute month day.
-        if (options.bymonthday) {
-          retval.bymonthday = options.bymonthday
-          // Relative month weekday.
-        } else if (options.bysetpos) {
-          retval.bysetpos = options.bysetpos
-          retval.byweekday = options.byweekday
-        }
-        break
-    }
-
-    if (options.interval && options.interval !== 1) {
-      retval.interval = options.interval
-    }
-
-    // Sets the terminating condition.
-    if (options.until) {
-      retval.until = options.until
-    } else if (options.count) {
-      retval.count = options.count
-    }
-
-    return retval
   }
 
   format(dateString: string) {
@@ -953,97 +687,80 @@ export default class DialogUpdateEvent extends Vue {
     return format(date, 'EEE, LLL d, yyyy')
   }
 
+  async onSubmit() {
+    // Type asserted as this is not multi-file upload.
+    const url = (await this.$accessor.files.filesToURL(this.files)) as
+      | string
+      | null
+
+    if (this.$accessor.files.error) {
+      console.error(this.$accessor.files.error)
+    }
+
+    const dto = Object.assign(
+      {
+        rrule: this.rrule || undefined,
+        project: this.project || undefined,
+        course: this.course || undefined,
+        ...this.meta,
+      },
+      this.dates.allday
+        ? { dtend: toDate(this.dates.start.date, '23:59').toISOString() }
+        : {
+            dtend: toDate(
+              this.dates.end.date,
+              this.times.end.time
+            ).toISOString(),
+          },
+      !this.rrule && {
+        dtstart: toDate(
+          this.dates.start.date,
+          this.times.start.time
+        ).toISOString(),
+      },
+      this.feeType !== 'free' && {
+        feeType: this.feeType,
+        fee: {
+          amount: this.fee.amount.toFixed(2),
+          lateAmount: this.fee.lateAmount?.toFixed(2),
+        },
+      },
+      url && { picture: url }
+    )
+
+    if (this.dates.allday) {
+      // Incomplete, allday is not accurate
+    }
+
+    await this.$accessor.events.create(dto)
+
+    if (this.$accessor.events.error) {
+      console.error(this.$accessor.events.error)
+    } else {
+      this.$emit('event:create')
+
+      this.success = true
+      this.dialog.close(1500)
+    }
+  }
+
+  onProjectSelect(id: number) {
+    this.project = id
+  }
+
   onProjectCreated(project: Project) {
-    this.meta.project = project.id
+    this.project = project.id
   }
 
   onCourseCreated(course: Course) {
-    this.meta.course = course.id
-  }
-
-  /**
-   * Resetting causes the event being looked into to be refreshed.
-   * This must be handled by the parent component.
-   */
-  onReset() {
-    this.$emit('event:refresh', this.$route.params.id)
-  }
-
-  /**
-   * The "save changes" button was pushed and the form has no errors.
-   */
-  async onSubmit() {
-    if (this.meta.picture instanceof File) {
-      const file = (await this.$accessor.files.uploadFile(
-        this.meta.picture
-      )) as FileEntity
-
-      if (this.error) {
-        return this.$accessor.snackbar.show({ text: this.error.message })
-      }
-
-      this.meta.picture = file.root
-    }
-
-    // Let the computed properties update.
-    await this.$nextTick()
-
-    const numChangesets = Object.keys(this.changeset).length
-
-    if (numChangesets > 1) {
-      return this.typeDialog.open()
-    }
-
-    if (this.changeset.future) {
-      // If we got here we removed any files.
-      await this.update('future', this.changeset.future as DTO<UpdateEventsDto>)
-    }
-  }
-
-  /**
-   * Callback method for the update event type popup.
-   */
-  async onSubmitType(
-    type: 'single' | 'future' | 'all',
-    changeset: DTO<UpdateEventDto> | DTO<UpdateEventsDto>
-  ) {
-    await this.update(type, changeset)
-  }
-
-  /**
-   * Submits the changes for an event update.
-   */
-  async update(
-    type: 'single' | 'future' | 'all',
-    changeset: DTO<UpdateEventDto> | DTO<UpdateEventsDto>
-  ) {
-    await this.$accessor.events.update({
-      id: this.$route.params.id,
-      dto: changeset,
-      type,
-    })
-
-    if (this.error) {
-      this.$accessor.snackbar.show({
-        text: this.error.message,
-      })
-    } else {
-      this.$emit('event:update', this.$route.params.id)
-      this.$accessor.snackbar.show({
-        text: 'Event successfully updated',
-      })
-      this.dialog.close()
-    }
+    this.course = course.id
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.preview {
-  text-shadow: 0 0 0 #000;
-  height: 100%;
-  font-weight: 700;
-  font-size: 1.3rem;
+.v-card__text {
+  padding: 16px 0;
 }
 
 .shrink-append {

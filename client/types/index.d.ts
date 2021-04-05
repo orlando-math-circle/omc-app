@@ -1,9 +1,9 @@
 import { NuxtRuntimeConfig } from '@nuxt/types/config/runtime'
-import { User } from '@omc/server/user/user.entity'
 import { NuxtCookies } from 'cookie-universal-nuxt'
 import { Framework } from 'vuetify'
-import { accessorType } from '~/store'
-import { DTOUser } from '~/store/users'
+import { User } from '../../backend/src/user/user.entity'
+import { accessorType } from '../src/store'
+import { DTOUser } from '../src/store/users'
 
 declare module 'vue/types/vue' {
   interface Vue {

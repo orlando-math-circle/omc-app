@@ -179,8 +179,8 @@ import { User } from '@omc/server/user/user.entity'
 import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
 import { grades } from '../../utils/events'
 import { genders, reminders } from '../../utils/constants'
-import DialogUserEdit from '~/components/dialogs/DialogUserEdit.vue'
-import DialogConfirm from '~/components/dialogs/DialogConfirm.vue'
+import DialogUserEdit from '~/components/dialog/UserEdit.vue'
+import DialogConfirm from '~/components/dialog/Confirm.vue'
 
 @Component({
   head: {

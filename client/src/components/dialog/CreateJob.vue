@@ -86,7 +86,7 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'nuxt-property-decorator'
-import DialogForm from './DialogForm.vue'
+import DialogForm from './Form.vue'
 
 @Component
 export default class DialogCreateJob extends Vue {

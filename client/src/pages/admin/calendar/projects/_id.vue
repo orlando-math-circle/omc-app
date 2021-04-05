@@ -135,9 +135,9 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { cloneDeep } from 'lodash'
 import { Project } from '@omc/server/project/project.entity'
-import { shallowDiff } from '../../../../utils/utilities'
 import { UpdateProjectDto } from '@omc/server/project/dto/update-project.dto'
 import { CreateJobDto } from '@omc/server/volunteer-job/dto/create-job.dto'
+import { shallowDiff } from '~/utils/utilities'
 
 @Component({
   layout: 'admin',

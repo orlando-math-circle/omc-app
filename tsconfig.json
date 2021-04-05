@@ -2,11 +2,11 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@omc/server/*": ["backend/src/*"],
-      "@omc/client/*": ["frontend/src/*"],
-      "@omc/shared/*": ["resources/*"],
-      "~/*": ["frontend/src/*"],
-      "@/*": ["frontend/src/*"]
+      "@omc/server/*": ["server/src/*"],
+      "@omc/client/*": ["client/src/*"],
+      "@omc/shared/*": ["shared/*"],
+      "~/*": ["client/src/*"],
+      "@/*": ["client/src/*"]
     }
   },
   "exclude": ["**/node_modules"]

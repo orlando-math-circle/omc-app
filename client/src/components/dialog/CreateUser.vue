@@ -164,7 +164,7 @@ import { Grade } from '@omc/server/user/enums/grade.enum'
 import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
 import { education, genders, reminders } from '../../utils/constants'
 import { grades } from '../../utils/events'
-import DialogForm from './DialogForm.vue'
+import DialogForm from './Form.vue'
 
 @Component
 export default class DialogUserCreate extends Vue {

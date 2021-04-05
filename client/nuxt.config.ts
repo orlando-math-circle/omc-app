@@ -1,5 +1,5 @@
-import { NuxtConfig } from '@nuxt/types'
 import path from 'path'
+import { NuxtConfig } from '@nuxt/types'
 import { VuetifyLoaderPlugin } from 'vuetify-loader'
 
 const config: NuxtConfig = {
@@ -66,14 +66,17 @@ const config: NuxtConfig = {
       ssr: false,
     },
   ],
-  components: true,
-  buildModules: [
-    '@nuxt/typescript-build',
-    '@nuxtjs/eslint-module',
-    'nuxt-typed-vuex',
-  ],
+  components: ['~/components', '~/components/inputs'],
+  buildModules: ['@nuxt/typescript-build', 'nuxt-typed-vuex'],
   eslint: {
     cache: true,
+  },
+  typescript: {
+    typeCheck: {
+      eslint: {
+        files: './**/*.{ts,js,vue}',
+      },
+    },
   },
   modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
   axios: {
@@ -104,9 +107,9 @@ const config: NuxtConfig = {
     extend(config) {
       const alias = (config.resolve!.alias = config.resolve!.alias || {})
 
-      alias['@omc/server'] = path.join(__dirname, '../backend/src')
+      alias['@omc/server'] = path.join(__dirname, '../server/src')
       alias['@omc/client'] = path.resolve(__dirname, './src')
-      alias['@omc/shared'] = path.resolve(__dirname, '../resources')
+      alias['@omc/shared'] = path.resolve(__dirname, '../shared')
     },
   },
 }
