@@ -26,10 +26,10 @@ jobs:
         run: docker-compose up -d
 
       - run: npm install
-        working-directory: backend
+        working-directory: server
 
       - run: npm run test:e2e
-        working-directory: backend
+        working-directory: server
         env:
           PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
           PAYPAL_SECRET_KEY: ${{ secrets.PAYPAL_SECRET_KEY }}
