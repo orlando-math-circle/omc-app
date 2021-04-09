@@ -1,0 +1,13 @@
+{
+  "name": "@omc/docs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "generate": "nuxt generate"
+  },
+  "devDependencies": {
+    "docus": "0.0.10",
+    "nuxt": "2.15.4"
+  }
+}

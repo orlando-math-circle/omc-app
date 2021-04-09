@@ -5,7 +5,7 @@ module.exports = {
   },
   projects: [
     {
-      root: "./client",
+      root: "./packages/client",
     },
   ],
 };
