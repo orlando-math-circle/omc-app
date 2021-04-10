@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Plugin } from '@nuxt/types'
-import type { Event } from '@omc/server/event/event.entity'
+import { Event } from '@omc/server/event/event.entity'
 
 declare module 'vue/types/vue' {
   interface Vue {

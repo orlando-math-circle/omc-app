@@ -1,22 +1,14 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "lib": ["esnext", "esnext.asynciterable", "dom"],
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "sourceMap": true,
-    "strict": true,
+    "lib": ["ESNext", "ESNext.AsyncIterable", "DOM"],
+    "emitDecoratorMetadata": false,
+    "declaration": false,
     "noEmit": true,
-    "baseUrl": ".",
-    "importsNotUsedAsValues": "preserve",
     "types": [
       "@types/node",
       "@nuxt/types",
-      "@nuxt/typescript-build",
       "@nuxtjs/axios",
-      "typed-vuex",
       "cookie-universal-nuxt",
       "vuetify"
     ]

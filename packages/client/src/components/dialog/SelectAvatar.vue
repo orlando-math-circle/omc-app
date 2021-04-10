@@ -66,8 +66,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import type { DefaultAvatar } from '@omc/server/user/enums/default-avatar.enum'
-import type { User } from '@omc/server/user/user.entity'
+import { DefaultAvatar } from '@omc/server/user/enums/default-avatar.enum'
+import { User } from '@omc/server/user/user.entity'
 
 @Component
 export default class DialogSelectAvatar extends Vue {

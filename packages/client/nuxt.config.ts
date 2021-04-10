@@ -5,6 +5,7 @@ import { VuetifyLoaderPlugin } from 'vuetify-loader'
 const config: NuxtConfig = {
   ssr: true,
   srcDir: 'src/',
+  buildDir: 'dist',
   server: {
     port: 8000,
   },

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2020",
+    "module": "ESNext",
+    "target": "ESNext",
     "allowJs": true,
     "moduleResolution": "Node",
     "declaration": true,
@@ -15,12 +15,14 @@
     "incremental": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
+    "baseUrl": "./packages/",
     "paths": {
-      "@omc/client/*": ["packages/client/src/*"],
-      "@omc/server/*": ["packages/server/src/*"],
-      "@omc/shared/*": ["packages/shared/src/*"]
+      "@omc/server/*": ["server/src/*"],
+      "@omc/client/*": ["client/src/*"],
+      "@omc/shared/*": ["shared/src/*"],
+      "~/*": ["client/src/*"],
+      "@/*": ["client/src/*"]
     }
   },
-  "exclude": ["**/node_modules", "**/dist", "**/.nuxt"]
+  "exclude": ["**/node_modules", "**/dist"]
 }

@@ -5,12 +5,15 @@
   "author": "John Gilbert",
   "private": true,
   "scripts": {
+    "clean": "rimraf **/dist && rimraf **/.nuxt",
     "client": "yarn workspace @omc/client",
     "server": "yarn workspace @omc/server",
     "shared": "yarn workspace @omc/shared",
     "docs": "yarn workspace @omc/docs"
   },
-  "workspaces": [
-    "packages/*"
-  ]
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  }
 }

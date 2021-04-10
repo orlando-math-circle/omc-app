@@ -1,7 +1,7 @@
 // import { NuxtRuntimeConfig } from '@nuxt/types/config/runtime'
 import { NuxtCookies } from 'cookie-universal-nuxt'
 // import { Framework } from 'vuetify'
-import { User } from '@omc/server/src/user/user.entity'
+import { User } from '../../packages/server/src/user/user.entity'
 import { accessorType } from './src/store'
 import { DTOUser } from './src/store/users'
 
