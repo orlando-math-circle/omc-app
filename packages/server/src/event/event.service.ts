@@ -5,7 +5,7 @@ import {
   QueryOrder,
   QueryOrderMap,
 } from '@mikro-orm/core';
-import { endOfDay } from '@omc/shared/time';
+import { endOfDay } from '@shared/time';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

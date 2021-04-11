@@ -354,12 +354,12 @@
 
 <script lang="ts">
 import { Component, Ref, Vue } from 'nuxt-property-decorator'
-import { User } from '@omc/server/user/user.entity'
-import { EventRegistrationStatus } from '@omc/server/event-registration/dtos/event-registration-status.dto'
-import { EventRegistration } from '@omc/server/event-registration/event-registration.entity'
-import { Roles } from '@omc/server/app.roles'
-import { Gender } from '@omc/server/user/enums/gender.enum'
-import { VolunteerJob } from '@omc/server/volunteer-job/volunteer-job.entity'
+import { User } from '@server/user/user.entity'
+import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
+import { EventRegistration } from '@server/event-registration/event-registration.entity'
+import { Roles } from '@server/app.roles'
+import { Gender } from '@server/user/enums/gender.enum'
+import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
 import DialogConfirm from '~/components/dialog/Confirm.vue'
 import { contiguousGradeRanges, gradeGroups, grades } from '~/utils/events'
 import { formatDate } from '~/utils/utilities'

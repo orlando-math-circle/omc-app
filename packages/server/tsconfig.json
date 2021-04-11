@@ -1,21 +1,6 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ESNext",
-    "allowJs": true,
-    "moduleResolution": "Node",
-    "declaration": true,
-    "removeComments": true,
-    "sourceMap": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
     "outDir": "./dist"
   },
   "include": ["src/**/*", "test/**/*"]

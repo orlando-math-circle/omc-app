@@ -175,8 +175,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { User } from '@omc/server/user/user.entity'
-import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
+import { User } from '@server/user/user.entity'
+import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
 import { grades } from '../../utils/events'
 import { genders, reminders } from '../../utils/constants'
 import DialogUserEdit from '~/components/dialog/UserEdit.vue'

@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
-import { User } from '@omc/server/user/user.entity'
+import { User } from '@server/user/user.entity'
 
 @Component({
   layout: 'landing',

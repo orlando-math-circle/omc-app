@@ -5,15 +5,22 @@
   "author": "John Gilbert",
   "private": true,
   "scripts": {
-    "clean": "rimraf **/dist && rimraf **/.nuxt",
     "client": "yarn workspace @omc/client",
     "server": "yarn workspace @omc/server",
     "shared": "yarn workspace @omc/shared",
     "docs": "yarn workspace @omc/docs"
   },
-  "workspaces": {
-    "packages": [
-      "packages/*"
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^12.1.1",
+    "@commitlint/config-conventional": "^12.1.1",
+    "husky": "^6.0.0"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
     ]
   }
 }

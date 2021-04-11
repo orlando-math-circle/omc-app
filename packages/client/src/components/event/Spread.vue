@@ -44,7 +44,7 @@
 <script lang="ts">
 import { format } from 'date-fns'
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { Event } from '@omc/server/event/event.entity'
+import { Event } from '@server/event/event.entity'
 
 @Component
 export default class EventSpread extends Vue {

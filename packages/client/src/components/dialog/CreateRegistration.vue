@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { User } from '@omc/server/user/user.entity'
+import { User } from '@server/user/user.entity'
 
 @Component
 export default class DialogCreateRegistration extends Vue {

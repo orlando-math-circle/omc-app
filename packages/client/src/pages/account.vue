@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
-import { Roles } from '@omc/server/app.roles'
+import { Roles } from '@server/app.roles'
 
 @Component({
   head: {

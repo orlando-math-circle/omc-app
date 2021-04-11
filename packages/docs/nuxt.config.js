@@ -2,6 +2,7 @@ import { withDocus } from 'docus'
 
 export default withDocus({
   srcDir: 'src/',
+  buildDir: 'dist/',
   docus: {
     colors: {
       primary: '#8E75FF',

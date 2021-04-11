@@ -106,8 +106,8 @@
 <script lang="ts">
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'nuxt-property-decorator'
-import { VolunteerWork } from '@omc/server/volunteer-work/volunteer-work.entity'
-import { UpdateWorkDto } from '@omc/server/volunteer-work/dto/update-work.dto'
+import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity'
+import { UpdateWorkDto } from '@server/volunteer-work/dto/update-work.dto'
 import { shallowDiff } from '~/utils/utilities'
 import { workStatuses } from '~/utils/constants'
 

@@ -21,11 +21,11 @@ export const config: Options = {
   cache: { enabled: process.env.DATABASE_CACHE === 'true' },
   driverOptions: {
     connection: {
-      ssl: process.env.DATABASE_SSL === 'true' || false
-    }
+      ssl: process.env.DATABASE_SSL === 'true' || false,
+    },
   },
   migrations: {
-    disableForeignKeys: false
+    disableForeignKeys: false,
   },
   findOneOrFailHandler: (entityName: string) => {
     return new NotFoundException(`${entityName} not found`);

@@ -134,9 +134,9 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { cloneDeep } from 'lodash'
-import { Project } from '@omc/server/project/project.entity'
-import { UpdateProjectDto } from '@omc/server/project/dto/update-project.dto'
-import { CreateJobDto } from '@omc/server/volunteer-job/dto/create-job.dto'
+import { Project } from '@server/project/project.entity'
+import { UpdateProjectDto } from '@server/project/dto/update-project.dto'
+import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
 import { shallowDiff } from '~/utils/utilities'
 
 @Component({

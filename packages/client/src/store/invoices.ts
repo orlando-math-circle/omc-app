@@ -1,5 +1,5 @@
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
-import { Invoice } from '@omc/server/invoice/invoice.entity'
+import { Invoice } from '@server/invoice/invoice.entity'
 import { StateError } from '../types/state-error.interface'
 import { StateStatus } from '../types/state.interface'
 import { parseAxiosError } from '../utils/utilities'

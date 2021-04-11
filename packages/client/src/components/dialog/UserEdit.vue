@@ -115,10 +115,10 @@
 </template>
 
 <script lang="ts">
-import { IndustryDto } from '@omc/server/user/dtos/industry.dto'
-import { Gender } from '@omc/server/user/enums/gender.enum'
-import { User } from '@omc/server/user/user.entity'
-import { Grade } from '@omc/server/user/enums/grade.enum'
+import { IndustryDto } from '@server/user/dtos/industry.dto'
+import { Gender } from '@server/user/enums/gender.enum'
+import { User } from '@server/user/user.entity'
+import { Grade } from '@server/user/enums/grade.enum'
 import { Component, Vue } from 'nuxt-property-decorator'
 import { genders } from '../../utils/constants'
 import { grades } from '../../utils/events'

@@ -1,5 +1,5 @@
-import { OrderDetails } from '../../src/paypal/types/orders/order-details.interface';
-import { CreateOrderResponse } from '../../src/paypal/types/orders/responses/create-order.interface';
+import { OrderDetails } from '../../src/paypal/interfaces/orders/order-details.interface';
+import { CreateOrderResponse } from '../../src/paypal/interfaces/orders/responses/create-order.interface';
 
 export class PayPalMock {
   constructor(

@@ -1,5 +1,5 @@
 import { Middleware } from '@nuxt/types'
-import { Roles } from '@omc/server/app.roles'
+import { Roles } from '@server/app.roles'
 
 /**
  * Admin Access Middleware

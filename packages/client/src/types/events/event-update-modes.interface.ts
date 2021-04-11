@@ -1,5 +1,5 @@
-import { UpdateEventDto } from '@omc/server/event/dto/update-event.dto'
-import { UpdateEventsDto } from '@omc/server/event/dto/update-events.dto'
+import { UpdateEventDto } from '@server/event/dto/update-event.dto'
+import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
 import { DTO } from '../date-to-string.interface'
 
 export type AddFile<T> = Omit<T, 'picture'> & { picture: string | File }

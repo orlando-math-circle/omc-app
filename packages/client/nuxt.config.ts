@@ -5,9 +5,9 @@ import { VuetifyLoaderPlugin } from 'vuetify-loader'
 const config: NuxtConfig = {
   ssr: true,
   srcDir: 'src/',
-  buildDir: 'dist',
+  buildDir: 'dist/',
   server: {
-    port: 8000,
+    port: 9000,
   },
   head: {
     titleTemplate: '%s · OMC',
@@ -83,8 +83,13 @@ const config: NuxtConfig = {
       productionTip: false,
     },
   },
+  cli: {
+    bannerColor: 'magenta',
+    badgeMessages: ['Orlando Math Circle'],
+  },
   alias: {
-    '@omc/server': resolve(__dirname, '../server/src'),
+    '@server': resolve(__dirname, '../server/src'),
+    '@shared': resolve(__dirname, '../shared/src'),
   },
   build: {
     parallel: true,

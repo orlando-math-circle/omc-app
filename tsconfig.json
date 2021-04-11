@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ESNext",
-    "allowJs": true,
+    "module": "CommonJS",
+    "target": "ES2018",
     "moduleResolution": "Node",
     "declaration": true,
     "removeComments": true,
@@ -15,13 +14,13 @@
     "incremental": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": "./packages/",
+    "baseUrl": ".",
     "paths": {
-      "@omc/server/*": ["server/src/*"],
-      "@omc/client/*": ["client/src/*"],
-      "@omc/shared/*": ["shared/src/*"],
-      "~/*": ["client/src/*"],
-      "@/*": ["client/src/*"]
+      "@shared/*": ["packages/shared/src/*"],
+      "@server/*": ["packages/server/src/*"],
+      "@client/*": ["packages/client/src/*"],
+      "~/*": ["packages/client/src/*"],
+      "@/*": ["packages/client/src/*"]
     }
   },
   "exclude": ["**/node_modules", "**/dist"]

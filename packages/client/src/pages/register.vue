@@ -179,9 +179,9 @@
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
 import { ValidationObserver, ValidationProvider } from 'vee-validate'
-import { Gender } from '@omc/server/user/enums/gender.enum'
-import { ReminderFreq } from '@omc/server/user/enums/reminder-freq.enum'
-import { CreateAccountDto } from '@omc/server/account/dtos/create-account.dto'
+import { Gender } from '@server/user/enums/gender.enum'
+import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
+import { CreateAccountDto } from '@server/account/dtos/create-account.dto'
 import { StateStatus } from '../types/state.interface'
 import { genders } from '../utils/constants'
 

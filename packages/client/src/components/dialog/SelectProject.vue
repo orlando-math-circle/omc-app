@@ -62,7 +62,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { throttle } from 'lodash'
-import { FindAllProjectsDto } from '@omc/server/project/dto/find-all-projects.dto'
+import { FindAllProjectsDto } from '@server/project/dto/find-all-projects.dto'
 import { DataTableOptions } from '../../types/data-table.interface'
 
 export default Vue.extend({

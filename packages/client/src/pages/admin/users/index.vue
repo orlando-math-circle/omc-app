@@ -113,7 +113,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { Roles } from '@omc/server/app.roles'
+import { Roles } from '@server/app.roles'
 import {
   contiguousGradeRanges,
   gradeGroups,
