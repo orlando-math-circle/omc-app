@@ -2,9 +2,10 @@ import { BaseEntity, Options } from '@mikro-orm/core';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { NotFoundException } from '@nestjs/common';
 import dotenv from 'dotenv';
+import { resolve } from 'path';
 import { UserSubscriber } from './src/user/user.subscriber';
 
-dotenv.config();
+dotenv.config({ path: resolve(__dirname, '../../backend.env') });
 
 export const config: Options = {
   type: 'postgresql',

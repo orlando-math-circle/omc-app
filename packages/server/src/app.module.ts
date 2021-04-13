@@ -26,6 +26,7 @@ import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '../../backend.env',
       validate,
     }),
     MikroOrmModule.forRoot(MikroORMConfig),
