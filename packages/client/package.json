@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
-    "build": "nuxt build",
-    "start": "nuxt start",
+    "dev": "nuxt --dotenv ../../frontend.env",
+    "build": "nuxt build --dotenv ../../frontend.env",
+    "start": "nuxt start --dotenv ../../frontend.env",
     "lint": "eslint --ext .ts,.js,.vue --ignore-path ../../.gitignore ."
   },
   "dependencies": {
@@ -17,7 +17,7 @@
     "apexcharts": "3.26.0",
     "cookie-universal-nuxt": "2.1.4",
     "cropperjs": "1.5.11",
-    "date-fns": "2.19.0",
+    "date-fns": "2.20.2",
     "lodash": "4.17.21",
     "moment": "2.29.1",
     "nuxt": "2.15.4",
@@ -26,10 +26,11 @@
     "nuxt-typed-vuex": "0.1.22",
     "rrule": "2.6.8",
     "vee-validate": "3.4.5",
-    "vue-apexcharts": "1.6.0",
+    "vue-apexcharts": "1.6.1",
     "vuetify-loader": "1.7.2"
   },
   "devDependencies": {
+    "@nuxt/postcss8": "^1.1.3",
     "@nuxt/types": "2.15.4",
     "@nuxt/typescript-build": "2.1.0",
     "@nuxtjs/eslint-config-typescript": "6.0.0",
