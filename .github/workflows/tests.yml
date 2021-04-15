@@ -33,9 +33,7 @@ jobs:
         run: docker-compose up -d
 
       - name: Yarn Install
-        run: |
-          yarn config set ignore-engines true
-          yarn
+        run: yarn
 
       - name: Test
         run: yarn server test:e2e
