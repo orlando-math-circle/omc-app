@@ -38,7 +38,7 @@ jobs:
           yarn
 
       - name: Test
-      - run: yarn server test:e2e
+        run: yarn server test:e2e
         env:
           PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
           PAYPAL_SECRET_KEY: ${{ secrets.PAYPAL_SECRET_KEY }}
