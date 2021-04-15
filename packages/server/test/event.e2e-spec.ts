@@ -3,7 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { addMonths } from 'date-fns';
+import { addDays, addMonths } from 'date-fns';
 import Joi from 'joi';
 import moment from 'moment';
 import RRule, { Frequency } from 'rrule';
@@ -32,7 +32,6 @@ import { MikroORMTestingConfig } from './mikro-orm.test-config';
 describe('Events', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
-  let agent: request.SuperAgentTest;
 
   /**
    * Testing Data
@@ -89,8 +88,6 @@ describe('Events', () => {
     );
     app.useGlobalFilters(new JsonWebTokenFilter());
 
-    agent = request.agent(app.getHttpServer());
-
     await app.init();
 
     /**
@@ -100,7 +97,11 @@ describe('Events', () => {
     token = await userFixtures.createAccount();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    const events = await orm.em.find(Event, {});
+
+    expect(events.every((e) => !e.dtend || +e.dtstart < +e.dtend)).toBeTruthy();
+
     orm.em.clear();
   });
 
@@ -111,11 +112,11 @@ describe('Events', () => {
 
   describe('POST /event', () => {
     it('should throw 401 for unauthenticated users', async () => {
-      await agent.post('/event').expect(401);
+      await request(app.getHttpServer()).post('/event').expect(401);
     });
 
     it('should throw 403 for unauthorized users', async () => {
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .expect(403);
@@ -132,7 +133,7 @@ describe('Events', () => {
 
       orm.em.clear();
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Event Name', dtend: new Date() })
@@ -150,7 +151,7 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -164,7 +165,7 @@ describe('Events', () => {
         dtend: new Date(Date.UTC(2020, 11, 24)),
       };
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -179,7 +180,7 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send(dtoTwo)
@@ -193,7 +194,7 @@ describe('Events', () => {
         dtend: new Date(Date.UTC(2020, 11, 25)),
       };
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -216,7 +217,7 @@ describe('Events', () => {
         },
       };
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -257,7 +258,7 @@ describe('Events', () => {
       expect(recurrence).toBeDefined();
       expect(recurrence!.events.length).toBe(1);
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .get('/event')
         .query({ start: dtstart, end: until })
         .expect(200);
@@ -290,7 +291,7 @@ describe('Events', () => {
 
       const length = events.length;
 
-      await agent
+      await request(app.getHttpServer())
         .get('/event')
         .query({ start: dtstart, end: until })
         .expect(200);
@@ -316,11 +317,11 @@ describe('Events', () => {
 
   describe('GET /event/:id', () => {
     it('should retrieve single events', async () => {
-      await agent.get('/event/1').expect(200);
+      await request(app.getHttpServer()).get('/event/1').expect(200);
     });
 
     it('should throw on a non-existant event', async () => {
-      await agent.get('/event/10').expect(404);
+      await request(app.getHttpServer()).get('/event/10').expect(404);
     });
   });
 
@@ -334,7 +335,7 @@ describe('Events', () => {
         dtend: newEnd,
       };
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .patch('/event/3/single')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -355,7 +356,7 @@ describe('Events', () => {
         description: 'Update Single',
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch('/event/3/single')
         .send(dto)
         .set('Authorization', `Bearer ${token}`)
@@ -371,7 +372,7 @@ describe('Events', () => {
         dtend: new Date(Date.UTC(2020, 1, 14, 15, 30)),
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch('/event/5/future')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -406,13 +407,13 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch('/event/4/future')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
         .expect(200);
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .get('/event')
         .query({ start: dto.rrule!.dtstart, end: dto.rrule!.until })
         .expect(200);
@@ -438,13 +439,13 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch('/event/12/future')
         .send(dto)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      await agent
+      await request(app.getHttpServer())
         .get('/event')
         .query({
           start: new Date(Date.UTC(2020, 1, 7, 10, 30)).toUTCString(),
@@ -465,7 +466,7 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch('/event/4/future')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -486,13 +487,13 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .send(dto)
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .get('/event')
         .query({
           start: dto.rrule!.dtstart,
@@ -519,13 +520,13 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch(`/event/${thirdCreatedEvent}/future`)
         .send(secondDto)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      await agent
+      await request(app.getHttpServer())
         .get('/event')
         .query({
           start: secondDto.rrule!.dtstart,
@@ -553,13 +554,13 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .send(dto)
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .get('/event')
         .query({
           start: dto.rrule!.dtstart,
@@ -594,7 +595,7 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch(`/event/${first}/future`)
         .send(secondDto)
         .set('Authorization', `Bearer ${token}`)
@@ -620,7 +621,7 @@ describe('Events', () => {
         name: 'All Events',
       };
 
-      await agent
+      await request(app.getHttpServer())
         .patch('/event/10/all')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
@@ -646,13 +647,13 @@ describe('Events', () => {
 
       expect(rrule).toBeDefined();
 
-      await agent
+      await request(app.getHttpServer())
         .patch('/event/8/all')
         .set('Authorization', `Bearer ${token}`)
         .send(dto)
         .expect(200);
 
-      await agent
+      await request(app.getHttpServer())
         .get('/event')
         .query({
           start: new Date(Date.UTC(2020, 1, 7, 10, 30)).toUTCString(),
@@ -680,77 +681,130 @@ describe('Events', () => {
         },
       };
 
-      const resp = await agent
+      await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
         .send(createDto)
-        .expect(500);
+        .expect(201);
 
-      console.log(resp.body);
-      const dto: UpdateEventDto = {
-        dtstart: new Date(Date.UTC(2020, 1, 19, 5, 0)),
-        dtend: new Date(Date.UTC(2020, 1, 19, 10, 0)),
-      };
-
-      await agent
-        .patch('/event/16/single/')
-        .set('Authorization', `Bearer ${token}`)
-        .send(dto)
+      const createdEvents = await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: createDto.rrule!.dtstart,
+          end: addDays(createDto.rrule!.until!, 1),
+        })
         .expect(200);
 
-      const dtoTwo: UpdateEventsDto = {
+      expect(createdEvents.body).toBeDefined();
+      expect(Array.isArray(createdEvents.body)).toBeTruthy();
+      expect(createdEvents.body.length).toBe(10);
+
+      const firstEventId = createdEvents.body[0].id;
+      const secondEventId = createdEvents.body[1].id;
+
+      expect(typeof firstEventId).toBe('number');
+      expect(typeof secondEventId).toBe('number');
+
+      const exceptionDto: UpdateEventDto = {
+        dtend: new Date(Date.UTC(2020, 0, 2, 1, 30)),
+      };
+
+      await request(app.getHttpServer())
+        .patch(`/event/${secondEventId}/single/`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(exceptionDto)
+        .expect(200);
+
+      const exceptionEvent = await orm.em.findOneOrFail(Event, secondEventId);
+
+      expect(exceptionEvent.originalStart).toBeDefined();
+
+      const updateDto: UpdateEventsDto = {
         rrule: {
           freq: Frequency.DAILY,
-          dtstart: new Date(Date.UTC(2020, 1, 17, 10, 0)),
-          until: new Date(Date.UTC(2020, 1, 21, 12, 0)),
+          dtstart: createDto.rrule!.dtstart,
+          until: addDays(createDto.rrule!.until!, 2),
         },
       };
 
-      await agent
-        .patch('/event/12/all')
+      await request(app.getHttpServer())
+        .patch(`/event/${firstEventId}/all`)
         .set('Authorization', `Bearer ${token}`)
-        .send(dtoTwo)
+        .send(updateDto)
         .expect(200);
 
-      const event = await orm.em.findOne(Event, 16);
+      orm.em.clear();
+      const event = await orm.em.findOne(Event, secondEventId);
 
       expect(event).toBeDefined();
-      expect(event!.id).toBe(16);
+      expect(event!.id).toBe(secondEventId);
       expect(event!.originalStart).toBe(null);
     });
   });
 
-  describe.skip('DELETE /event/:id/single', () => {
+  describe('DELETE /event/:id/single', () => {
+    let eventDeletionId: number;
+
     it('should not re-create the event again', async () => {
-      await agent
-        .delete('/event/17/single')
+      const createRecurrenceDto: CreateEventDto = {
+        name: 'Deletion Recreation Test',
+        dtend: new Date(Date.UTC(2020, 10, 1, 5, 50)),
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 10, 1, 0, 0)),
+          count: 3,
+        },
+      };
+
+      await request(app.getHttpServer())
+        .post('/event')
+        .set('Authorization', `Bearer ${token}`)
+        .send(createRecurrenceDto)
+        .expect(201);
+
+      const events = await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: createRecurrenceDto.rrule!.dtstart,
+          end: new Date(Date.UTC(2020, 11, 1, 5, 30)),
+        })
+        .expect(200);
+
+      expect(events.body).toBeDefined();
+      expect(Array.isArray(events.body)).toBeTruthy();
+      expect(events.body.length).toBe(3);
+
+      eventDeletionId = events.body[1].id;
+
+      await request(app.getHttpServer())
+        .delete(`/event/${eventDeletionId}/single`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      const resp = await agent
+      const resp = await request(app.getHttpServer())
         .get('/event')
         .query({
-          start: new Date(Date.UTC(2020, 1, 19, 10, 30)),
-          end: new Date(Date.UTC(2020, 1, 20, 0, 0)),
+          start: createRecurrenceDto.rrule!.dtstart,
+          end: new Date(Date.UTC(2020, 11, 1, 5, 30)),
         })
         .expect(200);
 
       expect(resp.body).toBeDefined();
       expect(Array.isArray(resp.body)).toBeTruthy();
-      expect(resp.body.length).toBe(0);
+      expect(resp.body.length).toBe(2);
     });
 
     it('should return 404 on a subsequent deletion', async () => {
-      await agent
-        .delete('/event/17/single')
+      await request(app.getHttpServer())
+        .delete(`/event/${eventDeletionId}/single`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
   });
 
-  describe.skip('DELETE /event/:id/future', () => {
+  describe('DELETE /event/:id/future', () => {
     it('should delete events and prevent their re-creation', async () => {
-      const dto: CreateEventDto = {
+      const createDto: CreateEventDto = {
         name: 'Deleting Future Recurrences',
         dtend: new Date(Date.UTC(2020, 10, 10, 3, 0)),
         rrule: {
@@ -760,30 +814,30 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .set('Authorization', `Bearer ${token}`)
-        .send(dto)
+        .send(createDto)
         .expect(201);
 
-      await agent
+      await request(app.getHttpServer())
         .get('/event')
         .query({
-          start: dto.rrule!.dtstart,
-          end: dto.rrule!.until,
+          start: createDto.rrule!.dtstart,
+          end: createDto.rrule!.until,
         })
         .expect(200);
 
       const events = await orm.em.find(Event, {
-        dtstart: { $gte: dto.rrule!.dtstart },
-        dtend: { $lte: dto.rrule!.until },
+        dtstart: { $gte: createDto.rrule!.dtstart },
+        dtend: { $lte: createDto.rrule!.until },
       });
 
       expect(events).toBeDefined();
       expect(Array.isArray(events)).toBeTruthy();
       expect(events.length).toBe(11);
 
-      await agent
+      await request(app.getHttpServer())
         .delete(`/event/${events[2].id}/future`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
@@ -791,8 +845,7 @@ describe('Events', () => {
       orm.em.clear();
 
       const remainingEvents = await orm.em.find(Event, {
-        dtstart: { $gte: dto.rrule!.dtstart },
-        dtend: { $lte: dto.rrule!.until },
+        name: createDto.name,
       });
 
       expect(remainingEvents).toBeDefined();
@@ -801,56 +854,115 @@ describe('Events', () => {
     });
 
     it('should pivot to deleting all events if the first instance is selected', async () => {
-      const recurrence = await orm.em.findOne(EventRecurrence, 5, ['events']);
+      const createDto: CreateEventDto = {
+        name: 'Delete Entire Recurrence by Pivot',
+        dtend: new Date(Date.UTC(2020, 11, 1, 1, 30)),
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 11, 1)),
+          count: 10,
+        },
+      };
 
-      expect(recurrence).toBeDefined();
-      expect(recurrence!.events.length).toBe(3);
+      await request(app.getHttpServer())
+        .post('/event')
+        .send(createDto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
 
-      const eventId = recurrence!.events.getIdentifiers();
+      await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: createDto.rrule!.dtstart,
+          end: addDays(createDto.rrule!.dtstart, 10),
+        })
+        .expect(200);
 
-      await agent
-        .delete('/event/21/future')
+      const createdEvents = await orm.em.find(
+        Event,
+        { name: createDto.name },
+        { populate: ['recurrence'] },
+      );
+
+      expect(createdEvents.length).toBe(10);
+      expect(createdEvents[0].recurrence).toBeDefined();
+
+      await request(app.getHttpServer())
+        .delete(`/event/${createdEvents[0].id}/future`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       orm.em.clear();
 
-      const recurrenceAfter = await orm.em.findOne(EventRecurrence, 5);
+      const deletedEvents = await orm.em.find(Event, { name: createDto.name });
 
-      expect(recurrenceAfter).toBeFalsy();
+      expect(deletedEvents.length).toBe(0);
 
-      const events = await orm.em.find(Event, { id: { $in: eventId } });
+      const deletedRecurrence = await orm.em.findOne(
+        EventRecurrence,
+        createdEvents[0].recurrence!.id,
+      );
 
-      expect(events.length).toBe(0);
+      expect(deletedRecurrence).toBeNull();
     });
   });
 
-  describe.skip('DELETE /event/:id/all', () => {
+  describe('DELETE /event/:id/all', () => {
     it('should remove all events and the recurrence', async () => {
-      const recurrence = await orm.em.findOne(EventRecurrence, 3, ['events']);
+      const createDto: CreateEventDto = {
+        name: 'Delete Entire Recurrence By All',
+        dtend: new Date(Date.UTC(2020, 11, 1, 1, 30)),
+        rrule: {
+          freq: Frequency.DAILY,
+          dtstart: new Date(Date.UTC(2020, 11, 1)),
+          count: 10,
+        },
+      };
 
-      expect(recurrence).toBeDefined();
+      await request(app.getHttpServer())
+        .post('/event')
+        .send(createDto)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
 
-      const eventIds = recurrence!.events.getIdentifiers();
+      await request(app.getHttpServer())
+        .get('/event')
+        .query({
+          start: createDto.rrule!.dtstart,
+          end: addDays(createDto.rrule!.dtstart, 10),
+        })
+        .expect(200);
 
-      await agent
-        .delete('/event/16/all')
+      const createdEvents = await orm.em.find(
+        Event,
+        { name: createDto.name },
+        { populate: ['recurrence'] },
+      );
+
+      expect(createdEvents.length).toBe(10);
+      expect(createdEvents[0].recurrence).toBeDefined();
+
+      await request(app.getHttpServer())
+        .delete(`/event/${createdEvents[4].id}/all`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       orm.em.clear();
 
-      const recurrenceAfter = await orm.em.findOne(EventRecurrence, 3);
+      const deletedEvents = await orm.em.find(Event, { name: createDto.name });
 
-      expect(recurrenceAfter).toBeFalsy();
+      expect(deletedEvents.length).toBe(0);
 
-      const events = await orm.em.find(Event, { id: { $in: eventIds } });
+      const deletedRecurrence = await orm.em.findOne(
+        EventRecurrence,
+        createdEvents[0].recurrence!.id,
+      );
 
-      expect(events.length).toBe(0);
+      expect(deletedRecurrence).toBeNull();
     });
   });
 
-  describe.skip('Event Hydration', () => {
+  describe('Event Hydration', () => {
     it('should hydrate events outside of the range', async () => {
       const createEventDto: CreateEventDto = {
         name: 'Extended Range',
@@ -862,7 +974,7 @@ describe('Events', () => {
         },
       };
 
-      await agent
+      await request(app.getHttpServer())
         .post('/event')
         .send(createEventDto)
         .set('Authorization', `Bearer ${token}`)
@@ -877,7 +989,7 @@ describe('Events', () => {
       const start = new Date(Date.UTC(2020, 2, 1));
       const end = new Date(Date.UTC(2020, 3, 1));
 
-      const events = await agent
+      const events = await request(app.getHttpServer())
         .get('/event')
         .query({ start, end })
         .expect(200);
@@ -889,16 +1001,6 @@ describe('Events', () => {
           createEventDto.rrule!.dtstart.toISOString(),
         );
       }
-    });
-  });
-
-  describe.skip('Post-Test Scanning', () => {
-    it('should not have created any events where dtstart > dtend', async () => {
-      const events = await orm.em.find(Event, {});
-
-      expect(
-        events.every((e) => !e.dtend || +e.dtstart < +e.dtend),
-      ).toBeTruthy();
     });
   });
 });

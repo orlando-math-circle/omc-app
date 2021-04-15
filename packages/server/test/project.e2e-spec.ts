@@ -22,7 +22,7 @@ import { UserModule } from '../src/user/user.module';
 import { UserFixtures } from './fixtures/user.fixture';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
-describe.skip('Projects', () => {
+describe('Projects', () => {
   let app: INestApplication;
   let orm: MikroORM;
 

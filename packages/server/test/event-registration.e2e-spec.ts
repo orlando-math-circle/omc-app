@@ -21,7 +21,7 @@ import { UserModule } from '../src/user/user.module';
 import { VolunteerJobModule } from '../src/volunteer-job/volunteer-job.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
-describe.skip('Event Registrations', () => {
+describe('Event Registrations', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
 

@@ -3,10 +3,10 @@ name: tests
 on:
   push:
     paths:
-      - server/**
+      - packages/server/**
   pull_request:
     paths:
-      - server/**
+      - packages/server/**
 
 jobs:
   build:
@@ -26,10 +26,10 @@ jobs:
         run: docker-compose up -d
 
       - run: npm install
-        working-directory: server
+        working-directory: packages/server
 
       - run: npm run test:e2e
-        working-directory: server
+        working-directory: packages/server
         env:
           PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
           PAYPAL_SECRET_KEY: ${{ secrets.PAYPAL_SECRET_KEY }}
@@ -37,4 +37,4 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v1
         with:
-          directory: server/coverage
+          directory: packages/server/coverage

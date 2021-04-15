@@ -6,6 +6,10 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "moduleNameMapper": {
+    "^@shared/(.*)$": "<rootDir>/../../packages/shared/src/$1",
+    "^@server/(.*)$": "<rootDir>/../../packages/server/src/$1"
+  },
   "collectCoverage": true,
   "collectCoverageFrom": [
     "./src/**/*.{js,ts}",

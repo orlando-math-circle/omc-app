@@ -21,7 +21,7 @@ import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { MikroORMTestingConfig } from './mikro-orm.test-config';
 
-describe.skip('Users', () => {
+describe('Users', () => {
   let app: INestApplication;
   let orm: MikroORM<IDatabaseDriver<Connection>>;
 
