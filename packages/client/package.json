@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nuxt --dotenv ../../frontend.env",
-    "build": "nuxt build --dotenv ../../frontend.env",
-    "start": "nuxt start --dotenv ../../frontend.env",
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
     "lint": "eslint --ext .ts,.js,.vue --ignore-path ../../.gitignore ."
   },
   "dependencies": {

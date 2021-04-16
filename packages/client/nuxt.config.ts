@@ -7,7 +7,7 @@ const config: NuxtConfig = {
   srcDir: 'src/',
   buildDir: 'dist/',
   server: {
-    port: 9000,
+    port: process.env.PORT || 9000,
   },
   head: {
     titleTemplate: '%s · OMC',
