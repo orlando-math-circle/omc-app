@@ -44,7 +44,7 @@ const configSchema = Joi.object({
     then: Joi.string().required(),
     otherwise: Joi.string(),
   }),
-  FILE_DIRECTORY: Joi.string().default('../../uploads'),
+  FILE_DIRECTORY: Joi.string().default('../../../uploads'),
   FORM_SUBDIRECTORY: Joi.string().default('form'),
   SERVE_STATIC: Joi.boolean().default(true),
   DEFAULT_EVENT_PICTURE: Joi.string().default('/defaults/neon-math.jpg'),
