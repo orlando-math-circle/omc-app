@@ -61,15 +61,23 @@ export class EventService {
       ...meta,
     });
 
-    if (feeType && fee && meta.course) {
+    if (feeType && fee) {
       const eventFee = new EventFee(fee);
 
       switch (feeType) {
         case FeeType.COURSE:
+          if (!meta.course) {
+            throw new BadRequestException(
+              'Cannot create event payment by course with no course',
+            );
+          }
+
           eventFee.course = await this.courseService.findOneOrFail(meta.course);
+          eventFee.populated();
           break;
         case FeeType.EVENT:
           eventFee.event = event;
+          eventFee.populated();
           break;
         default:
           break;
