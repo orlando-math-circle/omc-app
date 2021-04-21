@@ -3044,15 +3044,15 @@ __metadata:
     "@types/dropzone": 5.7.3
     "@types/lodash": 4.14.168
     animate.css: 4.1.1
-    apexcharts: 3.26.0
+    apexcharts: 3.26.1
     cookie-universal-nuxt: 2.1.4
     cropperjs: 1.5.11
-    date-fns: 2.20.2
+    date-fns: 2.21.1
     deepmerge: 4.2.2
     eslint: 7.24.0
-    eslint-config-prettier: 8.1.0
+    eslint-config-prettier: 8.2.0
     eslint-plugin-nuxt: 2.0.0
-    eslint-plugin-prettier: 3.3.1
+    eslint-plugin-prettier: 3.4.0
     fibers: 5.0.0
     lodash: 4.17.21
     moment: 2.29.1
@@ -3062,11 +3062,11 @@ __metadata:
     nuxt-typed-vuex: 0.1.22
     prettier: 2.2.1
     rrule: 2.6.8
-    sass: 1.32.8
+    sass: 1.32.11
     sass-loader: 10.1.1
     vee-validate: 3.4.5
     vue-apexcharts: 1.6.1
-    vuetify: 2.4.9
+    vuetify: 2.4.10
     vuetify-loader: 1.7.2
   languageName: unknown
   linkType: soft
@@ -3118,10 +3118,10 @@ __metadata:
     "@types/jest": 26.0.22
     "@types/jsonwebtoken": 8.5.1
     "@types/lodash": 4.14.168
-    "@types/luxon": 1.26.3
+    "@types/luxon": 1.26.4
     "@types/module-alias": ^2.0.0
     "@types/multer": 1.4.5
-    "@types/node": 14.14.37
+    "@types/node": 14.14.41
     "@types/passport-jwt": 3.0.5
     "@types/passport-local": 1.0.33
     "@types/rimraf": 3.0.0
@@ -3134,11 +3134,11 @@ __metadata:
     cache-manager: 3.4.3
     class-transformer: 0.4.0
     class-validator: 0.13.1
-    date-fns: 2.20.2
+    date-fns: 2.21.1
     dotenv: 8.2.0
     eslint: 7.24.0
-    eslint-config-prettier: 8.1.0
-    eslint-plugin-prettier: 3.3.1
+    eslint-config-prettier: 8.2.0
+    eslint-plugin-prettier: 3.4.0
     form-data: 4.0.0
     jest: 26.6.3
     joi: 17.4.0
@@ -3155,8 +3155,7 @@ __metadata:
     rxjs: 6.6.7
     supertest: 6.1.3
     systeminformation: 5.6.12
-    ts-jest: 26.5.4
-    ts-loader: ^8.1.0
+    ts-jest: 26.5.5
     tsconfig-paths: ^3.9.0
     typescript: 4.2.4
     uuid: 8.3.2
@@ -3758,10 +3757,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:1.26.3":
-  version: 1.26.3
-  resolution: "@types/luxon@npm:1.26.3"
-  checksum: d34b3ceaeed2fadd008b5b41357fce7e3a2d6e0a7feb7e6f39dab1d93d77cd30afae3bc1dfb09d9a4dae812a3f80da3ffcaf9b315422e6ae6c2362f6ae8d885d
+"@types/luxon@npm:1.26.4":
+  version: 1.26.4
+  resolution: "@types/luxon@npm:1.26.4"
+  checksum: 4ddb55f1c73b1efe0dae407d79f10aba0e3f87945c6386a0c09742b66b39a4b1a81673bc5ddb2483b107684d052fbd953af1aaacdf43bd9bd882742a936791ec
   languageName: node
   linkType: hard
 
@@ -3839,7 +3838,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:14.14.37":
+"@types/node@npm:*":
   version: 14.14.37
   resolution: "@types/node@npm:14.14.37"
   checksum: 5e2d9baf7594ebacaf016716515f30de0765169412787f981481c2fb8b468923149bb9e2e3219ee672399811672ceddc339a7372a61cf15bc656836a5494d991
@@ -3850,6 +3849,13 @@ __metadata:
   version: 10.12.18
   resolution: "@types/node@npm:10.12.18"
   checksum: 64cc1c5105bcb7c27917c30c4de8d50931c9539bde52e0e8fae0c562a62ba38b9eab1bb1420eabf246f727845cac3109c83b4cba00abf93b6a73327bbdf141b5
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:14.14.41":
+  version: 14.14.41
+  resolution: "@types/node@npm:14.14.41"
+  checksum: 37dfb639644c8ee9b9846106834983f590d494b855e74645a4f169ea24199f7559366d25f6e72e83ba940b59eb6370e002bd53963d098d6d9fdf935a37011417
   languageName: node
   linkType: hard
 
@@ -5392,9 +5398,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"apexcharts@npm:3.26.0":
-  version: 3.26.0
-  resolution: "apexcharts@npm:3.26.0"
+"apexcharts@npm:3.26.1":
+  version: 3.26.1
+  resolution: "apexcharts@npm:3.26.1"
   dependencies:
     svg.draggable.js: ^2.2.2
     svg.easing.js: ^2.0.0
@@ -5402,7 +5408,7 @@ __metadata:
     svg.pathmorphing.js: ^0.1.3
     svg.resize.js: ^1.4.3
     svg.select.js: ^3.0.1
-  checksum: 6f09801bcb28c9edf4187f29b637787c63a94b3435695f0b76eeadd1c3ae0a78fb17aeb0848f00104188fd1cd5d566298ec754dca581f8566f9355937db3bed6
+  checksum: e5f7f03ae18c3b48609739990bb31668431926065062619e59bea157da52b1f52aa36d2f057b4e4b775183383580a582daee46d0c452cefc505ef727a93b91d7
   languageName: node
   linkType: hard
 
@@ -6737,7 +6743,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:3.5.1, chokidar@npm:>=2.0.0 <4.0.0, chokidar@npm:^3.4.1, chokidar@npm:^3.4.2, chokidar@npm:^3.5.1":
+"chokidar@npm:3.5.1, chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.4.1, chokidar@npm:^3.4.2, chokidar@npm:^3.5.1":
   version: 3.5.1
   resolution: "chokidar@npm:3.5.1"
   dependencies:
@@ -8038,10 +8044,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:2.20.2":
-  version: 2.20.2
-  resolution: "date-fns@npm:2.20.2"
-  checksum: f1e64c4edbd607591d97c56ac8aa2a26a3acb362614234091810f7f7d5685349e7610dfdc6d199903548a6acec3a13ace76b99efafe0f9e24ca95f5070da083f
+"date-fns@npm:2.21.1":
+  version: 2.21.1
+  resolution: "date-fns@npm:2.21.1"
+  checksum: 00a2ddea1047c4ce6eaadda76a0ee0782d1cfe65061641bbff94f7a70d2d6ab12dac89e027b39d49710bdb2cf264bc1a4e096b0324c7de79699296a4c19f4a40
   languageName: node
   linkType: hard
 
@@ -8934,14 +8940,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:8.1.0":
-  version: 8.1.0
-  resolution: "eslint-config-prettier@npm:8.1.0"
+"eslint-config-prettier@npm:8.2.0":
+  version: 8.2.0
+  resolution: "eslint-config-prettier@npm:8.2.0"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 409d3a071f8228d4c958a6a9be9d5ec2b357ce21b7b6cbb137096cade2c31f008a0a3c3533dee8979c0cd944f220a959710b30fd86f8b96f0ef1f4f557d740b3
+  checksum: 0fe60cc42dd84fd878ee437dfe73340ba8b18f41ba2538878c54ff15f24a6855bf7e048b36290022b21e0e050ee6cf61d66bfdf39bedb5ccc15c28997cda7016
   languageName: node
   linkType: hard
 
@@ -9054,9 +9060,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-prettier@npm:3.3.1":
-  version: 3.3.1
-  resolution: "eslint-plugin-prettier@npm:3.3.1"
+"eslint-plugin-prettier@npm:3.4.0":
+  version: 3.4.0
+  resolution: "eslint-plugin-prettier@npm:3.4.0"
   dependencies:
     prettier-linter-helpers: ^1.0.0
   peerDependencies:
@@ -9065,7 +9071,7 @@ __metadata:
   peerDependenciesMeta:
     eslint-config-prettier:
       optional: true
-  checksum: cf35b0f0e9ef30782fe82913db92f6874181723d77f0c4613f9d69c87069f73d0dc420ef850ebc844613c00a8e87eb9762a36b7d028334c5c7b091763118347b
+  checksum: 322be1af8c7a6b7f1c718d912090722b65da072fda05bbc0a9d94523e6c3dfda49a7f62fd411126f1909c12bbc63e827ee6459163b2ce3458adb292541decf66
   languageName: node
   linkType: hard
 
@@ -18520,14 +18526,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"sass@npm:1.32.8":
-  version: 1.32.8
-  resolution: "sass@npm:1.32.8"
+"sass@npm:1.32.11":
+  version: 1.32.11
+  resolution: "sass@npm:1.32.11"
   dependencies:
-    chokidar: ">=2.0.0 <4.0.0"
+    chokidar: ">=3.0.0 <4.0.0"
   bin:
     sass: sass.js
-  checksum: d319b3d7459451b6532b492984e3cbb37381e6c6379622f668900b196c0d545f5a2c32819cf02b5405fb2ef79720fe1f8f16b7614a2fef3fb7af8dfec83a6597
+  checksum: a56ca780febc1f4c5c015f2fbd5dacd780297371456197424bce7e48d54cef8ae564fb8927076ef61e6fcd34f69556d0a3dd8e157ff06081729066ad595e97bf
   languageName: node
   linkType: hard
 
@@ -20298,9 +20304,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:26.5.4":
-  version: 26.5.4
-  resolution: "ts-jest@npm:26.5.4"
+"ts-jest@npm:26.5.5":
+  version: 26.5.5
+  resolution: "ts-jest@npm:26.5.5"
   dependencies:
     bs-logger: 0.x
     buffer-from: 1.x
@@ -20317,11 +20323,11 @@ fsevents@^1.2.7:
     typescript: ">=3.8 <5.0"
   bin:
     ts-jest: cli.js
-  checksum: 8e5856b7cb990ff4cbc9577e4ec2a1135da9747e41dbf128e03ffa631dd0fdce402780a87318d28114174faa80ccdd0875b2c312b86c07a4537531c517f79101
+  checksum: a7fe56357bfd7e7cd833ea4a97408910ee67796fb7f3938c7155c69dc7b35f3172b76503e16282715e07a4a2b5026efd4803f0b090b3930e0c79c58d25b740db
   languageName: node
   linkType: hard
 
-"ts-loader@npm:^8.0.17, ts-loader@npm:^8.1.0":
+"ts-loader@npm:^8.0.17":
   version: 8.1.0
   resolution: "ts-loader@npm:8.1.0"
   dependencies:
@@ -21416,12 +21422,12 @@ vue-demi@latest:
   languageName: node
   linkType: hard
 
-"vuetify@npm:2.4.9":
-  version: 2.4.9
-  resolution: "vuetify@npm:2.4.9"
+"vuetify@npm:2.4.10":
+  version: 2.4.10
+  resolution: "vuetify@npm:2.4.10"
   peerDependencies:
     vue: ^2.6.4
-  checksum: e0794fa18c2d78c2f14c43677f0722a96d4136017dfc5de5276c8ad9b44763b8a6596a2788a052284b5549d8e23c18326b32f9381850fbb0177b5df0d466ac71
+  checksum: f63704486cbd6352ba8c1e15bb39e088c6d4951743f418ad246e12b3f1169688040883e67011309fc4a1b023c2f8eed828538abcd908069998e982f5fe055d9f
   languageName: node
   linkType: hard
 
