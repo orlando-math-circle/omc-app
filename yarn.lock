@@ -1464,7 +1464,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/cli@npm:^12.1.1":
+"@commitlint/cli@npm:12.1.1":
   version: 12.1.1
   resolution: "@commitlint/cli@npm:12.1.1"
   dependencies:
@@ -1484,7 +1484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/config-conventional@npm:^12.1.1":
+"@commitlint/config-conventional@npm:12.1.1":
   version: 12.1.1
   resolution: "@commitlint/config-conventional@npm:12.1.1"
   dependencies:
@@ -2668,7 +2668,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxt/postcss8@npm:^1.1.3":
+"@nuxt/postcss8@npm:1.1.3, @nuxt/postcss8@npm:^1.1.3":
   version: 1.1.3
   resolution: "@nuxt/postcss8@npm:1.1.3"
   dependencies:
@@ -3034,7 +3034,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/client@workspace:packages/client"
   dependencies:
-    "@nuxt/postcss8": ^1.1.3
+    "@nuxt/postcss8": 1.1.3
     "@nuxt/types": 2.15.4
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.1
@@ -3084,9 +3084,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/monorepo@workspace:."
   dependencies:
-    "@commitlint/cli": ^12.1.1
-    "@commitlint/config-conventional": ^12.1.1
-    husky: ^6.0.0
+    "@commitlint/cli": 12.1.1
+    "@commitlint/config-conventional": 12.1.1
+    husky: 6.0.0
   languageName: unknown
   linkType: soft
 
@@ -3113,13 +3113,13 @@ __metadata:
     "@nestjs/testing": 7.6.15
     "@sendgrid/mail": 7.4.2
     "@types/bcrypt": 3.0.1
-    "@types/cache-manager": ^3.4.0
+    "@types/cache-manager": 3.4.0
     "@types/express": 4.17.11
     "@types/jest": 26.0.22
     "@types/jsonwebtoken": 8.5.1
     "@types/lodash": 4.14.168
     "@types/luxon": 1.26.4
-    "@types/module-alias": ^2.0.0
+    "@types/module-alias": 2.0.0
     "@types/multer": 1.4.5
     "@types/node": 14.14.41
     "@types/passport-jwt": 3.0.5
@@ -3156,7 +3156,7 @@ __metadata:
     supertest: 6.1.3
     systeminformation: 5.6.12
     ts-jest: 26.5.5
-    tsconfig-paths: ^3.9.0
+    tsconfig-paths: 3.9.0
     typescript: 4.2.4
     uuid: 8.3.2
   languageName: unknown
@@ -3428,7 +3428,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cache-manager@npm:^3.4.0":
+"@types/cache-manager@npm:3.4.0":
   version: 3.4.0
   resolution: "@types/cache-manager@npm:3.4.0"
   checksum: 11a5d923d246e5956e23ccf6e02126c4abf1c1e57e057cd5fa758941e54eb764c504137d4623bc0a972e68edfc37f241bfd0b316f176e1211fbc2c36846e097e
@@ -3794,7 +3794,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/module-alias@npm:^2.0.0":
+"@types/module-alias@npm:2.0.0":
   version: 2.0.0
   resolution: "@types/module-alias@npm:2.0.0"
   checksum: d25152dbe86a70c32844bfa3ef882b4c6e2456c016486596c0ffa8e541b095791c95042e3e06b44a91e6306c5d75232c317d12a71771e4767d69f2e5f8c1df80
@@ -11251,7 +11251,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"husky@npm:^6.0.0":
+"husky@npm:6.0.0":
   version: 6.0.0
   resolution: "husky@npm:6.0.0"
   bin:
