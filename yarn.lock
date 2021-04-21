@@ -3119,7 +3119,6 @@ __metadata:
     "@types/jsonwebtoken": 8.5.1
     "@types/lodash": 4.14.168
     "@types/luxon": 1.26.4
-    "@types/module-alias": ^2.0.0
     "@types/multer": 1.4.5
     "@types/node": 14.14.41
     "@types/passport-jwt": 3.0.5
@@ -3156,7 +3155,6 @@ __metadata:
     supertest: 6.1.3
     systeminformation: 5.6.12
     ts-jest: 26.5.5
-    tsconfig-paths: ^3.9.0
     typescript: 4.2.4
     uuid: 8.3.2
   languageName: unknown
@@ -3791,13 +3789,6 @@ __metadata:
   version: 1.2.1
   resolution: "@types/minimist@npm:1.2.1"
   checksum: 3a6f5fe35f1656b34a4ccd5a5db1c38509d8d5b59625865b8c2b997994fcb0cfde0d9af7c5507b95dc5a0a32a22886c189e505cd2e52a7ef36d3c9982f07ed5a
-  languageName: node
-  linkType: hard
-
-"@types/module-alias@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@types/module-alias@npm:2.0.0"
-  checksum: d25152dbe86a70c32844bfa3ef882b4c6e2456c016486596c0ffa8e541b095791c95042e3e06b44a91e6306c5d75232c317d12a71771e4767d69f2e5f8c1df80
   languageName: node
   linkType: hard
 
