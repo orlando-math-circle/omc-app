@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - /packages/docs/**
+      - packages/docs/**
 
 jobs:
   build-deploy:
