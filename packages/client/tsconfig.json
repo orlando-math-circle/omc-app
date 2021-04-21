@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "ESNext.AsyncIterable", "DOM"],
+    "emitDecoratorMetadata": false,
+    "declaration": false,
+    "noEmit": true,
+    "types": [
+      "@types/node",
+      "@nuxt/types",
+      "@nuxtjs/axios",
+      "cookie-universal-nuxt",
+      "vuetify"
+    ]
+  },
+  "include": ["src/**/*", "types/**/*", "index.d.ts"]
+}

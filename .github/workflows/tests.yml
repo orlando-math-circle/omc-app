@@ -3,10 +3,10 @@ name: tests
 on:
   push:
     paths:
-      - backend/**
+      - packages/server/**
   pull_request:
     paths:
-      - backend/**
+      - packages/server/**
 
 jobs:
   build:
@@ -17,19 +17,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Use Node.js ${{ matrix.node_version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ matrix.node-version }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Init docker
         run: docker-compose up -d
 
-      - run: npm install
-        working-directory: backend
+      - name: Yarn Install
+        run: yarn
 
-      - run: npm run test:e2e
-        working-directory: backend
+      - name: Test
+        run: yarn server test:e2e
         env:
           PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
           PAYPAL_SECRET_KEY: ${{ secrets.PAYPAL_SECRET_KEY }}
@@ -37,4 +44,4 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v1
         with:
-          directory: backend/coverage
+          directory: packages/server/coverage
