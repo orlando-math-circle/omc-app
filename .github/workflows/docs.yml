@@ -19,21 +19,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup node.js ${{ matrix.node_version }}
-        uses: actions/setup-node@v2.1.2
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install dependencies
-        run: npm ci
-        working-directory: docs
+      - name: Yarn Install
+        run: yarn
 
       - name: Generate
-        run: npm run generate
-        working-directory: docs
+        run: yarn docs generate
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./packages/docs/dist
+          publish_dir: packages/docs/dist
