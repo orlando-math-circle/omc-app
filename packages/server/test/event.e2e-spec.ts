@@ -1,4 +1,9 @@
-import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
+import {
+  Connection,
+  IDatabaseDriver,
+  MikroORM,
+  QueryOrder,
+} from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -828,10 +833,13 @@ describe('Events', () => {
         })
         .expect(200);
 
-      const events = await orm.em.find(Event, {
-        dtstart: { $gte: createDto.rrule!.dtstart },
-        dtend: { $lte: createDto.rrule!.until },
-      });
+      const events = await orm.em.find(
+        Event,
+        {
+          name: createDto.name,
+        },
+        { orderBy: { dtstart: QueryOrder.ASC } },
+      );
 
       expect(events).toBeDefined();
       expect(Array.isArray(events)).toBeTruthy();
@@ -874,14 +882,14 @@ describe('Events', () => {
         .get('/event')
         .query({
           start: createDto.rrule!.dtstart,
-          end: addDays(createDto.rrule!.dtstart, 10),
+          end: addDays(createDto.dtend!, 10),
         })
         .expect(200);
 
       const createdEvents = await orm.em.find(
         Event,
         { name: createDto.name },
-        { populate: ['recurrence'] },
+        { populate: ['recurrence'], orderBy: { dtstart: QueryOrder.ASC } },
       );
 
       expect(createdEvents.length).toBe(10);
