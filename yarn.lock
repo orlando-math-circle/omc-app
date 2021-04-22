@@ -2910,6 +2910,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nuxtjs/composition-api@npm:^0.23.2":
+  version: 0.23.2
+  resolution: "@nuxtjs/composition-api@npm:0.23.2"
+  dependencies:
+    "@vue/composition-api": 1.0.0-rc.7
+    defu: ^3.2.2
+    estree-walker: ^2.0.2
+    magic-string: ^0.25.7
+    ufo: ^0.6.11
+    upath: ^2.0.1
+  peerDependencies:
+    "@nuxt/vue-app": ^2.15
+    fs-extra: ^8.1.0
+    nuxt: ^2.15
+    vue: ^2
+  checksum: d21b471326add4ed1341428ad9c18717c336c6ec64efac9a1a064cfe1559e7688afae29066b61a5f68819379e364f8c8c1f754829214001bd63b0a254c01dfb5
+  languageName: node
+  linkType: hard
+
 "@nuxtjs/dotenv@npm:1.4.1":
   version: 1.4.1
   resolution: "@nuxtjs/dotenv@npm:1.4.1"
@@ -3038,6 +3057,7 @@ __metadata:
     "@nuxt/types": 2.15.4
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.1
+    "@nuxtjs/composition-api": ^0.23.2
     "@nuxtjs/dotenv": 1.4.1
     "@nuxtjs/eslint-config-typescript": 6.0.0
     "@nuxtjs/pwa": 3.3.5
@@ -3066,7 +3086,7 @@ __metadata:
     sass-loader: 10.1.1
     vee-validate: 3.4.5
     vue-apexcharts: 1.6.1
-    vuetify: 2.4.10
+    vuetify: 2.4.11
     vuetify-loader: 1.7.2
   languageName: unknown
   linkType: soft
@@ -4627,6 +4647,17 @@ __metadata:
     prettier:
       optional: true
   checksum: 7fc8f6d81cc486a73457eb46f9c7d25a88f05a81573fe264d8d5cde51ecb2a45115cd6fe59fc96ab0799954643bf481f5f894cbd25f15c77a484beaf7d0dabaf
+  languageName: node
+  linkType: hard
+
+"@vue/composition-api@npm:1.0.0-rc.7":
+  version: 1.0.0-rc.7
+  resolution: "@vue/composition-api@npm:1.0.0-rc.7"
+  dependencies:
+    tslib: ^2.2.0
+  peerDependencies:
+    vue: ">= 2.5 < 3"
+  checksum: b209b486bcc528f48d3ef8081d0b0b67aaad4ca39e66089fa43d479189697013bab2535fa7808f4ed5edcfee40854a0f5d6f637ad16bc781098eb678339bef00
   languageName: node
   linkType: hard
 
@@ -9295,7 +9326,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"estree-walker@npm:^2.0.1":
+"estree-walker@npm:^2.0.1, estree-walker@npm:^2.0.2":
   version: 2.0.2
   resolution: "estree-walker@npm:2.0.2"
   checksum: 378cc9d3be56962c5219c55ad1fde732cb7d55a11cde5acbf5995f39ddd0e98c1095a43c0ef15a520d1d6910e816bd3daff5fc5d7d38baaf8b12d5a2970df57c
@@ -20388,7 +20419,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.3, tslib@npm:^2.1.0":
+"tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.2.0":
   version: 2.2.0
   resolution: "tslib@npm:2.2.0"
   checksum: 2d35468c470410871c5246e43f12dcb6d0fc363b617c176f26443b9530e5c5ee8448966892a42956168d8f495da7865bda33dfe82c26c91991e28999974a618f
@@ -20578,7 +20609,7 @@ typescript@4.2.3:
   languageName: node
   linkType: hard
 
-"ufo@npm:^0.6.10, ufo@npm:^0.6.7, ufo@npm:^0.6.9":
+"ufo@npm:^0.6.10, ufo@npm:^0.6.11, ufo@npm:^0.6.7, ufo@npm:^0.6.9":
   version: 0.6.11
   resolution: "ufo@npm:0.6.11"
   checksum: 3b0393dbec80e0f7072959903dc39f64368211645cafce291bf440d48e8a5c8c33c9a13ac8a6839be42d63ed0d797090d6376490aad40709d292069d2cb29c7c
@@ -21413,12 +21444,12 @@ vue-demi@latest:
   languageName: node
   linkType: hard
 
-"vuetify@npm:2.4.10":
-  version: 2.4.10
-  resolution: "vuetify@npm:2.4.10"
+"vuetify@npm:2.4.11":
+  version: 2.4.11
+  resolution: "vuetify@npm:2.4.11"
   peerDependencies:
     vue: ^2.6.4
-  checksum: f63704486cbd6352ba8c1e15bb39e088c6d4951743f418ad246e12b3f1169688040883e67011309fc4a1b023c2f8eed828538abcd908069998e982f5fe055d9f
+  checksum: 8fd9f0f430bab3b8545921cf6983115aad195d10ef587e289510558f3e7c4a6040117e5f509628f8c9aa3f1a800f1e25d67ad2af08653b5b4d22b4ce427d52e8
   languageName: node
   linkType: hard
 

@@ -68,7 +68,12 @@ const config: NuxtConfig = {
     },
   ],
   components: ['~/components', '~/components/inputs'],
-  buildModules: ['@nuxt/typescript-build', 'nuxt-typed-vuex', '@nuxt/postcss8'],
+  buildModules: [
+    '@nuxt/typescript-build',
+    '@nuxtjs/composition-api/module',
+    'nuxt-typed-vuex',
+    '@nuxt/postcss8',
+  ],
   modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
   axios: {
     baseURL: process.env.AXIOS_BASE_URL || 'http://localhost:3000/',

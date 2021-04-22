@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "5.13.1",
+    "@nuxtjs/composition-api": "^0.23.2",
     "@nuxtjs/dotenv": "1.4.1",
     "@nuxtjs/pwa": "3.3.5",
     "@types/dropzone": "5.7.3",
@@ -44,7 +45,7 @@
     "prettier": "2.2.1",
     "sass": "1.32.11",
     "sass-loader": "10.1.1",
-    "vuetify": "2.4.10"
+    "vuetify": "2.4.11"
   },
   "prettier": {
     "semi": false,
