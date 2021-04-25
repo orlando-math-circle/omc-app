@@ -10,6 +10,7 @@ export class CreateWorkDto {
   @IsNumber()
   user!: number | User;
 
+  @IsOptional()
   @IsNumber()
   project?: number | Project;
 

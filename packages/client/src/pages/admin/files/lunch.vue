@@ -10,7 +10,7 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>
@@ -20,7 +20,7 @@
       <v-col>
         <v-card>
           <v-card-title>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -29,7 +29,7 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
           </v-card-title>
 
           <v-data-table :headers="headers" :items="attachments">
@@ -58,57 +58,59 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { computed, defineComponent, useFetch } from '@nuxtjs/composition-api'
+import { useDebouncedRef } from '@/composables'
+import { useAttachments } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const search = useDebouncedRef('')
+
+    const attachmentStore = useAttachments()
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/files/lunch',
+      },
+      {
+        text: 'Reduced Lunch Forms',
+      },
+    ]
+
+    const statuses = [
+      { text: 'Pending', value: 'pending' },
+      { text: 'Approved', value: 'approved' },
+      { text: 'Denied', value: 'denied' },
+      { text: 'Cancelled', value: 'cancelled' },
+    ]
+
+    const headers = [
+      { text: 'Id', value: 'id' },
+      { text: 'Status', value: 'status' },
+      { text: 'User', value: 'user' },
+      {
+        text: 'Edit',
+        value: 'edit',
+        sortable: false,
+      },
+    ]
+
+    const attachments = computed(() => attachmentStore.attachments)
+
+    const getStatus = (value: string) => {
+      const status = statuses.find((s) => s.value === value)
+
+      return status?.text || 'Unknown'
+    }
+
+    useFetch(async () => await attachmentStore.findAll('REDUCED_LUNCH_FORM'))
+
+    return { search, breadcrumbs, statuses, headers, attachments, getStatus }
+  },
   head: {
     title: 'Lunch Forms',
   },
 })
-export default class LunchFilesPage extends Vue {
-  search = ''
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/files/lunch',
-    },
-    {
-      text: 'Reduced Lunch Forms',
-    },
-  ]
-
-  statuses = [
-    { text: 'Pending', value: 'pending' },
-    { text: 'Approved', value: 'approved' },
-    { text: 'Denied', value: 'denied' },
-    { text: 'Cancelled', value: 'cancelled' },
-  ]
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Status', value: 'status' },
-    { text: 'User', value: 'user' },
-    {
-      text: 'Edit',
-      value: 'edit',
-      sortable: false,
-    },
-  ]
-
-  get attachments() {
-    return this.$accessor.files.attachments
-  }
-
-  getStatus(value: string) {
-    const status = this.statuses.find((s) => s.value === value)
-
-    return status?.text || 'Unknown'
-  }
-
-  async fetch() {
-    await this.$accessor.files.findAllAttachments('REDUCED_LUNCH_FORM')
-  }
-}
 </script>

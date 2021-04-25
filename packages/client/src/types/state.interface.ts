@@ -1,6 +1,7 @@
-export enum StateStatus {
-  UNLOADED = 0,
-  WAITING = 1,
-  BUSY = 2,
-  ERROR = 3,
+export type StateStatus = 'Idle' | 'Loading' | 'Error'
+
+export interface StateError {
+  url?: string
+  status?: number
+  message: string
 }

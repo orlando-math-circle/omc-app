@@ -105,7 +105,6 @@
                       <v-col cols="auto" class="inline-height"> On </v-col>
                       <v-col>
                         <v-dialog
-                          ref="dateDialog"
                           v-model="dateDialog"
                           :return-value.sync="options.until"
                           width="290px"
@@ -128,12 +127,8 @@
                             <v-btn text @click="dateDialog = false"
                               >Cancel
                             </v-btn>
-                            <v-btn
-                              text
-                              @click="datePickerDialog.save(options.until)"
-                            >
-                              Ok
-                            </v-btn>
+
+                            <v-btn text> Ok </v-btn>
                           </v-date-picker>
                         </v-dialog>
                       </v-col>
@@ -159,7 +154,7 @@
                         />
                         <v-sheet
                           class="fake-input outlined"
-                          @click="occurrences.focus()"
+                          @click="occurrences && occurrences.focus()"
                         >
                           occurrence{{
                             options.count && options.count > 1 ? 's' : ''
@@ -186,13 +181,22 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Ref, Watch } from 'vue-property-decorator'
 import { Frequency, ByWeekday, Options } from 'rrule'
 import { format, parseISO } from 'date-fns'
 import {
   EventRecurrenceDto,
   EventRecurrenceOptions,
-} from '../../types/events/event-recurrence.interface'
+} from '@/types/events/event-recurrence.interface'
+import {
+  computed,
+  defineComponent,
+  onBeforeMount,
+  PropType,
+  reactive,
+  ref,
+  toRefs,
+  watch,
+} from '@nuxtjs/composition-api'
 
 export interface Weekday {
   text: string
@@ -217,302 +221,327 @@ export enum RecurrenceSelections {
   DEFINED = 1,
 }
 
-@Component
-export default class RecurrenceDialog extends Vue {
-  @Ref('occurrences') readonly occurrences!: HTMLFormElement
-  @Ref('dateDialog') readonly datePickerDialog!: { save: (value: any) => void }
-  @Prop({ required: true }) value!: null | Partial<Options>
-  @Prop({ required: true }) dateString!: string
+const frequencies = [
+  {
+    singular: 'day',
+    plural: 'days',
+    relative: 'daily',
+    value: Frequency.DAILY,
+  },
+  {
+    singular: 'week',
+    plural: 'weeks',
+    relative: 'weekly',
+    value: Frequency.WEEKLY,
+  },
+  {
+    singular: 'month',
+    plural: 'months',
+    relative: 'monthly',
+    value: Frequency.MONTHLY,
+  },
+  {
+    singular: 'year',
+    plural: 'years',
+    relative: 'yearly',
+    value: Frequency.YEARLY,
+  },
+]
 
-  dialog = false
-  dateDialog = false
-  pristine = true
+const occurance = ['first', 'second', 'third', 'fourth', 'fifth']
+const weekday = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+]
 
-  frequencies = [
-    {
-      singular: 'day',
-      plural: 'days',
-      relative: 'daily',
-      value: Frequency.DAILY,
+const weekdays: Weekday[] = [
+  { text: 'S', value: 6, short: 'Sun' },
+  { text: 'M', value: 0, short: 'Mon' },
+  { text: 'T', value: 1, short: 'Tue' },
+  { text: 'W', value: 2, short: 'Wed' },
+  { text: 'T', value: 3, short: 'Thu' },
+  { text: 'F', value: 4, short: 'Fri' },
+  { text: 'S', value: 5, short: 'Sat' },
+]
+
+export default defineComponent({
+  props: {
+    value: {
+      type: Object as PropType<Options | null>,
+      required: false,
+      default: null,
     },
-    {
-      singular: 'week',
-      plural: 'weeks',
-      relative: 'weekly',
-      value: Frequency.WEEKLY,
+    dateString: {
+      type: String,
+      required: true,
     },
-    {
-      singular: 'month',
-      plural: 'months',
-      relative: 'monthly',
-      value: Frequency.MONTHLY,
-    },
-    {
-      singular: 'year',
-      plural: 'years',
-      relative: 'yearly',
-      value: Frequency.YEARLY,
-    },
-  ]
+  },
+  setup(props, { emit }) {
+    const refs = {
+      occurrences: ref<InstanceType<typeof HTMLFormElement>>(),
+    }
 
-  rule = {
-    labels: [
-      { text: 'Does not repeat', value: RecurrenceSelections.NONREPEATING },
-      { text: 'Custom...', value: RecurrenceSelections.CUSTOM },
-    ],
-    selected: RecurrenceSelections.NONREPEATING,
-    prevSelected: null as RecurrenceSelections | null,
-  }
+    const state = reactive({
+      dialog: false,
+      dateDialog: false,
+      pristine: true,
+      rule: {
+        labels: [
+          { text: 'Does not repeat', value: RecurrenceSelections.NONREPEATING },
+          { text: 'Custom...', value: RecurrenceSelections.CUSTOM },
+        ],
+        selected: RecurrenceSelections.NONREPEATING,
+        prevSelected: null as RecurrenceSelections | null,
+      },
+      type: RecurrenceTerminator.UNTIL,
+      freq: {
+        monthType: MonthType.ABSOLUTE,
+      },
+      options: {
+        interval: 1,
+        freq: Frequency.DAILY,
+        dtstart: '',
+        until: '',
+        count: 10,
+        byweekday: [],
+        bysetpos: 1,
+        bymonthday: 1,
+      } as EventRecurrenceOptions,
+    })
 
-  occurance = ['first', 'second', 'third', 'fourth', 'fifth']
-  weekday = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ]
+    const date = computed(() => parseISO(props.dateString))
 
-  weekdays: Weekday[] = [
-    { text: 'S', value: 6, short: 'Sun' },
-    { text: 'M', value: 0, short: 'Mon' },
-    { text: 'T', value: 1, short: 'Tue' },
-    { text: 'W', value: 2, short: 'Wed' },
-    { text: 'T', value: 3, short: 'Thu' },
-    { text: 'F', value: 4, short: 'Fri' },
-    { text: 'S', value: 5, short: 'Sat' },
-  ]
+    // The v-date-picker component will not accept time.
+    // Warning: This is also changed to a local date!
+    const until = computed({
+      get() {
+        return format(new Date(state.options.until), 'yyyy-MM-dd')
+      },
+      set(date: string) {
+        state.options.until = parseISO(date).toISOString()
+      },
+    })
 
-  type: RecurrenceTerminator = RecurrenceTerminator.UNTIL
+    const formattedUntilDate = computed(() => {
+      if (!state.options.until) return ''
 
-  freq = {
-    monthType: MonthType.ABSOLUTE,
-  }
+      return format(new Date(state.options.until), 'LLL do, yyyy')
+    })
 
-  options: EventRecurrenceOptions = {
-    interval: 1,
-    freq: Frequency.DAILY,
-    dtstart: '',
-    until: '',
-    count: 10,
-    byweekday: [],
-    bysetpos: 1,
-    bymonthday: 1,
-  }
-
-  get date() {
-    return parseISO(this.dateString)
-  }
-
-  // The v-date-picker component will not accept time.
-  // Warning: This is also changed to a local date!
-  get until() {
-    return format(new Date(this.options.until), 'yyyy-MM-dd')
-  }
-
-  set until(date: string) {
-    this.options.until = parseISO(date).toISOString()
-  }
-
-  get formattedUntilDate() {
-    if (!this.options.until) return ''
-
-    return format(new Date(this.options.until), 'LLL do, yyyy')
-  }
-
-  get monthTypes() {
-    return [
+    const monthTypes = computed(() => [
       {
-        text: `Monthly on day ${this.date.getDate()}`,
+        text: `Monthly on day ${date.value.getDate()}`,
         value: MonthType.ABSOLUTE,
       },
       {
         text: `Monthly on the ${
-          this.occurance[(this.options.bysetpos as number) - 1]
-        } ${this.weekday[this.date.getDay()]}`,
+          occurance[(state.options.bysetpos as number) - 1]
+        } ${weekday[date.value.getDay()]}`,
       },
-    ]
-  }
+    ])
 
-  get selections() {
-    if (this.pristine) return this.rule.labels
+    const customRuleToText = (rule: EventRecurrenceOptions) => {
+      const retval = ['Repeats']
+      const freq = frequencies.find((f) => f.value === rule.freq)
 
-    return [
-      {
-        text: this.customRuleToText(this.options),
-        value: RecurrenceSelections.DEFINED,
-      },
-      ...this.rule.labels,
-    ]
-  }
-
-  /**
-   * Initializes the RRule data and copies any
-   * provided data over.
-   */
-  beforeMount() {
-    const now = new Date()
-    const month = now.getMonth()
-
-    const nextMonth =
-      month === 11
-        ? new Date(now.getFullYear() + 1, 0, 1)
-        : new Date(now.getFullYear(), month + 1, 1)
-
-    this.options.until = nextMonth.toISOString()
-
-    const weekday = this.weekdays[this.date.getDay()].value
-
-    // Set the byweekday value to the selected day
-    this.options.byweekday = [weekday]
-
-    // Set bymonthday and bysetpos for month-based intervals.
-    this.options.bysetpos = this.getWeekdayOccurance(this.date)
-    this.options.bymonthday = this.date.getDate()
-
-    if (this.value) {
-      Object.assign(this.options, this.value)
-
-      if (this.value.until) {
-        this.type = RecurrenceTerminator.UNTIL
-      } else if (this.value.count) {
-        this.type = RecurrenceTerminator.COUNT
+      if (rule.interval !== 1) {
+        retval.push(`every ${rule.interval} ${freq!.plural}`)
+      } else {
+        retval.push(freq!.relative)
       }
 
-      this.rule.selected = RecurrenceSelections.DEFINED
-      this.pristine = false
-    }
-  }
+      if (rule.byweekday && rule.freq === Frequency.WEEKLY) {
+        const days: string[] = []
 
-  @Watch('rule.selected')
-  onSelect(type: RecurrenceSelections, old: RecurrenceSelections) {
-    switch (type) {
-      case RecurrenceSelections.NONREPEATING:
-        this.$emit('input', null)
-        this.$emit('change:rule')
-        break
-      case RecurrenceSelections.CUSTOM:
-        this.dialog = true
-        break
-      case RecurrenceSelections.DEFINED:
-        this.onSetRule()
-        break
-      default:
-        break
-    }
-
-    this.rule.prevSelected = old
-  }
-
-  customRuleToText(rule: EventRecurrenceOptions) {
-    const retval = ['Repeats']
-    const freq = this.frequencies.find((f) => f.value === rule.freq)
-
-    if (rule.interval !== 1) {
-      retval.push(`every ${rule.interval} ${freq!.plural}`)
-    } else {
-      retval.push(freq!.relative)
-    }
-
-    if (rule.byweekday && rule.freq === Frequency.WEEKLY) {
-      const days: string[] = []
-
-      for (let i = 0; i < this.weekdays.length; i++) {
-        for (let j = 0; j < rule.byweekday.length; j++) {
-          if (this.weekdays[i].value === rule.byweekday[j]) {
-            days.push(this.weekdays[i].short)
+        for (let i = 0; i < weekdays.length; i++) {
+          for (let j = 0; j < rule.byweekday.length; j++) {
+            if (weekdays[i].value === rule.byweekday[j]) {
+              days.push(weekdays[i].short)
+            }
           }
         }
+
+        retval.push(`on ${days.join(', ')}`)
       }
 
-      retval.push(`on ${days.join(', ')}`)
+      if (state.type === RecurrenceTerminator.UNTIL && rule.until) {
+        retval.push(`until ${format(new Date(rule.until), 'LLL do, yyyy')}`)
+      } else if (state.type === RecurrenceTerminator.COUNT && rule.count) {
+        retval.push(`${rule.count} times`)
+      }
+
+      return retval.join(' ')
     }
 
-    if (this.type === RecurrenceTerminator.UNTIL && rule.until) {
-      retval.push(`until ${format(new Date(rule.until), 'LLL do, yyyy')}`)
-    } else if (this.type === RecurrenceTerminator.COUNT && rule.count) {
-      retval.push(`${rule.count} times`)
+    const selections = computed(() => {
+      if (state.pristine) return state.rule.labels
+
+      return [
+        {
+          text: customRuleToText(state.options),
+          value: RecurrenceSelections.DEFINED,
+        },
+        ...state.rule.labels,
+      ]
+    })
+
+    /**
+     * Calculates the occurrance of a weekday given a date.
+     * For example, Thanksgiving is always the 4th Thursday of November.
+     */
+    const getWeekdayOccurance = (dateOrString: Date | string) => {
+      const date =
+        typeof dateOrString === 'string' ? new Date(dateOrString) : dateOrString
+
+      return Math.ceil(date.getDate() / 7)
     }
 
-    return retval.join(' ')
-  }
+    /**
+     * Initializes the RRule data and copies any
+     * provided data over.
+     */
+    onBeforeMount(() => {
+      const now = new Date()
+      const month = now.getMonth()
 
-  /**
-   * Calculates the occurrance of a weekday given a date.
-   * For example, Thanksgiving is always the 4th Thursday of November.
-   */
-  getWeekdayOccurance(dateOrString: Date | string) {
-    const date =
-      typeof dateOrString === 'string' ? new Date(dateOrString) : dateOrString
+      const nextMonth =
+        month === 11
+          ? new Date(now.getFullYear() + 1, 0, 1)
+          : new Date(now.getFullYear(), month + 1, 1)
 
-    return Math.ceil(date.getDate() / 7)
-  }
+      state.options.until = nextMonth.toISOString()
 
-  onSetRule() {
-    let dto: EventRecurrenceDto
+      const weekday = weekdays[date.value.getDay()].value
 
-    switch (this.type) {
-      case RecurrenceTerminator.UNTIL:
-        dto = {
-          freq: this.options.freq,
-          dtstart: this.date.toISOString(),
-          until: this.options.until,
+      // Set the byweekday value to the selected day
+      state.options.byweekday = [weekday]
+
+      // Set bymonthday and bysetpos for month-based intervals.
+      state.options.bysetpos = getWeekdayOccurance(date.value)
+      state.options.bymonthday = date.value.getDate()
+
+      if (props.value) {
+        Object.assign(state.options, props.value)
+
+        if (props.value.until) {
+          state.type = RecurrenceTerminator.UNTIL
+        } else if (props.value.count) {
+          state.type = RecurrenceTerminator.COUNT
         }
-        break
-      case RecurrenceTerminator.COUNT:
-        dto = {
-          freq: this.options.freq,
-          dtstart: this.date.toISOString(),
-          count: this.options.count,
+
+        state.rule.selected = RecurrenceSelections.DEFINED
+        state.pristine = false
+      }
+    })
+
+    const onSetRule = () => {
+      let dto: EventRecurrenceDto
+
+      switch (state.type) {
+        case RecurrenceTerminator.UNTIL:
+          dto = {
+            freq: state.options.freq,
+            dtstart: date.value.toISOString(),
+            until: state.options.until,
+          }
+          break
+        case RecurrenceTerminator.COUNT:
+          dto = {
+            freq: state.options.freq,
+            dtstart: date.value.toISOString(),
+            count: state.options.count,
+          }
+
+          break
+        default:
+          throw new Error('Unexpected recurrence terminating behavior')
+      }
+
+      if (state.options.interval > 1) {
+        dto.interval = state.options.interval
+      }
+
+      // Weekly
+      if (state.options.freq === 2) {
+        dto.byweekday = state.options.byweekday
+      }
+
+      // Monthly
+      if (state.options.freq === 1) {
+        if (state.freq.monthType === MonthType.ABSOLUTE) {
+          dto.bymonthday = state.options.bymonthday
+        } else {
+          dto.bysetpos = state.options.bysetpos
+          dto.byweekday = state.options.byweekday
         }
+      }
 
-        break
-      default:
-        throw new Error('Unexpected recurrence terminating behavior')
+      state.pristine = false
+      state.rule.selected = RecurrenceSelections.DEFINED
+
+      emit('input', dto)
+      emit('change:rule')
+
+      state.dialog = false
     }
 
-    if (this.options.interval > 1) {
-      dto.interval = this.options.interval
+    const onSelect = (
+      type: RecurrenceSelections,
+      old: RecurrenceSelections
+    ) => {
+      switch (type) {
+        case RecurrenceSelections.NONREPEATING:
+          emit('input', null)
+          emit('change:rule')
+          break
+        case RecurrenceSelections.CUSTOM:
+          state.dialog = true
+          break
+        case RecurrenceSelections.DEFINED:
+          onSetRule()
+          break
+        default:
+          break
+      }
+
+      state.rule.prevSelected = old
     }
 
-    // Weekly
-    if (this.options.freq === 2) {
-      dto.byweekday = this.options.byweekday
-    }
+    const close = () => {
+      state.dialog = false
 
-    // Monthly
-    if (this.options.freq === 1) {
-      if (this.freq.monthType === MonthType.ABSOLUTE) {
-        dto.bymonthday = this.options.bymonthday
-      } else {
-        dto.bysetpos = this.options.bysetpos
-        dto.byweekday = this.options.byweekday
+      if (state.rule.selected === RecurrenceSelections.CUSTOM) {
+        if (state.rule.prevSelected !== null) {
+          state.rule.selected = state.rule.prevSelected
+        } else {
+          state.rule.selected = RecurrenceSelections.NONREPEATING
+        }
       }
     }
 
-    this.pristine = false
-    this.rule.selected = RecurrenceSelections.DEFINED
+    watch(() => state.rule.selected, onSelect, { deep: true })
 
-    this.$emit('input', dto)
-    this.$emit('change:rule')
-
-    this.dialog = false
-  }
-
-  close() {
-    this.dialog = false
-
-    if (this.rule.selected === RecurrenceSelections.CUSTOM) {
-      if (this.rule.prevSelected !== null) {
-        this.rule.selected = this.rule.prevSelected
-      } else {
-        this.rule.selected = RecurrenceSelections.NONREPEATING
-      }
+    return {
+      ...refs,
+      ...toRefs(state),
+      date,
+      until,
+      weekdays,
+      formattedUntilDate,
+      monthTypes,
+      frequencies,
+      selections,
+      onSetRule,
+      close,
+      onSelect,
     }
-  }
-}
+  },
+})
 </script>
 
 <style lang="scss" scoped>

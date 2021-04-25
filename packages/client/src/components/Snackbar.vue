@@ -1,6 +1,6 @@
 <template>
   <v-snackbar v-model="show" :color="color" :timeout="timeout">
-    {{ text }}
+    {{ message }}
 
     <template #action="{ attrs }">
       <v-btn icon v-bind="attrs" @click="show = false">
@@ -11,28 +11,28 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { useSnackbar } from '@/stores'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
 
-@Component
-export default class Snackbar extends Vue {
-  show = false
-  timeout = null as number | null
+export default defineComponent({
+  setup() {
+    const snackbar = useSnackbar()
 
-  get text() {
-    return this.$accessor.snackbar.text
-  }
-
-  get color() {
-    return this.$accessor.snackbar.color
-  }
-
-  created() {
-    this.$store.subscribe((mutation) => {
-      if (mutation.type === 'snackbar/setSnack') {
-        this.timeout = this.$accessor.snackbar.timeout
-        this.show = true
-      }
+    const show = computed({
+      get() {
+        return snackbar.show
+      },
+      set(value: boolean) {
+        snackbar.show = value
+      },
     })
-  }
-}
+
+    return {
+      show,
+      message: computed(() => snackbar.message),
+      color: computed(() => snackbar.color),
+      timeout: computed(() => snackbar.timeout),
+    }
+  },
+})
 </script>

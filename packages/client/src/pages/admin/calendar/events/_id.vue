@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Edit Event" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Edit Event" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-update-event
+          <DialogUpdateEvent
             :event="event"
             @event:refresh="onEventRefresh"
             @event:update="onEventRefresh"
@@ -25,7 +25,7 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-update-event>
+          </DialogUpdateEvent>
 
           <v-list-item @click="onDeleteMenu">
             <v-list-item-icon>
@@ -38,14 +38,22 @@
           </v-list-item>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
-    <dialog-delete-event
+    <DialogDeleteEvent
       ref="deleteModeSelector"
       @delete:confirm="onDeleteConfirm"
     />
 
-    <v-row>
+    <template v-if="$fetchState.pending">
+      <v-row>
+        <v-col>
+          <v-skeleton-loader class="mx-auto" type="card" />
+        </v-col>
+      </v-row>
+    </template>
+
+    <v-row v-else>
       <v-col>
         <v-card>
           <div class="d-flex flex-no-wrap justify-space-between">
@@ -66,7 +74,7 @@
                     </v-list-item-content>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
                     <v-list-item-icon>
@@ -86,13 +94,13 @@
 
             <div class="ma-3">
               <v-avatar size="125" rounded class="elevation-2">
-                <v-img :src="background"></v-img>
+                <v-img :src="background" />
               </v-avatar>
             </div>
           </div>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
 
             <v-btn :to="`/events/${event.id}`" text>Visit on App</v-btn>
           </v-card-actions>
@@ -103,123 +111,139 @@
 </template>
 
 <script lang="ts">
+import {
+  computed,
+  defineComponent,
+  ref,
+  useContext,
+  useRouter,
+  useFetch,
+  useRoute,
+} from '@nuxtjs/composition-api'
 import { format, isSameDay, isSameWeek, parseISO } from 'date-fns'
-import { Component, Ref, Vue } from 'nuxt-property-decorator'
-import DialogDeleteEvent from '~/components/dialog/DeleteEvent.vue'
+import DialogDeleteEvent from '@/components/dialog/DeleteEvent.vue'
+import { useSnackbar } from '@/composables'
+import { useEvents } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const deleteModeSelector = ref<InstanceType<typeof DialogDeleteEvent>>()
+
+    const { $config } = useContext()
+    const eventStore = useEvents()
+    const snackbar = useSnackbar()
+    const route = useRoute()
+    const router = useRouter()
+
+    const event = computed(() => eventStore.event!)
+    const background = computed(() => {
+      const url = event.value.picture
+
+      if (url.startsWith('http')) return url
+
+      return `${$config.staticBase}${url}`
+    })
+    const dates = computed(() => ({
+      start: parseISO(event.value.dtstart),
+      end: parseISO(event.value.dtend),
+    }))
+
+    const dateText = computed(() => {
+      const { start, end } = dates.value
+
+      if (isSameDay(start, end)) {
+        return format(start, 'EEE, LLL d, yyyy')
+      } else if (isSameWeek(start, end)) {
+        return `${format(start, 'EEE')} - ${format(end, 'EEE, LLL d, yyyy')}`
+      } else {
+        return `${format(start, 'EEE, LLL d, yyyy')} - ${format(
+          end,
+          'EEE, LLL d, yyyy'
+        )}`
+      }
+    })
+
+    const timeText = computed(() => {
+      const { start, end } = dates.value
+
+      if (isSameDay(start, end)) {
+        return `${format(start, 'h:mm aaaa')} till ${format(end, 'h:mm aaaa')}`
+      }
+    })
+
+    /**
+     * Gateway method for determining if opening the delete
+     * mode picker is necessary.
+     */
+    const onDeleteMenu = async () => {
+      if (event.value.recurrence) {
+        return deleteModeSelector.value!.open()
+      }
+
+      await del('single')
+    }
+
+    /**
+     * Callback from the deletion dialog for recurring events.
+     */
+    const onDeleteConfirm = async (mode: 'single' | 'future' | 'all') => {
+      await del(mode)
+    }
+
+    /**
+     * Asks the backend to delete the event with the provided method
+     * and redirects back to the calendar after.
+     */
+    const del = async (mode: 'single' | 'future' | 'all') => {
+      await eventStore.delete(+route.value.params.id, mode)
+
+      if (eventStore.error) {
+        snackbar.error(eventStore.error.message)
+      }
+
+      router.push('/admin/calendar/events')
+    }
+
+    const onEventRefresh = async (id: string) => {
+      await eventStore.findOne(+id)
+
+      // If the event was removed, navigate back to the calendar.
+      if (eventStore.error?.status === 404) {
+        router.push('/admin/calendar')
+      }
+    }
+
+    useFetch(async () => await eventStore.findOne(+route.value.params.id))
+
+    return {
+      deleteModeSelector,
+      event,
+      background,
+      dates,
+      dateText,
+      timeText,
+      onDeleteMenu,
+      onDeleteConfirm,
+      delete: del,
+      onEventRefresh,
+      breadcrumbs: [
+        {
+          text: 'Dashboard',
+          href: '/admin/',
+        },
+        {
+          text: 'Events',
+          href: '/admin/calendar/events',
+        },
+        {
+          text: 'Event',
+        },
+      ],
+    }
+  },
   head: {
     title: 'Edit Event',
   },
-  async fetch({ app: { $accessor }, route }) {
-    await $accessor.events.findOne(route.params.id)
-  },
 })
-export default class AdminEventEditPage extends Vue {
-  @Ref('deleteModeSelector') readonly modeDialog!: DialogDeleteEvent
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Events',
-      href: '/admin/calendar/events',
-    },
-    {
-      text: 'Event',
-    },
-  ]
-
-  get event() {
-    return this.$accessor.events.event!
-  }
-
-  get background() {
-    const url = this.event.picture
-
-    if (url.startsWith('http')) return url
-
-    return `${this.$config.staticBase}${url}`
-  }
-
-  get dates() {
-    return {
-      start: parseISO(this.event.dtstart),
-      end: parseISO(this.event.dtend),
-    }
-  }
-
-  get dateText() {
-    const { start, end } = this.dates
-
-    if (isSameDay(start, end)) {
-      return format(start, 'EEE, LLL d, yyyy')
-    } else if (isSameWeek(start, end)) {
-      return `${format(start, 'EEE')} - ${format(end, 'EEE, LLL d, yyyy')}`
-    } else {
-      return `${format(start, 'EEE, LLL d, yyyy')} - ${format(
-        end,
-        'EEE, LLL d, yyyy'
-      )}`
-    }
-  }
-
-  get timeText() {
-    const { start, end } = this.dates
-
-    if (isSameDay(start, end)) {
-      return `${format(start, 'h:mm aaaa')} till ${format(end, 'h:mm aaaa')}`
-    }
-  }
-
-  /**
-   * Gateway method for determining if opening the delete
-   * mode picker is necessary.
-   */
-  async onDeleteMenu() {
-    if (this.event.recurrence) {
-      return this.modeDialog.open()
-    }
-
-    await this.delete('single')
-  }
-
-  /**
-   * Callback from the deletion dialog for recurring events.
-   */
-  async onDeleteConfirm(mode: 'single' | 'future' | 'all') {
-    await this.delete(mode)
-  }
-
-  /**
-   * Asks the backend to delete the event with the provided method
-   * and redirects back to the calendar after.
-   */
-  async delete(mode: 'single' | 'future' | 'all') {
-    await this.$accessor.events.delete({ id: this.$route.params.id, mode })
-
-    if (this.$accessor.events.isErrored) {
-      return this.$accessor.snackbar.show({
-        text: this.$accessor.events.error?.message || 'Something went wrong :(',
-      })
-    }
-
-    this.$router.push('/admin/calendar/events')
-  }
-
-  async onEventRefresh(id: string) {
-    await this.$accessor.events.findOne(id)
-
-    // If the event was removed, navigate back to the calendar.
-    if (
-      this.$accessor.events.isErrored &&
-      this.$accessor.events.error!.status === 404
-    ) {
-      this.$router.push('/admin/calendar')
-    }
-  }
-}
 </script>

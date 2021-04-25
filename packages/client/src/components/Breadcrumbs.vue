@@ -1,9 +1,10 @@
 <template>
   <v-breadcrumbs :items="items" v-bind="$attrs">
     <template #item="{ item }">
-      <nuxt-link v-if="item.href" :to="item.href" class="breadcrumb">
+      <NuxtLink v-if="item.href" :to="item.href" class="breadcrumb">
         {{ item.text }}
-      </nuxt-link>
+      </NuxtLink>
+
       <span v-else class="breadcrumb">
         {{ item.text }}
       </span>
@@ -12,12 +13,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 
-@Component
-export default class Breadcrumbs extends Vue {
-  @Prop(Array) items!: any[]
-}
+export default defineComponent({
+  props: {
+    items: {
+      type: Array,
+      required: true,
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

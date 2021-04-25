@@ -19,6 +19,10 @@ export const months = [
   'December',
 ]
 
+export const monthSelections = Object.freeze(
+  months.map((m, i) => ({ text: m, value: i }))
+)
+
 export const workStatuses = Object.freeze([
   { text: 'Approved', value: VolunteerWorkStatus.APPROVED },
   { text: 'Pending', value: VolunteerWorkStatus.PENDING },
@@ -34,6 +38,19 @@ export const weekdays = [
   'Friday',
   'Saturday',
 ]
+
+export type Item<T, K> = { value: T; text: K }
+
+export type CalendarType = 'simple' | 'month' | 'week' | 'day' | '4day'
+
+export const calendarTypes: Readonly<Item<CalendarType, string>[]> =
+  Object.freeze([
+    { value: 'simple', text: 'Simple' },
+    { value: 'month', text: 'Month' },
+    { value: 'week', text: 'Week' },
+    { value: 'day', text: 'Day' },
+    { value: '4day', text: '4-Day' },
+  ])
 
 export const genders = Object.freeze([
   { text: 'Male', value: Gender.MALE },

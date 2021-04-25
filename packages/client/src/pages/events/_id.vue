@@ -13,7 +13,7 @@
 
             <v-spacer />
 
-            <dialog-lightbox :image="picture">
+            <DialogLightbox :image="picture">
               <template #activator="{ on, attrs }">
                 <v-btn icon v-bind="attrs" v-on="on">
                   <v-sheet class="pa-2 rounded">
@@ -21,7 +21,7 @@
                   </v-sheet>
                 </v-btn>
               </template>
-            </dialog-lightbox>
+            </DialogLightbox>
           </v-toolbar>
         </v-img>
       </v-card>
@@ -87,11 +87,13 @@
           </v-list>
         </v-card-text>
 
-        <v-card-title>Description</v-card-title>
+        <template v-if="event.description && event.description.length">
+          <v-card-title>Description</v-card-title>
 
-        <v-card-text>
-          <span>{{ description }}</span>
-        </v-card-text>
+          <v-card-text>
+            <span>{{ event.description }}</span>
+          </v-card-text>
+        </template>
       </v-card>
     </v-col>
 
@@ -108,7 +110,7 @@
                 :key="status.user.id"
               >
                 <v-list-item-avatar>
-                  <v-img :src="$avatar(status.user)" />
+                  <v-img :src="status.user.avatarUrl" />
                 </v-list-item-avatar>
 
                 <v-list-item-content>
@@ -134,7 +136,10 @@
                 </v-list-item-content>
 
                 <v-list-item-action v-if="!isClosed">
-                  <v-btn text @click="cancelDialog.open(status)">
+                  <v-btn
+                    text
+                    @click="cancelDialog && cancelDialog.open(status)"
+                  >
                     Cancel
                   </v-btn>
                 </v-list-item-action>
@@ -161,10 +166,9 @@
             <v-card>
               <v-card-title>Registration</v-card-title>
 
-              <v-card-subtitle
-                >Select the account users you wish to register to the
-                event.</v-card-subtitle
-              >
+              <v-card-subtitle>
+                Select the account users you wish to register to the event.
+              </v-card-subtitle>
 
               <v-card-text>
                 <v-list rounded>
@@ -180,7 +184,7 @@
                     >
                       <template #default="{ active }">
                         <v-list-item-avatar>
-                          <v-img :src="$avatar(status.user)" />
+                          <v-img :src="status.user.avatarUrl" />
                         </v-list-item-avatar>
 
                         <v-list-item-content>
@@ -204,7 +208,7 @@
                         </v-list-item-content>
 
                         <v-list-item-action v-if="status.eligible">
-                          <v-checkbox :input-value="active"></v-checkbox>
+                          <v-checkbox :input-value="active" />
                         </v-list-item-action>
                       </template>
                     </v-list-item>
@@ -213,12 +217,7 @@
               </v-card-text>
 
               <v-card-actions>
-                <v-btn
-                  v-if="!$accessor.auth.isValidated"
-                  disabled
-                  rounded
-                  block
-                >
+                <v-btn v-if="!isVerified" disabled rounded block>
                   Email Verification Required
                 </v-btn>
 
@@ -227,7 +226,7 @@
                   rounded
                   block
                   disabled
-                  @click="register"
+                  @click="onRegister"
                 >
                   Select Users
                 </v-btn>
@@ -237,7 +236,7 @@
                   rounded
                   block
                   color="primary"
-                  @click="register"
+                  @click="onRegister"
                 >
                   Complete Registration
                 </v-btn>
@@ -250,11 +249,11 @@
           </v-stepper-content>
 
           <v-stepper-content class="pa-0" step="2">
-            <v-card :loading="$accessor.paypal.isLoading">
+            <v-card :loading="isPayPalLoading">
               <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
               <v-card-text>
-                <payment-paypal
+                <PaymentPaypal
                   :event="event.id"
                   :users="usersRequiringPayment.map((u) => u.id)"
                   @payment:complete="onPaymentComplete"
@@ -276,11 +275,11 @@
       <v-card>
         <v-card-title>Volunteering</v-card-title>
 
-        <v-card-subtitle
-          >When registering to volunteer, you may also optionally select a job.
+        <v-card-subtitle>
+          When registering to volunteer you may also optionally select a job.
           The list is not exhaustive, and you can submit a volunteer work order
-          on the account page anytime.</v-card-subtitle
-        >
+          on the account page anytime.
+        </v-card-subtitle>
 
         <v-card-text>
           <v-row>
@@ -296,7 +295,7 @@
                 <template #selection="data">
                   <v-chip v-bind="data.attrs">
                     <v-avatar left>
-                      <v-img :src="$avatar(data.item.user)" />
+                      <v-img :src="data.item.user.avatarUrl" />
                     </v-avatar>
 
                     {{ data.item.user.name }}
@@ -305,7 +304,7 @@
 
                 <template #item="data">
                   <v-list-item-avatar>
-                    <v-img :src="$avatar(data.item.user)" />
+                    <v-img :src="data.item.user.avatarUrl" />
                   </v-list-item-avatar>
 
                   <v-list-item-content>
@@ -327,7 +326,7 @@
                 label="Job (Optional)"
                 outlined
                 hide-details="auto"
-              ></v-select>
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -346,23 +345,39 @@
       </v-card>
     </v-col>
 
-    <dialog-confirm ref="cancelDialog" @confirm="onCancelConfirm">
+    <DialogConfirm ref="cancelDialog" @confirm="onCancel">
       You may re-register at any time for no charge.
-    </dialog-confirm>
+    </DialogConfirm>
   </v-row>
 </template>
 
 <script lang="ts">
-import { Component, Ref, Vue } from 'nuxt-property-decorator'
 import { User } from '@server/user/user.entity'
 import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
 import { EventRegistration } from '@server/event-registration/event-registration.entity'
 import { Roles } from '@server/app.roles'
 import { Gender } from '@server/user/enums/gender.enum'
 import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
-import DialogConfirm from '~/components/dialog/Confirm.vue'
-import { contiguousGradeRanges, gradeGroups, grades } from '~/utils/events'
-import { formatDate } from '~/utils/utilities'
+import {
+  useRegistrations,
+  useEvents,
+  useAuth,
+  usePayPal,
+  UserEntity,
+} from '@/stores'
+import DialogConfirm from '@/components/dialog/Confirm.vue'
+import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
+import { formatDate } from '@/utils/utilities'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  ref,
+  toRefs,
+  useContext,
+  useRoute,
+} from '@nuxtjs/composition-api'
+import { useSnackbar } from '@/composables'
 
 enum RegisterStep {
   SELECTION = 1,
@@ -370,238 +385,256 @@ enum RegisterStep {
   COMPLETION = 3,
 }
 
-@Component({
-  head: {
-    title: 'Event Details',
-  },
-  async fetch({ app: { $accessor }, route }) {
-    await Promise.all([
-      $accessor.events.findOne(route.params.id),
-      $accessor.registrations.getStatuses(route.params.id),
-    ])
-  },
-})
-export default class EventPage extends Vue {
-  @Ref('cancelDialog') readonly cancelDialog!: DialogConfirm
+export default defineComponent({
+  setup() {
+    const cancelDialog = ref<InstanceType<typeof DialogConfirm>>()
 
-  selections: number[] = []
-  volunteer: number | null = null
-  volunteerJob: null | number = null
-  step: RegisterStep = RegisterStep.SELECTION
+    const { $config } = useContext()
+    const route = useRoute()
+    const eventStore = useEvents()
+    const authStore = useAuth()
+    const payPalStore = usePayPal()
+    const registrationStore = useRegistrations()
+    const snackbar = useSnackbar()
 
-  get event() {
-    return this.$accessor.events.event!
-  }
+    const state = reactive({
+      selections: [] as number[],
+      volunteer: null as number | null,
+      volunteerJob: null as number | null,
+      step: RegisterStep.SELECTION,
+    })
 
-  get statuses() {
-    return this.$accessor.registrations.registrationStatuses
-  }
+    const format = (date: string | Date, formatString: string) =>
+      formatDate(date, formatString)
 
-  get picture() {
-    const url = this.event.picture ?? this.event?.project?.picture
+    const event = computed(() => eventStore.event!)
+    const date = computed(() => format(event.value.dtstart, 'EEE, LLL d, yyyy'))
+    const times = computed(
+      () =>
+        `${format(event.value.dtstart, 'h:mm a')} - ${format(
+          event.value.dtend,
+          'h:mm a'
+        )}`
+    )
+    const picture = computed(() => {
+      const url = event.value.picture ?? event.value?.project?.picture
 
-    if (!url) return this.$accessor.events.defaultPicture
+      if (!url) return eventStore.defaultPicture
 
-    if (url.startsWith('http')) return url
+      if (url.startsWith('http')) return url
 
-    return `${this.$config.staticBase}${url}`
-  }
+      return `${$config.staticBase}${url}`
+    })
 
-  get date() {
-    return this.format(this.event.dtstart, 'EEE, LLL d, yyyy')
-  }
+    const statuses = computed(() => registrationStore.statuses)
 
-  get times() {
-    return `${this.format(this.event.dtstart, 'h:mm a')} - ${this.format(
-      this.event.dtend,
-      'h:mm a'
-    )}`
-  }
+    const selectedStatuses = computed(() =>
+      state.selections.map((s) => statuses.value[s])
+    )
 
-  get description() {
-    return this.event.description && this.event.description !== ''
-      ? this.event.description
-      : 'No description provided.'
-  }
+    const volunteerUsers = computed(() =>
+      statuses.value.filter((u) => u.user.roles.includes(Roles.VOLUNTEER))
+    )
 
-  get selectedStatuses() {
-    return this.selections.map((s) => this.statuses[s])
-  }
+    const unregisteredVolunteers = computed(() =>
+      volunteerUsers.value.filter((u) => u.registration === false)
+    )
 
-  get volunteerUsers() {
-    return this.statuses.filter((u) => u.user.roles.includes(Roles.VOLUNTEER))
-  }
-
-  get unregisteredVolunteers() {
-    return this.volunteerUsers.filter((u) => u.registration === false)
-  }
-
-  get fee(): string | undefined {
-    if (this.event?.course?.fee) {
-      if (this.event.course.isLate) {
-        return this.event.course.fee.lateAmount
-      } else {
-        return this.event.course.fee.amount
+    const fee = computed(() => {
+      if (event.value.course?.fee) {
+        if (event.value.course.isLate) {
+          return event.value.course.fee.lateAmount
+        } else {
+          return event.value.course.fee.amount
+        }
+      } else if (event.value.fee) {
+        if (event.value.isLate) {
+          return event.value.fee.lateAmount
+        } else {
+          return event.value.fee.amount
+        }
       }
-    } else if (this.event?.fee) {
-      if (this.event.isLate) {
-        return this.event.fee.lateAmount
-      } else {
-        return this.event.fee.amount
+    })
+
+    const isLate = computed(
+      () => event.value.course?.isLate || event.value.isLate
+    )
+
+    const checkoutCost = computed(() => {
+      if (typeof fee.value !== 'string') return 0
+
+      const feeNum = parseFloat(fee.value) || 0
+      return feeNum * usersRequiringPayment.value.length
+    })
+
+    const usersRequiringPayment = computed(() => {
+      const retval: User[] = []
+
+      for (const status of selectedStatuses.value) {
+        if (status.paid || status.user.feeWaived) continue
+
+        retval.push(status.user)
       }
-    }
-  }
 
-  get isLate(): boolean {
-    return this.event.course?.isLate || this.event.isLate
-  }
+      return retval
+    })
 
-  get checkoutCost() {
-    if (typeof this.fee !== 'string') return 0
-
-    const fee = parseFloat(this.fee) || 0
-    return fee * this.usersRequiringPayment.length
-  }
-
-  get jobs() {
-    if (!this.event.project || !this.event.project.jobs?.length)
-      return [
-        {
-          text: 'Other...',
-          value: null,
-        },
-      ]
-
-    return [
-      ...((this.event.project.jobs as unknown) as VolunteerJob[]).map((j) => ({
-        text: j.name,
-        value: j.id,
-      })),
+    const jobs = computed(() => [
+      ...((event.value.project?.jobs as unknown as VolunteerJob[]) || []).map(
+        (j) => ({
+          text: j.name,
+          value: j.id,
+        })
+      ),
       {
         text: 'Other...',
         value: null,
       },
-    ]
-  }
+    ])
 
-  get perms() {
-    if (!this.event.permissions) return
+    const perms = computed(() => {
+      if (!event.value.permissions) return
 
-    const { genders, grades } = this.event.permissions
+      const { genders, grades } = event.value.permissions
 
-    let title: string | null = null
-    let subtitle: string | null = null
+      let title: string | null = null
+      let subtitle: string | null = null
 
-    if (grades?.length) {
-      const ranges = gradeGroups(contiguousGradeRanges(grades))
+      if (grades?.length) {
+        const ranges = gradeGroups(contiguousGradeRanges(grades))
 
-      title = ranges.join(', ')
-    } else {
-      title = 'All Grade Levels'
-    }
+        title = ranges.join(', ')
+      } else {
+        title = 'All Grade Levels'
+      }
 
-    // If both male and female are selected, don't show anything.
-    if (genders?.length === 1) {
-      const str = genders[0] === Gender.MALE ? 'Boys Only' : 'Girls Only'
+      // If both male and female are selected, don't show anything.
+      if (genders?.length === 1) {
+        const str = genders[0] === Gender.MALE ? 'Boys Only' : 'Girls Only'
 
-      subtitle = str
-    } else {
-      subtitle = 'Boys and Girls'
-    }
+        subtitle = str
+      } else {
+        subtitle = 'Boys and Girls'
+      }
 
-    return { title, subtitle }
-  }
+      return { title, subtitle }
+    })
 
-  get registeredUsers() {
-    return this.statuses.filter((s) => s.registration !== false)
-  }
-
-  get unregisteredUsers() {
-    return this.statuses.filter((s) => !this.registeredUsers.includes(s))
-  }
-
-  get usersRequiringPayment() {
-    const retval: User[] = []
-
-    for (const status of this.selectedStatuses) {
-      if (status.paid || status.user.feeWaived) continue
-
-      retval.push(status.user)
-    }
-
-    return retval
-  }
-
-  /**
-   * Determines if the event is open to new registrations.
-   * TODO: Implement override functionality.
-   */
-  get isClosed() {
-    return !!(this.event?.isClosed || this.event?.course?.isClosed)
-  }
-
-  grade(user: User) {
-    if (!user.grade) return null
-
-    if (user.grade < 13) return grades[user.grade].text
-
-    return 'Graduated'
-  }
-
-  format(date: string | Date, formatString: string) {
-    return formatDate(date, formatString)
-  }
-
-  async onPaymentComplete() {
-    await this.$accessor.registrations.getStatuses(this.$route.params.id)
-    await this.register()
-  }
-
-  async onCancelConfirm(status: EventRegistrationStatus) {
-    await this.$accessor.registrations.delete(
-      (status.registration as EventRegistration).id
+    const registeredUsers = computed(() =>
+      statuses.value.filter((s) => s.registration !== false)
     )
 
-    await this.$accessor.registrations.getStatuses(this.$route.params.id)
-  }
+    const unregisteredUsers = computed(() =>
+      statuses.value.filter((s) => s.registration === false)
+    )
 
-  async register() {
-    await this.$accessor.registrations.create({
-      eventId: +this.$route.params.id,
-      users: this.selectedStatuses.map((s) => s.user.id),
-    })
+    const isClosed = computed(
+      () => !!(event.value.isClosed || event.value.course?.isClosed)
+    )
 
-    if (this.$accessor.registrations.error) {
-      console.error(this.$accessor.registrations.error)
+    const grade = (user: UserEntity) => {
+      if (!user.grade) return null
+
+      if (user.grade < 13) return grades[user.grade].text
+
+      return 'Graduated'
     }
 
-    await this.$accessor.registrations.getStatuses(this.$route.params.id)
+    const onRegister = async () => {
+      await registrationStore.create({
+        eventId: +route.value.params.id,
+        users: selectedStatuses.value.map((s) => s.user.id),
+      })
 
-    this.selections = []
-    this.$accessor.snackbar.show({
-      text: 'Registration Complete',
-      color: '#66bb6a',
-    })
-    this.step = RegisterStep.SELECTION
-  }
+      if (registrationStore.error) {
+        return snackbar.error(registrationStore.error.message)
+      }
 
-  async onVolunteer() {
-    await this.$accessor.registrations.volunteer({
-      eventId: +this.$route.params.id,
-      users: [{ userId: this.volunteer!, job: this.volunteerJob || undefined }],
-    })
+      await registrationStore.findStatuses(+route.value.params.id)
 
-    if (this.$accessor.registrations.isErrored) {
-      this.$snack(
-        'An error occurred attempting to create a volunteer registration'
+      state.selections = []
+      snackbar.success('Registration Complete')
+      state.step = RegisterStep.SELECTION
+    }
+
+    const onVolunteer = async () => {
+      await registrationStore.create(
+        {
+          eventId: +route.value.params.id,
+          users: [
+            { userId: state.volunteer!, job: state.volunteerJob || undefined },
+          ],
+        },
+        true
       )
-    } else {
-      await this.$accessor.registrations.getStatuses(this.$route.params.id)
-      this.$snack('Registration Complete!')
-      this.volunteer = null
+
+      if (registrationStore.error) {
+        return snackbar.error(registrationStore.error.message)
+      }
+
+      await registrationStore.findStatuses(+route.value.params.id)
+      snackbar.success('Registration Complete')
+      state.volunteer = null
     }
-  }
-}
+
+    const onPaymentComplete = async () => {
+      await Promise.all([
+        registrationStore.findStatuses(+route.value.params.id),
+        onRegister(),
+      ])
+    }
+
+    const onCancel = async (status: EventRegistrationStatus) => {
+      await registrationStore.delete(
+        (status.registration as EventRegistration).id
+      )
+
+      if (registrationStore.error) {
+        snackbar.error(registrationStore.error.message)
+      }
+
+      await registrationStore.findStatuses(+route.value.params.id)
+    }
+
+    return {
+      ...toRefs(state),
+      cancelDialog,
+      event,
+      date,
+      times,
+      picture,
+      fee,
+      isLate,
+      jobs,
+      checkoutCost,
+      perms,
+      isClosed,
+      isVerified: computed(() => authStore.isVerified),
+      isPayPalLoading: computed(() => payPalStore.isLoading),
+      grade,
+      usersRequiringPayment,
+      registeredUsers,
+      unregisteredUsers,
+      unregisteredVolunteers,
+      onPaymentComplete,
+      onCancel,
+      onRegister,
+      onVolunteer,
+    }
+  },
+  async asyncData({ pinia, route }) {
+    const eventStore = useEvents(pinia)
+    const registrationStore = useRegistrations(pinia)
+
+    await Promise.all([
+      eventStore.findOne(+route.params.id),
+      registrationStore.findStatuses(+route.params.id),
+    ])
+  },
+  head: {
+    title: 'Event Details',
+  },
+})
 </script>
 
 <style lang="scss">

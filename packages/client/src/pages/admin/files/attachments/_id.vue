@@ -10,7 +10,7 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>
@@ -20,7 +20,7 @@
       <v-col>
         <v-card>
           <v-card-title>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -29,7 +29,7 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
           </v-card-title>
         </v-card>
       </v-col>
@@ -38,53 +38,57 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, ref, useRoute } from '@nuxtjs/composition-api'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const search = ref('')
+
+    const route = useRoute()
+
+    const headers = [
+      { text: 'Id', value: 'id' },
+      { text: 'Status', value: 'status' },
+      { text: 'User', value: 'user' },
+      {
+        text: 'Edit',
+        value: 'edit',
+        sortable: false,
+      },
+    ]
+
+    const statuses = [
+      { text: 'Pending', value: 'pending' },
+      { text: 'Approved', value: 'approved' },
+      { text: 'Denied', value: 'denied' },
+      { text: 'Cancelled', value: 'cancelled' },
+    ]
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/files/attachments',
+      },
+      {
+        text: 'Attachments',
+        href: '/admin/files/attachments',
+      },
+      {
+        text: route.value.params.id,
+      },
+    ]
+
+    const getStatus = (value: string) => {
+      const status = statuses.find((s) => s.value === value)
+
+      return status?.text || 'Unknown'
+    }
+
+    return { search, headers, breadcrumbs, getStatus }
+  },
   head: {
     title: 'Attachments',
   },
 })
-export default class AttachmentPage extends Vue {
-  search = ''
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Status', value: 'status' },
-    { text: 'User', value: 'user' },
-    {
-      text: 'Edit',
-      value: 'edit',
-      sortable: false,
-    },
-  ]
-
-  statuses = [
-    { text: 'Pending', value: 'pending' },
-    { text: 'Approved', value: 'approved' },
-    { text: 'Denied', value: 'denied' },
-    { text: 'Cancelled', value: 'cancelled' },
-  ]
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/files/attachments',
-    },
-    {
-      text: 'Attachments',
-      href: '/admin/files/attachments',
-    },
-    {
-      text: this.$route.params.id,
-    },
-  ]
-
-  getStatus(value: string) {
-    const status = this.statuses.find((s) => s.value === value)
-
-    return status?.text || 'Unknown'
-  }
-}
 </script>

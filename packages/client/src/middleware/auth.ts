@@ -1,18 +1,20 @@
-import { Middleware } from '@nuxt/types'
+import { defineNuxtMiddleware } from '@nuxtjs/composition-api'
+import { useAuth } from '@/stores'
 
 /**
  * Auth Middleware
+ *
+ * Ensures that the user is logged in (has a token) and
+ * has a complete token (picked a user, if necessary).
  */
-const middleware: Middleware = (ctx) => {
-  if (!ctx.app.$accessor.auth.token) {
-    console.log('Redirect: Not logged in.')
-    return ctx.redirect('/login')
+export default defineNuxtMiddleware(({ pinia, redirect }) => {
+  const authStore = useAuth(pinia)
+
+  if (!authStore.token) {
+    return redirect('/login')
   }
 
-  if (ctx.app.$accessor.auth.complete === false) {
-    console.info('Redirect: Incomplete token.')
-    return ctx.redirect('/switcher')
+  if (authStore.complete === false) {
+    return redirect('/switcher')
   }
-}
-
-export default middleware
+})

@@ -16,37 +16,34 @@
 
         <v-toolbar-title>Create Course</v-toolbar-title>
 
-        <v-spacer></v-spacer>
+        <v-spacer />
       </v-toolbar>
 
-      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
+      <VFormValidated v-slot="{ passes }" @form:submit="onSubmit">
         <v-card-text>
-          <alert-error v-if="error" :error="error" />
+          <AlertError :error="error" />
 
           <v-row>
             <v-col v-if="!project" cols="12">
-              <auto-complete-project
+              <AutocompleteProject
                 v-model="newProject"
-                label="Project (Optional)"
                 :rules="{ required: !project }"
-                item-value="id"
-                outlined
-              ></auto-complete-project>
+              />
             </v-col>
 
             <v-col cols="12">
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="dto.name"
                 label="Name"
                 rules="required"
                 hide-details="auto"
                 required
                 outlined
-              ></v-text-field-validated>
+              />
             </v-col>
 
             <v-col cols="12">
-              <v-textarea-validated
+              <VTextareaValidated
                 v-model="dto.description"
                 label="Description (Optional)"
                 hide-details="auto"
@@ -59,51 +56,64 @@
         <v-card-actions>
           <v-spacer />
 
-          <v-btn
-            text
-            type="submit"
-            :disabled="!passes"
-            :loading="$accessor.courses.isLoading"
-            >Create</v-btn
-          >
+          <v-btn text type="submit" :disabled="!passes" :loading="isLoading">
+            Create
+          </v-btn>
         </v-card-actions>
-      </v-form-validated>
+      </VFormValidated>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  reactive,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { useCourses } from '@/stores'
 
-@Component
-export default class DialogCreateCourse extends Vue {
-  @Prop() readonly project?: number
+export default defineComponent({
+  props: {
+    project: {
+      type: Number as PropType<number | null>,
+      default: null,
+    },
+  },
+  setup(props, { emit }) {
+    const state = reactive({
+      dialog: false,
+      newProject: null as number | null,
+      dto: {
+        name: '',
+        description: '',
+      },
+    })
 
-  dialog = false
-  newProject: number | null = null
+    const courseStore = useCourses()
 
-  dto = {
-    name: '',
-    description: '',
-  }
+    const onSubmit = async () => {
+      const dto = {
+        ...state.dto,
+        project: props.project || state.newProject!,
+      }
 
-  get error() {
-    return this.$accessor.courses.error
-  }
+      const course = await courseStore.create(dto)
 
-  async onSubmit() {
-    const dto = {
-      name: this.dto.name,
-      description: this.dto.description,
-      project: this.project ? this.project : this.newProject!,
+      if (!courseStore.error) {
+        emit('create:course', course)
+        state.dialog = false
+      }
     }
 
-    const course = await this.$accessor.courses.create(dto)
-
-    if (!this.error) {
-      this.$emit('create:course', course)
-      this.dialog = false
+    return {
+      ...toRefs(state),
+      error: computed(() => courseStore.error),
+      isLoading: computed(() => courseStore.isLoading),
+      onSubmit,
     }
-  }
-}
+  },
+})
 </script>

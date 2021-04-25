@@ -1,12 +1,8 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-file-input
       :error-messages="errors"
+      :hide-details="hideDetails"
       v-bind="$attrs"
       v-on="$listeners"
       @change="onChange"
@@ -22,24 +18,42 @@
         <slot :name="slotName" />
       </template>
     </v-file-input>
-  </validation-provider>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 import { ValidationProvider } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
-})
-export default class VFileInputValidated extends Vue {
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
+  props: {
+    value: {
+      type: null as any,
+      required: true,
+    },
+    rules: {
+      type: [String, Object],
+      default: '',
+    },
+    hideDetails: {
+      type: String,
+      default: 'auto',
+    },
+    vid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
+  setup(_, { emit }) {
+    const onChange = (value: File) => {
+      emit('input', value)
+    }
 
-  onChange(value: File) {
-    this.$emit('input', value)
-  }
-}
+    return { onChange }
+  },
+})
 </script>

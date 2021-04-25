@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Courses" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Courses" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-course @create:course="onCourseCreate">
+          <DialogCreateCourse @create:course="onCourseCreate">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -21,15 +21,17 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-course>
+          </DialogCreateCourse>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row>
       <v-col>
         <v-card :loading="isLoading">
           <v-card-title>
+            <v-spacer />
+
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -38,20 +40,21 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
-            <v-btn class="ml-3" icon large @click="onRefresh(null)">
+            />
+
+            <v-btn class="ml-3" icon large @click="onRefresh">
               <v-icon>mdi-refresh</v-icon>
             </v-btn>
           </v-card-title>
 
-          <v-data-table-paginated
+          <VDataTablePaginated
             :headers="headers"
             :items="courses"
             :search="search"
             @refresh="onRefresh"
           >
             <template #[`item.id`]="{ item }">
-              # <link-copy :text="item.id"></link-copy>
+              # <LinkCopy :text="item.id" />
             </template>
 
             <template #[`item.createdAt`]="{ item }">
@@ -67,7 +70,7 @@
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>
             </template>
-          </v-data-table-paginated>
+          </VDataTablePaginated>
         </v-card>
       </v-col>
     </v-row>
@@ -75,58 +78,54 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { formatDate } from '~/utils/utilities'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { formatDate } from '@/utils/utilities'
+import { useDebouncedRef } from '@/composables'
+import { useCourses } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  transition: 'admin',
+  setup() {
+    const search = useDebouncedRef('')
+
+    const courseStore = useCourses()
+
+    const onCourseCreate = async () => {
+      await onRefresh()
+    }
+
+    const onRefresh = async () => {
+      await courseStore.findAll({ contains: search.value })
+    }
+
+    return {
+      search,
+      courses: computed(() => courseStore.courses),
+      isLoading: computed(() => courseStore.isLoading),
+      format: (date: string, formatString: string) =>
+        formatDate(date, formatString),
+      onCourseCreate,
+      onRefresh,
+      headers: [
+        { text: 'Id', value: 'id' },
+        { text: 'name', value: 'name' },
+        { text: 'Description', value: 'description' },
+        { text: 'Edit', value: 'edit' },
+      ],
+      breadcrumbs: [
+        {
+          text: 'Dashboard',
+          href: '/admin/',
+        },
+        {
+          text: 'Courses',
+        },
+      ],
+    }
+  },
   head: {
     title: 'Courses',
   },
-  transition: 'admin',
 })
-export default class AdminCoursesPage extends Vue {
-  search = ''
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Courses',
-    },
-  ]
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Edit', value: 'edit' },
-  ]
-
-  get courses() {
-    return this.$accessor.courses.courses
-  }
-
-  get isLoading() {
-    return this.$accessor.courses.isLoading
-  }
-
-  format(date: string, formatString: string) {
-    return formatDate(date, formatString)
-  }
-
-  async onCourseCreate() {
-    await this.onRefresh(null)
-  }
-
-  async onCreate() {
-    await this.$fetch()
-  }
-
-  async onRefresh(options: any) {
-    await this.$accessor.courses.findAll(options)
-  }
-}
 </script>

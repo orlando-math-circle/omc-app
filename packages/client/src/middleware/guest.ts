@@ -1,4 +1,5 @@
-import { Middleware } from '@nuxt/types'
+import { defineNuxtMiddleware } from '@nuxtjs/composition-api'
+import { useAuth } from '@/stores'
 
 /**
  * Guest Middleware
@@ -6,12 +7,12 @@ import { Middleware } from '@nuxt/types'
  * Redirects users out of pages or layouts protected
  * with this middleware if they are already logged in.
  */
-const middleware: Middleware = (ctx) => {
-  const isOnSwitcher = ctx.route.fullPath === '/switcher'
+export default defineNuxtMiddleware(({ pinia, redirect, route }) => {
+  const authStore = useAuth(pinia)
 
-  if (ctx.app.$accessor.auth.token && !isOnSwitcher) {
-    return ctx.redirect('/home')
+  const isOnSwitcher = route.fullPath === '/switcher'
+
+  if (authStore.token && !isOnSwitcher) {
+    return redirect('/home')
   }
-}
-
-export default middleware
+})

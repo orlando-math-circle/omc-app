@@ -18,66 +18,73 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { debounce } from 'lodash'
-import { DataTableOptions } from '~/types/data-table.interface'
+import { DataTableOptions } from '@/types/data-table.interface'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  reactive,
+  watch,
+} from '@nuxtjs/composition-api'
+import { useVModel } from '@vueuse/core'
 
-@Component
-export default class VDataTablePaginated extends Vue {
-  @Prop() value!: any
-  @Prop() search?: string
+export default defineComponent({
+  props: {
+    value: {
+      type: [String, Number, Boolean, Object, Array],
+      required: false,
+      default: () => [],
+    },
+    search: {
+      type: String as PropType<string | null>,
+      default: null,
+    },
+  },
+  setup(props, { emit }) {
+    const selections = useVModel(props)
 
-  get selections() {
-    return this.value
-  }
-
-  set selections(value: any) {
-    this.$emit('input', value)
-  }
-
-  pagination = {
-    total: 0,
-    limit: 40,
-    offset: 0,
-    sort: [] as string[],
-  }
-
-  @Watch('search')
-  onSearch() {
-    this.refresh()
-  }
-
-  get trimmedSearch() {
-    if (!this.search) return undefined
-
-    return this.search.trim()
-  }
-
-  refresh = debounce(this.refreshDebounced, 500)
-
-  refreshDebounced() {
-    this.$emit('refresh', {
-      contains: this.trimmedSearch,
-      limit: this.pagination.limit,
-      offset: this.pagination.offset,
-      sort: this.pagination.sort,
+    const state = reactive({
+      pagination: {
+        total: 0,
+        limit: 40,
+        offset: 0,
+        sort: [] as string[],
+      },
     })
-  }
 
-  onChangeOptions(options: DataTableOptions) {
-    this.pagination.limit = options.itemsPerPage
-    this.pagination.offset = this.pagination.limit * (options.page - 1)
-    this.pagination.sort = []
+    const trimmedSearch = computed(() => props.search?.trim())
 
-    if (options.sortBy.length) {
-      for (let i = 0; i < options.sortBy.length; i++) {
-        this.pagination.sort[i] = `${options.sortBy[i]}:${
-          options.sortDesc[i] ? 'DESC' : 'ASC'
-        }`
+    const refresh = debounce(
+      () =>
+        emit('refresh', {
+          contains: trimmedSearch.value,
+          limit: state.pagination.limit,
+          offset: state.pagination.offset,
+          sort: state.pagination.sort,
+        }),
+      500
+    )
+
+    watch(() => props.search, refresh)
+
+    const onChangeOptions = (options: DataTableOptions) => {
+      state.pagination.limit = options.itemsPerPage
+      state.pagination.offset = state.pagination.limit * (options.page - 1)
+      state.pagination.sort = []
+
+      if (options.sortBy.length) {
+        for (let i = 0; i < options.sortBy.length; i++) {
+          state.pagination.sort[i] = `${options.sortBy[i]}:${
+            options.sortDesc[i] ? 'DESC' : 'ASC'
+          }`
+        }
       }
+
+      refresh()
     }
 
-    this.refresh()
-  }
-}
+    return { onChangeOptions, selections }
+  },
+})
 </script>

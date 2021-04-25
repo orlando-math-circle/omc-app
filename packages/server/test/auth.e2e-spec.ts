@@ -9,7 +9,7 @@ import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { AccountService } from '../src/account/account.service';
-import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
+import { RegisterAccountDto } from '../src/account/dto/register.dto';
 import { AuthModule } from '../src/auth/auth.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -109,7 +109,7 @@ describe('Auth', () => {
 
   describe('POST /login', () => {
     it('should accept valid logins', async () => {
-      const createAccountDto: CreateAccountDto = {
+      const createAccountDto: RegisterAccountDto = {
         first: 'Jane',
         last: 'Doe',
         gender: Gender.FEMALE,

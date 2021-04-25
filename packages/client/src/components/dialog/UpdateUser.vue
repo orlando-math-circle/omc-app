@@ -1,100 +1,163 @@
 <template>
-  <v-dialog
-    v-model="dialog"
-    :fullscreen="$vuetify.breakpoint.mobile"
-    max-width="440"
-  >
-    <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" large text v-on="on">Edit</v-btn>
-      </slot>
+  <DialogForm ref="formRef" @form:submit="onSubmit">
+    <template #activator="activator">
+      <slot name="activator" v-bind="activator" />
     </template>
 
-    <v-card>
-      <v-toolbar flat>
-        <v-btn icon @click="dialog = false">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
+    <template #title>Update User</template>
 
-        <v-toolbar-title>Update User</v-toolbar-title>
+    <template #form>
+      <v-col cols="6">
+        <VTextFieldValidated
+          v-model="dto.first"
+          label="First Name"
+          rules="required"
+          required
+          outlined
+        />
+      </v-col>
 
-        <v-spacer></v-spacer>
-      </v-toolbar>
+      <v-col cols="6">
+        <VTextFieldValidated
+          v-model="dto.last"
+          label="Last Name"
+          rules="required"
+          required
+          outlined
+        />
+      </v-col>
 
-      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
-        <v-card-text>
-          <v-row>
-            <v-col>
-              <v-text-field-validated
-                v-model="dto.first"
-                label="First Name"
-                rules="required"
-                required
-                outlined
-              ></v-text-field-validated>
-            </v-col>
-            <v-col>
-              <v-text-field-validated
-                v-model="dto.last"
-                label="Last Name"
-                rules="required"
-                required
-                outlined
-              ></v-text-field-validated>
-            </v-col>
-          </v-row>
+      <v-col cols="12">
+        <BirthdayPickerValidated v-model="dto.dob" :min-age="0" />
+      </v-col>
 
-          <birthday-picker v-model="dto.dob" outlined></birthday-picker>
+      <v-col cols="12">
+        <VTextFieldValidated
+          v-model="dto.email"
+          label="Email"
+          rules="required"
+          required
+          outlined
+        />
+      </v-col>
 
-          <v-row>
-            <v-col>
-              <v-text-field-validated
-                v-model="dto.email"
-                label="Email"
-                rules="required"
-                required
-                outlined
-              ></v-text-field-validated>
+      <v-col cols="6">
+        <VSelectValidated
+          v-model="dto.gender"
+          :items="genders"
+          label="Gender"
+          rules="required"
+          outlined
+          hide-details="auto"
+        />
+      </v-col>
 
-              <v-select-validated
-                v-model="dto.gender"
-                :items="genders"
-                label="Gender"
-                rules="required"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-        </v-card-text>
+      <v-col cols="6">
+        <VSelectValidated v-model="dto.grade" :items="grades" label="Grade" />
+      </v-col>
+    </template>
 
-        <v-card-actions>
-          <v-btn type="submit" :disabled="!passes">Submit Changes</v-btn>
-        </v-card-actions>
-      </v-form-validated>
-    </v-card>
-  </v-dialog>
+    <template #actions="{ passes }">
+      <v-spacer />
+
+      <v-btn type="submit" :disabled="!passes" color="secondary">
+        Submit Changes
+      </v-btn>
+    </template>
+  </DialogForm>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { genders } from '../../utils/constants'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { genders } from '@/utils/constants'
+import { grades } from '@/utils/events'
+import DialogForm from '@/components/dialog/Form.vue'
+import { useTemplateRef } from '@/composables'
+import { UserEntity, useUsers } from '@/stores'
+import { Gender } from '@server/user/enums/gender.enum'
+import { Grade } from '@server/user/enums/grade.enum'
+import { IndustryDto } from '@server/user/dtos/industry.dto'
+import { difference } from '@/utils/utilities'
 
-@Component
-export default class DialogUpdateUser extends Vue {
-  dialog = false
-  genders = genders
+type FormComponent = InstanceType<typeof DialogForm>
 
-  dto = {
-    first: '',
-    last: '',
-    email: '',
-    dob: null as string | null,
-    gender: null,
-  }
+export default defineComponent({
+  setup(_, { emit }) {
+    const form = useTemplateRef<FormComponent>('formRef')
 
-  onSubmit() {
-    console.log('Submitting Form')
-  }
-}
+    const userStore = useUsers()
+
+    const state = reactive({
+      user: null as UserEntity | null,
+      dto: {
+        first: '',
+        last: '',
+        dob: '',
+        gender: undefined as Gender | undefined,
+        grade: undefined as Grade | undefined,
+        email: undefined as string | undefined,
+        industry: {
+          profession: '',
+          jobTitle: '',
+          company: '',
+        } as IndustryDto,
+      },
+    })
+
+    const open = (user: UserEntity) => {
+      state.user = user
+      state.dto.first = user.first
+      state.dto.last = user.last
+      state.dto.dob = user.dob
+      state.dto.gender = user.gender
+      state.dto.grade = user.grade
+      state.dto.email = user.email
+      state.dto.industry = user.industry || {
+        profession: '',
+        jobTitle: '',
+        company: '',
+      }
+
+      form.value.open()
+    }
+
+    const changes = computed(() => {
+      const originalUser = { ...state.user }
+
+      // This could be null and would break comparison
+      if (!originalUser.industry) {
+        originalUser.industry = {
+          profession: '',
+          jobTitle: '',
+          company: '',
+        }
+      }
+
+      return difference(originalUser, state.dto)
+    })
+
+    const onSubmit = async () => {
+      await userStore.update(state.user!.id, changes.value, true)
+
+      if (!userStore.error) {
+        emit('user:update')
+        form.value.close()
+      }
+    }
+
+    return {
+      ...toRefs(state),
+      genders,
+      onSubmit,
+      open,
+      grades,
+      changes,
+    }
+  },
+})
 </script>

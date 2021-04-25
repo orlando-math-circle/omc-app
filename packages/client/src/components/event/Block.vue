@@ -1,6 +1,6 @@
 <template>
   <v-card width="270" :to="'/events/' + event.id">
-    <v-img class="align-end" height="150px" :src="background"></v-img>
+    <v-img class="align-end" height="150px" :src="background" />
 
     <div class="card--bottom">
       <v-card-title class="card--title mr-15">{{ event.name }}</v-card-title>
@@ -32,30 +32,44 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  useContext,
+} from '@nuxtjs/composition-api'
 import { Event } from '@server/event/event.entity'
 import { formatDate } from '~/utils/utilities'
 
-@Component
-export default class EventBlock extends Vue {
-  @Prop() event!: Event
+export default defineComponent({
+  props: {
+    event: {
+      type: Object as PropType<Event>,
+      required: true,
+    },
+  },
+  setup(props) {
+    const { $config } = useContext()
 
-  get date() {
-    const d = formatDate(this.event.dtstart, 'd-MMM-h:mm aaaa')
+    const date = computed(() => {
+      const nativeDate = formatDate(props.event.dtstart, 'd-MMM-h:mm aaaa')
 
-    const [day, month, time] = d.split('-')
+      const [day, month, time] = nativeDate.split('-')
 
-    return { day, month, time }
-  }
+      return { day, month, time }
+    })
 
-  get background() {
-    const url = this.event.picture
+    const background = computed(() => {
+      const url = props.event.picture
 
-    if (url.startsWith('http')) return url
+      if (url.startsWith('http')) return url
 
-    return `${this.$config.staticBase}${url}`
-  }
-}
+      return `${$config.staticBase}${url}`
+    })
+
+    return { date, background }
+  },
+})
 </script>
 
 <style lang="scss" scoped>

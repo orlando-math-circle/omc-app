@@ -1,13 +1,12 @@
 <template>
-  <dialog-form ref="refDialog" @submit:form="onSubmit">
+  <DialogForm ref="refDialog" @form:submit="onSubmit">
     <template #title>Create Registration</template>
-    <template #subtitle
-      >Registers a user to an event. This will bypass payment
-      requirements.</template
-    >
+    <template #subtitle>
+      Registers a user to an event. This will bypass payment requirements.
+    </template>
 
     <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }"></slot>
+      <slot name="activator" v-bind="{ on, attrs }" />
     </template>
 
     <v-card-text>
@@ -18,24 +17,30 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <auto-complete-user v-model="user" />
+            <AutoCompleteUser v-model="user" />
           </v-list-item-content>
         </v-list-item>
 
         <v-divider />
       </v-list>
     </v-card-text>
-  </dialog-form>
+  </DialogForm>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, toRefs, reactive } from '@nuxtjs/composition-api'
 import { User } from '@server/user/user.entity'
 
-@Component
-export default class DialogCreateRegistration extends Vue {
-  user: User | null = null
+export default defineComponent({
+  setup() {
+    const state = reactive({
+      user: null as User | null,
+    })
 
-  onSubmit() {}
-}
+    // TODO: NYI
+    const onSubmit = () => {}
+
+    return { ...toRefs(state), onSubmit }
+  },
+})
 </script>

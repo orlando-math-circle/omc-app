@@ -1,9 +1,9 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-if="user != null" v-model="drawer" app>
+    <v-navigation-drawer v-model="drawer" app>
       <v-list-item class="px-2">
         <v-list-item-avatar>
-          <v-img :src="$avatar(user)" />
+          <v-img :src="user.avatarUrl" />
         </v-list-item-avatar>
 
         <v-list-item-content>
@@ -150,7 +150,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item link @click="logout">
+        <v-list-item link @click="onLogout">
           <v-list-item-icon>
             <v-icon>mdi-logout</v-icon>
           </v-list-item-icon>
@@ -162,24 +162,24 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+    <v-app-bar app flat class="appbar">
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
 
-      <v-toolbar-title class="title">OMC Admin</v-toolbar-title>
+      <v-toolbar-title class="title">Orlando Math Circle</v-toolbar-title>
 
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" icon elevation="2" v-on="on">
             <v-avatar>
-              <v-img :src="$avatar(user)"></v-img>
+              <v-img :src="user.avatarUrl" />
             </v-avatar>
           </v-btn>
         </template>
 
         <v-list dense nav>
-          <v-list-item link to="/account/settings">
+          <v-list-item link to="/dashboard">
             <v-list-item-icon>
               <v-icon>mdi-account-box-outline</v-icon>
             </v-list-item-icon>
@@ -207,7 +207,7 @@
 
           <v-divider />
 
-          <v-list-item link @click="logout">
+          <v-list-item link @click="onLogout">
             <v-list-item-icon>
               <v-icon>mdi-logout-variant</v-icon>
             </v-list-item-icon>
@@ -221,49 +221,57 @@
     </v-app-bar>
 
     <v-main>
-      <v-container class="pa-6">
-        <nuxt />
+      <v-container fluid>
+        <Nuxt />
       </v-container>
     </v-main>
 
-    <snackbar></snackbar>
+    <Snackbar />
   </v-app>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  ref,
+  useRouter,
+} from '@nuxtjs/composition-api'
+import { useDarkMode } from '@/composables'
+import { useAuth } from '@/stores'
 
-@Component({
+export default defineComponent({
   middleware: ['auth', 'admin'],
+  setup() {
+    const isDark = useDarkMode()
+    const authStore = useAuth()
+    const router = useRouter()
+
+    const drawer = ref(false)
+
+    const onLogout = () => {
+      authStore.logout()
+      router.push('/')
+    }
+
+    return {
+      drawer,
+      user: computed(() => authStore.user!),
+      isDark,
+      onLogout,
+    }
+  },
   head: {
     title: 'Admin Dashboard',
   },
 })
-export default class AdminLayout extends Vue {
-  drawer = false
-  mini = false
-
-  get user() {
-    return this.$accessor.auth.user!
-  }
-
-  get isDark() {
-    return this.$vuetify.theme.dark
-  }
-
-  set isDark(value: boolean) {
-    this.$vuetify.theme.dark = value
-    this.$cookies.set('omc-theme-dark', value)
-  }
-
-  logout() {
-    this.$accessor.auth.logout()
-    this.$router.push('/')
-  }
-}
 </script>
 
 <style lang="scss">
+.appbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
 // VList
 .v-list-item__action:first-child,
 .v-list-item__icon:first-child {

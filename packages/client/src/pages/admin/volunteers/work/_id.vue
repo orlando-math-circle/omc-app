@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Edit Work" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Edit Work" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-confirm @confirm="onDelete">
+          <DialogConfirm @confirm="onDelete">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -23,68 +23,59 @@
             </template>
 
             <span>Are you sure you wish to delete this volunteer work?</span>
-          </dialog-confirm>
+          </DialogConfirm>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
-    <v-row v-if="work">
+    <v-row v-if="state && state.work">
       <v-col cols="12">
         <v-card>
           <v-card-title>Information</v-card-title>
 
-          <v-form-validated @submit:form="onSubmit">
+          <VFormValidated @form:submit="onSubmit">
             <v-card-text>
               <v-row>
                 <client-only>
                   <v-col cols="12">
-                    <auto-complete-user
-                      v-model="user"
-                      rules="required"
-                      item-value="id"
-                      label="User"
-                      outlined
-                    ></auto-complete-user>
+                    <AutocompleteUser v-model="state.userId" />
                   </v-col>
 
                   <v-col cols="12">
-                    <auto-complete-project
-                      v-model="project"
-                      rules="required"
-                      item-value="id"
+                    <AutocompleteProject
+                      v-model="state.projectId"
                       label="Project (Optional)"
-                      outlined
-                    ></auto-complete-project>
+                    />
                   </v-col>
                 </client-only>
 
                 <v-col cols="12">
                   <v-text-field
-                    v-model.number="work.hours"
+                    v-model.number="state.work.hours"
                     type="tel"
                     outlined
                     hide-details="auto"
                     label="Volunteer Hours"
                     persistent-hint
-                  ></v-text-field>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <v-select-validated
-                    v-model="work.status"
+                  <VSelectValidated
+                    v-model="state.work.status"
                     :items="workStatuses"
                     rules="required"
                     outlined
                     hide-details="auto"
                     label="Work Status"
                     persistent-hint
-                  ></v-select-validated>
+                  />
                 </v-col>
               </v-row>
             </v-card-text>
 
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer />
 
               <v-btn text @click="refresh">Reset</v-btn>
               <v-btn
@@ -96,7 +87,7 @@
                 Save Changes
               </v-btn>
             </v-card-actions>
-          </v-form-validated>
+          </VFormValidated>
         </v-card>
       </v-col>
     </v-row>
@@ -105,107 +96,117 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash'
-import { Component, Vue } from 'nuxt-property-decorator'
-import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity'
 import { UpdateWorkDto } from '@server/volunteer-work/dto/update-work.dto'
-import { shallowDiff } from '~/utils/utilities'
-import { workStatuses } from '~/utils/constants'
+import { shallowDiff } from '@/utils/utilities'
+import { workStatuses } from '@/utils/constants'
+import { useWork, WorkEntity } from '@/stores'
+import {
+  computed,
+  defineComponent,
+  useRouter,
+  useRoute,
+  useFetch,
+  reactive,
+} from '@nuxtjs/composition-api'
+import { useSnackbar } from '@/composables'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const router = useRouter()
+    const snackbar = useSnackbar()
+    const workStore = useWork()
+    const route = useRoute()
+
+    const state = reactive({
+      work: null as WorkEntity | null,
+      userId: null as number | null,
+      projectId: null as number | null,
+    })
+
+    const fetch = async () => {
+      await workStore.findOne(+route.value.params.id)
+
+      if (workStore.error) {
+        return snackbar.error(workStore.error.message)
+      }
+
+      state.work = cloneDeep(workStore.work)
+      state.userId = workStore.work!.user.id
+      state.projectId = workStore.work!.project?.id || null
+    }
+
+    useFetch(fetch)
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Volunteer Work',
+        href: '/admin/volunteers/work',
+      },
+      {
+        text: 'Work',
+      },
+    ]
+
+    const isLoading = computed(() => workStore.isLoading)
+
+    const changes = computed(() => {
+      if (!state?.work) return {}
+
+      const dto: UpdateWorkDto = Object.assign(
+        { hours: state.work.hours },
+        workStore.work!.user.id !== state.userId && {
+          user: state.userId || undefined,
+        },
+        workStore.work!.project?.id !== state.projectId && {
+          project: state.projectId || undefined,
+        }
+      )
+
+      return shallowDiff(workStore.work!, dto)
+    })
+
+    const onDelete = async () => {
+      await workStore.delete(state.work!.id)
+
+      if (workStore.error) {
+        return snackbar.error('Failed to delete work :(')
+      }
+
+      snackbar.success('Work Deleted!')
+
+      router.push('/admin/volunteers/work')
+    }
+
+    const onSubmit = async () => {
+      await workStore.update(state.work!.id, changes.value)
+
+      if (workStore.error) {
+        return snackbar.error('Failed to update work :(')
+      }
+
+      snackbar.success('Work Updated')
+
+      fetch()
+    }
+
+    return {
+      state,
+      workStatuses,
+      breadcrumbs,
+      isLoading,
+      onDelete,
+      onSubmit,
+      refresh: fetch,
+      changes,
+    }
+  },
   head: {
     title: 'Edit Work',
   },
-  async asyncData({ app: { $accessor }, route }) {
-    await $accessor.volunteers.findOneWork(route.params.id)
-
-    return {
-      work: cloneDeep($accessor.volunteers.work),
-      user: $accessor.volunteers.work!.user.id,
-      project: $accessor.volunteers.work!.project?.id || null,
-    }
-  },
 })
-export default class VolunteerWorkAdminPage extends Vue {
-  work: null | VolunteerWork = null
-  user: null | number = null
-  project: null | number = null
-  workStatuses = workStatuses
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Volunteer Work',
-      href: '/admin/volunteers/work',
-    },
-    {
-      text: 'Work',
-    },
-  ]
-
-  get isLoading() {
-    return this.$accessor.volunteers.isLoading
-  }
-
-  get changes() {
-    if (!this.work) return {}
-
-    const dto: UpdateWorkDto = Object.assign(
-      { hours: this.work.hours },
-      this.$accessor.volunteers.work!.user.id !== this.user && {
-        user: this.user || undefined,
-      },
-      this.$accessor.volunteers.work!.project?.id !== this.project && {
-        project: this.project || undefined,
-      }
-    )
-
-    return shallowDiff(this.$accessor.volunteers.work!, dto)
-  }
-
-  /**
-   * Reloads the work
-   */
-  async refresh(load = true) {
-    if (load) {
-      await this.$accessor.volunteers.findOneWork(this.$route.params.id)
-    }
-
-    this.work = cloneDeep(this.$accessor.volunteers.work)
-    this.user = this.work!.user.id
-    this.project = this.work!.project?.id || null
-  }
-
-  /**
-   * Deletes the active work.
-   */
-  async onDelete() {
-    await this.$accessor.volunteers.deleteWork(this.work!.id)
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack('Failed to delete work :(')
-    }
-
-    this.$snack('Work Deleted!')
-
-    this.$router.push('/admin/volunteers/work')
-  }
-
-  async onSubmit() {
-    await this.$accessor.volunteers.updateWork({
-      id: this.work!.id,
-      updateWorkDto: this.changes,
-    })
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack(this.$accessor.volunteers.error!.message)
-    }
-
-    this.$snack('Work Updated!')
-    await this.refresh()
-  }
-}
 </script>

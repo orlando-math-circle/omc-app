@@ -6,7 +6,7 @@
       </v-toolbar>
 
       <v-card-text>
-        <v-text-field-validated
+        <VTextFieldValidated
           v-model="dto.amount"
           label="Event Fee"
           type="number"
@@ -17,14 +17,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, reactive } from '@nuxtjs/composition-api'
+import { toRefs } from '@vueuse/core'
 
-@Component
-export default class DialogCreateFee extends Vue {
-  dialog = false
+export default defineComponent({
+  setup() {
+    const state = reactive({
+      dialog: false,
+      dto: {
+        amount: '',
+      },
+    })
 
-  dto = {
-    amount: '',
-  }
-}
+    return {
+      ...toRefs(state),
+    }
+  },
+})
 </script>

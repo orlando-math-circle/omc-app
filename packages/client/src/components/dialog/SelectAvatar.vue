@@ -1,14 +1,14 @@
 <template>
   <v-dialog v-model="dialog" max-width="440px">
-    <template #activator="{ on, attrs }">
-      <slot v-bind="{ on, attrs }"></slot>
+    <template #activator="activator">
+      <slot v-bind="activator" />
     </template>
 
     <v-card>
       <v-toolbar flat>
         <v-toolbar-title>Select Avatar</v-toolbar-title>
 
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn icon @click="dialog = false">
           <v-icon>mdi-close</v-icon>
@@ -16,8 +16,8 @@
       </v-toolbar>
 
       <v-card-text>
-        <template v-if="upload">
-          <file-upload v-model="file" outlined label="Upload Avatar" />
+        <template v-if="custom">
+          <FileUpload v-model="file" outlined label="Upload Avatar" />
 
           <v-divider class="my-3" />
         </template>
@@ -29,20 +29,14 @@
               :key="avatar"
               class="d-flex justify-center"
               cols="6"
+              md="3"
               sm="4"
             >
               <v-item v-slot="{ active, toggle }">
-                <v-card
-                  class="d-flex align-center"
-                  height="100"
-                  width="100"
-                  @click="toggle"
-                >
-                  <v-img :src="avatarToImage(avatar)">
+                <v-card class="d-flex align-center" @click="toggle">
+                  <v-img :src="avatarToImage(avatar)" class="rounded">
                     <v-scroll-y-transition>
-                      <div v-if="active" class="flex-grow-1 text-center active">
-                        Selected
-                      </div>
+                      <div v-if="active" class="active rounded">Selected</div>
                     </v-scroll-y-transition>
                   </v-img>
                 </v-card>
@@ -65,68 +59,107 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { DefaultAvatar } from '@server/user/enums/default-avatar.enum'
 import { User } from '@server/user/user.entity'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  reactive,
+  useContext,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { useUsers, useFiles } from '@/stores'
+import { useSnackbar } from '@/composables'
 
-@Component
-export default class DialogSelectAvatar extends Vue {
-  @Prop({ default: false }) upload!: boolean
-  @Prop({ required: true }) user!: User
+export default defineComponent({
+  props: {
+    custom: {
+      type: Boolean,
+      default: false,
+    },
+    user: {
+      type: Object as PropType<User>,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const { $config: config } = useContext()
+    const snackbar = useSnackbar()
+    const userStore = useUsers()
+    const fileStore = useFiles()
 
-  dialog = false
-  selected = 0
-  file: File | null = null
-  avatars = [...Array(10).keys()].map((key) =>
-    key.toString()
-  ) as DefaultAvatar[]
+    const state = reactive({
+      dialog: false,
+      selected: 0,
+      file: null as File | string | null,
+      avatars: [...Array(10).keys()].map((k) =>
+        k.toString()
+      ) as DefaultAvatar[],
+    })
 
-  get isLoading() {
-    return this.$accessor.users.isLoading
-  }
+    const avatarToImage = (avatar: DefaultAvatar) =>
+      `${config.staticBase}${config.avatarBase}/${avatar}.png`
 
-  avatarToImage(avatar: DefaultAvatar) {
-    return `${this.$config.staticBase}${this.$config.avatarBase}/${avatar}.png`
-  }
+    const onSubmit = async () => {
+      const isOwn = !props.custom
 
-  async onSubmit() {
-    if (this.upload && this.file) {
-      const url = (await this.$accessor.files.filesToURL(this.file)) as string
+      // Custom Image URL
+      if (props.custom && typeof state.file === 'string') {
+        await userStore.update(props.user.id, { avatar: state.file }, isOwn)
+      }
+      // Custom Image Upload
+      else if (props.custom && state.file instanceof File) {
+        await fileStore.create(state.file!)
 
-      if (this.$accessor.files.isErrored) {
-        this.$accessor.snackbar.show({
-          text: this.$accessor.files.error!.message,
-          timeout: 7000,
-        })
-        return
+        if (fileStore.error) {
+          return snackbar.error(fileStore.error.message)
+        }
+
+        await userStore.update(
+          props.user.id,
+          { avatar: fileStore.file!.root },
+          isOwn
+        )
+      }
+      // Default Avatar Selected
+      else {
+        await userStore.update(
+          props.user.id,
+          { avatar: state.avatars[state.selected] },
+          isOwn
+        )
       }
 
-      await this.$accessor.users.update({
-        id: this.user.id,
-        updateUserDto: {
-          avatar: url,
-        },
-      })
-    } else {
-      await this.$accessor.users.updateOwn({
-        id: this.$accessor.auth.user!.id,
-        updateOwnUserDto: {
-          avatar: this.avatars[this.selected],
-        },
-      })
+      if (userStore.error) {
+        return snackbar.error(userStore.error.message)
+      }
+
+      emit('update:avatar')
+
+      state.dialog = false
     }
 
-    this.$emit('update:avatar')
-
-    this.dialog = false
-  }
-}
+    return {
+      ...toRefs(state),
+      isLoading: computed(() => userStore.isLoading),
+      avatarToImage,
+      onSubmit,
+    }
+  },
+})
 </script>
 
 <style lang="scss" scoped>
 .active {
+  display: flex;
+  height: 100%;
   color: #fff;
   font-weight: 700;
   text-shadow: 0 0 3px #000;
+  border: 5px solid #fff;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
 }
 </style>
