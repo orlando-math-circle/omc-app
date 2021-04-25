@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-6">
+  <div>
     <v-row>
       <v-col cols="6" sm="5" md="3">
         <v-select
@@ -61,7 +61,7 @@
         </v-data-table-paginated>
       </v-col>
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
