@@ -71,8 +71,8 @@ const config: NuxtConfig = {
   buildModules: [
     '@nuxt/typescript-build',
     '@nuxtjs/composition-api/module',
-    'nuxt-typed-vuex',
     '@nuxt/postcss8',
+    'nuxt-typed-vuex',
   ],
   modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
   axios: {
