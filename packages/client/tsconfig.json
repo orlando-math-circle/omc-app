@@ -13,5 +13,5 @@
       "vuetify"
     ]
   },
-  "include": ["src/**/*", "types/**/*", "index.d.ts"]
+  "include": ["src/**/*", "types/**/*"]
 }
