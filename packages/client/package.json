@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "5.13.1",
-    "@nuxtjs/composition-api": "^0.23.2",
+    "@nuxtjs/composition-api": "0.23.2",
     "@nuxtjs/dotenv": "1.4.1",
     "@nuxtjs/pwa": "3.3.5",
     "@types/dropzone": "5.7.3",
