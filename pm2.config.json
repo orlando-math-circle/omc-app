@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "server",
+      "script": "yarn",
+      "args": "server start"
+    },
+    {
+      "name": "client",
+      "script": "yarn",
+      "args": "client start"
+    }
+  ]
+}
