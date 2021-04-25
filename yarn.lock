@@ -2910,7 +2910,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxtjs/composition-api@npm:^0.23.2":
+"@nuxtjs/composition-api@npm:0.23.2":
   version: 0.23.2
   resolution: "@nuxtjs/composition-api@npm:0.23.2"
   dependencies:
@@ -3057,7 +3057,7 @@ __metadata:
     "@nuxt/types": 2.15.4
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.1
-    "@nuxtjs/composition-api": ^0.23.2
+    "@nuxtjs/composition-api": 0.23.2
     "@nuxtjs/dotenv": 1.4.1
     "@nuxtjs/eslint-config-typescript": 6.0.0
     "@nuxtjs/pwa": 3.3.5
