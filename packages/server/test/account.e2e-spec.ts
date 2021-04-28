@@ -7,11 +7,13 @@ import Joi from 'joi';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
+import { CreateAccountDto } from '../src/account/dto/create-account.dto';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { EmailModule } from '../src/email/email.module';
 import { FileModule } from '../src/file/file.module';
+import { Gender } from '../src/user/enums/gender.enum';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
 import { UserFixtures } from './fixtures/user.fixture';
@@ -134,6 +136,46 @@ describe('Accounts', () => {
     });
   });
 
+  describe('POST /account', () => {
+    it('should create new accounuts', async () => {
+      const dto: CreateAccountDto = {
+        first: 'Jake',
+        last: 'Doe',
+        email: 'jake@doe.com',
+        omcEmail: 'jake@orlandomathcircle.org',
+        roles: [Roles.ADMIN],
+        gender: Gender.MALE,
+        password: 'apple',
+        dob: new Date(Date.UTC(2000, 0, 1)),
+        industry: {
+          profession: 'Fake Test Person',
+        },
+      };
+
+      const resp = await request(app.getHttpServer())
+        .post('/account')
+        .set('Authorization', `Bearer ${token}`)
+        .send(dto)
+        .expect(201);
+
+      expect(resp.body).toBeDefined();
+      expect(resp.body.primaryUser.name).toBe('Jake Doe');
+      expect(resp.body.primaryUser.omcEmail).toBe(dto.omcEmail);
+    });
+  });
+
+  describe('GET /account/user/:id', () => {
+    it('should retrieve an account by the primary user', async () => {
+      const resp = await request(app.getHttpServer())
+        .get('/account/user/1')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(resp.body).toBeDefined();
+      expect(resp.body.id).toBe(1);
+    });
+  });
+
   describe('DELETE /account/:id', () => {
     it('should throw 401 for unauthenticated requests', async () => {
       await request(app.getHttpServer()).delete('/account/1').expect(401);
@@ -160,9 +202,12 @@ describe('Accounts', () => {
     });
 
     it('should remove orphaned account users', async () => {
-      const users = await orm.em.find(User, {});
+      const users = await orm.em.find(User, {}, ['account']);
 
-      expect(users.length).toBe(0);
+      for (const user of users) {
+        expect(user.account).not.toBeFalsy();
+        expect(user.account.id).not.toBe(1);
+      }
     });
   });
 });

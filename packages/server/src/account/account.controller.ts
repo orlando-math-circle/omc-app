@@ -3,16 +3,23 @@ import { Acc } from '../auth/decorators/account.decorator';
 import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
 import { Account } from './account.entity';
 import { AccountService } from './account.service';
-import { CreateAccountDto } from './dtos/create-account.dto';
-import { FindOneAccountDto } from './dtos/find-one-account.dto';
+import { RegisterAccountDto } from './dto/register.dto';
+import { FindOneAccountDto } from './dto/find-one-account.dto';
+import { CreateAccountDto } from './dto/create-account.dto';
 
 @Controller('account')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
-  @Post('register')
+  @UserAuth('account', 'create:any')
+  @Post()
   create(@Body() createAccountDto: CreateAccountDto) {
     return this.accountService.create(createAccountDto);
+  }
+
+  @Post('register')
+  register(@Body() registerDto: RegisterAccountDto) {
+    return this.accountService.register(registerDto);
   }
 
   @AccountAuth()

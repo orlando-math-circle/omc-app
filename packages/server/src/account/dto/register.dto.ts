@@ -12,7 +12,7 @@ import { Gender } from '../../user/enums/gender.enum';
 import { Grade } from '../../user/enums/grade.enum';
 import { ReminderFreq } from '../../user/enums/reminder-freq.enum';
 
-export class CreateAccountDto {
+export class RegisterAccountDto {
   @IsString()
   readonly email!: string;
 

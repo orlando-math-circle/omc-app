@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios'
 import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
 import { Account } from '@server/account/account.entity'
-import { CreateAccountDto } from '@server/account/dtos/create-account.dto'
+import { RegisterAccountDto } from '@server/account/dto/register.dto'
 import { Roles } from '@server/app.roles'
 import { ChangePasswordDto } from '@server/auth/dtos/change-password.dto'
 import { ResetPasswordDto } from '@server/auth/dtos/reset-password.dto'
@@ -162,14 +162,14 @@ export const actions = actionTree(
     },
     async register(
       { commit },
-      createAccountDto: DTO<CreateAccountDto>
+      registerAccountDto: DTO<RegisterAccountDto>
     ): Promise<void> {
       try {
         commit('setStatus', StateStatus.BUSY)
 
         const { token, complete } = await this.$axios.$post(
           '/account/register',
-          createAccountDto
+          registerAccountDto
         )
 
         commit('setToken', token)
