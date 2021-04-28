@@ -1,135 +1,174 @@
 <template>
-  <v-row>
+  <v-row dense>
     <v-col cols="6">
-      <v-select-validated
-        v-model="birthday.month"
+      <VSelectValidated
+        v-model="month"
         label="Birthday Month"
         autocomplete="bday-month"
         name="Birthday Month"
         rules="required"
         :items="months"
         hide-details="auto"
+        outlined
         v-bind="$attrs"
+        @blur="onBlur('month')"
       />
     </v-col>
 
     <v-col cols="3">
-      <v-text-field-validated
+      <VTextFieldValidated
         ref="dateField"
-        v-model.number="birthday.date"
+        v-model.number="date"
         type="tel"
         maxlength="2"
         :rules="dayRules"
         name="Date"
         label="Day"
         hide-details="auto"
+        outlined
         v-bind="$attrs"
+        @blur="onBlur('date')"
       />
     </v-col>
 
     <v-col cols="3">
-      <v-text-field-validated
+      <VTextFieldValidated
         ref="yearField"
-        v-model.number="birthday.year"
+        v-model.number="year"
         type="tel"
         maxlength="4"
         rules="required"
         name="Year"
         label="Year"
         hide-details="auto"
+        outlined
         v-bind="$attrs"
+        @blur="onBlur('year')"
       />
     </v-col>
   </v-row>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  reactive,
+  toRefs,
+  watch,
+} from '@nuxtjs/composition-api'
+import { months } from '~/utils/constants'
 import { isValidDate } from '~/utils/utilities'
 
-@Component
-export default class BirthdayPicker extends Vue {
-  @Prop() value!: string | null
-  @Prop({ default: new Date().getFullYear() }) readonly maxYear!: number
-  @Prop({ default: new Date().getFullYear() - 100 }) readonly minYear!: number
+export default defineComponent({
+  props: {
+    value: {
+      type: String,
+      required: true,
+    },
+    maxYear: {
+      type: Number,
+      default: new Date().getFullYear(),
+    },
+    minYear: {
+      type: Number,
+      default: new Date().getFullYear() - 100,
+    },
+  },
+  setup(props, { emit }) {
+    const state = reactive({
+      month: null as number | null,
+      date: null as number | null,
+      year: null as number | null,
+    })
 
-  months = [
-    { text: 'January', value: 0 },
-    { text: 'February', value: 1 },
-    { text: 'March', value: 2 },
-    { text: 'April', value: 3 },
-    { text: 'May', value: 4 },
-    { text: 'June', value: 5 },
-    { text: 'July', value: 6 },
-    { text: 'August', value: 7 },
-    { text: 'September', value: 8 },
-    { text: 'October', value: 9 },
-    { text: 'November', value: 10 },
-    { text: 'December', value: 11 },
-  ]
+    const dirty = reactive({
+      month: false,
+      date: false,
+      year: false,
+    })
 
-  birthday = {
-    month: null as number | null,
-    date: null as number | null,
-    year: null as number | null,
-  }
+    /**
+     * Emits the blur event only after each birthday
+     * input has been blurred to prevent premature errors.
+     */
+    const onBlur = (type: keyof typeof dirty) => {
+      dirty[type] = true
 
-  @Watch('birthday', { deep: true })
-  setDate(birthday: this['birthday']) {
-    if (
-      typeof birthday.year !== 'number' ||
-      typeof birthday.month !== 'number' ||
-      typeof birthday.date !== 'number'
-    )
-      return
-
-    const date = new Date(
-      birthday.year as number,
-      birthday.month as number,
-      birthday.date as number
-    )
-
-    if (!isValidDate(date)) return
-
-    this.$emit('input', date.toISOString())
-  }
-
-  /**
-   * Applies rules ensuring the user doesn't create a birthday
-   * with an invalid number of days in the month.
-   */
-  get dayRules() {
-    if (
-      typeof this.birthday.month !== 'number' ||
-      typeof this.birthday.year !== 'number'
-    ) {
-      return {
-        required: true,
-        min_value: 1,
+      if (dirty.month && dirty.date && dirty.year) {
+        emit('blur')
       }
     }
 
-    return {
-      required: true,
-      min_value: 1,
-      max_value: this.daysInMonth(this.birthday.month, this.birthday.year),
+    watch(
+      () => state,
+      (birthday: typeof state) => {
+        if (
+          typeof birthday.year !== 'number' ||
+          typeof birthday.month !== 'number' ||
+          typeof birthday.date !== 'number'
+        )
+          return
+
+        const date = new Date(
+          birthday.year as number,
+          birthday.month as number,
+          birthday.date as number
+        )
+
+        if (!isValidDate(date)) return
+
+        emit('input', date.toISOString())
+      },
+      { deep: true }
+    )
+
+    const daysInMonth = (month: number, year: number) => {
+      return new Date(year, month + 1, 0).getDate()
     }
-  }
 
-  daysInMonth(month: number, year: number) {
-    return new Date(year, month + 1, 0).getDate()
-  }
+    /**
+     * Applies rules ensuring the user doesn't create a birthday
+     * with an invalid number of days in the month.
+     */
+    const dayRules = computed(() => {
+      if (typeof state.month !== 'number' || typeof state.year !== 'number') {
+        return {
+          required: true,
+          min_value: 1,
+        }
+      }
 
-  mounted() {
-    if (typeof this.value !== 'string') return
+      return {
+        required: true,
+        min_value: 1,
+        max_value: daysInMonth(state.month, state.year),
+      }
+    })
 
-    const date = new Date(this.value)
+    const monthSelections = computed(() =>
+      months.map((m, i) => ({ text: m, value: i }))
+    )
 
-    if (!isValidDate(date)) return
+    onMounted(() => {
+      if (typeof props.value !== 'string') return
 
-    this.birthday.year = date.getFullYear()
-    this.birthday.month = date.getMonth()
-    this.birthday.date = date.getDate()
-  }
-}
+      const date = new Date(props.value)
+
+      if (!isValidDate(date)) return
+
+      state.year = date.getFullYear()
+      state.month = date.getMonth()
+      state.date = date.getDate()
+    })
+
+    return {
+      ...toRefs(state),
+      onBlur,
+      months: monthSelections,
+      dayRules,
+    }
+  },
+})
 </script>

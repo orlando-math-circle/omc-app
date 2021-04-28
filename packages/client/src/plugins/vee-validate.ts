@@ -8,9 +8,9 @@ import { email, min_value, max_value } from 'vee-validate/dist/rules'
  * Reduces the aggressiveness of vee-validate to not throw errors while the user
  * is still filling out the field being validated.
  *
- * @see https://logaretm.github.io/vee-validate/guide/interaction-and-ux.html#interaction-modes
+ * @see https://vee-validate.logaretm.com/v3/guide/interaction-and-ux.html#interaction-modes
  */
-setInteractionMode('lazy')
+setInteractionMode('eager')
 
 extend('min_value', min_value)
 extend('max_value', max_value)
@@ -51,9 +51,14 @@ extend('min_age', {
   validate: (value, { min }: any) => {
     const diff = differenceInYears(new Date(), new Date(value))
 
-    return diff >= min
+    if (diff < 0) {
+      return 'Please enter a valid date of birth.'
+    } else if (diff < min) {
+      return 'Please have a parent or guardian register for you.'
+    }
+
+    return true
   },
-  message: 'Please have a parent or guardian register in your stead.',
 })
 
 extend('max_age', {
@@ -61,9 +66,12 @@ extend('max_age', {
   validate: (value, { max }: any) => {
     const diff = differenceInYears(new Date(), new Date(value))
 
-    return diff < max
+    if (diff < 0 || diff > max) {
+      return 'Please enter a valid date of birth.'
+    }
+
+    return true
   },
-  message: 'Please select a valid birthday.',
 })
 
 extend('required', {

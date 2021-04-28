@@ -10,6 +10,7 @@ import { StateError } from '../types/state-error.interface'
 import { StateStatus } from '../types/state.interface'
 import { COOKIE_COMPLETE, COOKIE_JWT } from '../utils/constants'
 import { parseAxiosError } from '../utils/utilities'
+import { DTO } from '../types/date-to-string.interface'
 
 interface LoginDto {
   email: string
@@ -40,6 +41,12 @@ export const getters = getterTree(state, {
   isValidated: (state) => state.user?.emailVerified,
   avatar: (state) =>
     state.user?.avatar || '../images/default_avatars/default.svg',
+  roleTitle: (state) =>
+    state.user?.roles.includes(Roles.ADMIN)
+      ? 'Administrator'
+      : state.user?.roles.includes(Roles.VOLUNTEER)
+      ? 'Volunteer'
+      : null,
 })
 
 export const mutations = mutationTree(state, {
@@ -155,7 +162,7 @@ export const actions = actionTree(
     },
     async register(
       { commit },
-      createAccountDto: CreateAccountDto
+      createAccountDto: DTO<CreateAccountDto>
     ): Promise<void> {
       try {
         commit('setStatus', StateStatus.BUSY)

@@ -11,6 +11,7 @@ module.exports = {
   ],
   rules: {
     'no-console': 'off',
+    camelcase: 'off',
     quotes: [2, 'single', { avoidEscape: true }],
     'vue/custom-event-name-casing': [
       'error',

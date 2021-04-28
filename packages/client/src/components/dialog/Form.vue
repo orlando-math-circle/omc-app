@@ -4,7 +4,6 @@
     :fullscreen="expands ? $vuetify.breakpoint.mobile : false"
     :max-width="width"
     persistent
-    @input="onInput"
     @click:outside="handler"
   >
     <template #activator="{ on, attrs }">
@@ -29,7 +28,7 @@
 
       <slot name="image"></slot>
 
-      <v-form-validated v-slot="data" @submit:form="submit">
+      <v-form-validated ref="form" v-slot="data" @submit:form="submit">
         <slot v-bind="{ ...data, closing }"></slot>
       </v-form-validated>
     </v-card>
@@ -37,49 +36,83 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
+import {
+  defineComponent,
+  reactive,
+  ref,
+  toRefs,
+  watch,
+} from '@nuxtjs/composition-api'
+import VFormValidated from '~/components/inputs/VFormValidated.vue'
 
-@Component
-export default class DialogForm extends Vue {
-  @Prop({ default: 570 }) width?: number
-  @Prop({ default: true }) expands!: boolean
+export default defineComponent({
+  props: {
+    width: {
+      type: Number,
+      default: 570,
+    },
+    expands: {
+      type: Boolean,
+      default: true,
+    },
+    resetValidation: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  setup(props, { emit }) {
+    const form = ref<InstanceType<typeof VFormValidated>>()
+    const state = reactive({
+      dialog: false,
+      closing: false,
+      downInner: false,
+    })
 
-  dialog = false
-  closing = false
-  downInner = false
+    watch(
+      () => state.dialog,
+      () => {
+        if (state.dialog === false && props.resetValidation) {
+          form.value!.reset()
+        }
 
-  onInput(value: boolean) {
-    this.$emit('dialog:state', value)
-  }
+        emit('dialog:state', state.dialog)
+      }
+    )
 
-  close(delay?: number) {
-    if (delay) {
-      this.closing = true
-      setTimeout(() => (this.dialog = false), delay)
-      return
+    const close = (delay: number = 0) => {
+      if (!delay) {
+        return emit('dialog:state', (state.dialog = false))
+      }
+
+      state.closing = true
+      setTimeout(() => emit('dialog:state', (state.dialog = false)), delay)
     }
 
-    this.dialog = false
-  }
+    const submit = () => emit('submit:form')
 
-  submit() {
-    this.$emit('submit:form')
-  }
+    watch(
+      () => state.dialog,
+      () => (state.downInner = false)
+    )
 
-  @Watch('dialog')
-  watchDialog() {
-    this.downInner = false
-  }
+    const setMouseDown = () => (state.downInner = true)
 
-  setMouseDown() {
-    this.downInner = true
-  }
+    const handler = () => {
+      if (state.downInner === false) {
+        state.dialog = false
+      }
 
-  handler() {
-    if (this.downInner === false) {
-      this.dialog = false
+      state.downInner = true
     }
-    this.downInner = false
-  }
-}
+
+    return {
+      ...toRefs(state),
+      form,
+      close,
+      submit,
+      setMouseDown,
+      handler,
+    }
+  },
+})
 </script>

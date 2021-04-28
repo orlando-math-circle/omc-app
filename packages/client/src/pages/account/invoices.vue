@@ -55,30 +55,32 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { formatDate } from '../../utils/utilities'
+import {
+  computed,
+  defineComponent,
+  useContext,
+  useFetch,
+} from '@nuxtjs/composition-api'
+import { formatDate } from '~/utils/utilities'
 
-@Component({
-  head: {
-    title: 'Account Invoices',
-  },
+export default defineComponent({
   transition(_to, from) {
     if (!from) return 'slide-left'
 
     return from.name === 'account-settings' ? 'slide-right' : 'slide-left'
   },
+  setup() {
+    const { $accessor: store } = useContext()
+    const invoices = computed(() => store.invoices.invoices)
+
+    useFetch(async () => {
+      await store.invoices.findByAccount()
+    })
+
+    return { invoices, format: formatDate }
+  },
+  head: {
+    title: 'Account Invoices',
+  },
 })
-export default class AccountInvoicesPage extends Vue {
-  get invoices() {
-    return this.$accessor.invoices.invoices
-  }
-
-  format(date: Date | string, formatter: string) {
-    return formatDate(date, formatter)
-  }
-
-  async fetch() {
-    await this.$accessor.invoices.findByAccount()
-  }
-}
 </script>

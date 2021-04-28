@@ -7,17 +7,25 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, ref } from '@nuxtjs/composition-api'
 import { ValidationObserver } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationObserver,
   },
+  setup(_, { emit }) {
+    const observer = ref<InstanceType<typeof ValidationObserver>>()
+
+    const submit = () => {
+      emit('submit:form')
+    }
+
+    const reset = () => {
+      observer.value!.reset()
+    }
+
+    return { submit, reset, observer }
+  },
 })
-export default class VFormValidated extends Vue {
-  submit() {
-    this.$emit('submit:form')
-  }
-}
 </script>
