@@ -22,10 +22,7 @@ const plugin: Plugin = ({ $axios, app, redirect }) => {
   })
 
   $axios.onError((error) => {
-    if (!error.config) {
-      console.error(error)
-      return
-    }
+    if (!error.config) return
 
     // Issue with the current access token.
     if (error.response?.status === 401) {
@@ -34,12 +31,6 @@ const plugin: Plugin = ({ $axios, app, redirect }) => {
         redirect('/')
       }
     }
-
-    console.error(
-      `${error.config.method}: ${
-        error.config.url
-      } - ${app.$accessor.auth.token?.substr(-5)} - ${error.message}`
-    )
   })
 }
 
