@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { set, sub } from 'date-fns';
 import { isNumber } from 'lodash';
 import request from 'supertest';
-import { CreateAccountDto } from '../../src/account/dtos/create-account.dto';
+import { RegisterAccountDto } from '../../src/account/dto/register.dto';
 import { Roles } from '../../src/app.roles';
 import { Gender } from '../../src/user/enums/gender.enum';
 import { Grade } from '../../src/user/enums/grade.enum';
@@ -40,7 +40,7 @@ export class UserFixtures {
       milliseconds: 0,
     });
 
-    const dto: CreateAccountDto = {
+    const dto: RegisterAccountDto = {
       first,
       last,
       email: email || `${first}@${last}.com`.toLowerCase(),
