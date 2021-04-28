@@ -10,6 +10,6 @@ export class EmailSandbox {
    * @param args Any
    */
   public async send(...args: any) {
-    this.logger.log(args);
+    this.logger.log(JSON.stringify(args, null, 2));
   }
 }
