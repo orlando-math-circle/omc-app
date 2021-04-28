@@ -44,12 +44,16 @@ export class UserService {
 
   /**
    * Creates a new user for the given account.
+   * TODO: Add logic for validating these emails, age checks, ...etc.
    *
    * @param account Account to add the user to.
    * @param createUserDto Data necessary for creating a new user.
    */
   async create(account: Account, createUserDto: CreateUserDto) {
-    // TODO: Add logic for validating these emails, age checks, ...etc.
+    if (createUserDto.industry) {
+      createUserDto.industry = classToPlain(createUserDto.industry);
+    }
+
     const user = this.userRepository.create(createUserDto);
 
     account.users.add(user);
