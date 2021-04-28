@@ -156,85 +156,120 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { FileAttachment } from '@server/file-attachment/file-attachment.entity'
 import { User } from '@server/user/user.entity'
 import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  ref,
+  useContext,
+} from '@nuxtjs/composition-api'
 
-@Component({
+export default defineComponent({
+  transition: 'slide-right',
+  setup() {
+    const { $accessor: store } = useContext()
+
+    const file = ref<File>()
+    const selectedUser = ref<User>()
+    const work = reactive({
+      project: null as number | null,
+      hours: 0,
+      status: VolunteerWorkStatus.PENDING,
+      notes: '',
+    })
+
+    // const usersWithoutForms = computed(() => ($accessor.auth.user!.account!.users as unknown as User[]).filter(
+    //         (u) => !this.attachments.find((a) => a.user.id === u.id)
+
+    //     })
+
+    return {
+      file,
+      work,
+      selectedUser,
+      isVolunteer: computed(() => store.auth.isVolunteer),
+    }
+  },
   head: {
     title: 'Account Forms',
   },
-  transition: 'slide-right',
 })
-export default class AccountFormsPage extends Vue {
-  file: null | File = null
-  selectedUser: null | User = null
+// @Component({
+//   head: {
+//     title: 'Account Forms',
+//   },
+//   transition: 'slide-right',
+// })
+// export class AccountFormsPage extends Vue {
+//   file: null | File = null
+//   selectedUser: null | User = null
 
-  work = {
-    project: null as number | null,
-    hours: 0,
-    status: VolunteerWorkStatus.PENDING,
-    notes: '',
-  }
+//   work = {
+//     project: null as number | null,
+//     hours: 0,
+//     status: VolunteerWorkStatus.PENDING,
+//     notes: '',
+//   }
 
-  get user() {
-    return this.$accessor.auth.user!
-  }
+//   get user() {
+//     return this.$accessor.auth.user!
+//   }
 
-  get isVolunteer() {
-    return this.$accessor.auth.isVolunteer
-  }
+//   get isVolunteer() {
+//     return this.$accessor.auth.isVolunteer
+//   }
 
-  get accountUsers() {
-    return (this.$accessor.auth.account!.users as unknown) as User[]
-  }
+//   get accountUsers() {
+//     return (this.$accessor.auth.account!.users as unknown) as User[]
+//   }
 
-  get attachments() {
-    return this.$accessor.files.attachments
-  }
+//   get attachments() {
+//     return this.$accessor.files.attachments
+//   }
 
-  get usersWithoutForms() {
-    return this.accountUsers.filter(
-      (u) => !this.attachments.find((a) => a.user.id === u.id)
-    )
-  }
+//   get usersWithoutForms() {
+//     return this.accountUsers.filter(
+//       (u) => !this.attachments.find((a) => a.user.id === u.id)
+//     )
+//   }
 
-  async onClickCancel(attachment: FileAttachment) {
-    await this.$accessor.files.deleteAttachment(attachment.id)
-  }
+//   async onClickCancel(attachment: FileAttachment) {
+//     await this.$accessor.files.deleteAttachment(attachment.id)
+//   }
 
-  async submitWork() {
-    await this.$accessor.volunteers.createWork({
-      ...this.work,
-      user: this.user.id,
-    } as any)
+//   async submitWork() {
+//     await this.$accessor.volunteers.createWork({
+//       ...this.work,
+//       user: this.user.id,
+//     } as any)
 
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack('Error while creating new work :(')
-    }
+//     if (this.$accessor.volunteers.isErrored) {
+//       return this.$snack('Error while creating new work :(')
+//     }
 
-    this.work.project = null
-    this.work.hours = 0
-    this.work.notes = ''
+//     this.work.project = null
+//     this.work.hours = 0
+//     this.work.notes = ''
 
-    this.$snack('Work request submitted')
-  }
+//     this.$snack('Work request submitted')
+//   }
 
-  async upload() {
-    await this.$accessor.files.uploadAttachment({
-      file: this.file as File,
-      field: 'REDUCED_LUNCH_FIELD',
-    })
+//   async upload() {
+//     await this.$accessor.files.uploadAttachment({
+//       file: this.file as File,
+//       field: 'REDUCED_LUNCH_FIELD',
+//     })
 
-    if (this.$accessor.files.isErrored) {
-      this.$accessor.snackbar.show({
-        text: this.$accessor.files.error!.message,
-        timeout: 10000,
-      })
-    } else {
-      this.selectedUser = null
-    }
-  }
-}
+//     if (this.$accessor.files.isErrored) {
+//       this.$accessor.snackbar.show({
+//         text: this.$accessor.files.error!.message,
+//         timeout: 10000,
+//       })
+//     } else {
+//       this.selectedUser = null
+//     }
+//   }
+// }
 </script>

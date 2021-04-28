@@ -11,149 +11,145 @@
         <v-col>
           <h2>Registration</h2>
           <span class="subheader">Welcome to Orlando Math Circle</span>
-          <span class="d-flex subheader"
-            >Already registered?
-            <nuxt-link class="pl-2" to="/login">Log in</nuxt-link></span
-          >
+          <span class="d-flex subheader">
+            Already registered?
+            <nuxt-link class="pl-2" to="/login">Log in</nuxt-link>
+          </span>
 
           <alert-error v-if="error" :error="error" class="mt-3"> </alert-error>
 
           <v-form-validated @submit:form="onSubmit">
-            <v-row>
+            <v-row dense class="mb-4">
               <v-col>
-                <v-text-field-validated
-                  v-model="dto.first"
+                <VTextFieldValidated
+                  v-model="first"
                   label="First Name"
                   rules="required"
-                  hide-details="auto"
                   outlined
-                ></v-text-field-validated>
+                />
               </v-col>
 
               <v-col>
-                <v-text-field-validated
-                  v-model="dto.last"
+                <VTextFieldValidated
+                  v-model="last"
                   label="Last Name"
                   rules="required"
-                  hide-details="auto"
+                  outlined
+                />
+              </v-col>
+            </v-row>
+
+            <BirthdayPickerValidated v-model="dob" />
+
+            <v-row>
+              <v-col>
+                <VSelectValidated
+                  v-model="gender"
+                  :items="genders"
+                  rules="required"
+                  label="Gender"
+                  outlined
+                >
+                  <template #append>
+                    <v-tooltip left>
+                      <template #activator="{ on, attrs }">
+                        <v-icon v-bind="attrs" v-on="on">mdi-help</v-icon>
+                      </template>
+
+                      <span
+                        >We only collect this information for our focused
+                        events.</span
+                      >
+                    </v-tooltip>
+                  </template>
+                </VSelectValidated>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col>
+                <VTextFieldValidated
+                  v-model="email"
+                  name="Email"
+                  rules="required|email"
+                  autocomplete="email"
+                  label="Email"
                   outlined
                 />
               </v-col>
             </v-row>
 
             <v-row>
-              <v-col class="py-0">
-                <validation-provider
-                  ref="birthday"
-                  v-slot="{ errors }"
-                  :rules="{
-                    min_age: { min: 18 },
-                    max_age: { max: 100 },
-                  }"
-                  name="Birthday"
-                >
-                  <birthday-picker
-                    v-model="dto.dob"
-                    :error="errors.length !== 0"
-                    outlined
-                  />
-
-                  <div class="v-text-field__details">
-                    <div class="v-messages error--text">
-                      <div class="v-messages__wrapper">
-                        <div v-if="errors.length" class="v-messages__message">
-                          {{ errors[0] }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </validation-provider>
+              <v-col>
+                <VTextFieldValidated
+                  v-model="password"
+                  label="Password"
+                  type="password"
+                  rules="required"
+                  autocomplete="new-password"
+                  vid="password"
+                  outlined
+                />
               </v-col>
             </v-row>
 
-            <v-select-validated
-              v-model="dto.gender"
-              :items="genders"
-              rules="required"
-              label="Gender"
-              outlined
-            >
-              <template #append-outer>
-                <v-tooltip left>
-                  <template #activator="{ on, attrs }">
-                    <v-icon v-bind="attrs" v-on="on">mdi-help</v-icon>
-                  </template>
+            <v-row>
+              <v-col>
+                <VTextFieldValidated
+                  v-model="passwordConfirm"
+                  label="Confirm Password"
+                  type="password"
+                  autocomplete="new-password"
+                  rules="required|password:@password"
+                  outlined
+                />
+              </v-col>
+            </v-row>
 
-                  <span
-                    >We only collect this information for our focused
-                    events.</span
-                  >
-                </v-tooltip>
-              </template>
-            </v-select-validated>
-
-            <v-text-field-validated
-              v-model="dto.email"
-              name="Email"
-              rules="required|email"
-              autocomplete="email"
-              label="Email"
-              outlined
-            />
-
-            <v-text-field-validated
-              v-model="dto.password"
-              label="Password"
-              type="password"
-              rules="required"
-              autocomplete="new-password"
-              vid="password"
-              outlined
-            >
-            </v-text-field-validated>
-
-            <v-text-field-validated
-              v-model="passwordConfirm"
-              label="Confirm Password"
-              type="password"
-              autocomplete="new-password"
-              rules="required|password:@password"
-              outlined
-            >
-            </v-text-field-validated>
-
-            <v-checkbox-validated
-              v-model="industry"
-              label="Are you an industry professional?"
-              hide-details
-            ></v-checkbox-validated>
+            <v-row>
+              <v-col>
+                <VCheckboxValidated
+                  v-model="isIndustry"
+                  label="Are you an industry professional?"
+                />
+              </v-col>
+            </v-row>
 
             <v-expand-transition>
-              <div v-show="industry" class="mt-3">
-                <v-text-field-validated
-                  v-model="professional.profession"
-                  label="Profession (Optional)"
-                  outlined
-                ></v-text-field-validated>
-
-                <v-text-field-validated
-                  v-model="professional.jobTitle"
-                  label="Job Title (Optional)"
-                  outlined
-                ></v-text-field-validated>
-
-                <v-text-field-validated
-                  v-model="professional.company"
-                  label="Company or Workplace (Optional)"
-                  outlined
-                ></v-text-field-validated>
+              <div v-show="isIndustry" class="mt-3">
+                <v-row>
+                  <v-col>
+                    <VTextFieldValidated
+                      v-model="industry.profession"
+                      label="Profession (Optional)"
+                      outlined
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <VTextFieldValidated
+                      v-model="industry.jobTitle"
+                      label="Job Title (Optional)"
+                      outlined
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <VTextFieldValidated
+                      v-model="industry.company"
+                      label="Company or Workplace (Optional)"
+                      outlined
+                    />
+                  </v-col>
+                </v-row>
               </div>
             </v-expand-transition>
 
             <v-checkbox
-              v-model="notifyDefault"
+              v-model="isNotify"
               label="Receive emails reminding me of registered events"
-              hide-details
             ></v-checkbox>
 
             <v-btn block class="my-4" type="submit" color="secondary">
@@ -177,69 +173,80 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
-import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import {
+  computed,
+  defineComponent,
+  onBeforeMount,
+  reactive,
+  toRefs,
+  useContext,
+  useRouter,
+} from '@nuxtjs/composition-api'
 import { Gender } from '@server/user/enums/gender.enum'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
-import { CreateAccountDto } from '@server/account/dtos/create-account.dto'
 import { StateStatus } from '../types/state.interface'
 import { genders } from '../utils/constants'
 
-@Component({
+export default defineComponent({
   layout: 'landing',
-  head: {
-    title: 'Register',
+  setup() {
+    const { $accessor: store } = useContext()
+    const router = useRouter()
+
+    const state = reactive({
+      password: '',
+      passwordConfirm: '',
+      first: '',
+      last: '',
+      gender: null as Gender | null,
+      dob: '',
+      email: '',
+      isIndustry: false,
+      isNotify: true,
+      industry: {
+        profession: '',
+        company: '',
+        jobTitle: '',
+      },
+    })
+
+    const error = computed(() => store.auth.isErrored && store.auth.error!)
+
+    const onSubmit = async () => {
+      await store.auth.register({
+        first: state.first,
+        last: state.last,
+        gender: state.gender!,
+        email: state.email,
+        password: state.password,
+        dob: state.dob,
+        industry: state.isIndustry ? { ...state.industry } : undefined,
+        reminders: state.isNotify ? [ReminderFreq.HOUR] : undefined,
+      })
+
+      if (!error.value) {
+        router.push('/home')
+      } else {
+        window.scroll({ top: 0, behavior: 'smooth' })
+      }
+    }
+
+    onBeforeMount(() => {
+      // Clear residual errors from login.
+      store.auth.setStatus(StateStatus.WAITING)
+    })
+
+    return {
+      ...toRefs(state),
+      error,
+      genders,
+      onSubmit,
+    }
   },
-  components: {
-    ValidationObserver,
-    ValidationProvider,
+  head: {
+    title: 'Registration',
   },
 })
-export default class RegisterPage extends Vue {
-  genders = genders
-  passwordConfirm = ''
-  notifyDefault = true
-
-  industry = false
-  professional = {
-    profession: '' as string | null,
-    jobTitle: '' as string | null,
-    company: '' as string | null,
-  }
-
-  dto = {
-    first: '',
-    last: '',
-    password: '',
-    gender: null as Gender | null,
-    dob: null as Date | null,
-    email: '',
-  }
-
-  get error() {
-    return this.$accessor.auth.isErrored && this.$accessor.auth.error!
-  }
-
-  beforeMount() {
-    // Clear residual errors from login.
-    this.$accessor.auth.setStatus(StateStatus.WAITING)
-  }
-
-  async onSubmit() {
-    await this.$accessor.auth.register(
-      Object.assign(
-        {},
-        this.dto,
-        this.notifyDefault && { reminders: [ReminderFreq.HOUR] },
-        this.industry && { industry: this.professional }
-      ) as CreateAccountDto
-    )
-
-    if (this.error) return
-
-    this.$router.push('/home')
-  }
-}
 </script>
 
 <style lang="scss" scoped>

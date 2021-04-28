@@ -8,6 +8,7 @@
     <v-select
       v-model="data"
       :error-messages="errors"
+      :hide-details="$attrs.hideDetails || 'auto'"
       v-bind="$attrs"
       v-on="$listeners"
     >

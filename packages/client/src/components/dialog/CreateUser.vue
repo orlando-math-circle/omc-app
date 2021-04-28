@@ -2,7 +2,7 @@
   <dialog-form
     ref="dialog"
     @submit:form="onSubmit"
-    @dialog:state="onDialogState"
+    @dialog:state="onDialogToggle"
   >
     <template #title>Create User</template>
 
@@ -11,139 +11,155 @@
     </template>
 
     <v-card-text>
-      <v-row>
+      <v-row dense class="mb-4">
         <v-col>
-          <v-text-field-validated
-            v-model="dto.first"
+          <VTextFieldValidated
+            v-model="first"
             label="First Name"
             rules="required"
             hide-details="auto"
             required
             outlined
-          ></v-text-field-validated>
+          />
         </v-col>
 
         <v-col>
-          <v-text-field-validated
-            v-model="dto.last"
+          <VTextFieldValidated
+            v-model="last"
             label="Last Name"
             rules="required"
             hide-details="auto"
             required
             outlined
-          ></v-text-field-validated>
+          />
         </v-col>
       </v-row>
 
-      <birthday-picker
-        v-model="dto.dob"
-        class="mb-5"
-        outlined
-      ></birthday-picker>
+      <BirthdayPickerValidated v-model="dob" :min-age="0" :max-age="100" />
 
-      <v-text-field-validated
-        v-model="dto.email"
-        label="Email (Optional)"
-        rules="email"
-        type="email"
-        outlined
-      ></v-text-field-validated>
+      <v-row>
+        <v-col>
+          <VTextFieldValidated
+            v-model="email"
+            label="Email (Optional)"
+            rules="email"
+            type="email"
+            name="Email"
+            hide-details="auto"
+            outlined
+          />
+        </v-col>
+      </v-row>
 
       <v-expand-transition>
-        <v-select-validated
-          v-show="dto.email && dto.email.length"
-          v-model="dto.reminders"
-          label="Event Email Reminders (Optional)"
-          :items="reminders"
-          multiple
-          clearable
-          outlined
-        ></v-select-validated>
+        <v-row v-show="email && email.length">
+          <v-col>
+            <VSelectValidated
+              v-model="reminderFreq"
+              label="Event Email Reminders (Optional)"
+              :items="reminders"
+              hide-details="auto"
+              chips
+              multiple
+              clearable
+              outlined
+            />
+          </v-col>
+        </v-row>
       </v-expand-transition>
 
-      <v-select-validated
-        v-model="dto.gender"
-        label="Gender"
-        :items="genders"
-        outlined
-      ></v-select-validated>
+      <v-row>
+        <v-col>
+          <VSelectValidated
+            v-model="gender"
+            label="Gender"
+            :items="genders"
+            hide-details="auto"
+            outlined
+          />
+        </v-col>
+      </v-row>
 
       <v-checkbox
-        v-show="!occupation.professional"
-        v-model="occupation.student"
-        :persistent-hint="!occupation.student"
-        hint="Only students can be registered to events"
+        v-show="!industry.professional"
+        v-model="industry.student"
+        persistent-hint
+        hint="Only students can register for events."
         label="Are they a student?"
       ></v-checkbox>
 
       <v-expand-transition>
-        <div v-show="occupation.student">
-          <v-row>
+        <div v-show="industry.student">
+          <v-row class="mt-3">
             <v-col>
-              <v-select-validated
-                v-model="occupation.education"
+              <VSelectValidated
+                v-model="industry.education"
                 label="Education Level"
                 :items="Object.keys(education)"
-                :rules="{ required: occupation.student }"
+                :rules="{ required: industry.student }"
                 outlined
-              ></v-select-validated>
+              ></VSelectValidated>
             </v-col>
 
             <v-col>
-              <v-select-validated
-                v-model="dto.grade"
+              <VSelectValidated
+                v-model="grade"
                 :label="
-                  occupation.education === 'College'
+                  industry.education === 'College'
                     ? 'Level of Study'
                     : 'Grade Level'
                 "
-                :items="education[occupation.education]"
-                :rules="{ required: occupation.student }"
+                :items="education[industry.education]"
+                :rules="{ required: industry.student }"
                 outlined
-              ></v-select-validated>
+              ></VSelectValidated>
             </v-col>
           </v-row>
 
-          <v-text-field-validated
-            v-model="occupation.institution"
+          <VTextFieldValidated
+            v-model="industry.institution"
             label="School Name"
             hint="Enter the name of their school or institution."
-            :rules="{ required: occupation.student }"
+            :rules="{ required: industry.student }"
             outlined
-          ></v-text-field-validated>
+          />
         </div>
       </v-expand-transition>
 
       <v-checkbox
-        v-show="!occupation.student"
-        v-model="occupation.professional"
+        v-show="!industry.student"
+        v-model="industry.professional"
         label="Are they an industry professional?"
-      ></v-checkbox>
+      />
 
       <v-expand-transition>
-        <div v-show="occupation.professional">
-          <v-text-field-validated
+        <div v-show="industry.professional">
+          <VTextFieldValidated
+            v-model="industry.profession"
             label="Profession (Optional)"
             outlined
-          ></v-text-field-validated>
+          />
 
-          <v-text-field-validated
+          <VTextFieldValidated
+            v-model="industry.jobTitle"
             label="Job Title (Optional)"
             outlined
-          ></v-text-field-validated>
+          />
 
-          <v-text-field-validated
+          <VTextFieldValidated
+            v-model="industry.company"
             label="Company or Workplace (Optional)"
             outlined
-          ></v-text-field-validated>
+          />
         </div>
       </v-expand-transition>
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-btn text @click="dialog && dialog.close()">Cancel</v-btn>
 
-      <v-btn text @click="dialog.close()">Cancel</v-btn>
+      <v-spacer />
+
       <v-btn type="submit" :loading="isLoading" color="primary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
@@ -157,95 +173,108 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref, Vue } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  ref,
+  toRefs,
+  useContext,
+} from '@nuxtjs/composition-api'
 import { CreateUserDto } from '@server/user/dtos/create-user.dto'
+import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
 import { Gender } from '@server/user/enums/gender.enum'
 import { Grade } from '@server/user/enums/grade.enum'
-import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
-import { education, genders, reminders } from '../../utils/constants'
-import { grades } from '../../utils/events'
-import DialogForm from './Form.vue'
+import { education, genders, reminders } from '~/utils/constants'
+import useStateReset from '~/composables/useStateReset'
+import { grades } from '~/utils/events'
+import DialogForm from '~/components/dialog/Form.vue'
 
-@Component
-export default class DialogUserCreate extends Vue {
-  @Ref('dialog') readonly dialog!: DialogForm
+export default defineComponent({
+  props: {
+    admin: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup() {
+    const { $accessor: store } = useContext()
+    const dialog = ref<InstanceType<typeof DialogForm>>()
 
-  success = false
-  genders = genders
-  grades = grades
-  education = education
-  reminders = reminders
-  reset = {}
-
-  dto = {
-    first: '',
-    last: '',
-    dob: '',
-    email: '' as string | null,
-    gender: Gender.MALE,
-    grade: null as Grade | null,
-    reminders: [] as ReminderFreq[],
-  }
-
-  occupation = {
-    student: false,
-    professional: false,
-    education: 'Middle School' as keyof this['education'],
-    educationLevel: 0,
-    institution: '',
-  }
-
-  get isLoading() {
-    return this.$accessor.users.isLoading || this.$accessor.auth.isLoading
-  }
-
-  /**
-   * Copy the empty template so we can erase data
-   * after creating a user.
-   */
-  beforeMount() {
-    this.reset = { ...this.dto }
-  }
-
-  /**
-   * When the dialog closes we should reset.
-   */
-  onDialogState(value: boolean) {
-    if (value === false) {
-      this.success = false
-      this.dto = { ...this.reset } as this['dto']
-    }
-  }
-
-  /**
-   * Create the user.
-   */
-  async onSubmit() {
-    const dto: CreateUserDto = Object.assign(
-      {
-        first: this.dto.first,
-        last: this.dto.last,
-        dob: this.dto.dob,
-        gender: this.dto.gender,
-        reminders: this.dto.reminders,
+    const { state, reset } = useStateReset({
+      success: false,
+      first: '',
+      last: '',
+      dob: '',
+      email: '' as string | null,
+      gender: Gender.MALE,
+      grade: null as Grade | null,
+      reminderFreq: [ReminderFreq.HOUR],
+      industry: {
+        student: false,
+        professional: false,
+        education: 'Middle School' as keyof typeof education,
+        educationLevel: 0,
+        institution: '', // NYI
+        profession: '',
+        jobTitle: '',
+        company: '',
       },
-      this.dto.email?.length && { email: this.dto.email },
-      this.dto.email?.length &&
-        this.dto.reminders.length && { reminders: this.dto.reminders },
-      this.dto.grade && { grade: this.dto.grade }
+    })
+
+    const isLoading = computed(
+      () => store.users.isLoading || store.auth.isLoading
     )
 
-    await this.$accessor.users.create(dto)
-    await this.$accessor.auth.getAccount()
-
-    if (this.$accessor.users.isErrored) {
-      console.error(this.$accessor.users.error)
-      return
+    const onDialogToggle = (value: boolean) => {
+      if (value === false) reset()
     }
 
-    this.success = true
-    this.$accessor.snackbar.show({ text: 'User successfully created' })
-    this.dialog.close(500)
-  }
-}
+    const onSubmit = async () => {
+      const dto: CreateUserDto = Object.assign(
+        {
+          first: state.first,
+          last: state.last,
+          dob: state.dob,
+          gender: state.gender,
+        },
+        state.email?.length && { email: state.email },
+        state.email?.length &&
+          state.reminderFreq.length && { reminders: state.reminderFreq },
+        state.grade && { grade: state.grade },
+        state.industry.student && { grade: state.grade },
+        state.industry.professional && {
+          industry: {
+            profession: state.industry.profession,
+            company: state.industry.company,
+            jobTitle: state.industry.jobTitle,
+          },
+        }
+      )
+
+      await store.users.create(dto)
+      await store.auth.getAccount()
+
+      if (store.users.isErrored) {
+        console.error(store.users.error)
+        return
+      }
+
+      state.success = true
+      store.snackbar.show({ text: 'User successfully created' })
+      dialog.value!.close(500)
+    }
+
+    return {
+      ...toRefs(state),
+      dialog,
+      genders,
+      grades,
+      education,
+      reminders,
+      isLoading,
+      onDialogToggle,
+      onSubmit,
+    }
+  },
+})
 </script>

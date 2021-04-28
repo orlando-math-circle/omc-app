@@ -3,7 +3,13 @@
     <admin-header title="Users" :breadcrumbs="breadcrumbs">
       <v-row>
         <v-col cols="auto" align-self="center">
-          <v-btn color="primary">Create User</v-btn>
+          <dialog-create-user>
+            <template #activator="{ on, attrs }">
+              <v-btn color="primary" v-bind="attrs" v-on="on">
+                Create User
+              </v-btn>
+            </template>
+          </dialog-create-user>
         </v-col>
 
         <v-col cols="auto" align-self="center">

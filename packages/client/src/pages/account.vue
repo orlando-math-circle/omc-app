@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row>
+    <v-row class="mb-2">
       <v-col>
         <v-card class="avatar--offset">
           <avatar-picker :url="$avatar(user)" />
@@ -33,48 +33,46 @@
       </v-col>
     </v-row>
 
-    <nuxt-child></nuxt-child>
+    <nuxt-child :user="user" :account="account" />
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
-import { Roles } from '@server/app.roles'
+import {
+  defineComponent,
+  computed,
+  useFetch,
+  useContext,
+} from '@nuxtjs/composition-api'
 
-@Component({
+export default defineComponent({
+  setup() {
+    const { $accessor: store } = useContext()
+
+    useFetch(async () => {
+      await Promise.all([
+        store.auth.getAccount(),
+        store.files.findMyAttachments('REDUCED_LUNCH_FIELD'),
+      ])
+    })
+
+    const user = computed(() => store.auth.user!)
+    const account = computed(() => store.auth.account!)
+    const role = computed(() => store.auth.roleTitle)
+
+    const onUpdateAvatar = () => store.auth.getMe()
+
+    return {
+      user,
+      account,
+      role,
+      onUpdateAvatar,
+    }
+  },
   head: {
     title: 'Account',
   },
-  async fetch({ app: { $accessor } }) {
-    await Promise.all([
-      $accessor.auth.getAccount(),
-      $accessor.files.findMyAttachments('REDUCED_LUNCH_FIELD'),
-    ])
-  },
 })
-export default class AccountPage extends Vue {
-  get user() {
-    return this.$accessor.auth.user!
-  }
-
-  get account() {
-    return this.$accessor.auth.account!
-  }
-
-  get role() {
-    if (!this.user || !this.user.roles) return
-
-    return this.user.roles.includes(Roles.ADMIN)
-      ? 'Administrator'
-      : this.user.roles.includes(Roles.VOLUNTEER)
-      ? 'Volunteer'
-      : undefined
-  }
-
-  onUpdateAvatar() {
-    this.$accessor.auth.getMe()
-  }
-}
 </script>
 
 <style lang="scss">

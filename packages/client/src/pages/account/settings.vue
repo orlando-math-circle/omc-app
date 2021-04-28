@@ -47,7 +47,7 @@
               </template>
 
               <v-list dense nav>
-                <v-list-item @click="$refs.editDialog.open(usr)">
+                <v-list-item @click="editDialog && editDialog.open(usr)">
                   <v-list-item-icon>
                     <v-icon>mdi-account-edit</v-icon>
                   </v-list-item-icon>
@@ -59,7 +59,7 @@
 
                 <v-list-item
                   v-if="primary && primary.id !== usr.id"
-                  @click="$refs.deleteDialog.open(usr)"
+                  @click="deleteDialog && deleteDialog.open(usr)"
                 >
                   <v-list-item-icon>
                     <v-icon>mdi-delete-alert-outline</v-icon>
@@ -101,7 +101,7 @@
           clearable
           hide-details
           outlined
-          @input="onChangeReminders"
+          @input="handleChangeReminders"
         >
         </v-select>
       </v-card-text>
@@ -112,12 +112,12 @@
 
       <v-card-subtitle>Change the password on the account.</v-card-subtitle>
 
-      <v-form-validated @submit:form="onChangePassword">
+      <v-form-validated @submit:form="handleChangePassword">
         <v-card-text>
           <v-row>
             <v-col cols="12">
               <v-text-field-validated
-                v-model="passwords.curPassword"
+                v-model="curPassword"
                 label="Original Password"
                 type="password"
                 rules="required"
@@ -129,7 +129,7 @@
 
             <v-col cols="12">
               <v-text-field-validated
-                v-model="passwords.newPassword"
+                v-model="newPassword"
                 label="New Password"
                 type="password"
                 rules="required"
@@ -142,7 +142,7 @@
 
             <v-col cols="12">
               <v-text-field-validated
-                v-model="passwords.confirm"
+                v-model="confirm"
                 label="Confirm New Password"
                 type="password"
                 autocomplete="new-password"
@@ -174,109 +174,108 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { User } from '@server/user/user.entity'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
-import { grades } from '../../utils/events'
-import { genders, reminders } from '../../utils/constants'
-import DialogUserEdit from '~/components/dialog/UserEdit.vue'
+import {
+  defineComponent,
+  ref,
+  reactive,
+  computed,
+  wrapProperty,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { User } from '@server/user/user.entity'
+import { genders, reminders } from '~/utils/constants'
+import { grades } from '~/utils/events'
 import DialogConfirm from '~/components/dialog/Confirm.vue'
+import DialogUserEdit from '~/components/dialog/UserEdit.vue'
+import { DTOUser } from '~/store/users'
 
-@Component({
+const useAccessor = wrapProperty('$accessor', false)
+const useSnackbar = wrapProperty('$snack', false)
+
+export default defineComponent({
+  transition: 'slide-left',
+  setup() {
+    const store = useAccessor()
+    const snackbar = useSnackbar()
+    const editDialog = ref<DialogUserEdit>()
+    const deleteDialog = ref<DialogConfirm>()
+    const user = computed(() => store.auth.user!)
+    const users = computed(() => store.auth.account?.users || [])
+    const primary = computed(() => store.auth.account?.primaryUser)
+
+    const state = reactive({
+      reminders: [] as ReminderFreq[],
+      confirm: '',
+      newPassword: '',
+      curPassword: '',
+    })
+
+    const handleChangePassword = async () => {
+      await store.auth.changePassword({
+        curPassword: state.curPassword,
+        newPassword: state.newPassword,
+      })
+
+      if (store.auth.isErrored) {
+        return snackbar(
+          store.auth.error?.status === 400
+            ? 'Current password is incorrect'
+            : store.users.error!.message,
+          10000
+        )
+      }
+
+      await store.auth.getMe()
+
+      state.confirm = ''
+      state.curPassword = ''
+      state.newPassword = ''
+
+      snackbar('Successfully Updated')
+    }
+
+    const handleChangeReminders = async (reminders: ReminderFreq[]) => {
+      await store.users.updateOwn({
+        id: user.value.id,
+        updateOwnUserDto: { reminders },
+      })
+
+      if (store.users.isErrored) {
+        snackbar(store.users.error!.message, 10000)
+      } else {
+        await store.auth.getMe()
+
+        snackbar('Successfully Updated')
+      }
+    }
+
+    const onDeleteConfirm = async (user: User) => {
+      await store.users.delete(user.id)
+      await store.auth.getAccount()
+    }
+
+    const gender = (user: DTOUser) =>
+      genders.find((gender) => gender.value === user.gender)?.text
+
+    return {
+      ...toRefs(state),
+      genders,
+      reminders,
+      grades,
+      user,
+      users,
+      primary,
+      handleChangePassword,
+      handleChangeReminders,
+      onDeleteConfirm,
+      gender,
+      editDialog,
+      deleteDialog,
+    }
+  },
   head: {
     title: 'Account Settings',
   },
-  transition: 'slide-left',
 })
-export default class AccountSettingsPage extends Vue {
-  $refs!: {
-    editDialog: InstanceType<typeof DialogUserEdit>
-    deleteDialog: InstanceType<typeof DialogConfirm>
-  }
-
-  grades = grades
-  genders = genders
-  reminders = reminders
-
-  emails = {
-    reminders: [] as ReminderFreq[],
-  }
-
-  passwords = {
-    confirm: '',
-    curPassword: '',
-    newPassword: '',
-  }
-
-  async onChangePassword() {
-    await this.$accessor.auth.changePassword({
-      curPassword: this.passwords.curPassword,
-      newPassword: this.passwords.newPassword,
-    })
-
-    if (this.$accessor.auth.isErrored) {
-      if (this.$accessor.auth.error?.status === 400) {
-        return this.$accessor.snackbar.show({
-          text: 'Current password is incorrect',
-          timeout: 10000,
-        })
-      }
-      return this.$accessor.snackbar.show({
-        text: this.$accessor.users.error!.message,
-        timeout: 10000,
-      })
-    }
-
-    await this.$accessor.auth.getMe()
-
-    this.passwords.confirm = ''
-    this.passwords.curPassword = ''
-    this.passwords.newPassword = ''
-
-    this.$accessor.snackbar.show({
-      text: 'Successfully Updated',
-    })
-  }
-
-  async onChangeReminders(reminders: ReminderFreq[]) {
-    await this.$accessor.users.updateOwn({
-      id: this.user.id,
-      updateOwnUserDto: { reminders },
-    })
-
-    if (this.$accessor.users.isErrored) {
-      this.$accessor.snackbar.show({
-        text: this.$accessor.users.error!.message,
-        timeout: 10000,
-      })
-    } else {
-      await this.$accessor.auth.getMe()
-
-      this.$accessor.snackbar.show({
-        text: 'Successfully Updated',
-      })
-    }
-  }
-
-  get user() {
-    return this.$accessor.auth.user!
-  }
-
-  get users() {
-    return ((this.$accessor.auth.account?.users as unknown) as User[]) || []
-  }
-
-  get primary() {
-    return this.$accessor.auth.account?.primaryUser
-  }
-
-  gender(user: User) {
-    return this.genders.find((gender) => gender.value === user.gender)?.text
-  }
-
-  async onDeleteConfirm(user: User) {
-    await this.$accessor.users.delete(user.id)
-    await this.$accessor.auth.getAccount()
-  }
-}
 </script>

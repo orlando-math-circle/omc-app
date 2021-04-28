@@ -117,15 +117,15 @@
 <script lang="ts">
 import { IndustryDto } from '@server/user/dtos/industry.dto'
 import { Gender } from '@server/user/enums/gender.enum'
-import { User } from '@server/user/user.entity'
 import { Grade } from '@server/user/enums/grade.enum'
 import { Component, Vue } from 'nuxt-property-decorator'
 import { genders } from '../../utils/constants'
 import { grades } from '../../utils/events'
+import { DTOUser } from '../../store/users'
 
 @Component
 export default class DialogUserEdit extends Vue {
-  user = null as User | null
+  user = null as DTOUser | null
   dialog = false
   genders = genders
   grades = grades
@@ -148,13 +148,13 @@ export default class DialogUserEdit extends Vue {
     return this.$accessor.users.isLoading || this.$accessor.auth.isLoading
   }
 
-  public open(user: User) {
+  public open(user: DTOUser) {
     if (!user) return
 
     this.user = user
     this.dto.first = user.first
     this.dto.last = user.last
-    this.dto.dob = (user.dob as unknown) as string
+    this.dto.dob = user.dob
     this.dto.email = user.email
     this.dto.gender = user.gender
     this.dto.grade = user.grade
