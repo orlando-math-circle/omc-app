@@ -8,7 +8,8 @@
     <v-text-field
       v-model="text"
       :error-messages="errors"
-      :hide-details="$attrs.hideDetails || 'auto'"
+      :hide-details="hideDetails"
+      :outlined="outlined"
       v-bind="$attrs"
       v-on="$listeners"
     >
@@ -27,17 +28,47 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, PropSync } from 'nuxt-property-decorator'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
 import { ValidationProvider } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
+  props: {
+    value: {
+      type: [String, Number],
+      required: false,
+      default: null,
+    },
+    rules: {
+      type: [String, Object],
+      default: '',
+    },
+    vid: {
+      type: String,
+      default: undefined,
+    },
+    hideDetails: {
+      type: String,
+      default: 'auto',
+    },
+    outlined: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  setup(props, { emit }) {
+    const text = computed({
+      get() {
+        return props.value
+      },
+      set(value: string) {
+        emit('input', value)
+      },
+    })
+
+    return { text }
+  },
 })
-export default class VTextFieldValidated extends Vue {
-  @PropSync('value') text!: string
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
-}
 </script>

@@ -1,7 +1,7 @@
-import { Plugin } from '@nuxt/types'
+import { defineNuxtPlugin } from '@nuxtjs/composition-api'
 import { initializeAxios } from '../utils/axios'
 
-const plugin: Plugin = ({ $axios, app, redirect }) => {
+export default defineNuxtPlugin(({ $axios, app, redirect }) => {
   /**
    * Attaches $axios to the Nuxt axios instance.
    */
@@ -32,6 +32,4 @@ const plugin: Plugin = ({ $axios, app, redirect }) => {
       }
     }
   })
-}
-
-export default plugin
+})

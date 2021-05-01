@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Plugin } from '@nuxt/types'
+import { defineNuxtPlugin } from '@nuxtjs/composition-api'
 
 declare module 'vue/types/vue' {
   interface Vue {
@@ -24,10 +25,8 @@ declare module 'vuex/types/index' {
   }
 }
 
-const plugin: Plugin = (ctx, inject) => {
+export default defineNuxtPlugin((ctx, inject) => {
   inject('snack', (text: string, timeout?: number, color?: string) => {
     ctx.app.$accessor.snackbar.show({ text, timeout, color })
   })
-}
-
-export default plugin
+})

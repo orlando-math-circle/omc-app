@@ -1,4 +1,4 @@
-import { actionTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, mutationTree } from 'typed-vuex'
 
 interface SnackbarPayload {
   text: string

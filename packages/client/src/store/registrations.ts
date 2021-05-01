@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { CreateRegistrationDto } from '@server/event-registration/dtos/create-registration.dto'
 import { CreateVolunteerRegistrationDto } from '@server/event-registration/dtos/create-volunteer-registration.dto'
 import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'

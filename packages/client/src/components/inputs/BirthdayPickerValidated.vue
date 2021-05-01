@@ -3,6 +3,7 @@
     <ValidationProvider
       v-slot="{ errors }"
       :rules="{
+        positive_age: true,
         min_age: minAge,
         max_age: maxAge,
       }"

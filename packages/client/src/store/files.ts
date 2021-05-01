@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { FileAttachment } from '@server/file-attachment/file-attachment.entity'
 import { FileField } from '@server/file-fields/file-field.entity'
 import { File as FileEntity } from '@server/file/file.entity'

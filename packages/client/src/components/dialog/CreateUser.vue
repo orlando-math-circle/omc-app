@@ -17,9 +17,7 @@
             v-model="first"
             label="First Name"
             rules="required"
-            hide-details="auto"
             required
-            outlined
           />
         </v-col>
 

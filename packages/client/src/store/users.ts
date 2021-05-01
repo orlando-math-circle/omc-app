@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { CreateUserDto } from '@server/user/dtos/create-user.dto'
 import { FindUsersDto } from '@server/user/dtos/find-users.dto'
 import { UpdateOwnUserDto } from '@server/user/dtos/update-own-user.dto'

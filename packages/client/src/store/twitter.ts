@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { StateError } from '../types/state-error.interface'
 import { StateStatus } from '../types/state.interface'
 import { parseAxiosError } from '../utils/utilities'

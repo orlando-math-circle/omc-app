@@ -1,5 +1,5 @@
 import { Context } from '@nuxt/types'
-import { actionTree, getAccessorType } from 'nuxt-typed-vuex'
+import { actionTree, getAccessorType } from 'typed-vuex'
 import * as auth from '~/store/auth'
 import * as courses from '~/store/courses'
 import * as events from '~/store/events'

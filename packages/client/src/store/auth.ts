@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { Account } from '@server/account/account.entity'
 import { RegisterAccountDto } from '@server/account/dto/register.dto'
 import { Roles } from '@server/app.roles'

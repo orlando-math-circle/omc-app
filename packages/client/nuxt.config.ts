@@ -54,7 +54,6 @@ const config: NuxtConfig = {
     avatarBase: process.env.AVATAR_BASE || '/defaults/avatars',
   },
   loading: { color: '#44d9e6' },
-  css: [],
   plugins: [
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
@@ -83,11 +82,6 @@ const config: NuxtConfig = {
   typescript: {
     typeCheck: false,
   },
-  vue: {
-    config: {
-      productionTip: false,
-    },
-  },
   cli: {
     bannerColor: 'magenta',
     badgeMessages: ['Orlando Math Circle'],
@@ -98,17 +92,12 @@ const config: NuxtConfig = {
   },
   build: {
     parallel: true,
-    cache: process.env.BUILD_CACHE === 'true',
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {
       sass: {
-        implementation: require('sass'),
-        sassOptions: {
-          fiber: require('fibers'),
-          indentedSyntax: true,
-          additionalData: "@import '@/assets/styles/variables.scss'",
-        },
+        // @ts-ignore Outdated @types/sass-loader
+        additionalData: "@import '~assets/styles/variables.scss'",
       },
     },
   },

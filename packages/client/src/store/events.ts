@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { CreateEventDto } from '@server/event/dto/create-event.dto'
 import { FindAllEventsDto } from '@server/event/dto/find-all-events.dto'
 import { UpdateEventDto } from '@server/event/dto/update-event.dto'

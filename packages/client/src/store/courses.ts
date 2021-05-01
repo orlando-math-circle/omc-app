@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { Course } from '@server/course/course.entity'
 import { CreateCourseDto } from '@server/course/dto/create-course.dto'
 import { FindAllCoursesDto } from '@server/course/dto/find-all-courses.dto'
