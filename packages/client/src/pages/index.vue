@@ -22,22 +22,28 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { computed, defineComponent, useContext } from '@nuxtjs/composition-api'
 
-@Component({
+export default defineComponent({
   layout: 'landing',
   middleware: 'guest',
+  setup() {
+    const { $vuetify } = useContext()
+
+    const logo = computed(() =>
+      $vuetify.theme.dark
+        ? require('@/assets/images/logo_white.png')
+        : require('@/assets/images/logo_dark.png')
+    )
+
+    return {
+      logo,
+    }
+  },
   head: {
     title: 'Welcome',
   },
 })
-export default class IndexPage extends Vue {
-  get logo() {
-    return this.$vuetify.theme.dark
-      ? require('@/assets/images/logo_white.png')
-      : require('@/assets/images/logo_dark.png')
-  }
-}
 </script>
 
 <style lang="scss" scoped>

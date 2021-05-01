@@ -46,32 +46,33 @@ extend('ext', {
   message: 'This file type is not permitted.',
 })
 
+extend('positive_age', {
+  validate: (value) => {
+    const isValid = differenceInYears(new Date(), new Date(value)) > 0
+
+    return isValid
+  },
+  message: 'Please enter a valid date of birth.',
+})
+
 extend('min_age', {
   params: ['min'],
   validate: (value, { min }: any) => {
-    const diff = differenceInYears(new Date(), new Date(value))
+    const isValid = differenceInYears(new Date(), new Date(value)) > min
 
-    if (diff < 0) {
-      return 'Please enter a valid date of birth.'
-    } else if (diff < min) {
-      return 'Please have a parent or guardian register for you.'
-    }
-
-    return true
+    return isValid
   },
+  message: 'Please have a parent or guardian register for you.',
 })
 
 extend('max_age', {
   params: ['max'],
   validate: (value, { max }: any) => {
-    const diff = differenceInYears(new Date(), new Date(value))
+    const isValid = differenceInYears(new Date(), new Date(value)) < max
 
-    if (diff < 0 || diff > max) {
-      return 'Please enter a valid date of birth.'
-    }
-
-    return true
+    return isValid
   },
+  message: 'Please enter a valid date of birth.',
 })
 
 extend('required', {

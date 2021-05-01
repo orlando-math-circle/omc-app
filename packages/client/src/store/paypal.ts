@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { Invoice } from '@server/invoice/invoice.entity'
 import { StateError } from '../types/state-error.interface'
 import { StateStatus } from '../types/state.interface'

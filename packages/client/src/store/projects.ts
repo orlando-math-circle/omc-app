@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { CreateProjectDto } from '@server/project/dto/create-project.dto'
 import { FindAllProjectsDto } from '@server/project/dto/find-all-projects.dto'
 import { UpdateProjectDto } from '@server/project/dto/update-project.dto'

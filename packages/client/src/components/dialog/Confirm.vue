@@ -22,23 +22,36 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent, reactive } from '@nuxtjs/composition-api'
 
-@Component
-export default class DialogConfirm extends Vue {
-  @Prop({ default: 'Are you sure?' }) title!: string
+export default defineComponent({
+  props: {
+    title: {
+      type: String,
+      default: 'Are you sure?',
+    },
+  },
+  setup(_, { emit }) {
+    const state = reactive({
+      dialog: false,
+      value: null as any,
+    })
 
-  dialog = false
-  value: any = null
+    const open = (value: any) => {
+      state.value = value
+      state.dialog = true
+    }
 
-  public open(value: any) {
-    this.value = value
-    this.dialog = true
-  }
+    const confirm = () => {
+      emit('confirm', state.value)
+      state.dialog = false
+    }
 
-  public confirm() {
-    this.$emit('confirm', this.value)
-    this.dialog = false
-  }
-}
+    return {
+      dialog: state.dialog,
+      open,
+      confirm,
+    }
+  },
+})
 </script>

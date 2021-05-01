@@ -1484,12 +1484,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/config-conventional@npm:12.1.1":
-  version: 12.1.1
-  resolution: "@commitlint/config-conventional@npm:12.1.1"
+"@commitlint/config-conventional@npm:^12.1.2":
+  version: 12.1.2
+  resolution: "@commitlint/config-conventional@npm:12.1.2"
   dependencies:
     conventional-changelog-conventionalcommits: ^4.3.1
-  checksum: 3474a7b70abb485e3cb1c25f7e8d11340712b724ba852b18128f87c5524b50c6cc47ee3c189025037bc336fb38014031bfa8247d5a352b83f3bdcbe91eb38ccb
+  checksum: 4ea56ae426f1308920a9affa3b54a5a3b98fe8e5d62c205fd75c7b2598986c7ef0b1de07cc16a9c74bbc22ce9bfb495ff3245c3a38ecdcc747c734810bda8741
   languageName: node
   linkType: hard
 
@@ -2035,14 +2035,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mikro-orm/cli@npm:4.5.3":
-  version: 4.5.3
-  resolution: "@mikro-orm/cli@npm:4.5.3"
+"@mikro-orm/cli@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@mikro-orm/cli@npm:4.5.4"
   dependencies:
-    "@mikro-orm/core": ^4.5.3
-    "@mikro-orm/entity-generator": ^4.5.3
-    "@mikro-orm/knex": ^4.5.3
-    "@mikro-orm/migrations": ^4.5.3
+    "@mikro-orm/core": ^4.5.4
+    "@mikro-orm/entity-generator": ^4.5.4
+    "@mikro-orm/knex": ^4.5.4
+    "@mikro-orm/migrations": ^4.5.4
     ansi-colors: 4.1.1
     cli-table3: 0.6.0
     fs-extra: 9.1.0
@@ -2068,13 +2068,13 @@ __metadata:
       optional: true
   bin:
     mikro-orm: cli.js
-  checksum: 82bbed51899e469b060ab8df61cdfa4f5ce14a82e8146d01e703218a32fe34af5e607c33754439aa1813591f99d99cad187eab2cfebb154bf0f00dbb317871a0
+  checksum: b38a890bd29fb60821be89641644e9b730d754092cb2f13328d30f0b0b8bf043ce637cda07bae11c67340551a899b26d388b9b481123d8ca134856dcd771c968
   languageName: node
   linkType: hard
 
-"@mikro-orm/core@npm:4.5.3, @mikro-orm/core@npm:^4.5.3":
-  version: 4.5.3
-  resolution: "@mikro-orm/core@npm:4.5.3"
+"@mikro-orm/core@npm:4.5.4, @mikro-orm/core@npm:^4.5.4":
+  version: 4.5.4
+  resolution: "@mikro-orm/core@npm:4.5.4"
   dependencies:
     ansi-colors: 4.1.1
     clone: 2.1.2
@@ -2107,25 +2107,25 @@ __metadata:
       optional: true
     "@mikro-orm/sqlite":
       optional: true
-  checksum: 7b25414e8e4ede51ec46ef626c4f5b944894d87dd2200598677743b1a94eaf569c2366ba8ef6af33fd5390a0b5a9f773da344ba3bc185df2014a92ad3b901a92
+  checksum: bc6d2d233854a80418cd19778364675fe28ff4bd4d6b465cd402d5a443d66c54a92f38fbe2dfd8387477b5727bb46a741fcc6929b24b4f818a73e5b4da812a64
   languageName: node
   linkType: hard
 
-"@mikro-orm/entity-generator@npm:^4.5.3":
-  version: 4.5.3
-  resolution: "@mikro-orm/entity-generator@npm:4.5.3"
+"@mikro-orm/entity-generator@npm:^4.5.4":
+  version: 4.5.4
+  resolution: "@mikro-orm/entity-generator@npm:4.5.4"
   dependencies:
-    "@mikro-orm/knex": ^4.5.3
+    "@mikro-orm/knex": ^4.5.4
     fs-extra: 9.1.0
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
-  checksum: 76db2ed4ed4f76440449b930c8303fcf83762c0ac11e9a91bfc3c9050a0d0dd17311e53d1d0214a85a10704f3333d57af2d74b98634c199703caedca17124567
+  checksum: 9ca763256ce4f1ee1ebbb7f573110cbd0f55539ffe5fee4887cfe4b66576fb386cf14c362914973c0546ff7192d0ca5a51132418a430af253cb7cf115ccc28c7
   languageName: node
   linkType: hard
 
-"@mikro-orm/knex@npm:4.5.3, @mikro-orm/knex@npm:^4.5.3":
-  version: 4.5.3
-  resolution: "@mikro-orm/knex@npm:4.5.3"
+"@mikro-orm/knex@npm:4.5.4, @mikro-orm/knex@npm:^4.5.4":
+  version: 4.5.4
+  resolution: "@mikro-orm/knex@npm:4.5.4"
   dependencies:
     fs-extra: 9.1.0
     knex: 0.21.19
@@ -2148,22 +2148,22 @@ __metadata:
       optional: true
     sqlite3:
       optional: true
-  checksum: 1b1a57061153228f5b37b6afa75f342ce5c447acf6b90af6402d4051e980f0ac72812ac65849aa154e37e32971c02eaee4fed3bdc6fe53766d294f6446c008ea
+  checksum: 89386d259bb351b3f2168e3077c9b362535d2d0714cf2422374860f3766b499acda2779101e3cd432b953d1f14bb67a4e9793ed9d624f30354af497db3fe0893
   languageName: node
   linkType: hard
 
-"@mikro-orm/migrations@npm:4.5.3, @mikro-orm/migrations@npm:^4.5.3":
-  version: 4.5.3
-  resolution: "@mikro-orm/migrations@npm:4.5.3"
+"@mikro-orm/migrations@npm:4.5.4, @mikro-orm/migrations@npm:^4.5.4":
+  version: 4.5.4
+  resolution: "@mikro-orm/migrations@npm:4.5.4"
   dependencies:
-    "@mikro-orm/knex": ^4.5.3
+    "@mikro-orm/knex": ^4.5.4
     "@types/umzug": 2.3.0
     fs-extra: 9.1.0
     knex: 0.21.19
     umzug: 2.3.0
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
-  checksum: da3eee72cf3c0c5666ced128c38b085ab96d78e1d13eb920b41895eb07bbc87ad52a0b2a925694423a316bd804c2e5a34d67c19774990a1b62cf8b220ccebb5d
+  checksum: 7b0ec35fb364cd23b9ba89c9428924184ee475f09d255d9cc094729f88746646abd2d25bc945d1185e47b6bf569ca65474def748053143ba3960f301c0fd10d5
   languageName: node
   linkType: hard
 
@@ -2178,15 +2178,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mikro-orm/postgresql@npm:4.5.3":
-  version: 4.5.3
-  resolution: "@mikro-orm/postgresql@npm:4.5.3"
+"@mikro-orm/postgresql@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@mikro-orm/postgresql@npm:4.5.4"
   dependencies:
-    "@mikro-orm/knex": ^4.5.3
-    pg: 8.5.1
+    "@mikro-orm/knex": ^4.5.4
+    pg: 8.6.0
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
-  checksum: 191bfb52ab909273bee2822c62c893445fe08230f03808e4c5c9e646f8af1a91c58de746f18cd45d29283060d26b48cdd16cd6d6023fe566cbd8d11002b22b84
+  checksum: 3fd6a2014f7b05b20cee708126a32a373e881ebe70ce471b4f217e3a797f4ebc698a0ceba4097766dc873ad0e75825e45c230cf6a4f0fe90650cd494933cb97f
   languageName: node
   linkType: hard
 
@@ -2910,22 +2910,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxtjs/composition-api@npm:0.23.2":
-  version: 0.23.2
-  resolution: "@nuxtjs/composition-api@npm:0.23.2"
+"@nuxtjs/composition-api@npm:^0.23.4":
+  version: 0.23.4
+  resolution: "@nuxtjs/composition-api@npm:0.23.4"
   dependencies:
     "@vue/composition-api": 1.0.0-rc.7
-    defu: ^3.2.2
+    defu: ^4.0.1
     estree-walker: ^2.0.2
     magic-string: ^0.25.7
-    ufo: ^0.6.11
+    ufo: ^0.7.2
     upath: ^2.0.1
   peerDependencies:
     "@nuxt/vue-app": ^2.15
     fs-extra: ^8.1.0
     nuxt: ^2.15
     vue: ^2
-  checksum: d21b471326add4ed1341428ad9c18717c336c6ec64efac9a1a064cfe1559e7688afae29066b61a5f68819379e364f8c8c1f754829214001bd63b0a254c01dfb5
+  checksum: ee6a3eeb940a920b0010cfdb96d7eccb1f6652e60e58f72f4db75caf607570019944651d5203a102d60f37df47a8a7da2bd44f468f37aa734726e2128a18957e
   languageName: node
   linkType: hard
 
@@ -3057,7 +3057,7 @@ __metadata:
     "@nuxt/types": 2.15.4
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.1
-    "@nuxtjs/composition-api": 0.23.2
+    "@nuxtjs/composition-api": ^0.23.4
     "@nuxtjs/dotenv": 1.4.1
     "@nuxtjs/eslint-config-typescript": 6.0.0
     "@nuxtjs/pwa": 3.3.5
@@ -3069,8 +3069,8 @@ __metadata:
     cropperjs: 1.5.11
     date-fns: 2.21.1
     deepmerge: 4.2.2
-    eslint: 7.24.0
-    eslint-config-prettier: 8.2.0
+    eslint: 7.25.0
+    eslint-config-prettier: 8.3.0
     eslint-plugin-nuxt: 2.0.0
     eslint-plugin-prettier: 3.4.0
     fibers: 5.0.0
@@ -3079,10 +3079,10 @@ __metadata:
     nuxt: 2.15.4
     nuxt-dropzone: 1.0.4
     nuxt-property-decorator: 2.9.1
-    nuxt-typed-vuex: 0.1.22
+    nuxt-typed-vuex: 0.2.0
     prettier: 2.2.1
     rrule: 2.6.8
-    sass: 1.32.11
+    sass: 1.32.12
     sass-loader: 10.1.1
     vee-validate: 3.4.5
     vue-apexcharts: 1.6.1
@@ -3104,9 +3104,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/monorepo@workspace:."
   dependencies:
-    "@commitlint/cli": 12.1.1
-    "@commitlint/config-conventional": 12.1.1
-    husky: 6.0.0
+    "@commitlint/cli": ^12.1.1
+    "@commitlint/config-conventional": ^12.1.2
+    husky: ^6.0.0
   languageName: unknown
   linkType: soft
 
@@ -3114,12 +3114,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/server@workspace:packages/server"
   dependencies:
-    "@mikro-orm/cli": 4.5.3
-    "@mikro-orm/core": 4.5.3
-    "@mikro-orm/knex": 4.5.3
-    "@mikro-orm/migrations": 4.5.3
+    "@mikro-orm/cli": 4.5.4
+    "@mikro-orm/core": 4.5.4
+    "@mikro-orm/knex": 4.5.4
+    "@mikro-orm/migrations": 4.5.4
     "@mikro-orm/nestjs": 4.2.0
-    "@mikro-orm/postgresql": 4.5.3
+    "@mikro-orm/postgresql": 4.5.4
     "@mikro-orm/sql-highlighter": 1.0.1
     "@nestjs/cli": 7.6.0
     "@nestjs/common": 7.6.15
@@ -3135,12 +3135,12 @@ __metadata:
     "@types/bcrypt": 3.0.1
     "@types/cache-manager": 3.4.0
     "@types/express": 4.17.11
-    "@types/jest": 26.0.22
+    "@types/jest": 26.0.23
     "@types/jsonwebtoken": 8.5.1
     "@types/lodash": 4.14.168
-    "@types/luxon": 1.26.4
+    "@types/luxon": 1.26.5
     "@types/multer": 1.4.5
-    "@types/node": 14.14.41
+    "@types/node": 14.14.43
     "@types/passport-jwt": 3.0.5
     "@types/passport-local": 1.0.33
     "@types/rimraf": 3.0.0
@@ -3155,8 +3155,8 @@ __metadata:
     class-validator: 0.13.1
     date-fns: 2.21.1
     dotenv: 8.2.0
-    eslint: 7.24.0
-    eslint-config-prettier: 8.2.0
+    eslint: 7.25.0
+    eslint-config-prettier: 8.3.0
     eslint-plugin-prettier: 3.4.0
     form-data: 4.0.0
     jest: 26.6.3
@@ -3171,7 +3171,7 @@ __metadata:
     reflect-metadata: 0.1.13
     rimraf: 3.0.2
     rrule: 2.6.8
-    rxjs: 6.6.7
+    rxjs: 7.0.0
     supertest: 6.1.3
     systeminformation: 5.6.12
     ts-jest: 26.5.5
@@ -3687,13 +3687,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:26.0.22":
-  version: 26.0.22
-  resolution: "@types/jest@npm:26.0.22"
+"@types/jest@npm:26.0.23":
+  version: 26.0.23
+  resolution: "@types/jest@npm:26.0.23"
   dependencies:
     jest-diff: ^26.0.0
     pretty-format: ^26.0.0
-  checksum: 4c98ed058522f6cc74bcb47b8b7b104b77b2d4e42e087171f3d2d3ae5338c21f43ec26f2a186bc229c1bd72c3f776ad07faba837f0ec27f22cf94e154516c0b3
+  checksum: a015676b78bdc51be6f6315acef10d9106ea8064e3e49143bca3c75b834b61285b45c5f5ccfd049a80107f1e2869a9183cdb5be85816c073ea8dd05852fafdc6
   languageName: node
   linkType: hard
 
@@ -3775,10 +3775,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:1.26.4":
-  version: 1.26.4
-  resolution: "@types/luxon@npm:1.26.4"
-  checksum: 4ddb55f1c73b1efe0dae407d79f10aba0e3f87945c6386a0c09742b66b39a4b1a81673bc5ddb2483b107684d052fbd953af1aaacdf43bd9bd882742a936791ec
+"@types/luxon@npm:1.26.5":
+  version: 1.26.5
+  resolution: "@types/luxon@npm:1.26.5"
+  checksum: d3c6bdac3c7adaa88f91db3699758ad938c7d05ffe12ab2824d0fd1b57d1e9eef6695ca64a7245cc6350c923064280357a27f8581d101201af1b7bbe1e504756
   languageName: node
   linkType: hard
 
@@ -3863,10 +3863,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:14.14.41":
-  version: 14.14.41
-  resolution: "@types/node@npm:14.14.41"
-  checksum: 37dfb639644c8ee9b9846106834983f590d494b855e74645a4f169ea24199f7559366d25f6e72e83ba940b59eb6370e002bd53963d098d6d9fdf935a37011417
+"@types/node@npm:14.14.43":
+  version: 14.14.43
+  resolution: "@types/node@npm:14.14.43"
+  checksum: b7a9e6df7c2a6f90e783bfe6ef358cc2c3ff4e1dfcea56b83349cd3feefd02a9b6fa54b443983694b4398a06257d871c947abeae03bd0d39fd71981161d61765
   languageName: node
   linkType: hard
 
@@ -8263,6 +8263,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"defu@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "defu@npm:4.0.1"
+  checksum: 0e66c20eda0833f351e90bd3a4931cf8c1932f49d28389345d30adf026dc449d24c906678e1b46ca4f2eb320a5b6c7191ff738a6e8ecb8a6154f737f72df23ec
+  languageName: node
+  linkType: hard
+
 "delayed-stream@npm:~1.0.0":
   version: 1.0.0
   resolution: "delayed-stream@npm:1.0.0"
@@ -8962,14 +8969,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:8.2.0":
-  version: 8.2.0
-  resolution: "eslint-config-prettier@npm:8.2.0"
+"eslint-config-prettier@npm:8.3.0":
+  version: 8.3.0
+  resolution: "eslint-config-prettier@npm:8.3.0"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 0fe60cc42dd84fd878ee437dfe73340ba8b18f41ba2538878c54ff15f24a6855bf7e048b36290022b21e0e050ee6cf61d66bfdf39bedb5ccc15c28997cda7016
+  checksum: 94ccbb50fb67e5e47e8ba6cfa257b5cbf53619990ab13f46b99518cfe9b900394b93bdf6ffedbde1a8e2997d301b0fbd73a6b4202146bc53475dfb30a8c812f2
   languageName: node
   linkType: hard
 
@@ -9208,9 +9215,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:7.24.0":
-  version: 7.24.0
-  resolution: "eslint@npm:7.24.0"
+"eslint@npm:7.25.0":
+  version: 7.25.0
+  resolution: "eslint@npm:7.25.0"
   dependencies:
     "@babel/code-frame": 7.12.11
     "@eslint/eslintrc": ^0.4.0
@@ -9251,7 +9258,7 @@ __metadata:
     v8-compile-cache: ^2.0.3
   bin:
     eslint: bin/eslint.js
-  checksum: 8130aacc3698a730ba8fa10ac9e1436151181c34cad265c21c97708e62dba714b6f3cc4cb7a1d343918da3d35a5913505ccf53cfbdc1fa8d62d326b7e35b7aae
+  checksum: 6e1782e2264ebf987504746ee82e996bf0ef2c29a2eaea869b54cb8aa1eaf10945b1d563618515e65ac934ca626f3609282127773f45868ad4a98744458a3c62
   languageName: node
   linkType: hard
 
@@ -14951,16 +14958,15 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"nuxt-typed-vuex@npm:0.1.22":
-  version: 0.1.22
-  resolution: "nuxt-typed-vuex@npm:0.1.22"
+"nuxt-typed-vuex@npm:0.2.0":
+  version: 0.2.0
+  resolution: "nuxt-typed-vuex@npm:0.2.0"
   dependencies:
-    consola: ^2.15.0
-    normalize-path: ^3.0.0
-    typed-vuex: 0.1.22
+    typed-vuex: 0.2.0
+    upath: ^2.0.1
   peerDependencies:
-    "@nuxt/types": ^2.14.5
-  checksum: 78976d2cb342ef6079c1806cfe42b3974d58d7a637801db098be2547f3809e2935a35e7d7a3d8e9abbac836569ec18673a3938ff98f084d0ee2cd119bf36a905
+    "@nuxt/types": ^2.15.4
+  checksum: dcd93260167f106edf691e49889e46700891e67f60452c15628428f4ca4a4bd5a10342a43dfc7753018cc4890be582ce40547f66239997b11d6ecba3bd3ea057
   languageName: node
   linkType: hard
 
@@ -15857,10 +15863,17 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:2.4.0, pg-connection-string@npm:^2.4.0":
+"pg-connection-string@npm:2.4.0":
   version: 2.4.0
   resolution: "pg-connection-string@npm:2.4.0"
   checksum: fdb3ec1c3daa8356381b1de3ed5fe03269e69d88644c4eb83a30aec1d1e320e0a8450d7ff8c04666dd06a4798c996c9dd006497f038d338790667965ec940d1d
+  languageName: node
+  linkType: hard
+
+"pg-connection-string@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "pg-connection-string@npm:2.5.0"
+  checksum: 504f288e5e361a903f8b426efe9d00fc289e1d55e16fcca8e4f70f89c29e3429b60291bdec65636ca9c56496319bea878eb32ea60a0d4949ef6df3d748250818
   languageName: node
   linkType: hard
 
@@ -15871,19 +15884,19 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"pg-pool@npm:^3.2.2":
-  version: 3.2.2
-  resolution: "pg-pool@npm:3.2.2"
+"pg-pool@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "pg-pool@npm:3.3.0"
   peerDependencies:
     pg: ">=8.0"
-  checksum: d25d4d075701079433333fcca3fbf5f4fd8d0ae21bf37b11c8528849e41338daf6e335aba25a0a4f5beff133cba63bd6bf2d534dea7f811119d175e575b25446
+  checksum: 25f528a9b72ebe00678bbafe8a196e95c73b6843388619a8fda30878044b45b38ffbaaf69e485354d73c7452ac81f62ea6aa9705014855b60d71f6ef256cfe45
   languageName: node
   linkType: hard
 
-"pg-protocol@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "pg-protocol@npm:1.4.0"
-  checksum: 2b5ebfccd014a4a9127a04e34a423a9e7fe6f6b96c32698929e0860e32c453e64438c935068405ee923ab99788345b9591a6dbaa30bba70e724d7fc4d5f5d21e
+"pg-protocol@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "pg-protocol@npm:1.5.0"
+  checksum: 270e72d38aaed3ee23ec35802899c707b91e176f94373ce571c45b604ee9c5fbe60f629bec0a05bb607d23d0c016c23e4e318ec3c391f83467f705284190970c
   languageName: node
   linkType: hard
 
@@ -15900,15 +15913,15 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"pg@npm:8.5.1":
-  version: 8.5.1
-  resolution: "pg@npm:8.5.1"
+"pg@npm:8.6.0":
+  version: 8.6.0
+  resolution: "pg@npm:8.6.0"
   dependencies:
     buffer-writer: 2.0.0
     packet-reader: 1.0.0
-    pg-connection-string: ^2.4.0
-    pg-pool: ^3.2.2
-    pg-protocol: ^1.4.0
+    pg-connection-string: ^2.5.0
+    pg-pool: ^3.3.0
+    pg-protocol: ^1.5.0
     pg-types: ^2.1.0
     pgpass: 1.x
   peerDependencies:
@@ -15916,7 +15929,7 @@ fsevents@^1.2.7:
   peerDependenciesMeta:
     pg-native:
       optional: true
-  checksum: b8eed3cd3831ea8cce051fcc58a56f39e7c24545c18466c89e64e4f90c8c2d386e3c51c33e22b0d2e39bf51156bdd4d5ade16c6e0edad1fbff97bd89f2bd86f2
+  checksum: 06bec69854081161b3563f2bc0a3b09a20ebbff87e137914816de0970d70a0a4b282917434783f99841ec650a0650c0919fade96cb25e636d1b4a0cebb672922
   languageName: node
   linkType: hard
 
@@ -18456,7 +18469,16 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"rxjs@npm:6.6.7, rxjs@npm:^6.6.0":
+"rxjs@npm:7.0.0":
+  version: 7.0.0
+  resolution: "rxjs@npm:7.0.0"
+  dependencies:
+    tslib: ~2.1.0
+  checksum: e0d08420f94474c73a14e57b7a1bcbf7010791817e06e5a16a998a8e151b89bd0b4a4883203cb86906a81b0e052cb99cfe3d96b652de4c744282f4d60a51d73e
+  languageName: node
+  linkType: hard
+
+"rxjs@npm:^6.6.0":
   version: 6.6.7
   resolution: "rxjs@npm:6.6.7"
   dependencies:
@@ -18548,14 +18570,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"sass@npm:1.32.11":
-  version: 1.32.11
-  resolution: "sass@npm:1.32.11"
+"sass@npm:1.32.12":
+  version: 1.32.12
+  resolution: "sass@npm:1.32.12"
   dependencies:
     chokidar: ">=3.0.0 <4.0.0"
   bin:
     sass: sass.js
-  checksum: a56ca780febc1f4c5c015f2fbd5dacd780297371456197424bce7e48d54cef8ae564fb8927076ef61e6fcd34f69556d0a3dd8e157ff06081729066ad595e97bf
+  checksum: 8ff7460bfe2836b14836d22e9bfb3218870c606e1da1edc780ca6fd9a01aa08ec86b6e631d288a764d9d1959980f8feb9ba376eebcef0316db860c1c7a3d8cb3
   languageName: node
   linkType: hard
 
@@ -20405,7 +20427,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.1.0":
+"tslib@npm:2.1.0, tslib@npm:~2.1.0":
   version: 2.1.0
   resolution: "tslib@npm:2.1.0"
   checksum: d8f5bdd067611651c6b846c2388f4dc8ba1f5af124e66105f5263d1ad56da17f4b8c6566887ca2f205c5a9758451871ceca87d5d06087af2dca1699c5e33db69
@@ -20537,12 +20559,12 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"typed-vuex@npm:0.1.22":
-  version: 0.1.22
-  resolution: "typed-vuex@npm:0.1.22"
+"typed-vuex@npm:0.2.0":
+  version: 0.2.0
+  resolution: "typed-vuex@npm:0.2.0"
   peerDependencies:
-    vuex: ^3.5.1
-  checksum: f570db8fc5822ad55041a87366d6cae18115b07de73f37ec377c07aa47d9ee64e29f0a7a8f478425be89836eeaede807dfe5cbaf5b7f2147a33787d19df4a86b
+    vuex: ^3.6.2
+  checksum: d718b42552f4ac3ce82b2b7054023f26bad12f4e171995119c9214b495c9d6d2125ad3c85e5b2686f95689bbd940c4965b066f4f2907d785dcb47b16fa2dc7ee
   languageName: node
   linkType: hard
 
@@ -20609,10 +20631,17 @@ typescript@4.2.3:
   languageName: node
   linkType: hard
 
-"ufo@npm:^0.6.10, ufo@npm:^0.6.11, ufo@npm:^0.6.7, ufo@npm:^0.6.9":
+"ufo@npm:^0.6.10, ufo@npm:^0.6.7, ufo@npm:^0.6.9":
   version: 0.6.11
   resolution: "ufo@npm:0.6.11"
   checksum: 3b0393dbec80e0f7072959903dc39f64368211645cafce291bf440d48e8a5c8c33c9a13ac8a6839be42d63ed0d797090d6376490aad40709d292069d2cb29c7c
+  languageName: node
+  linkType: hard
+
+"ufo@npm:^0.7.2":
+  version: 0.7.2
+  resolution: "ufo@npm:0.7.2"
+  checksum: 01d3c7a237a5ea26ea2136b6cce819a4229973f4effe6b7b6caf3fb46c6eb7ed33f5e62fd251462863ffe89d9eeba3aa22f9903fcedccbcc40f97323b851d674
   languageName: node
   linkType: hard
 

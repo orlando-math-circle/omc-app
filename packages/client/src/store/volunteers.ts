@@ -1,4 +1,4 @@
-import { actionTree, getterTree, mutationTree } from 'nuxt-typed-vuex'
+import { actionTree, getterTree, mutationTree } from 'typed-vuex'
 import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
 import { FindAllJobsDto } from '@server/volunteer-job/dto/find-all-jobs.dto'
 import { UpdateJobDto } from '@server/volunteer-job/dto/update-job.dto'
