@@ -1,7 +1,7 @@
 <template>
-  <v-row dense>
+  <v-row>
     <v-col cols="6">
-      <VSelectValidated
+      <v-text-field-validated
         v-model="month"
         label="Birthday Month"
         autocomplete="bday-month"
@@ -16,7 +16,7 @@
     </v-col>
 
     <v-col cols="3">
-      <VTextFieldValidated
+      <v-text-field-validated
         ref="dateField"
         v-model.number="date"
         type="tel"
@@ -32,7 +32,7 @@
     </v-col>
 
     <v-col cols="3">
-      <VTextFieldValidated
+      <v-text-field-validated
         ref="yearField"
         v-model.number="year"
         type="tel"
@@ -60,6 +60,7 @@ import {
 } from '@nuxtjs/composition-api'
 import { months } from '~/utils/constants'
 import { isValidDate } from '~/utils/utilities'
+import useStateReset from '~/composables/useStateReset'
 
 export default defineComponent({
   props: {
@@ -77,29 +78,41 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const state = reactive({
+    const { state, reset } = useStateReset({
       month: null as number | null,
       date: null as number | null,
       year: null as number | null,
-    })
-
-    const dirty = reactive({
-      month: false,
-      date: false,
-      year: false,
+      dirty: reactive({
+        month: false,
+        date: false,
+        year: false,
+      }),
     })
 
     /**
      * Emits the blur event only after each birthday
      * input has been blurred to prevent premature errors.
      */
-    const onBlur = (type: keyof typeof dirty) => {
-      dirty[type] = true
+    const onBlur = (type: keyof typeof state['dirty']) => {
+      state.dirty[type] = true
 
-      if (dirty.month && dirty.date && dirty.year) {
+      if (state.dirty.month && state.dirty.date && state.dirty.year) {
         emit('blur')
       }
     }
+
+    /**
+     * If the v-model is cleared then the component data
+     * should also clear.
+     */
+    watch(
+      () => props.value,
+      (value: string) => {
+        if (!value || !value.length) {
+          reset()
+        }
+      }
+    )
 
     watch(
       () => state,
