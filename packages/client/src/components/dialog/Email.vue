@@ -1,5 +1,5 @@
 <template>
-  <dialog-form ref="dialog" @submit:form="onSubmit">
+  <dialog-form ref="dialog" @submit:form="onSubmit" @dialog:close="reset">
     <template #title>Email Users</template>
     <template #subtitle>
       Generate an email to the selected users. Note that users without emails
@@ -22,7 +22,7 @@
           rules="required"
           hide-details="auto"
           outlined
-        ></v-text-field-validated>
+        />
       </v-col>
 
       <v-col cols="12">
@@ -32,7 +32,7 @@
           rules="required"
           outlined
           counter
-        ></v-textarea-validated>
+        />
       </v-col>
     </v-card-text>
 
@@ -46,44 +46,65 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
 import { CreateEmailDto } from '@server/email/dto/create-email.dto'
-import { DTOUser } from '../../store/users'
-import DialogForm from './Form.vue'
+import { User } from '@server/user/user.entity'
+import {
+  defineComponent,
+  PropType,
+  ref,
+  useContext,
+  watch,
+} from '@nuxtjs/composition-api'
+import DialogForm from '~/components/dialog/Form.vue'
+import useStateReset from '~/composables/useStateReset'
 
-@Component
-export default class DialogEmail extends Vue {
-  @Ref('dialog') readonly dialog!: DialogForm
-  @Prop() readonly users!: DTOUser[]
+export default defineComponent({
+  props: {
+    users: {
+      type: Array as PropType<User[]>,
+      required: true,
+    },
+  },
+  setup(props) {
+    const { $axios, $snack } = useContext()
+    const dialog = ref<InstanceType<typeof DialogForm>>()
 
-  subject = ''
-  body = ''
-  loading = false
-  internalUsers: number[] = []
+    const { state, reset } = useStateReset({
+      subject: '',
+      body: '',
+      loading: false,
+      internalUsers: [] as number[],
+    })
 
-  @Watch('users', { immediate: true })
-  onUsersChange(users: DTOUser[]) {
-    this.internalUsers = users.map((u) => u.id)
-  }
+    watch(
+      () => props.users,
+      (users: User[]) => {
+        state.internalUsers = users.map((u) => u.id)
+      },
+      { immediate: true }
+    )
 
-  async onSubmit() {
-    try {
-      this.loading = true
+    const onSubmit = async () => {
+      try {
+        state.loading = true
 
-      const dto: CreateEmailDto = {
-        userIds: this.internalUsers,
-        subject: this.subject,
-        body: this.body,
+        const dto: CreateEmailDto = {
+          userIds: state.internalUsers,
+          subject: state.subject,
+          body: state.body,
+        }
+
+        await $axios.$post('/email', dto)
+      } catch (error) {
+        $snack('An error occured attempting to email')
+      } finally {
+        state.loading = false
+        $snack('Email Successfully Sent')
+        dialog.value!.close()
       }
-
-      await this.$axios.$post('/email', dto)
-    } catch (error) {
-      this.$snack('An error occured attempting to email')
-    } finally {
-      this.loading = false
-      this.$snack('Email Successfully Sent')
-      this.dialog.close()
     }
-  }
-}
+
+    return { dialog, reset, state, onSubmit }
+  },
+})
 </script>

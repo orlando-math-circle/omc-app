@@ -1,5 +1,5 @@
 <template>
-  <v-card :loading="$fetchState.pending">
+  <v-card>
     <v-card-title>Payment History</v-card-title>
     <v-card-subtitle>
       View a list of the transactions made on your account.
@@ -55,12 +55,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  useContext,
-  useFetch,
-} from '@nuxtjs/composition-api'
+import { computed, defineComponent, useContext } from '@nuxtjs/composition-api'
 import { formatDate } from '~/utils/utilities'
 
 export default defineComponent({
@@ -73,11 +68,10 @@ export default defineComponent({
     const { $accessor: store } = useContext()
     const invoices = computed(() => store.invoices.invoices)
 
-    useFetch(async () => {
-      await store.invoices.findByAccount()
-    })
-
     return { invoices, format: formatDate }
+  },
+  async asyncData({ $accessor }) {
+    await $accessor.invoices.findByAccount()
   },
   head: {
     title: 'Account Invoices',

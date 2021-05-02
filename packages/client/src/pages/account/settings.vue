@@ -113,6 +113,10 @@
       <v-card-subtitle>Change the password on the account.</v-card-subtitle>
 
       <v-form-validated @submit:form="handleChangePassword">
+        <!-- Hidden, but included or accessibility reasons. -->
+        <!-- https://www.chromium.org/developers/design-documents/create-amazing-password-forms -->
+        <input hidden type="text" autocomplete="email" />
+
         <v-card-text>
           <v-row>
             <v-col cols="12">
@@ -124,7 +128,7 @@
                 autocomplete="current-password"
                 outlined
                 hide-details="auto"
-              ></v-text-field-validated>
+              />
             </v-col>
 
             <v-col cols="12">
@@ -137,7 +141,7 @@
                 vid="password"
                 outlined
                 hide-details="auto"
-              ></v-text-field-validated>
+              />
             </v-col>
 
             <v-col cols="12">
@@ -149,7 +153,7 @@
                 rules="required|password:@password"
                 outlined
                 hide-details="auto"
-              ></v-text-field-validated>
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -184,6 +188,7 @@ import {
   toRefs,
 } from '@nuxtjs/composition-api'
 import { User } from '@server/user/user.entity'
+import VTextFieldValidated from '~/components/inputs/VTextFieldValidated.vue'
 import { genders, reminders } from '~/utils/constants'
 import { grades } from '~/utils/events'
 import DialogConfirm from '~/components/dialog/Confirm.vue'
@@ -194,12 +199,13 @@ const useAccessor = wrapProperty('$accessor', false)
 const useSnackbar = wrapProperty('$snack', false)
 
 export default defineComponent({
+  components: { VTextFieldValidated },
   transition: 'slide-left',
   setup() {
     const store = useAccessor()
     const snackbar = useSnackbar()
-    const editDialog = ref<DialogUserEdit>()
-    const deleteDialog = ref<DialogConfirm>()
+    const editDialog = ref<InstanceType<typeof DialogUserEdit>>()
+    const deleteDialog = ref<InstanceType<typeof DialogConfirm>>()
     const user = computed(() => store.auth.user!)
     const users = computed(() => store.auth.account?.users || [])
     const primary = computed(() => store.auth.account?.primaryUser)

@@ -35,10 +35,10 @@ export const getters = getterTree(state, {
   isLoading: (state) => state.status === StateStatus.BUSY,
   isErrored: (state) => state.status === StateStatus.ERROR,
   loggedIn: (state) => !!state.token,
-  accountUsers: (state) => (state.account?.users as unknown) as User[],
-  isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN),
-  isVolunteer: (state) => state.user?.roles?.includes(Roles.VOLUNTEER),
-  isValidated: (state) => state.user?.emailVerified,
+  accountUsers: (state) => (state.account?.users || []) as User[],
+  isAdmin: (state) => state.user?.roles?.includes(Roles.ADMIN) || false,
+  isVolunteer: (state) => state.user?.roles?.includes(Roles.VOLUNTEER) || false,
+  isValidated: (state) => state.user?.emailVerified || false,
   avatar: (state) =>
     state.user?.avatar || '../images/default_avatars/default.svg',
   roleTitle: (state) =>

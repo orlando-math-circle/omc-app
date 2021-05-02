@@ -38,23 +38,11 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  computed,
-  useFetch,
-  useContext,
-} from '@nuxtjs/composition-api'
+import { defineComponent, computed, useContext } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   setup() {
     const { $accessor: store } = useContext()
-
-    useFetch(async () => {
-      await Promise.all([
-        store.auth.getAccount(),
-        store.files.findMyAttachments('REDUCED_LUNCH_FIELD'),
-      ])
-    })
 
     const user = computed(() => store.auth.user!)
     const account = computed(() => store.auth.account!)
@@ -68,6 +56,12 @@ export default defineComponent({
       role,
       onUpdateAvatar,
     }
+  },
+  async asyncData({ $accessor }) {
+    await Promise.all([
+      $accessor.auth.getAccount(),
+      $accessor.files.findMyAttachments('REDUCED_LUNCH_FIELD'),
+    ])
   },
   head: {
     title: 'Account',

@@ -63,7 +63,7 @@ export default defineComponent({
       get() {
         return props.value
       },
-      set(value: string) {
+      set(value: string | number) {
         emit('input', value)
       },
     })

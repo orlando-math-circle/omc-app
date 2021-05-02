@@ -1,9 +1,5 @@
 <template>
-  <dialog-form
-    ref="dialog"
-    @submit:form="onSubmit"
-    @dialog:state="onDialogToggle"
-  >
+  <dialog-form ref="dialog" @submit:form="onSubmit" @dialog:close="reset">
     <template #title>Create User</template>
 
     <template #activator="{ on, attrs }">
@@ -11,9 +7,9 @@
     </template>
 
     <v-card-text>
-      <v-row dense class="mb-4">
-        <v-col>
-          <VTextFieldValidated
+      <v-row>
+        <v-col cols="6">
+          <v-text-field-validated
             v-model="first"
             label="First Name"
             rules="required"
@@ -21,8 +17,8 @@
           />
         </v-col>
 
-        <v-col>
-          <VTextFieldValidated
+        <v-col cols="6">
+          <v-text-field-validated
             v-model="last"
             label="Last Name"
             rules="required"
@@ -31,13 +27,17 @@
             outlined
           />
         </v-col>
-      </v-row>
 
-      <BirthdayPickerValidated v-model="dob" :min-age="0" :max-age="100" />
+        <v-col cols="12">
+          <birthday-picker-validated
+            v-model="dob"
+            :min-age="0"
+            :max-age="100"
+          />
+        </v-col>
 
-      <v-row>
-        <v-col>
-          <VTextFieldValidated
+        <v-col cols="12">
+          <v-text-field-validated
             v-model="email"
             label="Email (Optional)"
             rules="email"
@@ -47,12 +47,10 @@
             outlined
           />
         </v-col>
-      </v-row>
 
-      <v-expand-transition>
-        <v-row v-show="email && email.length">
-          <v-col>
-            <VSelectValidated
+        <v-expand-transition>
+          <v-col v-show="email && email.length" cols="12">
+            <v-select
               v-model="reminderFreq"
               label="Event Email Reminders (Optional)"
               :items="reminders"
@@ -63,12 +61,10 @@
               outlined
             />
           </v-col>
-        </v-row>
-      </v-expand-transition>
+        </v-expand-transition>
 
-      <v-row>
-        <v-col>
-          <VSelectValidated
+        <v-col cols="12">
+          <v-select
             v-model="gender"
             label="Gender"
             :items="genders"
@@ -76,81 +72,97 @@
             outlined
           />
         </v-col>
+
+        <v-col cols="12">
+          <v-checkbox
+            v-show="!industry.professional"
+            v-model="industry.student"
+            persistent-hint
+            dense
+            hint="Only students can register for events."
+            label="Are they a student?"
+          />
+        </v-col>
+
+        <v-expand-transition>
+          <v-col v-show="industry.student">
+            <v-row>
+              <v-col cols="6">
+                <v-select-validated
+                  v-model="industry.education"
+                  label="Education Level"
+                  :items="Object.keys(education)"
+                  :rules="{ required: industry.student }"
+                  outlined
+                />
+              </v-col>
+
+              <v-col cols="6">
+                <v-select-validated
+                  v-model="grade"
+                  :label="
+                    industry.education === 'College'
+                      ? 'Level of Study'
+                      : 'Grade Level'
+                  "
+                  :items="education[industry.education]"
+                  :rules="{ required: industry.student }"
+                  outlined
+                />
+              </v-col>
+
+              <v-col cols="12">
+                <v-text-field-validated
+                  v-model="industry.institution"
+                  label="School Name"
+                  hint="Enter the name of their school or institution."
+                  :rules="{ required: industry.student }"
+                  outlined
+                />
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-expand-transition>
+
+        <v-col cols="12">
+          <v-checkbox
+            v-show="!industry.student"
+            v-model="industry.professional"
+            dense
+            label="Are they an industry professional?"
+          />
+        </v-col>
+
+        <v-expand-transition>
+          <v-col v-show="industry.professional">
+            <v-row>
+              <v-col cols="12">
+                <v-text-field-validated
+                  v-model="industry.profession"
+                  label="Profession (Optional)"
+                  outlined
+                />
+              </v-col>
+
+              <v-col cols="12">
+                <v-text-field-validated
+                  v-model="industry.jobTitle"
+                  label="Job Title (Optional)"
+                  outlined
+                />
+              </v-col>
+
+              <v-col cols="12">
+                <v-text-field-validated
+                  v-model="industry.company"
+                  label="Company or Workplace (Optional)"
+                  outlined
+                />
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-expand-transition>
       </v-row>
-
-      <v-checkbox
-        v-show="!industry.professional"
-        v-model="industry.student"
-        persistent-hint
-        hint="Only students can register for events."
-        label="Are they a student?"
-      ></v-checkbox>
-
-      <v-expand-transition>
-        <div v-show="industry.student">
-          <v-row class="mt-3">
-            <v-col>
-              <VSelectValidated
-                v-model="industry.education"
-                label="Education Level"
-                :items="Object.keys(education)"
-                :rules="{ required: industry.student }"
-                outlined
-              ></VSelectValidated>
-            </v-col>
-
-            <v-col>
-              <VSelectValidated
-                v-model="grade"
-                :label="
-                  industry.education === 'College'
-                    ? 'Level of Study'
-                    : 'Grade Level'
-                "
-                :items="education[industry.education]"
-                :rules="{ required: industry.student }"
-                outlined
-              ></VSelectValidated>
-            </v-col>
-          </v-row>
-
-          <VTextFieldValidated
-            v-model="industry.institution"
-            label="School Name"
-            hint="Enter the name of their school or institution."
-            :rules="{ required: industry.student }"
-            outlined
-          />
-        </div>
-      </v-expand-transition>
-
-      <v-checkbox
-        v-show="!industry.student"
-        v-model="industry.professional"
-        label="Are they an industry professional?"
-      />
-
-      <v-expand-transition>
-        <div v-show="industry.professional">
-          <VTextFieldValidated
-            v-model="industry.profession"
-            label="Profession (Optional)"
-            outlined
-          />
-
-          <VTextFieldValidated
-            v-model="industry.jobTitle"
-            label="Job Title (Optional)"
-            outlined
-          />
-
-          <VTextFieldValidated
-            v-model="industry.company"
-            label="Company or Workplace (Optional)"
-            outlined
-          />
-        </div>
-      </v-expand-transition>
     </v-card-text>
 
     <v-card-actions>
@@ -195,7 +207,7 @@ export default defineComponent({
     },
   },
   setup() {
-    const { $accessor: store } = useContext()
+    const { $accessor: store, $snack } = useContext()
     const dialog = ref<InstanceType<typeof DialogForm>>()
 
     const { state, reset } = useStateReset({
@@ -223,10 +235,6 @@ export default defineComponent({
       () => store.users.isLoading || store.auth.isLoading
     )
 
-    const onDialogToggle = (value: boolean) => {
-      if (value === false) reset()
-    }
-
     const onSubmit = async () => {
       const dto: CreateUserDto = Object.assign(
         {
@@ -237,7 +245,9 @@ export default defineComponent({
         },
         state.email?.length && { email: state.email },
         state.email?.length &&
-          state.reminderFreq.length && { reminders: state.reminderFreq },
+          state.reminderFreq.length && {
+            reminders: state.reminderFreq,
+          },
         state.grade && { grade: state.grade },
         state.industry.student && { grade: state.grade },
         state.industry.professional && {
@@ -258,7 +268,8 @@ export default defineComponent({
       }
 
       state.success = true
-      store.snackbar.show({ text: 'User successfully created' })
+
+      $snack('User successfully created')
       dialog.value!.close(500)
     }
 
@@ -270,7 +281,7 @@ export default defineComponent({
       education,
       reminders,
       isLoading,
-      onDialogToggle,
+      reset,
       onSubmit,
     }
   },

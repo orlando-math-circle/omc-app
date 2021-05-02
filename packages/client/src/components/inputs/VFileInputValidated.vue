@@ -7,6 +7,7 @@
   >
     <v-file-input
       :error-messages="errors"
+      :hide-details="hideDetails"
       v-bind="$attrs"
       v-on="$listeners"
       @change="onChange"
@@ -26,20 +27,33 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 import { ValidationProvider } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
-})
-export default class VFileInputValidated extends Vue {
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
+  props: {
+    rules: {
+      type: [String, Object],
+      default: '',
+    },
+    hideDetails: {
+      type: String,
+      default: 'auto',
+    },
+    vid: {
+      type: String,
+      default: undefined,
+    },
+  },
+  setup(_, { emit }) {
+    const onChange = (value: File) => {
+      emit('input', value)
+    }
 
-  onChange(value: File) {
-    this.$emit('input', value)
-  }
-}
+    return { onChange }
+  },
+})
 </script>

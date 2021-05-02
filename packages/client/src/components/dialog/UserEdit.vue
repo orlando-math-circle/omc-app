@@ -43,8 +43,8 @@
               </v-text-field-validated>
             </v-col>
 
-            <v-col cols="12" class="py-0">
-              <birthday-picker v-model="dto.dob" outlined></birthday-picker>
+            <v-col cols="12">
+              <BirthdayPicker v-model="dto.dob" :min-age="0" />
             </v-col>
 
             <v-col cols="6">

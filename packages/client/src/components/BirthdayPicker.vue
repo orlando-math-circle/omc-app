@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col cols="6">
-      <v-text-field-validated
+      <v-select-validated
         v-model="month"
         label="Birthday Month"
         autocomplete="bday-month"

@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-6">
+  <div>
     <template v-if="!user">
       <v-row>
         <v-col>
@@ -312,7 +312,7 @@
         </v-col>
       </v-row>
     </template>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">

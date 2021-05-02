@@ -8,8 +8,8 @@ import { reactive } from '@nuxtjs/composition-api'
 export default function useStateReset<T extends Record<string, unknown>>(
   data: T
 ) {
-  const state = reactive<T>(Object.assign({}, data))
-  const backup = reactive<T>(Object.assign({}, data))
+  const state = reactive({ ...data })
+  const backup = { ...data }
 
   const reset = () => {
     Object.assign(state, backup)
