@@ -19,9 +19,9 @@
           <alert-error v-if="error" :error="error" class="mt-3"> </alert-error>
 
           <v-form-validated @submit:form="onSubmit">
-            <v-row dense class="mb-4">
-              <v-col>
-                <VTextFieldValidated
+            <v-row>
+              <v-col cols="6">
+                <v-text-field-validated
                   v-model="first"
                   label="First Name"
                   rules="required"
@@ -29,21 +29,21 @@
                 />
               </v-col>
 
-              <v-col>
-                <VTextFieldValidated
+              <v-col cols="6">
+                <v-text-field-validated
                   v-model="last"
                   label="Last Name"
                   rules="required"
                   outlined
                 />
               </v-col>
-            </v-row>
 
-            <BirthdayPickerValidated v-model="dob" />
-
-            <v-row>
               <v-col>
-                <VSelectValidated
+                <birthday-picker-validated v-model="dob" />
+              </v-col>
+
+              <v-col cols="12">
+                <v-select-validated
                   v-model="gender"
                   :items="genders"
                   rules="required"
@@ -62,13 +62,11 @@
                       >
                     </v-tooltip>
                   </template>
-                </VSelectValidated>
+                </v-select-validated>
               </v-col>
-            </v-row>
 
-            <v-row>
-              <v-col>
-                <VTextFieldValidated
+              <v-col cols="12">
+                <v-text-field-validated
                   v-model="email"
                   name="Email"
                   rules="required|email"
@@ -77,11 +75,9 @@
                   outlined
                 />
               </v-col>
-            </v-row>
 
-            <v-row>
-              <v-col>
-                <VTextFieldValidated
+              <v-col cols="12">
+                <v-text-field-validated
                   v-model="password"
                   label="Password"
                   type="password"
@@ -91,11 +87,9 @@
                   outlined
                 />
               </v-col>
-            </v-row>
 
-            <v-row>
-              <v-col>
-                <VTextFieldValidated
+              <v-col cols="12">
+                <v-text-field-validated
                   v-model="passwordConfirm"
                   label="Confirm Password"
                   type="password"
@@ -104,67 +98,61 @@
                   outlined
                 />
               </v-col>
-            </v-row>
 
-            <v-row>
-              <v-col>
-                <VCheckboxValidated
+              <v-col cols="12">
+                <v-checkbox-validated
                   v-model="isIndustry"
                   label="Are you an industry professional?"
                 />
               </v-col>
-            </v-row>
 
-            <v-expand-transition>
-              <div v-show="isIndustry" class="mt-3">
-                <v-row>
-                  <v-col>
-                    <VTextFieldValidated
+              <v-expand-transition>
+                <div v-show="isIndustry" class="mt-3">
+                  <v-col cols="12">
+                    <v-text-field-validated
                       v-model="industry.profession"
                       label="Profession (Optional)"
                       outlined
                     />
                   </v-col>
-                </v-row>
-                <v-row>
-                  <v-col>
-                    <VTextFieldValidated
+
+                  <v-col cols="12">
+                    <v-text-field-validated
                       v-model="industry.jobTitle"
                       label="Job Title (Optional)"
                       outlined
                     />
                   </v-col>
-                </v-row>
-                <v-row>
-                  <v-col>
-                    <VTextFieldValidated
+
+                  <v-col cols="12">
+                    <v-text-field-validated
                       v-model="industry.company"
                       label="Company or Workplace (Optional)"
                       outlined
                     />
                   </v-col>
-                </v-row>
+                </div>
+              </v-expand-transition>
+
+              <v-checkbox
+                v-model="isNotify"
+                label="Receive emails reminding me of registered events"
+              ></v-checkbox>
+
+              <v-btn block class="my-4" type="submit" color="secondary">
+                Sign up
+              </v-btn>
+
+              <div class="mb-5">
+                By continuing to register you are agreeing to our
+                <a
+                  href="https://www.orlandomathcircle.org/privacy-policy/"
+                  target="blank"
+                  rel="noreferrer"
+                  >privacy policy</a
+                >.
               </div>
-            </v-expand-transition>
-
-            <v-checkbox
-              v-model="isNotify"
-              label="Receive emails reminding me of registered events"
-            ></v-checkbox>
-
-            <v-btn block class="my-4" type="submit" color="secondary">
-              Sign up
-            </v-btn>
-
-            <div class="mb-5">
-              By continuing to register you are agreeing to our
-              <a
-                href="https://www.orlandomathcircle.org/privacy-policy/"
-                target="blank"
-                rel="noreferrer"
-                >privacy policy</a
-              >.
-            </div>
+            </v-row>
           </v-form-validated>
         </v-col>
       </v-row>

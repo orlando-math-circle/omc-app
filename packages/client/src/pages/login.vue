@@ -19,10 +19,10 @@
             </v-alert>
           </v-expand-transition>
 
-          <VFormValidated @submit:form="login">
+          <v-form-validated @submit:form="login">
             <v-row>
               <v-col>
-                <VTextFieldValidated
+                <v-text-field-validated
                   v-model="email"
                   label="Email"
                   name="email"
@@ -38,7 +38,7 @@
 
             <v-row>
               <v-col>
-                <VTextFieldValidated
+                <v-text-field-validated
                   v-model="password"
                   label="Password"
                   :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
@@ -73,7 +73,7 @@
             </v-btn>
             <div class="or-separator">or</div>
             <v-btn block color="secondary" to="/register">Sign up</v-btn>
-          </VFormValidated>
+          </v-form-validated>
         </v-col>
       </v-row>
     </v-container>

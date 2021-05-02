@@ -5,7 +5,7 @@
     height="120px"
   >
     <v-avatar size="110px">
-      <v-img :src="url"> </v-img>
+      <v-img :src="url" />
     </v-avatar>
   </v-sheet>
 </template>

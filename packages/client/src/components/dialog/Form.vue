@@ -4,6 +4,7 @@
     :fullscreen="expands ? $vuetify.breakpoint.mobile : false"
     :max-width="width"
     persistent
+    rounded=""
     @click:outside="handler"
   >
     <template #activator="{ on, attrs }">
@@ -12,7 +13,10 @@
       </slot>
     </template>
 
-    <v-card @mousedown="setMouseDown">
+    <v-card
+      :style="{ borderRadius: $vuetify.breakpoint.mobile ? '0px' : 'inherit' }"
+      @mousedown="setMouseDown"
+    >
       <v-toolbar flat>
         <v-toolbar-title>
           <slot name="title"></slot>
@@ -73,6 +77,12 @@ export default defineComponent({
       () => {
         if (state.dialog === false && props.resetValidation) {
           form.value!.reset()
+        }
+
+        if (state.dialog) {
+          emit('dialog:open')
+        } else {
+          emit('dialog:close')
         }
 
         emit('dialog:state', state.dialog)

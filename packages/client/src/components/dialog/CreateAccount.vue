@@ -7,36 +7,37 @@
     </template>
 
     <v-card-text>
-      <v-row dense class="mb-4">
-        <v-col>
-          <VTextFieldValidated
+      <v-row>
+        <v-col cols="6">
+          <v-text-field-validated
             v-model="first"
             label="First Name"
             rules="required"
             required
           />
         </v-col>
-        <v-col>
-          <VTextFieldValidated
+
+        <v-col cols="6">
+          <v-text-field-validated
             v-model="last"
             label="Last Name"
             rules="required"
             required
           />
         </v-col>
-      </v-row>
 
-      <BirthdayPickerValidated
-        v-model="dob"
-        :min-age="18"
-        :custom-messages="{
-          min_age: 'Primary account users must be 18 years old.',
-        }"
-      />
+        <v-col cols="12">
+          <BirthdayPickerValidated
+            v-model="dob"
+            :min-age="18"
+            :custom-messages="{
+              min_age: 'Primary account users must be 18 years old.',
+            }"
+          />
+        </v-col>
 
-      <v-row>
-        <v-col>
-          <VTextFieldValidated
+        <v-col cols="12">
+          <v-text-field-validated
             v-model="email"
             label="Email"
             rules="required|email"

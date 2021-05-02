@@ -1,6 +1,6 @@
 <template>
-  <div class="mb-4">
-    <ValidationProvider
+  <div>
+    <validation-provider
       v-slot="{ errors }"
       :rules="{
         positive_age: true,
@@ -10,7 +10,7 @@
       :custom-messages="customMessages"
       name="Birthday"
     >
-      <BirthdayPicker
+      <birthday-picker
         v-model="date"
         :error="!!errors.length"
         v-bind="$attrs"
@@ -26,7 +26,7 @@
           </div>
         </div>
       </div>
-    </ValidationProvider>
+    </validation-provider>
   </div>
 </template>
 

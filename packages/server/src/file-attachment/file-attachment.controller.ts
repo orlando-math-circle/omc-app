@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -27,6 +28,10 @@ export class FileAttachmentController {
   @Post(':name')
   @UseInterceptors(FileInterceptor())
   upload(@UploadedFile() file: MulterFile, @Usr() user: User) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
     return this.attachmentService.create(file.fieldname, file, user);
   }
 
