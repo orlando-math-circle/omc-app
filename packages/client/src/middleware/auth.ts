@@ -1,18 +1,14 @@
-import { Middleware } from '@nuxt/types'
+import { defineNuxtMiddleware } from '@nuxtjs/composition-api'
 
 /**
  * Auth Middleware
  */
-const middleware: Middleware = (ctx) => {
-  if (!ctx.app.$accessor.auth.token) {
-    console.log('Redirect: Not logged in.')
+export default defineNuxtMiddleware((ctx) => {
+  if (!ctx.$accessor.auth.token) {
     return ctx.redirect('/login')
   }
 
-  if (ctx.app.$accessor.auth.complete === false) {
-    console.info('Redirect: Incomplete token.')
+  if (ctx.$accessor.auth.complete === false) {
     return ctx.redirect('/switcher')
   }
-}
-
-export default middleware
+})
