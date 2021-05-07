@@ -4,7 +4,6 @@
     :fullscreen="expands ? $vuetify.breakpoint.mobile : false"
     :max-width="width"
     persistent
-    rounded=""
     @click:outside="handler"
   >
     <template #activator="{ on, attrs }">
@@ -17,10 +16,11 @@
       :style="{ borderRadius: $vuetify.breakpoint.mobile ? '0px' : 'inherit' }"
       @mousedown="setMouseDown"
     >
-      <v-toolbar flat>
+      <v-toolbar :flat="flat">
         <v-toolbar-title>
           <slot name="title"></slot>
         </v-toolbar-title>
+
         <v-btn small absolute right fab icon @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -32,9 +32,17 @@
 
       <slot name="image"></slot>
 
-      <v-form-validated ref="form" v-slot="data" @submit:form="submit">
+      <VFormValidated ref="form" v-slot="data" @submit:form="submit">
         <slot v-bind="{ ...data, closing }"></slot>
-      </v-form-validated>
+
+        <v-card-text>
+          <v-row>
+            <slot name="form" v-bind="{ ...data, closing }"></slot>
+          </v-row>
+        </v-card-text>
+
+        <slot name="actions" v-bind="{ ...data, closing }"></slot>
+      </VFormValidated>
     </v-card>
   </v-dialog>
 </template>
@@ -56,6 +64,10 @@ export default defineComponent({
       default: 570,
     },
     expands: {
+      type: Boolean,
+      default: true,
+    },
+    flat: {
       type: Boolean,
       default: true,
     },
@@ -89,6 +101,8 @@ export default defineComponent({
       }
     )
 
+    const open = () => (state.dialog = true)
+
     const close = (delay: number = 0) => {
       if (!delay) {
         return emit('dialog:state', (state.dialog = false))
@@ -118,6 +132,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       form,
+      open,
       close,
       submit,
       setMouseDown,

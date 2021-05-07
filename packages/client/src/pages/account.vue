@@ -3,12 +3,12 @@
     <v-row class="mb-2">
       <v-col>
         <v-card class="avatar--offset">
-          <avatar-picker :url="$avatar(user)" />
+          <AvatarPicker :url="$avatar(user)" />
 
           <div class="d-flex flex-row">
             <v-spacer />
 
-            <dialog-select-avatar
+            <DialogSelectAvatar
               v-slot="{ on, attrs }"
               :user="user"
               @update:avatar="onUpdateAvatar"
@@ -16,7 +16,7 @@
               <v-btn text class="ma-2" v-bind="attrs" v-on="on">
                 Edit Avatar
               </v-btn>
-            </dialog-select-avatar>
+            </DialogSelectAvatar>
           </div>
 
           <div class="d-flex flex-column align-center justify-center my-3">
@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, useContext } from '@nuxtjs/composition-api'
+import { computed, defineComponent, useContext } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   setup() {
@@ -48,7 +48,10 @@ export default defineComponent({
     const account = computed(() => store.auth.account!)
     const role = computed(() => store.auth.roleTitle)
 
-    const onUpdateAvatar = () => store.auth.getMe()
+    const onUpdateAvatar = () => {
+      store.auth.getMe()
+      store.auth.getAccount()
+    }
 
     return {
       user,

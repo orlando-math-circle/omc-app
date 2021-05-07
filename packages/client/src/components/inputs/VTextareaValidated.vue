@@ -1,31 +1,38 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules">
     <v-textarea
-      v-model="text"
+      v-model="data"
       :error-messages="errors"
       v-bind="$attrs"
       v-on="$listeners"
     />
-  </validation-provider>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Vue } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
+import { useVModel } from '@vueuse/core'
 import { ValidationProvider } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
+  props: {
+    rules: {
+      type: [String, Object],
+      default: '',
+    },
+    value: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
+  setup(props) {
+    const data = useVModel(props)
+
+    return { data }
+  },
 })
-export default class VTextareaValidated extends Vue {
-  @PropSync('value') text!: string
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
-}
 </script>

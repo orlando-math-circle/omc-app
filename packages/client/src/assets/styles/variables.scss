@@ -11,9 +11,10 @@
 // An alternative font that's quite nice is "DM Sans"
 $body-font-family: 'Quicksand', sans-serif;
 $heading-font-family: 'Quicksand', sans-serif;
-$border-radius-root: 8px;
+$border-radius-root: 15px;
 $color-pack: false;
-$grid-gutter: 12px;
+$grid-gutter: 15px;
+$container-padding-x: $grid-gutter;
 
 // Light Theme
 $material-light: (

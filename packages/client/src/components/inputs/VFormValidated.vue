@@ -1,9 +1,9 @@
 <template>
-  <validation-observer v-slot="{ valid, passes, passed }" ref="observer">
-    <v-form ref="form" @submit.prevent="passes(submit)">
-      <slot v-bind="{ valid, passes, passed }"></slot>
+  <ValidationObserver v-slot="attrs" ref="observer">
+    <v-form ref="form" @submit.prevent="attrs.passes(submit)" @reset="reset">
+      <slot v-bind="attrs"></slot>
     </v-form>
-  </validation-observer>
+  </ValidationObserver>
 </template>
 
 <script lang="ts">
@@ -17,15 +17,14 @@ export default defineComponent({
   setup(_, { emit }) {
     const observer = ref<InstanceType<typeof ValidationObserver>>()
 
-    const submit = () => {
-      emit('submit:form')
-    }
+    const submit = () => emit('form:submit')
 
     const reset = () => {
+      console.log('Resetting...')
       observer.value!.reset()
     }
 
-    return { submit, reset, observer }
+    return { reset, submit, observer }
   },
 })
 </script>
