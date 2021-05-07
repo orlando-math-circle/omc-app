@@ -3,7 +3,7 @@ version: "3.4"
 services:
   # PostgreSQL Service
   database:
-    image: postgres:12
+    image: postgres:13
     container_name: PostgreSQL
     restart: unless-stopped
     tty: true
