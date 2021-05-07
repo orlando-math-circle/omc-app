@@ -1,14 +1,14 @@
 <template>
   <v-dialog v-model="dialog" max-width="440px">
-    <template #activator="{ on, attrs }">
-      <slot v-bind="{ on, attrs }"></slot>
+    <template #activator="activator">
+      <slot v-bind="activator"></slot>
     </template>
 
     <v-card>
       <v-toolbar flat>
         <v-toolbar-title>Select Avatar</v-toolbar-title>
 
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn icon @click="dialog = false">
           <v-icon>mdi-close</v-icon>
@@ -29,20 +29,14 @@
               :key="avatar"
               class="d-flex justify-center"
               cols="6"
+              md="3"
               sm="4"
             >
               <v-item v-slot="{ active, toggle }">
-                <v-card
-                  class="d-flex align-center"
-                  height="100"
-                  width="100"
-                  @click="toggle"
-                >
-                  <v-img :src="avatarToImage(avatar)">
+                <v-card class="d-flex align-center" @click="toggle">
+                  <v-img :src="avatarToImage(avatar)" class="rounded">
                     <v-scroll-y-transition>
-                      <div v-if="active" class="flex-grow-1 text-center active">
-                        Selected
-                      </div>
+                      <div v-if="active" class="active rounded">Selected</div>
                     </v-scroll-y-transition>
                   </v-img>
                 </v-card>
@@ -65,68 +59,93 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { DefaultAvatar } from '@server/user/enums/default-avatar.enum'
 import { User } from '@server/user/user.entity'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  reactive,
+  useContext,
+  toRefs,
+} from '@nuxtjs/composition-api'
 
-@Component
-export default class DialogSelectAvatar extends Vue {
-  @Prop({ default: false }) upload!: boolean
-  @Prop({ required: true }) user!: User
+export default defineComponent({
+  props: {
+    upload: {
+      type: Boolean,
+      default: false,
+    },
+    user: {
+      type: Object as PropType<User>,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const { $accessor: store, $config: config, $snack: snack } = useContext()
 
-  dialog = false
-  selected = 0
-  file: File | null = null
-  avatars = [...Array(10).keys()].map((key) =>
-    key.toString()
-  ) as DefaultAvatar[]
+    const state = reactive({
+      dialog: false,
+      selected: 0,
+      file: null as File | null,
+      avatars: [...Array(10).keys()].map((k) =>
+        k.toString()
+      ) as DefaultAvatar[],
+    })
 
-  get isLoading() {
-    return this.$accessor.users.isLoading
-  }
+    const isLoading = computed(() => store.users.isLoading)
 
-  avatarToImage(avatar: DefaultAvatar) {
-    return `${this.$config.staticBase}${this.$config.avatarBase}/${avatar}.png`
-  }
+    const avatarToImage = (avatar: DefaultAvatar) =>
+      `${config.staticBase}${config.avatarBase}/${avatar}.png`
 
-  async onSubmit() {
-    if (this.upload && this.file) {
-      const url = (await this.$accessor.files.filesToURL(this.file)) as string
+    const onSubmit = async () => {
+      if (props.upload && state.file) {
+        const url = (await store.files.filesToURL(state.file)) as string
 
-      if (this.$accessor.files.isErrored) {
-        this.$accessor.snackbar.show({
-          text: this.$accessor.files.error!.message,
-          timeout: 7000,
+        if (store.files.isErrored) {
+          return snack(store.files.error!.message)
+        }
+
+        await store.users.update({
+          id: props.user.id,
+          updateUserDto: {
+            avatar: url,
+          },
         })
-        return
+      } else {
+        await store.users.updateOwn({
+          id: store.auth.user!.id,
+          updateOwnUserDto: {
+            avatar: state.avatars[state.selected],
+          },
+        })
       }
 
-      await this.$accessor.users.update({
-        id: this.user.id,
-        updateUserDto: {
-          avatar: url,
-        },
-      })
-    } else {
-      await this.$accessor.users.updateOwn({
-        id: this.$accessor.auth.user!.id,
-        updateOwnUserDto: {
-          avatar: this.avatars[this.selected],
-        },
-      })
+      emit('update:avatar')
+
+      state.dialog = false
     }
 
-    this.$emit('update:avatar')
-
-    this.dialog = false
-  }
-}
+    return {
+      ...toRefs(state),
+      isLoading,
+      avatarToImage,
+      onSubmit,
+    }
+  },
+})
 </script>
 
 <style lang="scss" scoped>
 .active {
+  display: flex;
+  height: 100%;
   color: #fff;
   font-weight: 700;
   text-shadow: 0 0 3px #000;
+  border: 5px solid #fff;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
 }
 </style>

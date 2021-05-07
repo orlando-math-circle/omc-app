@@ -1,12 +1,7 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules">
     <v-text-field
-      v-model="text"
+      v-model="data"
       :error-messages="errors"
       :hide-details="hideDetails"
       :outlined="outlined"
@@ -24,11 +19,12 @@
         <slot :name="slotName" />
       </template>
     </v-text-field>
-  </validation-provider>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { defineComponent } from '@nuxtjs/composition-api'
+import { useVModel } from '@vueuse/core'
 import { ValidationProvider } from 'vee-validate'
 
 export default defineComponent({
@@ -36,18 +32,14 @@ export default defineComponent({
     ValidationProvider,
   },
   props: {
-    value: {
-      type: [String, Number],
-      required: false,
-      default: null,
-    },
     rules: {
       type: [String, Object],
       default: '',
     },
-    vid: {
-      type: String,
-      default: undefined,
+    value: {
+      type: [String, Number],
+      required: false,
+      default: null,
     },
     hideDetails: {
       type: String,
@@ -58,17 +50,10 @@ export default defineComponent({
       default: true,
     },
   },
-  setup(props, { emit }) {
-    const text = computed({
-      get() {
-        return props.value
-      },
-      set(value: string | number) {
-        emit('input', value)
-      },
-    })
+  setup(props) {
+    const data = useVModel(props)
 
-    return { text }
+    return { data }
   },
 })
 </script>

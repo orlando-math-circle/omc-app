@@ -1,40 +1,38 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules">
     <v-checkbox
-      v-model="val"
+      v-model="data"
       :error-messages="errors"
       v-bind="$attrs"
       v-on="$listeners"
-    >
-    </v-checkbox>
-  </validation-provider>
+    />
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 import { ValidationProvider } from 'vee-validate'
+import { useVModel } from '@vueuse/core'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
+  props: {
+    rules: {
+      type: [String, Object],
+      required: true,
+    },
+    value: {
+      type: [Boolean],
+      required: false,
+      default: null,
+    },
+  },
+  setup(props) {
+    const data = useVModel(props)
+
+    return { data }
+  },
 })
-export default class VCheckboxValidated extends Vue {
-  @Prop() value!: boolean
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
-
-  get val() {
-    return this.value
-  }
-
-  set val(value: boolean) {
-    this.$emit('input', value)
-  }
-}
 </script>

@@ -1,22 +1,34 @@
 <template>
-  <v-sheet
-    class="avatar--bg d-flex align-center justify-center"
-    width="120px"
-    height="120px"
-  >
-    <v-avatar size="110px">
-      <v-img :src="url" />
-    </v-avatar>
-  </v-sheet>
+  <v-tooltip bottom>
+    <template #activator="{ on, attrs }">
+      <v-sheet
+        class="avatar--bg d-flex align-center justify-center"
+        width="120px"
+        height="120px"
+        v-bind="attrs"
+        v-on="on"
+      >
+        <v-avatar size="110px">
+          <v-img :src="url" />
+        </v-avatar>
+      </v-sheet>
+    </template>
+
+    <span>Change Your Avatar</span>
+  </v-tooltip>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 
-@Component
-export default class AvatarPicker extends Vue {
-  @Prop() url!: string
-}
+export default defineComponent({
+  props: {
+    url: {
+      type: String,
+      required: true,
+    },
+  },
+})
 </script>
 
 <style lang="scss">

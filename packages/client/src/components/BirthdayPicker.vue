@@ -1,8 +1,8 @@
 <template>
   <v-row>
     <v-col cols="6">
-      <v-select-validated
-        v-model="month"
+      <VSelectValidated
+        v-model="fields.month"
         label="Birthday Month"
         autocomplete="bday-month"
         name="Birthday Month"
@@ -16,9 +16,9 @@
     </v-col>
 
     <v-col cols="3">
-      <v-text-field-validated
+      <VTextFieldValidated
         ref="dateField"
-        v-model.number="date"
+        v-model.number="fields.date"
         type="tel"
         maxlength="2"
         :rules="dayRules"
@@ -32,9 +32,9 @@
     </v-col>
 
     <v-col cols="3">
-      <v-text-field-validated
+      <VTextFieldValidated
         ref="yearField"
-        v-model.number="year"
+        v-model.number="fields.year"
         type="tel"
         maxlength="4"
         rules="required"
@@ -53,13 +53,13 @@
 import {
   computed,
   defineComponent,
-  onMounted,
   reactive,
   toRefs,
   watch,
 } from '@nuxtjs/composition-api'
 import { months } from '~/utils/constants'
 import { isValidDate } from '~/utils/utilities'
+import { daysInMonth } from '~/utils/time'
 import useStateReset from '~/composables/useStateReset'
 
 export default defineComponent({
@@ -79,15 +79,48 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { state, reset } = useStateReset({
-      month: null as number | null,
-      date: null as number | null,
-      year: null as number | null,
+      fields: {
+        month: null as number | null,
+        date: null as number | null,
+        year: null as number | null,
+      },
       dirty: reactive({
         month: false,
         date: false,
         year: false,
       }),
     })
+
+    const date = computed(() => {
+      // If the fields are empty then there is no internal date.
+      if (!state.fields.year || !state.fields.month || !state.fields.date) {
+        return ''
+      }
+
+      return new Date(
+        state.fields.year,
+        state.fields.month,
+        state.fields.date
+      ).toISOString()
+    })
+
+    const fromISO = () => {
+      if (props.value === date.value) {
+        return
+      }
+
+      if (props.value === '') {
+        return reset()
+      }
+
+      const newDate = new Date(props.value)
+
+      if (!isValidDate(newDate)) return
+
+      state.fields.year = newDate.getFullYear()
+      state.fields.month = newDate.getMonth()
+      state.fields.date = newDate.getDate()
+    }
 
     /**
      * Emits the blur event only after each birthday
@@ -101,52 +134,15 @@ export default defineComponent({
       }
     }
 
-    /**
-     * If the v-model is cleared then the component data
-     * should also clear.
-     */
-    watch(
-      () => props.value,
-      (value: string) => {
-        if (!value || !value.length) {
-          reset()
-        }
-      }
-    )
-
-    watch(
-      () => state,
-      (birthday: typeof state) => {
-        if (
-          typeof birthday.year !== 'number' ||
-          typeof birthday.month !== 'number' ||
-          typeof birthday.date !== 'number'
-        )
-          return
-
-        const date = new Date(
-          birthday.year as number,
-          birthday.month as number,
-          birthday.date as number
-        )
-
-        if (!isValidDate(date)) return
-
-        emit('input', date.toISOString())
-      },
-      { deep: true }
-    )
-
-    const daysInMonth = (month: number, year: number) => {
-      return new Date(year, month + 1, 0).getDate()
-    }
+    watch(() => props.value, fromISO, { immediate: true })
+    watch(state.fields, () => emit('input', date.value))
 
     /**
      * Applies rules ensuring the user doesn't create a birthday
      * with an invalid number of days in the month.
      */
     const dayRules = computed(() => {
-      if (typeof state.month !== 'number' || typeof state.year !== 'number') {
+      if (!state.fields.month || !state.fields.year) {
         return {
           required: true,
           min_value: 1,
@@ -156,25 +152,13 @@ export default defineComponent({
       return {
         required: true,
         min_value: 1,
-        max_value: daysInMonth(state.month, state.year),
+        max_value: daysInMonth(state.fields.month, state.fields.year),
       }
     })
 
     const monthSelections = computed(() =>
       months.map((m, i) => ({ text: m, value: i }))
     )
-
-    onMounted(() => {
-      if (typeof props.value !== 'string') return
-
-      const date = new Date(props.value)
-
-      if (!isValidDate(date)) return
-
-      state.year = date.getFullYear()
-      state.month = date.getMonth()
-      state.date = date.getDate()
-    })
 
     return {
       ...toRefs(state),

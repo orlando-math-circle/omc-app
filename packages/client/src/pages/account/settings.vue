@@ -1,5 +1,12 @@
 <template>
   <div>
+    <DialogConfirm ref="deleteDialog" @confirm="onDeleteConfirm">
+      Deleting a user is a permanent action and cannot be undone. If you need to
+      correct any information on the account please contact an administrator.
+    </DialogConfirm>
+
+    <DialogUserEdit ref="editDialog" />
+
     <v-card v-if="user.omcEmail" class="mb-4">
       <v-card-title>OMC Email</v-card-title>
 
@@ -12,6 +19,40 @@
       </v-card-text>
     </v-card>
 
+    <!-- Personal User Settings -->
+    <v-card class="mb-4">
+      <v-card-title>Personal Info</v-card-title>
+
+      <VFormValidated v-slot="{ dirty }" @form:submit="onChangeSettings">
+        <v-card-text>
+          <v-row>
+            <v-col cols="6">
+              <VTextFieldValidated v-model="first" rules="required" />
+            </v-col>
+
+            <v-col cols="6">
+              <VTextFieldValidated v-model="last" rules="required" />
+            </v-col>
+
+            <v-col cols="12">
+              <VTextFieldValidated v-model="email" rules="required" />
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn v-if="dirty" text @click="$emit('form:reset')">
+            Reset Changes
+          </v-btn>
+
+          <v-spacer />
+
+          <v-btn type="submit">Save Changes</v-btn>
+        </v-card-actions>
+      </VFormValidated>
+    </v-card>
+
+    <!-- Account Users Card -->
     <v-card class="mb-4">
       <v-card-title>Account Users</v-card-title>
 
@@ -58,7 +99,7 @@
                 </v-list-item>
 
                 <v-list-item
-                  v-if="primary && primary.id !== usr.id"
+                  v-if="primary.id !== usr.id"
                   @click="deleteDialog && deleteDialog.open(usr)"
                 >
                   <v-list-item-icon>
@@ -76,14 +117,15 @@
       </v-list>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
-        <dialog-create-user v-slot="{ on, attrs }">
+        <DialogCreateUser v-slot="{ on, attrs }">
           <v-btn color="primary" v-bind="attrs" v-on="on">Add User</v-btn>
-        </dialog-create-user>
+        </DialogCreateUser>
       </v-card-actions>
     </v-card>
 
+    <!-- Notifications Card -->
     <v-card class="mb-4">
       <v-card-title>Notifications</v-card-title>
 
@@ -107,7 +149,8 @@
       </v-card-text>
     </v-card>
 
-    <v-card class="mb-4">
+    <!-- Password Changing Card -->
+    <v-card v-if="isPrimary" class="mb-4">
       <v-card-title>Change Password</v-card-title>
 
       <v-card-subtitle>Change the password on the account.</v-card-subtitle>
@@ -120,7 +163,7 @@
         <v-card-text>
           <v-row>
             <v-col cols="12">
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="curPassword"
                 label="Original Password"
                 type="password"
@@ -132,7 +175,7 @@
             </v-col>
 
             <v-col cols="12">
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="newPassword"
                 label="New Password"
                 type="password"
@@ -145,7 +188,7 @@
             </v-col>
 
             <v-col cols="12">
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="confirm"
                 label="Confirm New Password"
                 type="password"
@@ -168,12 +211,6 @@
         </v-card-actions>
       </v-form-validated>
     </v-card>
-
-    <dialog-confirm ref="deleteDialog" @confirm="onDeleteConfirm">
-      Deleting a user is a permanent action and cannot be undone. If you need to
-      correct any information on the account please contact an administrator.
-    </dialog-confirm>
-    <dialog-user-edit ref="editDialog"></dialog-user-edit>
   </div>
 </template>
 
@@ -184,37 +221,42 @@ import {
   ref,
   reactive,
   computed,
-  wrapProperty,
+  useContext,
   toRefs,
 } from '@nuxtjs/composition-api'
 import { User } from '@server/user/user.entity'
-import VTextFieldValidated from '~/components/inputs/VTextFieldValidated.vue'
 import { genders, reminders } from '~/utils/constants'
 import { grades } from '~/utils/events'
 import DialogConfirm from '~/components/dialog/Confirm.vue'
 import DialogUserEdit from '~/components/dialog/UserEdit.vue'
 import { DTOUser } from '~/store/users'
-
-const useAccessor = wrapProperty('$accessor', false)
-const useSnackbar = wrapProperty('$snack', false)
+import useStateReset from '~/composables/useStateReset'
 
 export default defineComponent({
-  components: { VTextFieldValidated },
   transition: 'slide-left',
   setup() {
-    const store = useAccessor()
-    const snackbar = useSnackbar()
+    const { $accessor: store, $snack: snackbar } = useContext()
     const editDialog = ref<InstanceType<typeof DialogUserEdit>>()
     const deleteDialog = ref<InstanceType<typeof DialogConfirm>>()
+
     const user = computed(() => store.auth.user!)
     const users = computed(() => store.auth.account?.users || [])
-    const primary = computed(() => store.auth.account?.primaryUser)
+    const primary = computed(() => store.auth.account!.primaryUser)
+    const isPrimary = computed(() => store.auth.isPrimary)
 
     const state = reactive({
       reminders: [] as ReminderFreq[],
       confirm: '',
       newPassword: '',
       curPassword: '',
+    })
+
+    const { state: userSettings } = useStateReset({
+      first: user.value.first,
+      last: user.value.last,
+      dob: user.value.dob,
+      email: user.value.email,
+      grade: user.value.grade,
     })
 
     const handleChangePassword = async () => {
@@ -256,6 +298,10 @@ export default defineComponent({
       }
     }
 
+    const onChangeSettings = () => {
+      console.log('Settings Submit')
+    }
+
     const onDeleteConfirm = async (user: User) => {
       await store.users.delete(user.id)
       await store.auth.getAccount()
@@ -266,14 +312,17 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      ...toRefs(userSettings),
       genders,
       reminders,
       grades,
       user,
       users,
       primary,
+      isPrimary,
       handleChangePassword,
       handleChangeReminders,
+      onChangeSettings,
       onDeleteConfirm,
       gender,
       editDialog,

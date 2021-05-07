@@ -1,185 +1,170 @@
 <template>
-  <v-dialog v-model="dialog" max-width="440px">
-    <v-card v-if="user == null">
-      <v-card-title>Error</v-card-title>
+  <FormDialog ref="form" @form:submit="onSubmit">
+    <template #title>Update User</template>
 
-      <v-card-text>User not found.</v-card-text>
-    </v-card>
+    <template #form>
+      <v-row>
+        <v-col cols="6">
+          <VTextFieldValidated
+            v-model="dto.first"
+            label="First Name"
+            rules="required"
+          />
+        </v-col>
 
-    <v-card v-else>
-      <v-toolbar flat>
-        <v-card-title>Edit User</v-card-title>
+        <v-col cols="6">
+          <VTextFieldValidated
+            v-model="dto.last"
+            label="Last Name"
+            rules="required"
+            field="text"
+          />
+        </v-col>
 
-        <v-spacer></v-spacer>
+        <v-col cols="12">
+          <BirthdayPickerValidated v-model="dto.dob" :min-age="0" />
+        </v-col>
 
-        <v-btn icon @click="dialog = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-toolbar>
+        <v-col cols="6">
+          <VSelectValidated
+            v-model="dto.gender"
+            :items="genders"
+            rules="required"
+            label="Gender"
+          />
+        </v-col>
 
-      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
-        <v-card-text>
-          <v-row>
-            <v-col cols="6">
-              <v-text-field-validated
-                v-model="dto.first"
-                label="First Name"
-                rules="required"
-                hide-details="auto"
-                required
-                outlined
-              ></v-text-field-validated>
-            </v-col>
+        <v-col cols="6">
+          <VSelect
+            v-model="dto.grade"
+            :items="grades"
+            label="Grade"
+            hide-details="auto"
+            outlined
+          />
+        </v-col>
+      </v-row>
 
-            <v-col cols="6">
-              <v-text-field-validated
-                v-model="dto.last"
-                label="Last Name"
-                rules="required"
-                hide-details="auto"
-                required
-                outlined
-              >
-              </v-text-field-validated>
-            </v-col>
+      <!-- <FormField
+        v-model="dto.industry.profession"
+        label="Profession (Optional)"
+        field="text"
+      />
 
-            <v-col cols="12">
-              <BirthdayPicker v-model="dto.dob" :min-age="0" />
-            </v-col>
+      <FormField
+        v-model="dto.industry.jobTitle"
+        label="Job Title (Optional)"
+        field="text"
+      />
 
-            <v-col cols="6">
-              <v-select-validated
-                v-model="dto.gender"
-                :items="genders"
-                label="Gender"
-                rules="required"
-                outlined
-                hide-details="auto"
-              ></v-select-validated>
-            </v-col>
+      <FormField
+        v-model="dto.industry.company"
+        label="Company or Workplace (Optional)"
+        field="text"
+      /> -->
+    </template>
 
-            <v-col cols="6">
-              <v-select-validated
-                v-model="dto.grade"
-                :items="grades"
-                label="Grade"
-                hide-details="auto"
-                outlined
-              ></v-select-validated>
-            </v-col>
+    <template #actions="{ passes }">
+      <v-spacer />
 
-            <v-col cols="12">
-              <v-text-field-validated
-                v-model="dto.industry.profession"
-                label="Profession (Optional)"
-                hide-details="auto"
-                outlined
-              ></v-text-field-validated>
-            </v-col>
-
-            <v-col cols="12">
-              <v-text-field-validated
-                v-model="dto.industry.jobTitle"
-                label="Job Title (Optional)"
-                hide-details="auto"
-                outlined
-              ></v-text-field-validated>
-            </v-col>
-
-            <v-col cols="12">
-              <v-text-field-validated
-                v-model="dto.industry.company"
-                label="Company or Workplace (Optional)"
-                hide-details="auto"
-                outlined
-              ></v-text-field-validated>
-            </v-col>
-          </v-row>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-
-          <v-btn
-            type="submit"
-            :disabled="!passes"
-            :loading="isLoading"
-            color="secondary"
-          >
-            Edit User
-          </v-btn>
-        </v-card-actions>
-      </v-form-validated>
-    </v-card>
-  </v-dialog>
+      <v-btn
+        block
+        rounded
+        type="submit"
+        :disabled="!passes"
+        :loading="isLoading"
+        color="secondary"
+      >
+        Submit
+      </v-btn>
+    </template>
+  </FormDialog>
 </template>
 
 <script lang="ts">
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+  ref,
+  useContext,
+} from '@nuxtjs/composition-api'
+import { User } from '@server/user/user.entity'
 import { IndustryDto } from '@server/user/dtos/industry.dto'
 import { Gender } from '@server/user/enums/gender.enum'
 import { Grade } from '@server/user/enums/grade.enum'
-import { Component, Vue } from 'nuxt-property-decorator'
-import { genders } from '../../utils/constants'
-import { grades } from '../../utils/events'
-import { DTOUser } from '../../store/users'
+import { genders } from '~/utils/constants'
+import { grades } from '~/utils/events'
+import FormDialog from '~/components/form/Dialog.vue'
 
-@Component
-export default class DialogUserEdit extends Vue {
-  user = null as DTOUser | null
-  dialog = false
-  genders = genders
-  grades = grades
+export default defineComponent({
+  setup() {
+    const { $accessor: store } = useContext()
+    const form = ref<InstanceType<typeof FormDialog>>()
 
-  dto = {
-    first: '',
-    last: '',
-    dob: '',
-    gender: undefined as Gender | undefined,
-    grade: undefined as Grade | undefined,
-    email: '' as string | undefined,
-    industry: {
-      profession: '',
-      jobTitle: '',
-      company: '',
-    } as IndustryDto,
-  }
-
-  get isLoading() {
-    return this.$accessor.users.isLoading || this.$accessor.auth.isLoading
-  }
-
-  public open(user: DTOUser) {
-    if (!user) return
-
-    this.user = user
-    this.dto.first = user.first
-    this.dto.last = user.last
-    this.dto.dob = user.dob
-    this.dto.email = user.email
-    this.dto.gender = user.gender
-    this.dto.grade = user.grade
-
-    if (user.industry) {
-      this.dto.industry = { ...user.industry }
-    }
-
-    this.dialog = true
-  }
-
-  async onSubmit() {
-    await this.$accessor.users.update({
-      id: this.user!.id,
-      updateUserDto: this.dto,
+    const state = reactive({
+      user: null as User | null,
+      dto: {
+        first: '',
+        last: '',
+        dob: '',
+        gender: undefined as Gender | undefined,
+        grade: undefined as Grade | undefined,
+        email: undefined as string | undefined,
+        industry: {
+          profession: '',
+          jobTitle: '',
+          company: '',
+        } as IndustryDto,
+      },
     })
 
-    if (!this.$accessor.users.error) {
-      if (this.$accessor.auth.user!.id === this.user!.id) {
-        await this.$accessor.auth.getMe()
-      }
-      await this.$accessor.auth.getAccount()
+    const isLoading = computed(
+      () => store.users.isLoading || store.auth.isLoading
+    )
 
-      this.dialog = false
+    const open = (user: User) => {
+      state.user = user
+
+      state.dto.first = user.first
+      state.dto.last = user.last
+      state.dto.dob = (user.dob as unknown) as string
+      state.dto.gender = user.gender
+      state.dto.grade = user.grade
+      state.dto.email = user.email
+
+      state.dto.industry = user.industry || {
+        profession: '',
+        jobTitle: '',
+        company: '',
+      }
+
+      form.value!.open()
     }
-  }
-}
+
+    const onSubmit = async () => {
+      await store.users.update({
+        id: state.user!.id,
+        updateUserDto: state.dto,
+      })
+
+      if (!store.users.isErrored) {
+        // Refresh the account users.
+        await store.auth.getAccount()
+        form.value!.close()
+      }
+    }
+
+    return {
+      ...toRefs(state),
+      form,
+      genders,
+      grades,
+      open,
+      onSubmit,
+      isLoading,
+    }
+  },
+})
 </script>

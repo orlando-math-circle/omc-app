@@ -12,7 +12,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn text @click="dialog = false">Cancel</v-btn>
         <v-btn color="secondary" @click="confirm">Confirm</v-btn>
@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from '@nuxtjs/composition-api'
+import { defineComponent, reactive, toRefs } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   props: {
@@ -34,21 +34,22 @@ export default defineComponent({
   setup(_, { emit }) {
     const state = reactive({
       dialog: false,
-      value: null as any,
+      data: null as any,
     })
 
     const open = (value: any) => {
-      state.value = value
+      console.log('Opening Confirm Dialog')
+      state.data = value
       state.dialog = true
     }
 
     const confirm = () => {
-      emit('confirm', state.value)
+      emit('confirm', state.data)
       state.dialog = false
     }
 
     return {
-      dialog: state.dialog,
+      ...toRefs(state),
       open,
       confirm,
     }

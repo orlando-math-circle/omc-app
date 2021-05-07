@@ -1,37 +1,35 @@
 <template>
-  <div>
-    <validation-provider
-      v-slot="{ errors }"
-      :rules="{
-        positive_age: true,
-        min_age: minAge,
-        max_age: maxAge,
-      }"
-      :custom-messages="customMessages"
-      name="Birthday"
-    >
-      <birthday-picker
-        v-model="date"
-        :error="!!errors.length"
-        v-bind="$attrs"
-        v-on="$listeners"
-      />
+  <ValidationProvider
+    v-slot="{ errors }"
+    :rules="{
+      positive_age: true,
+      min_age: minAge,
+      max_age: maxAge,
+    }"
+    :custom-messages="customMessages"
+  >
+    <BirthdayPicker
+      v-model="data"
+      :error="!!errors.length"
+      v-bind="$attrs"
+      v-on="$listeners"
+    />
 
-      <div v-if="!!errors.length" class="v-text-field__details mt-2 mb-3 px-3">
-        <div class="v-messages error--text">
-          <div class="v-messages__wrapper">
-            <div class="v-messages__message">
-              {{ errors[0] }}
-            </div>
+    <div v-if="!!errors.length" class="v-text-field__details mt-2 mb-3 px-3">
+      <div class="v-messages error--text">
+        <div class="v-messages__wrapper">
+          <div class="v-messages__message">
+            {{ errors[0] }}
           </div>
         </div>
       </div>
-    </validation-provider>
-  </div>
+    </div>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@nuxtjs/composition-api'
+import { defineComponent, PropType } from '@nuxtjs/composition-api'
+import { useVModel } from '@vueuse/core'
 import { ValidationProvider } from 'vee-validate'
 
 interface CustomMessages {
@@ -62,18 +60,11 @@ export default defineComponent({
       default: () => ({}),
     },
   },
-  setup(props, { emit }) {
-    const date = computed({
-      get() {
-        return props.value
-      },
-      set(value: string) {
-        emit('input', value)
-      },
-    })
+  setup(props) {
+    const data = useVModel(props)
 
     return {
-      date,
+      data,
     }
   },
 })

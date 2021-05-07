@@ -1,10 +1,5 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules">
     <v-file-input
       :error-messages="errors"
       :hide-details="hideDetails"
@@ -23,7 +18,7 @@
         <slot :name="slotName" />
       </template>
     </v-file-input>
-  </validation-provider>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
@@ -42,10 +37,6 @@ export default defineComponent({
     hideDetails: {
       type: String,
       default: 'auto',
-    },
-    vid: {
-      type: String,
-      default: undefined,
     },
   },
   setup(_, { emit }) {

@@ -21,7 +21,7 @@
         <v-spacer></v-spacer>
       </v-toolbar>
 
-      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
+      <VFormValidated>
         <v-card-text>
           <v-row>
             <v-col>
@@ -71,7 +71,7 @@
         <v-card-actions>
           <v-btn type="submit" :disabled="!passes">Submit Changes</v-btn>
         </v-card-actions>
-      </v-form-validated>
+      </VFormValidated>
     </v-card>
   </v-dialog>
 </template>
@@ -79,6 +79,18 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { genders } from '../../utils/constants'
+
+// export default defineComponent({
+//   const state = reactive({
+//     dialog: false,
+
+//   })
+
+//   return {
+//     ...toRefs(state),
+//     genders,
+//   }
+// })
 
 @Component
 export default class DialogUpdateUser extends Vue {

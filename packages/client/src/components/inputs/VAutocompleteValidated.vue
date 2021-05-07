@@ -1,10 +1,5 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules">
     <v-autocomplete
       :value="value"
       :error-messages="errors"
@@ -23,21 +18,22 @@
         <slot :name="slotName" />
       </template>
     </v-autocomplete>
-  </validation-provider>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 import { ValidationProvider } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
+  props: {
+    rules: {
+      type: [String, Object],
+      required: true,
+    },
+  },
 })
-export default class VAutocompleteValidated extends Vue {
-  @Prop() value!: any
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
-}
 </script>
