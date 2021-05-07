@@ -2910,22 +2910,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxtjs/composition-api@npm:0.23.2":
-  version: 0.23.2
-  resolution: "@nuxtjs/composition-api@npm:0.23.2"
+"@nuxtjs/composition-api@npm:0.23.4":
+  version: 0.23.4
+  resolution: "@nuxtjs/composition-api@npm:0.23.4"
   dependencies:
     "@vue/composition-api": 1.0.0-rc.7
-    defu: ^3.2.2
+    defu: ^4.0.1
     estree-walker: ^2.0.2
     magic-string: ^0.25.7
-    ufo: ^0.6.11
+    ufo: ^0.7.2
     upath: ^2.0.1
   peerDependencies:
     "@nuxt/vue-app": ^2.15
     fs-extra: ^8.1.0
     nuxt: ^2.15
     vue: ^2
-  checksum: d21b471326add4ed1341428ad9c18717c336c6ec64efac9a1a064cfe1559e7688afae29066b61a5f68819379e364f8c8c1f754829214001bd63b0a254c01dfb5
+  checksum: ee6a3eeb940a920b0010cfdb96d7eccb1f6652e60e58f72f4db75caf607570019944651d5203a102d60f37df47a8a7da2bd44f468f37aa734726e2128a18957e
   languageName: node
   linkType: hard
 
@@ -3057,7 +3057,7 @@ __metadata:
     "@nuxt/types": 2.15.4
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.1
-    "@nuxtjs/composition-api": 0.23.2
+    "@nuxtjs/composition-api": 0.23.4
     "@nuxtjs/dotenv": 1.4.1
     "@nuxtjs/eslint-config-typescript": 6.0.0
     "@nuxtjs/pwa": 3.3.5
@@ -8260,6 +8260,13 @@ __metadata:
   version: 3.2.2
   resolution: "defu@npm:3.2.2"
   checksum: 15c2989ea916b66eae3639310faa3c4dafc4f5be55bda2576cbe47d6e90e56349ab2ebbe7cdf6f50543869a8cf07cb0e1ad82e74d4ec0ab9cac9ff00c353c2de
+  languageName: node
+  linkType: hard
+
+"defu@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "defu@npm:4.0.1"
+  checksum: 0e66c20eda0833f351e90bd3a4931cf8c1932f49d28389345d30adf026dc449d24c906678e1b46ca4f2eb320a5b6c7191ff738a6e8ecb8a6154f737f72df23ec
   languageName: node
   linkType: hard
 
@@ -20609,10 +20616,17 @@ typescript@4.2.3:
   languageName: node
   linkType: hard
 
-"ufo@npm:^0.6.10, ufo@npm:^0.6.11, ufo@npm:^0.6.7, ufo@npm:^0.6.9":
+"ufo@npm:^0.6.10, ufo@npm:^0.6.7, ufo@npm:^0.6.9":
   version: 0.6.11
   resolution: "ufo@npm:0.6.11"
   checksum: 3b0393dbec80e0f7072959903dc39f64368211645cafce291bf440d48e8a5c8c33c9a13ac8a6839be42d63ed0d797090d6376490aad40709d292069d2cb29c7c
+  languageName: node
+  linkType: hard
+
+"ufo@npm:^0.7.2":
+  version: 0.7.2
+  resolution: "ufo@npm:0.7.2"
+  checksum: 01d3c7a237a5ea26ea2136b6cce819a4229973f4effe6b7b6caf3fb46c6eb7ed33f5e62fd251462863ffe89d9eeba3aa22f9903fcedccbcc40f97323b851d674
   languageName: node
   linkType: hard
 
