@@ -3067,7 +3067,7 @@ __metadata:
     apexcharts: 3.26.1
     cookie-universal-nuxt: 2.1.4
     cropperjs: 1.5.11
-    date-fns: 2.21.1
+    date-fns: 2.21.3
     deepmerge: 4.2.2
     eslint: 7.24.0
     eslint-config-prettier: 8.2.0
@@ -3153,7 +3153,7 @@ __metadata:
     cache-manager: 3.4.3
     class-transformer: 0.4.0
     class-validator: 0.13.1
-    date-fns: 2.21.1
+    date-fns: 2.21.3
     dotenv: 8.2.0
     eslint: 7.24.0
     eslint-config-prettier: 8.2.0
@@ -8066,10 +8066,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:2.21.1":
-  version: 2.21.1
-  resolution: "date-fns@npm:2.21.1"
-  checksum: 00a2ddea1047c4ce6eaadda76a0ee0782d1cfe65061641bbff94f7a70d2d6ab12dac89e027b39d49710bdb2cf264bc1a4e096b0324c7de79699296a4c19f4a40
+"date-fns@npm:2.21.3":
+  version: 2.21.3
+  resolution: "date-fns@npm:2.21.3"
+  checksum: a88c9da180cde3a3426c09cacf3f6bffb615e31d73e458da90e9d5304432eea2e0b360f40ee4fd5ca187659e8a7f8f667db902a3eb033e8d2d1522b1cc1b9e32
   languageName: node
   linkType: hard
 
