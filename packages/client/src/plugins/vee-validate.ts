@@ -1,4 +1,4 @@
-import { differenceInYears, parse } from 'date-fns'
+import { differenceInYears, isAfter, parse } from 'date-fns'
 import { isNumber } from 'lodash'
 import { extend, setInteractionMode } from 'vee-validate'
 // eslint-disable-next-line camelcase
@@ -46,32 +46,27 @@ extend('ext', {
   message: 'This file type is not permitted.',
 })
 
+/**
+ * A date of birth is invalid if it occurs in the future.
+ *
+ * This is split from the other rules to allow for message overrides.
+ */
 extend('positive_age', {
-  validate: (value) => {
-    const isValid = differenceInYears(new Date(), new Date(value)) > 0
-
-    return isValid
-  },
+  validate: (value) => isAfter(new Date(), new Date(value)),
   message: 'Please enter a valid date of birth.',
 })
 
 extend('min_age', {
   params: ['min'],
-  validate: (value, { min }: any) => {
-    const isValid = differenceInYears(new Date(), new Date(value)) > min
-
-    return isValid
-  },
+  validate: (value, { min }: any) =>
+    differenceInYears(new Date(), new Date(value)) > min,
   message: 'Please have a parent or guardian register for you.',
 })
 
 extend('max_age', {
   params: ['max'],
-  validate: (value, { max }: any) => {
-    const isValid = differenceInYears(new Date(), new Date(value)) < max
-
-    return isValid
-  },
+  validate: (value, { max }: any) =>
+    differenceInYears(new Date(), new Date(value)) < max,
   message: 'Please enter a valid date of birth.',
 })
 
