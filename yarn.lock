@@ -3132,7 +3132,7 @@ __metadata:
     "@nestjs/schematics": 7.3.1
     "@nestjs/testing": 7.6.15
     "@sendgrid/mail": 7.4.2
-    "@types/bcrypt": 3.0.1
+    "@types/bcrypt": 5.0.0
     "@types/cache-manager": 3.4.0
     "@types/express": 4.17.11
     "@types/jest": 26.0.22
@@ -3404,10 +3404,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bcrypt@npm:3.0.1":
-  version: 3.0.1
-  resolution: "@types/bcrypt@npm:3.0.1"
-  checksum: 95e8b2cf190d37d3ceaa4e44b5e6d734b08915dbad50cebd2a59e9fedbfc8b14c09d41505658056a1903f6e8a90b3e58bdad66bb359bc16243cfc4d92894f116
+"@types/bcrypt@npm:5.0.0":
+  version: 5.0.0
+  resolution: "@types/bcrypt@npm:5.0.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: 4cf4cb6e1320ad7840d0b464f463d5d8e84418522c1fe01df800483a84c81f32b8e4b43658ccb5bae010a5a14f4a6fdea38b8018fff91ffafd7126d4247939b6
   languageName: node
   linkType: hard
 
