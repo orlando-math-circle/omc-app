@@ -57,7 +57,7 @@ import {
   toRefs,
   watch,
 } from '@nuxtjs/composition-api'
-import { months } from '~/utils/constants'
+import { monthSelections } from '~/utils/constants'
 import { isValidDate } from '~/utils/utilities'
 import { daysInMonth } from '~/utils/time'
 import useStateReset from '~/composables/useStateReset'
@@ -123,19 +123,32 @@ export default defineComponent({
     }
 
     /**
-     * Emits the blur event only after each birthday
-     * input has been blurred to prevent premature errors.
+     * Somewhat of a hack that emits a singular blur event to
+     * simulate a single field instead of three seperate fields
+     * to prevent VeeValidate annoying users with errors when
+     * they haven't even finished filling out their birthday.
      */
     const onBlur = (type: keyof typeof state['dirty']) => {
       state.dirty[type] = true
 
-      if (state.dirty.month && state.dirty.date && state.dirty.year) {
+      // An existing date means the fields aren't empty, thus
+      // any further modification should display errors.
+      if (date.value !== '') {
+        emit('blur')
+      }
+
+      // Otherwise, emit only when all 3 of the fields have been touched.
+      else if (state.dirty.month && state.dirty.date && state.dirty.year) {
         emit('blur')
       }
     }
 
     watch(() => props.value, fromISO, { immediate: true })
-    watch(state.fields, () => emit('input', date.value))
+    watch(
+      () => state.fields,
+      () => emit('input', date.value),
+      { deep: true }
+    )
 
     /**
      * Applies rules ensuring the user doesn't create a birthday
@@ -155,10 +168,6 @@ export default defineComponent({
         max_value: daysInMonth(state.fields.month, state.fields.year),
       }
     })
-
-    const monthSelections = computed(() =>
-      months.map((m, i) => ({ text: m, value: i }))
-    )
 
     return {
       ...toRefs(state),
