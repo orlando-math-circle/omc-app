@@ -3154,7 +3154,7 @@ __metadata:
     class-transformer: 0.4.0
     class-validator: 0.13.1
     date-fns: 2.21.1
-    dotenv: 8.2.0
+    dotenv: 9.0.2
     eslint: 7.24.0
     eslint-config-prettier: 8.2.0
     eslint-plugin-prettier: 3.4.0
@@ -8628,6 +8628,13 @@ __metadata:
   version: 8.2.0
   resolution: "dotenv@npm:8.2.0"
   checksum: 16cb89cbd7b98b053899b8aba8c5044c8fb61a2db8a81fe70360b75035fce5fed53bd7a34d772be717d0880c0321122a4c09423f518025e1b52d96791521b1a7
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:9.0.2":
+  version: 9.0.2
+  resolution: "dotenv@npm:9.0.2"
+  checksum: 062a31a2fd024a8a7efee4f2d3972d488a1485e0545b97ab3c338f59f17689a2ae84b6e8ddb9ebca2902cc9b4926e7b672a476f5e326c6902648312fc3da54d9
   languageName: node
   linkType: hard
 
