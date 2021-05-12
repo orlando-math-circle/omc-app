@@ -3140,7 +3140,7 @@ __metadata:
     "@types/lodash": 4.14.168
     "@types/luxon": 1.26.4
     "@types/multer": 1.4.5
-    "@types/node": 14.14.41
+    "@types/node": 14.14.45
     "@types/passport-jwt": 3.0.5
     "@types/passport-local": 1.0.33
     "@types/rimraf": 3.0.0
@@ -3863,10 +3863,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:14.14.41":
-  version: 14.14.41
-  resolution: "@types/node@npm:14.14.41"
-  checksum: 37dfb639644c8ee9b9846106834983f590d494b855e74645a4f169ea24199f7559366d25f6e72e83ba940b59eb6370e002bd53963d098d6d9fdf935a37011417
+"@types/node@npm:14.14.45":
+  version: 14.14.45
+  resolution: "@types/node@npm:14.14.45"
+  checksum: b9ad381a8cc5273bfd75d5870f57eed2b0978a5afe9e7e0347fcdb955e9fed502277a374c2837c3e1fe6a7ade58d53a460d954dbbe50e2f18bdd7e86075ffca9
   languageName: node
   linkType: hard
 
