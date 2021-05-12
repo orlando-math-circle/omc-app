@@ -3082,7 +3082,7 @@ __metadata:
     nuxt-typed-vuex: 0.1.22
     prettier: 2.2.1
     rrule: 2.6.8
-    sass: 1.32.11
+    sass: 1.32.13
     sass-loader: 10.1.1
     vee-validate: 3.4.5
     vue-apexcharts: 1.6.1
@@ -18548,14 +18548,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"sass@npm:1.32.11":
-  version: 1.32.11
-  resolution: "sass@npm:1.32.11"
+"sass@npm:1.32.13":
+  version: 1.32.13
+  resolution: "sass@npm:1.32.13"
   dependencies:
     chokidar: ">=3.0.0 <4.0.0"
   bin:
     sass: sass.js
-  checksum: a56ca780febc1f4c5c015f2fbd5dacd780297371456197424bce7e48d54cef8ae564fb8927076ef61e6fcd34f69556d0a3dd8e157ff06081729066ad595e97bf
+  checksum: 93913232ec9efbd9edbe63e9c32e08c90e2ca7e1b75079b570207aa828386ad1391a0944a06411f2b2add88803a41dd3ecbfbbcf45ec4c2b288154e17243e71f
   languageName: node
   linkType: hard
 

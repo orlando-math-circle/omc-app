@@ -43,7 +43,7 @@
     "eslint-plugin-prettier": "3.4.0",
     "fibers": "5.0.0",
     "prettier": "2.2.1",
-    "sass": "1.32.11",
+    "sass": "1.32.13",
     "sass-loader": "10.1.1",
     "vuetify": "2.4.11"
   },
