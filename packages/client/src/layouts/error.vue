@@ -16,28 +16,31 @@
 </template>
 
 <script>
-export default {
-  layout: 'empty',
+import { defineComponent, useMeta } from '@nuxtjs/composition-api'
+export default defineComponent({
   props: {
     error: {
       type: Object,
       default: null,
     },
   },
-  data() {
-    return {
+  setup(props) {
+    const title = useMeta()
+
+    const errors = {
       pageNotFound: '404 Not Found',
       otherError: 'An error occurred',
     }
-  },
-  head() {
-    const title =
-      this.error.statusCode === 404 ? this.pageNotFound : this.otherError
+
+    title.value =
+      props.error.statusCode === 404 ? errors.pageNotFound : errors.otherError
+
     return {
-      title,
+      ...errors,
     }
   },
-}
+  head: {},
+})
 </script>
 
 <style scoped>

@@ -60,7 +60,7 @@ import {
 import { monthSelections } from '~/utils/constants'
 import { isValidDate } from '~/utils/utilities'
 import { daysInMonth } from '~/utils/time'
-import useStateReset from '~/composables/useStateReset'
+import { useStateReset } from '~/composables/useStateReset'
 
 export default defineComponent({
   props: {

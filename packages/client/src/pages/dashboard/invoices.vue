@@ -55,23 +55,27 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, useContext } from '@nuxtjs/composition-api'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { useInvoices } from '@/store/useInvoices'
 import { formatDate } from '~/utils/utilities'
 
 export default defineComponent({
   transition(_to, from) {
-    if (!from) return 'slide-left'
+    if (from?.name === 'dashboard' || from?.name === 'dashboard-account') {
+      return 'slide-right'
+    }
 
-    return from.name === 'account-settings' ? 'slide-right' : 'slide-left'
+    return 'slide-left'
   },
   setup() {
-    const { $accessor: store } = useContext()
-    const invoices = computed(() => store.invoices.invoices)
+    const invoices = useInvoices()
 
-    return { invoices, format: formatDate }
+    return { invoices: computed(() => invoices.invoices), format: formatDate }
   },
-  async asyncData({ $accessor }) {
-    await $accessor.invoices.findByAccount()
+  async asyncData({ pinia }) {
+    const invoices = useInvoices(pinia)
+
+    await invoices.findAllByAccount()
   },
   head: {
     title: 'Account Invoices',

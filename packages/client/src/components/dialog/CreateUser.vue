@@ -1,15 +1,15 @@
 <template>
-  <dialog-form ref="dialog" @submit:form="onSubmit" @dialog:close="reset">
+  <FormDialog ref="form" @form:submit="onSubmit" @dialog:close="onClose">
     <template #title>Create User</template>
 
-    <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }"></slot>
+    <template #activator="activator">
+      <slot name="activator" v-bind="activator" />
     </template>
 
-    <v-card-text>
+    <template #form>
       <v-row>
         <v-col cols="6">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="first"
             label="First Name"
             rules="required"
@@ -18,7 +18,7 @@
         </v-col>
 
         <v-col cols="6">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="last"
             label="Last Name"
             rules="required"
@@ -29,15 +29,11 @@
         </v-col>
 
         <v-col cols="12">
-          <birthday-picker-validated
-            v-model="dob"
-            :min-age="0"
-            :max-age="100"
-          />
+          <BirthdayPickerValidated v-model="dob" :min-age="0" :max-age="100" />
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="email"
             label="Email (Optional)"
             rules="email"
@@ -88,7 +84,7 @@
           <v-col v-show="industry.student">
             <v-row>
               <v-col cols="6">
-                <v-select-validated
+                <VSelectValidated
                   v-model="industry.education"
                   label="Education Level"
                   :items="Object.keys(education)"
@@ -98,7 +94,7 @@
               </v-col>
 
               <v-col cols="6">
-                <v-select-validated
+                <VSelectValidated
                   v-model="grade"
                   :label="
                     industry.education === 'College'
@@ -112,7 +108,7 @@
               </v-col>
 
               <v-col cols="12">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="industry.institution"
                   label="School Name"
                   hint="Enter the name of their school or institution."
@@ -137,7 +133,7 @@
           <v-col v-show="industry.professional">
             <v-row>
               <v-col cols="12">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="industry.profession"
                   label="Profession (Optional)"
                   outlined
@@ -145,7 +141,7 @@
               </v-col>
 
               <v-col cols="12">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="industry.jobTitle"
                   label="Job Title (Optional)"
                   outlined
@@ -153,7 +149,7 @@
               </v-col>
 
               <v-col cols="12">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="industry.company"
                   label="Company or Workplace (Optional)"
                   outlined
@@ -163,10 +159,10 @@
           </v-col>
         </v-expand-transition>
       </v-row>
-    </v-card-text>
+    </template>
 
-    <v-card-actions>
-      <v-btn text @click="dialog && dialog.close()">Cancel</v-btn>
+    <template #actions>
+      <v-btn text @click="form && form.close()">Cancel</v-btn>
 
       <v-spacer />
 
@@ -178,37 +174,31 @@
         </v-scroll-x-transition>
         Save
       </v-btn>
-    </v-card-actions>
-  </dialog-form>
+    </template>
+  </FormDialog>
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  ref,
-  toRefs,
-  useContext,
-} from '@nuxtjs/composition-api'
+import { computed, defineComponent, ref, toRefs } from '@nuxtjs/composition-api'
 import { CreateUserDto } from '@server/user/dtos/create-user.dto'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
 import { Gender } from '@server/user/enums/gender.enum'
 import { Grade } from '@server/user/enums/grade.enum'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useUsers } from '@/store/useUsers'
+import { useAuth } from '@/store/useAuth'
 import { education, genders, reminders } from '~/utils/constants'
-import useStateReset from '~/composables/useStateReset'
+import { useStateReset } from '~/composables/useStateReset'
 import { grades } from '~/utils/events'
-import DialogForm from '~/components/dialog/Form.vue'
+import FormDialog from '~/components/form/Dialog.vue'
 
 export default defineComponent({
-  props: {
-    admin: {
-      type: Boolean,
-      default: false,
-    },
-  },
   setup() {
-    const { $accessor: store, $snack } = useContext()
-    const dialog = ref<InstanceType<typeof DialogForm>>()
+    const form = ref<InstanceType<typeof FormDialog>>()
+
+    const snackbar = useSnackbar()
+    const userStore = useUsers()
+    const authStore = useAuth()
 
     const { state, reset } = useStateReset({
       success: false,
@@ -231,9 +221,7 @@ export default defineComponent({
       },
     })
 
-    const isLoading = computed(
-      () => store.users.isLoading || store.auth.isLoading
-    )
+    const isLoading = computed(() => userStore.isLoading || authStore.isLoading)
 
     const onSubmit = async () => {
       const dto: CreateUserDto = Object.assign(
@@ -259,23 +247,26 @@ export default defineComponent({
         }
       )
 
-      await store.users.create(dto)
-      await store.auth.getAccount()
+      await Promise.all([userStore.create(dto), authStore.getMyAccount()])
 
-      if (store.users.isErrored) {
-        console.error(store.users.error)
-        return
+      if (userStore.error) {
+        return snackbar.error(userStore.error.message)
       }
 
       state.success = true
 
-      $snack('User successfully created')
-      dialog.value!.close(500)
+      snackbar.success('User successfully created')
+      form.value!.close(500)
+    }
+
+    const onClose = () => {
+      reset()
+      form.value!.resetValidation()
     }
 
     return {
       ...toRefs(state),
-      dialog,
+      form,
       genders,
       grades,
       education,
@@ -283,6 +274,7 @@ export default defineComponent({
       isLoading,
       reset,
       onSubmit,
+      onClose,
     }
   },
 })

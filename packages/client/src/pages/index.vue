@@ -22,16 +22,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, useContext } from '@nuxtjs/composition-api'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { useDarkMode } from '@/composables/useDarkMode'
 
 export default defineComponent({
   layout: 'landing',
   middleware: 'guest',
   setup() {
-    const { $vuetify } = useContext()
+    const isDark = useDarkMode()
 
     const logo = computed(() =>
-      $vuetify.theme.dark
+      isDark.value
         ? require('@/assets/images/logo_white.png')
         : require('@/assets/images/logo_dark.png')
     )

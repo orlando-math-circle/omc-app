@@ -10,7 +10,8 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       "cookie-universal-nuxt",
-      "vuetify"
+      "vuetify",
+      "pinia/nuxt/types"
     ]
   },
   "include": ["src/**/*", "types/**/*"]

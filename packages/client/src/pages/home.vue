@@ -54,44 +54,43 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
 import { addDays } from 'date-fns'
-import { formatDate } from '../utils/utilities'
+import { formatDate } from '@/utils/utilities'
+import { useTwitter } from '@/store/useTwitter'
+import { useEvents } from '@/store/useEvents'
 
-@Component({
+export default defineComponent({
+  setup() {
+    const twitterStore = useTwitter()
+    const eventStore = useEvents()
+
+    const nonReplyTweets = computed(() =>
+      twitterStore.tweets.filter((tweet) => !tweet.in_reply_to_status_id)
+    )
+
+    const format = (date: string) => formatDate(date, 'MMMM do, yyyy')
+
+    return {
+      format,
+      nonReplyTweets,
+      events: computed(() => eventStore.events),
+    }
+  },
+  async asyncData({ pinia }) {
+    const twitterStore = useTwitter(pinia)
+    const eventStore = useEvents(pinia)
+    const now = new Date()
+
+    await Promise.all([
+      twitterStore.findAll(),
+      eventStore.findAll({ start: now, end: addDays(now, 30) }),
+    ])
+  },
   head: {
     title: 'Home',
   },
 })
-export default class HomePage extends Vue {
-  async fetch() {
-    const now = new Date()
-
-    await Promise.all([
-      this.$accessor.twitter.findAll(),
-      this.$accessor.events.findAll({
-        start: now,
-        end: addDays(now, 30),
-      }),
-    ])
-  }
-
-  get tweets() {
-    return this.$accessor.twitter.tweets
-  }
-
-  get events() {
-    return this.$accessor.events.events
-  }
-
-  get nonReplyTweets() {
-    return this.tweets.filter((tweet: any) => !tweet.in_reply_to_status_id)
-  }
-
-  format(date: string) {
-    return formatDate(date, 'MMMM do, yyyy')
-  }
-}
 </script>
 
 <style lang="scss" scoped>

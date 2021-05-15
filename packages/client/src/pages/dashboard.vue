@@ -3,7 +3,7 @@
     <v-row class="mb-2">
       <v-col>
         <v-card class="avatar--offset">
-          <AvatarPicker :url="$avatar(user)" />
+          <Avatar :url="user.avatarUrl" />
 
           <div class="d-flex flex-row">
             <v-spacer />
@@ -13,57 +13,65 @@
               :user="user"
               @update:avatar="onUpdateAvatar"
             >
-              <v-btn text class="ma-2" v-bind="attrs" v-on="on">
+              <v-btn text right absolute class="ma-2" v-bind="attrs" v-on="on">
                 Edit Avatar
               </v-btn>
             </DialogSelectAvatar>
           </div>
 
-          <div class="d-flex flex-column align-center justify-center my-3">
+          <div
+            class="d-flex flex-column align-center justify-center mb-3"
+            style="margin-top: 70px"
+          >
             <div class="text-h4 user--name">{{ user.name }}</div>
             <div v-if="role" class="text-h5 user--role">{{ role }}</div>
           </div>
 
-          <v-tabs show-arrows centered grow>
-            <v-tab to="/account/settings">Settings</v-tab>
-            <v-tab to="/account/invoices">Invoices</v-tab>
-            <v-tab to="/account/forms">Forms</v-tab>
+          <v-tabs show-arrows centered grow class="tabs">
+            <v-tab to="/dashboard" exact>Settings</v-tab>
+            <v-tab v-if="isPrimaryUser" to="/dashboard/account">
+              Account
+            </v-tab>
+            <v-tab to="/dashboard/invoices">Invoices</v-tab>
+            <v-tab to="/dashboard/forms">Forms</v-tab>
           </v-tabs>
         </v-card>
       </v-col>
     </v-row>
 
-    <nuxt-child :user="user" :account="account" />
+    <NuxtChild :user="user" :account="account" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, useContext } from '@nuxtjs/composition-api'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { useAuth } from '@/store/useAuth'
+import { useAttachments } from '@/store/useAttachments'
 
 export default defineComponent({
   setup() {
-    const { $accessor: store } = useContext()
-
-    const user = computed(() => store.auth.user!)
-    const account = computed(() => store.auth.account!)
-    const role = computed(() => store.auth.roleTitle)
+    const authStore = useAuth()
 
     const onUpdateAvatar = () => {
-      store.auth.getMe()
-      store.auth.getAccount()
+      authStore.getMyUser()
+      authStore.getMyAccount()
     }
 
     return {
-      user,
-      account,
-      role,
+      user: computed(() => authStore.user!),
+      account: computed(() => authStore.account),
+      role: computed(() => authStore.roleTitle),
+      isPrimaryUser: computed(() => authStore.isPrimaryUser),
       onUpdateAvatar,
     }
   },
-  async asyncData({ $accessor }) {
+  async asyncData({ pinia }) {
+    const auth = useAuth(pinia)
+    const attachments = useAttachments(pinia)
+
     await Promise.all([
-      $accessor.auth.getAccount(),
-      $accessor.files.findMyAttachments('REDUCED_LUNCH_FIELD'),
+      auth.getMyAccount(),
+      attachments.findAll('REDUCED_LUNCH_FIELD', true),
     ])
   },
   head: {
@@ -73,6 +81,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+.tabs {
+  overflow: hidden;
+}
+
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,

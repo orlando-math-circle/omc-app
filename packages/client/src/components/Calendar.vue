@@ -2,28 +2,28 @@
   <div>
     <!-- Simple Date-Picker Calendar -->
     <v-date-picker
-      v-if="internalType === 'simple'"
+      v-if="type === 'simple'"
       v-model="date"
       :events="dates"
       event-color="#ff4299"
       full-width
       no-title
       elevation="2"
-      @update:picker-date="onPickerChange"
+      @update:picker-date="setRangeByMonth"
     />
 
     <!-- Regular, Full-Size Calendar -->
     <v-card v-else>
       <div class="calendar--header d-flex justify-center align-center">
-        <v-btn icon @click="$refs.calendar.prev()">
+        <v-btn icon @click="calendar && calendar.prev()">
           <v-icon>mdi-chevron-left</v-icon>
         </v-btn>
 
         <div class="calendar--header__title">
-          {{ header }}
+          {{ title }}
         </div>
 
-        <v-btn icon @click="$refs.calendar.next()">
+        <v-btn icon @click="calendar && calendar.next()">
           <v-icon>mdi-chevron-right</v-icon>
         </v-btn>
       </div>
@@ -33,180 +33,191 @@
           ref="calendar"
           v-model="date"
           class="calendar"
-          :type="internalType"
+          :type="type"
           :events="events"
           :event-color="calendarColor"
-          :loading="$store.getters['events/isLoading']"
+          :loading="isLoading"
           :short-weekdays="false"
-          @click:event="onClickEvent"
-          @change="onChange"
-        >
-        </v-calendar>
+          @click:event="(e) => onClickEvent(e.id)"
+          @change="(range) => setRange(range.start, range.end)"
+        />
       </v-sheet>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, PropSync, Watch } from 'nuxt-property-decorator'
-import {
-  parseISO,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-} from 'date-fns'
 import { VCalendar } from 'vuetify/src/components/VCalendar'
 import { Event } from '@server/event/event.entity'
-import { VCalendarChange } from '../types/calendar.interface'
-import { months } from '../utils/constants'
+import { CalendarType, months } from '@/utils/constants'
+import { useDates } from '@/composables/useDates'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  reactive,
+  ref,
+  toRef,
+  toRefs,
+  useFetch,
+  useRouter,
+  watch,
+} from '@nuxtjs/composition-api'
+import { useEvents } from '@/store/useEvents'
+import { CalendarTimestamp } from 'vuetify'
 
-@Component
-export default class Calendar extends Vue {
-  @Prop({ required: true }) value!: string
-  @PropSync('type', { default: 'simple' }) internalType!: string
-  @Prop() projectFilterIds?: number[]
-  @Prop({ default: '/events' }) clickRedirectBase!: string
+export default defineComponent({
+  props: {
+    value: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String as PropType<CalendarType>,
+      default: 'simple',
+    },
+    projects: {
+      type: Array as PropType<number[]>,
+      default: () => [],
+    },
+    clickRedirectBase: {
+      type: String,
+      default: '/events',
+    },
+  },
+  setup(props, { emit }) {
+    const calendar = ref<InstanceType<typeof VCalendar>>()
 
-  $refs!: {
-    calendar: InstanceType<typeof VCalendar>
-  }
+    const router = useRouter()
+    const dateUtil = useDates()
+    const eventStore = useEvents()
 
-  today = new Date()
-  range = {
-    start: null as Date | null,
-    end: null as Date | null,
-    moved: false,
-  }
+    const date = computed({
+      get() {
+        return props.value
+      },
+      set(value: string) {
+        emit('input', value)
+      },
+    })
 
-  get date() {
-    return this.value
-  }
+    const nativeDate = computed(() => dateUtil.toDate(date.value))
 
-  set date(value: string) {
-    this.$emit('input', value)
-  }
+    const rangeFromType = (type: CalendarType) => {
+      switch (type) {
+        case 'week':
+          return {
+            start: dateUtil.startOfWeek(nativeDate.value),
+            end: dateUtil.endOfWeek(nativeDate.value),
+          }
+        case 'simple':
+        case 'month':
+          return {
+            start: dateUtil.startOfMonth(nativeDate.value),
+            end: dateUtil.endOfMonth(nativeDate.value),
+          }
+        case 'day':
+          return {
+            start: dateUtil.startOfDay(nativeDate.value),
+            end: dateUtil.endOfDay(nativeDate.value),
+          }
+        case '4day':
+          return {
+            start: dateUtil.startOfDay(nativeDate.value),
+            end: dateUtil.addDays(dateUtil.startOfDay(nativeDate.value), 4),
+          }
+      }
+    }
 
-  get events() {
-    return this.$accessor.events.events
-  }
+    const state = reactive({
+      range: {
+        ...rangeFromType(props.type),
+      },
+    })
 
-  get dates() {
-    return this.$accessor.events.dates
-  }
+    const projects = toRef(props, 'projects')
+    const events = computed(() => eventStore.calendarEvents)
+    const dates = computed(() => eventStore.dates)
+    const title = computed(() => {
+      if (!state.range.start) return ''
 
-  get header() {
-    if (this.range.start) {
       return `${
-        months[this.range.start.getMonth()]
-      }, ${this.range.start.getFullYear()}`
+        months[state.range.start.getMonth()]
+      } ${state.range.start.getFullYear()}`
+    })
+    const colors = computed(() =>
+      events.value.reduce(
+        (ret, event) => ({
+          ...ret,
+          [event.dtstart.substr(0, 10)]: event.color || '#000000',
+        }),
+        {}
+      )
+    )
+
+    /**
+     * Moves the calendar window range using an ISO
+     * string only up to the month, e.g. `2020-05` by
+     * using the start and end dates of that month.
+     *
+     * Used by the VDatePicker component.
+     */
+    const setRangeByMonth = (month: string) => {
+      const nativeDate = dateUtil.toDate((month += '-01'))
+
+      state.range.start = dateUtil.startOfMonth(nativeDate)
+      state.range.end = dateUtil.endOfMonth(nativeDate)
     }
 
-    return `${months[this.today.getMonth()]}, ${this.today.getFullYear()}`
-  }
+    /**
+     * Moves the calendar window range using ISO
+     * strings representing the dates, e.g. `2020-05-01`.
+     *
+     * Used by the VCalendar component.
+     */
+    const setRange = (start: CalendarTimestamp, end: CalendarTimestamp) => {
+      state.range.start = dateUtil.toDate(start.date)
+      state.range.end = dateUtil.endOfDay(end.date)
+    }
 
-  get colors() {
-    const retval: Record<string, string> = {}
+    const onClickEvent = (id: number) => {
+      router.push(`${props.clickRedirectBase}/${id}`)
+    }
 
-    for (const event of this.events) {
-      Object.assign(retval, {
-        [event.dtstart.substr(0, 10)]: event.color || '#000000',
+    const calendarColor = (date: Event) => date.color || '#000000'
+
+    const onLoadRange = async () => {
+      await eventStore.findAll({
+        start: state.range.start!,
+        end: state.range.end!,
+        projects: projects.value ? projects.value : undefined,
       })
     }
 
-    return retval
-  }
+    /**
+     * Fetch the initial range and again if the range
+     * or project filters are modified.
+     */
+    useFetch(async () => await onLoadRange())
+    watch(() => state.range, onLoadRange, { deep: true })
+    watch(projects, onLoadRange)
 
-  calendarColor(date: Event) {
-    return date.color || '#000000'
-  }
-
-  @Watch('projectFilterIds')
-  async onChangeProjectFilterIds() {
-    await this.$fetch()
-  }
-
-  /**
-   * Setup the calendar start and end date ranges before the
-   * calendar is completely initialized.
-   */
-  created() {
-    const date = parseISO(this.value)
-
-    switch (this.internalType) {
-      case 'week':
-        this.range.start = startOfWeek(date)
-        this.range.end = endOfWeek(date)
-        break
-      case 'simple':
-      case 'month':
-        this.range.start = startOfMonth(date)
-        this.range.end = endOfMonth(date)
-        break
+    return {
+      date,
+      calendar,
+      ...toRefs(state),
+      isLoading: computed(() => eventStore.isLoading),
+      calendarColor,
+      events,
+      dates,
+      title,
+      colors,
+      onClickEvent,
+      setRangeByMonth,
+      setRange,
     }
-  }
-
-  async fetch() {
-    await this.$accessor.events.findAll({
-      start: this.range.start as Date,
-      end: this.range!.end as Date,
-      projects: this.projectFilterIds?.length
-        ? this.projectFilterIds
-        : undefined,
-    })
-  }
-
-  onClickEvent({ event }: { event: Event }) {
-    this.$router.push(`${this.clickRedirectBase}/${event.id}`)
-  }
-
-  async onChange({ start, end }: VCalendarChange) {
-    this.range.start = parseISO(start.date)
-    this.range.end = parseISO(end.date)
-
-    // The first change occurs on initialization,
-    // don't retieve data twice (from fetch)
-    if (!this.range.moved) {
-      this.range.moved = true
-      return
-    }
-
-    await this.$fetch()
-  }
-
-  async onPickerChange(dateString: string) {
-    const now = new Date()
-    const date = parseISO(dateString)
-
-    let newDate: string
-
-    if (now.getUTCMonth() === date.getUTCMonth()) {
-      newDate = now.toISOString().substr(0, 10)
-    } else {
-      newDate = date.toISOString().substr(0, 10)
-    }
-
-    if (this.date === newDate) return
-
-    this.date = newDate
-
-    await this.$accessor.events.findAll({
-      start: startOfMonth(date),
-      end: endOfMonth(date),
-    })
-  }
-
-  async refresh() {
-    if (this.internalType === 'simple') {
-      const now = new Date()
-
-      await this.$accessor.events.findAll({
-        start: startOfMonth(now),
-        end: endOfMonth(now),
-      })
-    }
-  }
-}
+  },
+})
 </script>
 
 <style lang="scss" scoped>

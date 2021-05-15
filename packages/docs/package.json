@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "docus": "0.0.10",
-    "nuxt": "2.15.4"
+    "nuxt": "2.15.6"
   },
   "prettier": {
     "semi": false,

@@ -56,7 +56,7 @@ import {
   watch,
 } from '@nuxtjs/composition-api'
 import DialogForm from '~/components/dialog/Form.vue'
-import useStateReset from '~/composables/useStateReset'
+import { useStateReset } from '~/composables/useStateReset'
 
 export default defineComponent({
   props: {

@@ -21,7 +21,7 @@ export default defineComponent({
   props: {
     rules: {
       type: [String, Object],
-      required: true,
+      default: '',
     },
     value: {
       type: [Boolean],

@@ -73,7 +73,7 @@
 
           <v-divider />
 
-          <v-list-item @click="logout">
+          <v-list-item @click="onLogout">
             <v-list-item-icon>
               <v-icon>mdi-logout-variant</v-icon>
             </v-list-item-icon>
@@ -118,86 +118,87 @@
       </v-btn>
     </v-bottom-navigation>
 
-    <snackbar></snackbar>
+    <Snackbar />
   </v-app>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  useRouter,
+} from '@nuxtjs/composition-api'
+import { toRefs } from '@vueuse/core'
+import { useAuth } from '@/store/useAuth'
+import { useDarkMode } from '@/composables/useDarkMode'
+import { useSnackbar } from '@/composables/useSnackbar'
 
-@Component({
+export default defineComponent({
   middleware: 'auth',
-})
-export default class DefaultLayout extends Vue {
-  drawer = false
-  fixed = false
-  items = [
-    {
-      icon: 'mdi-home',
-      title: 'Home',
-      to: '/home',
-    },
-    {
-      icon: 'mdi-calendar-star',
-      title: 'Events',
-      to: '/events',
-    },
-    {
-      icon: 'mdi-puzzle',
-      title: 'Projects',
-      to: '/projects',
-    },
-    {
-      icon: 'mdi-account-circle',
-      title: 'Account',
-      to: '/account/settings',
-    },
-  ]
+  setup() {
+    const authStore = useAuth()
+    const snackbar = useSnackbar()
+    const isDark = useDarkMode()
+    const router = useRouter()
 
-  get isAdmin() {
-    return this.$accessor.auth.isAdmin
-  }
+    const state = reactive({
+      drawer: false,
+      fixed: false,
+      items: [
+        {
+          icon: 'mdi-home',
+          title: 'Home',
+          to: '/home',
+        },
+        {
+          icon: 'mdi-calendar-star',
+          title: 'Events',
+          to: '/events',
+        },
+        {
+          icon: 'mdi-account-circle',
+          title: 'Account',
+          to: '/dashboard',
+        },
+      ],
+    })
 
-  get isDark() {
-    return this.$vuetify.theme.dark
-  }
+    const onResend = async () => {
+      await authStore.verifyEmailResend()
 
-  set isDark(value: boolean) {
-    this.$vuetify.theme.dark = value
-    this.$cookies.set('omc-theme-dark', value)
-  }
-
-  get user() {
-    return this.$accessor.auth.user
-  }
-
-  async fetch() {
-    if (this.$accessor.auth.user) return
-
-    await this.$store.dispatch('auth/getMe')
-  }
-
-  async resend() {
-    await this.$accessor.auth.resendVerifyEmail()
-
-    if (this.$accessor.auth.isErrored) {
-      this.$accessor.snackbar.show({
-        text: this.$accessor.auth.error!.message,
-        timeout: 10000,
-      })
-    } else {
-      this.$accessor.snackbar.show({
-        text:
-          'Verification Email Resent. You may change your email on the account page if you entered it incorrectly',
-      })
+      if (authStore.error) {
+        snackbar.error(authStore.error.message)
+      } else {
+        snackbar.success(
+          'Verification Email Resent. You may change your email on the account page if you entered it incorrectly.'
+        )
+      }
     }
-  }
 
-  logout() {
-    this.$accessor.auth.logout()
-    this.$router.push('/')
-  }
-}
+    const onLogout = () => {
+      authStore.logout()
+      router.push('/')
+    }
+
+    return {
+      ...toRefs(state),
+      user: computed(() => authStore.user!),
+      isAdmin: computed(() => authStore.isAdmin),
+      isDark,
+      resend: () => console.log('Testt'),
+      onLogout,
+      onResend,
+    }
+  },
+  async asyncData({ pinia }) {
+    const authStore = useAuth(pinia)
+
+    if (authStore.user) return
+
+    await authStore.getMyUser()
+  },
+})
 </script>
 
 <style lang="scss" scoped>

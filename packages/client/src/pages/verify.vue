@@ -15,66 +15,76 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  useFetch,
+  useRoute,
+} from '@nuxtjs/composition-api'
+import { useAuth } from '@/store/useAuth'
+import { useSnackbar } from '../composables/useSnackbar'
 
-@Component({
+export default defineComponent({
   fetchOnServer: false,
-})
-export default class AccountEmailVerification extends Vue {
-  token = ''
-  missing = false
-  gone = false
+  setup() {
+    const route = useRoute()
+    const authStore = useAuth()
+    const snackbar = useSnackbar()
 
-  get title() {
-    if (this.$fetchState.pending) {
-      return 'Loading...'
-    } else if (this.missing) {
-      return 'Token Missing'
-    } else if (this.gone) {
-      return 'Already Verified'
-    }
+    const state = reactive({
+      token: '',
+      missing: false,
+      gone: false,
+    })
 
-    return 'Email Verified!'
-  }
+    const { fetchState } = useFetch(async () => {
+      const token = route.value.query.token
 
-  get body() {
-    if (this.$fetchState.pending) {
-      return 'Please wait while the token is being verified'
-    } else if (this.missing) {
-      return 'The verification link is malformed. Make sure you copy the entire link from the email.'
-    } else if (this.gone) {
-      return 'Your email has already been verified.'
-    }
-
-    return 'Thank you for verifying your email. You are now eligible to register to upcoming events and receive email notifications.'
-  }
-
-  async fetch() {
-    const token = this.$route.query.token
-
-    if (Array.isArray(token)) return
-
-    if (!token) {
-      this.missing = true
-      return
-    }
-
-    await this.$accessor.auth.verify(token)
-
-    if (this.$accessor.auth.isErrored) {
-      // Check if it's already been verified
-      if (this.$accessor.auth.error?.status === 410) {
-        this.gone = true
+      if (!token || typeof token !== 'string') {
+        state.missing = true
         return
       }
 
-      this.$accessor.snackbar.show({
-        text: this.$accessor.auth.error!.message,
-        timeout: 10000,
-      })
-    }
+      await authStore.verifyEmail(token)
 
-    await this.$accessor.auth.getMe()
-  }
-}
+      if (authStore.error) {
+        if (authStore.error.status === 410) {
+          state.gone = true
+          return
+        }
+
+        snackbar.error(authStore.error.message)
+      }
+
+      await authStore.getMyUser()
+    })
+
+    const title = computed(() => {
+      if (fetchState.pending) {
+        return 'Loading...'
+      } else if (state.missing) {
+        return 'Token Missing'
+      } else if (state.gone) {
+        return 'Already Verified'
+      }
+
+      return 'Email Verified'
+    })
+
+    const body = computed(() => {
+      if (fetchState.pending) {
+        return 'Please wait while the token is being verified'
+      } else if (state.missing) {
+        return 'The verification link is malformed. Make sure you copy the entire link from the email.'
+      } else if (state.gone) {
+        return 'Your email has already been verified.'
+      }
+
+      return 'Thank you for verifying your email. You are now eligible to register to upcoming events and receive email notifications.'
+    })
+
+    return { title, body }
+  },
+})
 </script>

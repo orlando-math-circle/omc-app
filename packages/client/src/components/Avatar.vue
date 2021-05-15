@@ -1,21 +1,13 @@
 <template>
-  <v-tooltip bottom>
-    <template #activator="{ on, attrs }">
-      <v-sheet
-        class="avatar--bg d-flex align-center justify-center"
-        width="120px"
-        height="120px"
-        v-bind="attrs"
-        v-on="on"
-      >
-        <v-avatar size="110px">
-          <v-img :src="url" />
-        </v-avatar>
-      </v-sheet>
-    </template>
-
-    <span>Change Your Avatar</span>
-  </v-tooltip>
+  <v-sheet
+    class="avatar--bg d-flex align-center justify-center"
+    width="120px"
+    height="120px"
+  >
+    <v-avatar size="110px">
+      <v-img :src="url" eager />
+    </v-avatar>
+  </v-sheet>
 </template>
 
 <script lang="ts">

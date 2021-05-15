@@ -1,5 +1,9 @@
 import { DateTime } from 'luxon';
 
+export const toDate = (date: string | Date) => {
+  return typeof date === 'string' ? new Date(date) : date;
+};
+
 export const toDateTime = (date: Date | string | number): DateTime => {
   switch (typeof date) {
     case 'number':

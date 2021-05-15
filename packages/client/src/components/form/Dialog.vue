@@ -1,13 +1,13 @@
 <template>
   <v-dialog v-model="dialog" v-bind="dialogAttrs">
     <template #activator="activator">
-      <slot name="activator" v-bind="activator"></slot>
+      <slot name="activator" v-bind="activator" />
     </template>
 
     <v-card v-bind="cardAttrs">
-      <v-toolbar>
+      <v-toolbar flat>
         <v-toolbar-title>
-          <slot name="title"></slot>
+          <slot name="title" />
         </v-toolbar-title>
 
         <v-btn small absolute fab right icon class="mr-0" @click="close()">
@@ -16,12 +16,16 @@
       </v-toolbar>
 
       <v-card-subtitle v-if="$slots.subtitle">
-        <slot name="subtitle"></slot>
+        <slot name="subtitle" />
       </v-card-subtitle>
 
-      <slot name="image"></slot>
+      <slot name="image" />
 
-      <VFormValidated v-slot="form" @form:submit="$emit('form:submit')">
+      <VFormValidated
+        ref="form"
+        v-slot="form"
+        @form:submit="$emit('form:submit')"
+      >
         <v-card-text>
           <slot name="form" v-bind="form"></slot>
         </v-card-text>
@@ -39,9 +43,11 @@ import {
   computed,
   defineComponent,
   reactive,
+  ref,
   toRefs,
   useContext,
 } from '@nuxtjs/composition-api'
+import VFormValidated from '../inputs/VFormValidated.vue'
 
 export default defineComponent({
   props: {
@@ -56,6 +62,8 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { $vuetify } = useContext()
+
+    const form = ref<InstanceType<typeof VFormValidated>>()
 
     const state = reactive({
       dialog: false,
@@ -87,7 +95,19 @@ export default defineComponent({
       setTimeout(() => close(), delay)
     }
 
-    return { ...toRefs(state), open, close, cardAttrs, dialogAttrs }
+    const resetValidation = () => {
+      form.value!.resetValidation()
+    }
+
+    return {
+      ...toRefs(state),
+      form,
+      open,
+      close,
+      cardAttrs,
+      dialogAttrs,
+      resetValidation,
+    }
   },
 })
 </script>

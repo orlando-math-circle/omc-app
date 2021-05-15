@@ -111,6 +111,21 @@ export class User extends BaseEntity<User, 'id'> {
       .reduce((a, b) => a + b, 0);
   }
 
+  @Property({ persist: false })
+  get avatarUrl() {
+    if (!this.avatar) {
+      return `${process.env.STATIC_BASE}${process.env.AVATAR_BASE}/${
+        this.id % 10
+      }.png`;
+    }
+
+    if (this.avatar.startsWith('http')) {
+      return this.avatar;
+    }
+
+    return `${process.env.STATIC_BASE}${this.avatar}`;
+  }
+
   /**
    * Relationships
    */
