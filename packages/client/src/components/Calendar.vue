@@ -38,7 +38,7 @@
           :event-color="calendarColor"
           :loading="isLoading"
           :short-weekdays="false"
-          @click:event="(e) => onClickEvent(e.id)"
+          @click:event="(e) => onClickEvent(e.event.id)"
           @change="(range) => setRange(range.start, range.end)"
         />
       </v-sheet>
