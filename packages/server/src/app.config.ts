@@ -31,7 +31,7 @@ const configSchema = Joi.object({
     then: Joi.string().min(10).required(),
     otherwise: Joi.string().default('dev-secret'),
   }),
-  FRONTEND_URL: Joi.string().default('http://localhost:8080'),
+  FRONTEND_URL: Joi.string().default('http://localhost:9000'),
   ADMIN_EMAIL: Joi.string().email(),
   PAYPAL_SANDBOXED: Joi.boolean().default(true),
   PAYPAL_CLIENT_ID: Joi.string().required(),
@@ -47,6 +47,8 @@ const configSchema = Joi.object({
   FILE_DIRECTORY: Joi.string().default('../../../uploads'),
   FORM_SUBDIRECTORY: Joi.string().default('form'),
   SERVE_STATIC: Joi.boolean().default(true),
+  STATIC_BASE: Joi.string().default('http://localhost:3000'),
+  AVATAR_BASE: Joi.string().default('/defaults/avatars'),
   DEFAULT_EVENT_PICTURE: Joi.string().default('/defaults/neon-math.jpg'),
   DEFAULT_AVATAR_FOLDER: Joi.string().default('/defaults/avatars'),
 });

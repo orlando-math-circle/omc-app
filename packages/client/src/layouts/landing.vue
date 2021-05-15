@@ -1,19 +1,17 @@
 <template>
   <v-app>
     <v-main class="wave-top">
-      <nuxt />
+      <Nuxt />
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 
-@Component({
-  name: 'landing',
-  // middleware: 'guest',
+export default defineComponent({
+  name: 'Landing',
 })
-export default class LandingLayout extends Vue {}
 </script>
 
 <style lang="scss" scoped>

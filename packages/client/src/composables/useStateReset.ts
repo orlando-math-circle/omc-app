@@ -5,9 +5,7 @@ import { reactive } from '@nuxtjs/composition-api'
  *
  * @param data State data
  */
-export default function useStateReset<T extends Record<string, unknown>>(
-  data: T
-) {
+export const useStateReset = <T extends Record<string, unknown>>(data: T) => {
   const state = reactive({ ...data })
   const backup = { ...data }
 
@@ -17,6 +15,7 @@ export default function useStateReset<T extends Record<string, unknown>>(
    */
   const set = (data: T) => {
     Object.assign(state, data)
+    Object.assign(backup, data)
   }
 
   const reset = () => {

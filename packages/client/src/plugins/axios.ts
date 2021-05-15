@@ -1,19 +1,16 @@
 import { defineNuxtPlugin } from '@nuxtjs/composition-api'
-import { initializeAxios } from '../utils/axios'
+import { useAuth } from '@/store/useAuth'
 
-export default defineNuxtPlugin(({ $axios, app, redirect }) => {
-  /**
-   * Attaches $axios to the Nuxt axios instance.
-   */
-  initializeAxios($axios)
+export default defineNuxtPlugin(({ $axios, redirect, pinia }) => {
+  const authStore = useAuth(pinia)
 
   /**
    * Ensures that the token in the state is used
    * in each Axios request, or is removed when gone.
    */
   $axios.onRequest((config) => {
-    if (app.$accessor.auth.token) {
-      config.headers.common.Authorization = `Bearer ${app.$accessor.auth.token}`
+    if (authStore.token) {
+      config.headers.common.Authorization = `Bearer ${authStore.token}`
     } else {
       delete config.headers.common.Authorization
     }
@@ -22,12 +19,10 @@ export default defineNuxtPlugin(({ $axios, app, redirect }) => {
   })
 
   $axios.onError((error) => {
-    if (!error.config) return
-
     // Issue with the current access token.
     if (error.response?.status === 401) {
-      if (app.$accessor.auth.loggedIn) {
-        app.$accessor.auth.logout()
+      if (authStore.isLoggedIn) {
+        authStore.logout()
         redirect('/')
       }
     }

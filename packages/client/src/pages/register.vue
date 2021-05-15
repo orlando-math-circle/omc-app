@@ -16,12 +16,12 @@
             <nuxt-link class="pl-2" to="/login">Log in</nuxt-link>
           </span>
 
-          <alert-error v-if="error" :error="error" class="mt-3"> </alert-error>
+          <AlertError v-if="error" :error="error" class="mt-3" />
 
-          <v-form-validated @submit:form="onSubmit">
+          <VFormValidated @submit:form="onSubmit">
             <v-row>
               <v-col cols="6">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="first"
                   label="First Name"
                   rules="required"
@@ -30,7 +30,7 @@
               </v-col>
 
               <v-col cols="6">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="last"
                   label="Last Name"
                   rules="required"
@@ -39,11 +39,11 @@
               </v-col>
 
               <v-col>
-                <birthday-picker-validated v-model="dob" />
+                <BirthdayPickerValidated v-model="dob" />
               </v-col>
 
               <v-col cols="12">
-                <v-select-validated
+                <VSelectValidated
                   v-model="gender"
                   :items="genders"
                   rules="required"
@@ -62,11 +62,11 @@
                       >
                     </v-tooltip>
                   </template>
-                </v-select-validated>
+                </VSelectValidated>
               </v-col>
 
               <v-col cols="12">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="email"
                   name="Email"
                   rules="required|email"
@@ -77,7 +77,7 @@
               </v-col>
 
               <v-col cols="12">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="password"
                   label="Password"
                   type="password"
@@ -89,7 +89,7 @@
               </v-col>
 
               <v-col cols="12">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="passwordConfirm"
                   label="Confirm Password"
                   type="password"
@@ -100,7 +100,7 @@
               </v-col>
 
               <v-col cols="12">
-                <v-checkbox-validated
+                <VCheckboxValidated
                   v-model="isIndustry"
                   label="Are you an industry professional?"
                 />
@@ -109,7 +109,7 @@
               <v-expand-transition>
                 <div v-show="isIndustry" class="mt-3">
                   <v-col cols="12">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       v-model="industry.profession"
                       label="Profession (Optional)"
                       outlined
@@ -117,7 +117,7 @@
                   </v-col>
 
                   <v-col cols="12">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       v-model="industry.jobTitle"
                       label="Job Title (Optional)"
                       outlined
@@ -125,7 +125,7 @@
                   </v-col>
 
                   <v-col cols="12">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       v-model="industry.company"
                       label="Company or Workplace (Optional)"
                       outlined
@@ -153,7 +153,7 @@
                 >.
               </div>
             </v-row>
-          </v-form-validated>
+          </VFormValidated>
         </v-col>
       </v-row>
     </v-container>
@@ -162,24 +162,21 @@
 
 <script lang="ts">
 import {
-  computed,
   defineComponent,
-  onBeforeMount,
   reactive,
   toRefs,
-  useContext,
   useRouter,
 } from '@nuxtjs/composition-api'
 import { Gender } from '@server/user/enums/gender.enum'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
-import { StateStatus } from '../types/state.interface'
+import { useAuth } from '@/store/useAuth'
 import { genders } from '../utils/constants'
 
 export default defineComponent({
   layout: 'landing',
   setup() {
-    const { $accessor: store } = useContext()
     const router = useRouter()
+    const authStore = useAuth()
 
     const state = reactive({
       password: '',
@@ -198,35 +195,28 @@ export default defineComponent({
       },
     })
 
-    const error = computed(() => store.auth.isErrored && store.auth.error!)
-
     const onSubmit = async () => {
-      await store.auth.register({
+      await authStore.register({
         first: state.first,
         last: state.last,
         gender: state.gender!,
         email: state.email,
         password: state.password,
-        dob: state.dob,
+        dob: (state.dob as unknown) as Date,
         industry: state.isIndustry ? { ...state.industry } : undefined,
         reminders: state.isNotify ? [ReminderFreq.HOUR] : undefined,
       })
 
-      if (!error.value) {
-        router.push('/home')
-      } else {
+      if (authStore.error) {
         window.scroll({ top: 0, behavior: 'smooth' })
+      } else {
+        router.push('/home')
       }
     }
 
-    onBeforeMount(() => {
-      // Clear residual errors from login.
-      store.auth.setStatus(StateStatus.WAITING)
-    })
-
     return {
       ...toRefs(state),
-      error,
+      error: authStore.error,
       genders,
       onSubmit,
     }

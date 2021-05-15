@@ -2,7 +2,7 @@
   <VAutocompleteValidated
     :value="value"
     :items="$accessor.projects.projects"
-    :loading="bouncing || $accessor.projects.isLoading"
+    :loading="$accessor.projects.isLoading"
     :search-input.sync="search"
     item-text="name"
     placeholder="Search for a project"
@@ -11,31 +11,35 @@
     outlined
     v-bind="$attrs"
     @input="$emit('input', $event || null)"
-  ></VAutocompleteValidated>
+  />
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
-import { throttle } from 'lodash'
+import { defineComponent, useContext, watch } from '@nuxtjs/composition-api'
+import { useDebouncedRef } from '~/composables/useDebouncedRef'
 
-@Component
-export default class AutoCompleteProject extends Vue {
-  @Prop() value!: any
-  @Prop({ default: 250 }) wait!: number
+export default defineComponent({
+  props: {
+    value: {
+      type: [String, Number, Object],
+      default: null,
+    },
+    debounce: {
+      type: [Boolean],
+      default: false,
+    },
+    wait: {
+      type: Number,
+      default: 250,
+    },
+  },
+  setup(props) {
+    const { $accessor } = useContext()
+    const search = useDebouncedRef('', props.wait)
 
-  search = ''
-  bouncing = false
-  findAllThrottled = throttle(async () => await this.findAll(), this.wait)
+    watch(search, () => $accessor.projects.findAll())
 
-  @Watch('search')
-  async onSearch() {
-    this.bouncing = true
-    await this.findAllThrottled()
-  }
-
-  async findAll() {
-    await this.$accessor.projects.findAll()
-    this.bouncing = false
-  }
-}
+    return { search }
+  },
+})
 </script>

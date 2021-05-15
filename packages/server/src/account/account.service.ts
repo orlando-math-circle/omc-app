@@ -54,7 +54,7 @@ export class AccountService {
     }
 
     user.assign(dto);
-    user.password = await bcrypt.hash(user.password, BCRYPT_ROUNDS);
+    user.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     account.primaryUser = user;
     account.users.add(user);
 

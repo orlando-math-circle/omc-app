@@ -19,10 +19,10 @@
             </v-alert>
           </v-expand-transition>
 
-          <v-form-validated @submit:form="login">
+          <VFormValidated @form:submit="onLogin">
             <v-row>
               <v-col>
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="email"
                   label="Email"
                   name="email"
@@ -38,7 +38,7 @@
 
             <v-row>
               <v-col>
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="password"
                   label="Password"
                   :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
@@ -64,7 +64,7 @@
               </v-col>
 
               <v-col cols="6" class="action">
-                <nuxt-link to="/forgot">Forgot password?</nuxt-link>
+                <NuxtLink to="/forgot">Forgot password?</NuxtLink>
               </v-col>
             </v-row>
 
@@ -73,7 +73,7 @@
             </v-btn>
             <div class="or-separator">or</div>
             <v-btn block color="secondary" to="/register">Sign up</v-btn>
-          </v-form-validated>
+          </VFormValidated>
         </v-col>
       </v-row>
     </v-container>
@@ -82,20 +82,19 @@
 
 <script lang="ts">
 import {
-  computed,
   defineComponent,
   reactive,
   toRefs,
-  useContext,
   useRouter,
 } from '@nuxtjs/composition-api'
+import { useAuth } from '@/store/useAuth'
 
 export default defineComponent({
   layout: 'landing',
   middleware: 'guest',
   setup() {
-    const { $accessor: store } = useContext()
     const router = useRouter()
+    const authStore = useAuth()
 
     const state = reactive({
       email: '',
@@ -104,30 +103,19 @@ export default defineComponent({
       remember: true,
     })
 
-    const isLoading = computed(() => store.auth.isLoading)
-    const error = computed(() => store.auth.isErrored && store.auth.error!)
+    const onLogin = async () => {
+      await authStore.login(state.email, state.password, state.remember)
 
-    const login = async () => {
-      await store.auth.login({
-        email: state.email,
-        password: state.password,
-        remember: state.remember,
-      })
+      if (authStore.error) return
 
-      if (error.value) return
-
-      if (store.auth.complete) {
-        router.push('/')
-      } else {
-        router.push('/switcher')
-      }
+      router.push(authStore.complete ? '/' : '/switcher')
     }
 
     return {
       ...toRefs(state),
-      login,
-      isLoading,
-      error,
+      error: authStore.error,
+      isLoading: authStore.isLoading,
+      onLogin,
     }
   },
   head: {

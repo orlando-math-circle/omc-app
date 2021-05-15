@@ -55,6 +55,7 @@ const config: NuxtConfig = {
   },
   loading: { color: '#44d9e6' },
   plugins: [
+    '~/plugins/pinia',
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
     '~/plugins/axios',
@@ -71,7 +72,7 @@ const config: NuxtConfig = {
     '@nuxt/typescript-build',
     '@nuxtjs/composition-api/module',
     '@nuxt/postcss8',
-    'nuxt-typed-vuex',
+    'pinia/nuxt',
   ],
   modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
   axios: {

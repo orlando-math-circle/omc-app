@@ -38,7 +38,7 @@ export default defineComponent({
     },
     rules: {
       type: [String, Object],
-      required: true,
+      default: '',
     },
     value: {
       type: [String, Number, Object, Array],

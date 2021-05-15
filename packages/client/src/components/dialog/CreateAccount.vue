@@ -51,7 +51,7 @@
 
 <script lang="ts">
 import { defineComponent, toRefs } from '@nuxtjs/composition-api'
-import useStateReset from '../../composables/useStateReset'
+import { useStateReset } from '../../composables/useStateReset'
 import BirthdayPickerValidated from '../inputs/BirthdayPickerValidated.vue'
 
 export default defineComponent({

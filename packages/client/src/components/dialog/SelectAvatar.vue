@@ -69,6 +69,9 @@ import {
   useContext,
   toRefs,
 } from '@nuxtjs/composition-api'
+import { useUsers } from '@/store/useUsers'
+import { useFiles } from '@/store/useFiles'
+import { useSnackbar } from '@/composables/useSnackbar'
 
 export default defineComponent({
   props: {
@@ -82,7 +85,10 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const { $accessor: store, $config: config, $snack: snack } = useContext()
+    const { $config: config } = useContext()
+    const snackbar = useSnackbar()
+    const userStore = useUsers()
+    const fileStore = useFiles()
 
     const state = reactive({
       dialog: false,
@@ -93,32 +99,30 @@ export default defineComponent({
       ) as DefaultAvatar[],
     })
 
-    const isLoading = computed(() => store.users.isLoading)
-
     const avatarToImage = (avatar: DefaultAvatar) =>
       `${config.staticBase}${config.avatarBase}/${avatar}.png`
 
     const onSubmit = async () => {
-      if (props.upload && state.file) {
-        const url = (await store.files.filesToURL(state.file)) as string
+      const isUpload = props.upload && state.file
 
-        if (store.files.isErrored) {
-          return snack(store.files.error!.message)
+      if (isUpload) {
+        await fileStore.create(state.file!)
+
+        if (fileStore.error) {
+          return snackbar.error(fileStore.error.message)
         }
 
-        await store.users.update({
-          id: props.user.id,
-          updateUserDto: {
-            avatar: url,
-          },
-        })
+        await userStore.update(props.user.id, { avatar: fileStore.file!.root })
       } else {
-        await store.users.updateOwn({
-          id: store.auth.user!.id,
-          updateOwnUserDto: {
-            avatar: state.avatars[state.selected],
-          },
-        })
+        await userStore.update(
+          props.user.id,
+          { avatar: state.avatars[state.selected] },
+          true
+        )
+      }
+
+      if (userStore.error) {
+        return snackbar.error(userStore.error.message)
       }
 
       emit('update:avatar')
@@ -128,7 +132,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      isLoading,
+      isLoading: computed(() => userStore.isLoading),
       avatarToImage,
       onSubmit,
     }

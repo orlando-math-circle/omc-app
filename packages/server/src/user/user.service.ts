@@ -101,7 +101,7 @@ export class UserService {
     return this.userRepository.findAndCount(where, options);
   }
 
-  async update(
+  public async update(
     id: number,
     dto: UpdateUserDto | UpdateOwnUserDto,
     author?: User,
@@ -127,7 +127,7 @@ export class UserService {
     }
 
     if ('password' in dto) {
-      dto.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+      dto.password = await bcrypt.hash(dto.password!, BCRYPT_ROUNDS);
     }
 
     user.assign(dto);

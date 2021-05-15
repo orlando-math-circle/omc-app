@@ -1,36 +1,43 @@
 <template>
   <div>
-    <v-card v-if="$accessor.auth.isVolunteer" class="mb-4">
-      <v-card-title>Submit Work Request</v-card-title>
-      <v-card-subtitle>
-        Submit a work order request to be approved by a staff member.
-      </v-card-subtitle>
+    <v-card v-if="isVolunteer" class="mb-4">
+      <VFormValidated ref="workForm" @form:submit="onSubmitWork">
+        <v-card-title>Submit Work Request</v-card-title>
+        <v-card-subtitle>
+          Submit a work order request to be approved by a staff member.
+        </v-card-subtitle>
 
-      <v-form-validated @submit:form="submitWork">
         <v-card-text>
           <v-row>
             <v-col cols="12">
-              <auto-complete-project
+              <VAutocompleteValidated
                 v-model="work.project"
+                :items="projectStore.projects"
+                :loading="projectStore.isLoading"
                 item-value="id"
                 label="Project (Optional)"
+                hide-details="auto"
+                item-text="name"
+                clearable
                 outlined
-              ></auto-complete-project>
+                debounce
+                @search="projectStore.findAll()"
+              />
             </v-col>
 
             <v-col cols="12">
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model.number="work.hours"
                 rules="required"
                 label="Hours"
-                hint="The hours to award (or deduct)"
+                hint="Hours of work completed"
                 outlined
                 hide-details="auto"
               />
             </v-col>
 
             <v-col cols="12">
-              <v-text-field-validated
+              <v-textarea
                 v-model.number="work.notes"
                 label="Notes"
                 outlined
@@ -41,29 +48,26 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
 
-          <v-btn
-            type="submit"
-            :loading="$accessor.volunteers.isLoading"
-            color="primary"
-          >
+          <v-btn type="submit" :loading="workStore.isLoading" color="primary">
             Submit Request
           </v-btn>
         </v-card-actions>
-      </v-form-validated>
+      </VFormValidated>
     </v-card>
 
+    <!-- Reduced Lunch Form -->
     <v-card>
-      <v-card-title>Reduced Lunch Form</v-card-title>
-      <v-card-subtitle>
-        Sudents on their school's free lunch program will have their
-        registration fees waived. Attach a copy of a letter from the student's
-        school district indicating they are on the free lunch program for
-        approval.
-      </v-card-subtitle>
+      <VFormValidated v-slot="{ passes }">
+        <v-card-title>Reduced Lunch Form</v-card-title>
+        <v-card-subtitle>
+          Sudents on their school's free lunch program will have their
+          registration fees waived. Attach a copy of a letter from the student's
+          school district indicating they are on the free lunch program for
+          approval.
+        </v-card-subtitle>
 
-      <v-form-validated v-slot="{ passes }">
         <v-card-text>
           <v-list v-if="attachments.length" class="mb-5">
             <template v-for="attachment in attachments">
@@ -99,7 +103,7 @@
           <v-expand-transition>
             <v-row v-if="usersWithoutForms.length" class="mb-4">
               <v-col cols="12">
-                <v-file-input-validated
+                <VFileInputValidated
                   v-model="file"
                   prepend-icon="mdi-paperclip"
                   label="Upload Document"
@@ -111,12 +115,11 @@
               </v-col>
 
               <v-col cols="12">
-                <v-select-validated
+                <VSelectValidated
                   v-model="selectedUser"
                   :items="usersWithoutForms"
                   prepend-icon="mdi-account-circle-outline"
                   label="Select User"
-                  rules="required"
                   required
                   outlined
                 >
@@ -130,12 +133,12 @@
 
                   <template #selection="{ item }">
                     <v-avatar size="32px" class="mr-2">
-                      <v-img :src="$avatar(item)" />
+                      <v-img :src="item.avatarUrl" />
                     </v-avatar>
 
                     <span>{{ item.name }}</span>
                   </template>
-                </v-select-validated>
+                </VSelectValidated>
               </v-col>
             </v-row>
           </v-expand-transition>
@@ -151,12 +154,12 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn :disabled="!passes" color="secondary" @click="upload">
             Upload
           </v-btn>
         </v-card-actions>
-      </v-form-validated>
+      </VFormValidated>
     </v-card>
   </div>
 </template>
@@ -164,64 +167,65 @@
 <script lang="ts">
 import { User } from '@server/user/user.entity'
 import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum'
-import {
-  computed,
-  defineComponent,
-  ref,
-  useContext,
-} from '@nuxtjs/composition-api'
-import { FileAttachment } from '../../../../server/src/file-attachment/file-attachment.entity'
-import useStateReset from '../../composables/useStateReset'
+import { computed, defineComponent, ref } from '@nuxtjs/composition-api'
+import { FileAttachment } from '@server/file-attachment/file-attachment.entity'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useProjects } from '@/store/useProjects'
+import { useWork } from '@/store/useWork'
+import { useAttachments } from '@/store/useAttachments'
+import { useStateReset } from '../../composables/useStateReset'
+import VFormValidated from '../../components/inputs/VFormValidated.vue'
+import { useAuth } from '../../store/useAuth'
 
 export default defineComponent({
   transition: 'slide-right',
   setup() {
-    const { $accessor: store, $snack } = useContext()
+    const snackbar = useSnackbar()
+    const attachmentStore = useAttachments()
+    const projectStore = useProjects()
+    const workStore = useWork()
+    const authStore = useAuth()
 
     const file = ref<File>()
     const selectedUser = ref<User>()
-    const { state: work, reset } = useStateReset({
+    const workForm = ref<InstanceType<typeof VFormValidated>>()
+
+    const { state: work, reset: resetWorkState } = useStateReset({
       project: undefined as number | undefined,
       hours: 0,
       status: VolunteerWorkStatus.PENDING,
       notes: '',
     })
 
-    const attachments = computed(() => store.files.attachments)
-    const user = computed(() => store.auth.user!)
+    const user = computed(() => authStore.user!)
 
     const usersWithoutForms = computed(() =>
-      store.auth.accountUsers.filter(
-        (u) => !attachments.value.find((a) => a.user.id === u.id)
+      authStore.accountUsers.filter(
+        (u) => !attachmentStore.attachments.find((a) => a.user.id === u.id)
       )
     )
 
     const onCancel = async (attachment: FileAttachment) => {
-      await store.files.deleteAttachment(attachment.id)
+      await attachmentStore.delete(attachment.id)
     }
 
-    const submitWork = async () => {
-      await store.volunteers.createWork({
-        ...work,
-        user: user.value.id,
-      })
+    const onSubmitWork = async () => {
+      await workStore.create({ ...work, user: user.value.id })
 
-      if (store.volunteers.isErrored) {
-        return $snack('Error while creating new work :(')
+      if (workStore.error) {
+        return snackbar.error('Error while creating new work :(')
       }
 
-      $snack('Work request submitted')
-      reset()
+      snackbar.success('Work request submitted')
+      resetWorkState()
+      workForm.value!.resetValidation()
     }
 
     const upload = async () => {
-      await store.files.uploadAttachment({
-        file: file.value!,
-        field: 'REDUCED_LUNCH_FIELD',
-      })
+      await attachmentStore.create('REDUCED_LUNCH_FIELD', file.value!)
 
-      if (store.files.isErrored) {
-        $snack(store.files.error!.message)
+      if (attachmentStore.error) {
+        snackbar.error(attachmentStore.error.message)
       } else {
         selectedUser.value = undefined
       }
@@ -230,13 +234,17 @@ export default defineComponent({
     return {
       file,
       work,
+      workStore,
+      authStore,
+      projectStore,
       selectedUser,
-      attachments,
+      attachments: computed(() => attachmentStore.attachments),
       usersWithoutForms,
-      submitWork,
+      onSubmitWork,
       onCancel,
       upload,
-      isVolunteer: computed(() => store.auth.isVolunteer),
+      isVolunteer: computed(() => authStore.isVolunteer),
+      workForm,
     }
   },
   head: {
