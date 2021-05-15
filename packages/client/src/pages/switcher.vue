@@ -59,9 +59,7 @@ export default defineComponent({
     }
   },
   async asyncData({ pinia }) {
-    const authStore = useAuth(pinia)
-
-    await authStore.getMyAccount()
+    await useAuth(pinia).getMyAccount()
   },
   head: {
     title: 'Switch User',

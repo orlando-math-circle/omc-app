@@ -66,12 +66,9 @@ export default defineComponent({
     }
   },
   async asyncData({ pinia }) {
-    const auth = useAuth(pinia)
-    const attachments = useAttachments(pinia)
-
     await Promise.all([
-      auth.getMyAccount(),
-      attachments.findAll('REDUCED_LUNCH_FIELD', true),
+      useAuth(pinia).getMyAccount(),
+      useAttachments(pinia).findAll('REDUCED_LUNCH_FIELD', true),
     ])
   },
   head: {

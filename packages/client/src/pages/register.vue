@@ -202,7 +202,7 @@ export default defineComponent({
         gender: state.gender!,
         email: state.email,
         password: state.password,
-        dob: (state.dob as unknown) as Date,
+        dob: state.dob as unknown as Date,
         industry: state.isIndustry ? { ...state.industry } : undefined,
         reminders: state.isNotify ? [ReminderFreq.HOUR] : undefined,
       })
