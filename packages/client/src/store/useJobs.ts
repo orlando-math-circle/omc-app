@@ -3,10 +3,13 @@ import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
 import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
 import { FindAllJobsDto } from '@server/volunteer-job/dto/find-all-jobs.dto'
 import { UpdateJobDto } from '@server/volunteer-job/dto/update-job.dto'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export const useJobs = defineStore({
   id: 'jobs',
   state: () => ({
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
     job: null as VolunteerJob | null,
     jobs: [] as VolunteerJob[],
   }),

@@ -1,14 +1,20 @@
 import { defineStore } from 'pinia'
 import { FileAttachment } from '@server/file-attachment/file-attachment.entity'
 import { FileField } from '@server/file-fields/file-field.entity'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export const useAttachments = defineStore({
   id: 'attachments',
   state: () => ({
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
     attachment: null as FileAttachment | null,
     attachments: [] as FileAttachment[],
     fields: [] as FileField[],
   }),
+  getters: {
+    isLoading: (state) => state.status === 'Loading',
+  },
   actions: {
     async create(field: string, file: File) {
       const formData = new FormData()

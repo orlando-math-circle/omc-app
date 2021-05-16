@@ -3,14 +3,20 @@ import { CreateRegistrationDto } from '@server/event-registration/dtos/create-re
 import { CreateVolunteerRegistrationDto } from '@server/event-registration/dtos/create-volunteer-registration.dto'
 import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
 import { EventRegistration } from '@server/event-registration/event-registration.entity'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export const useRegistrations = defineStore({
   id: 'registrations',
   state: () => ({
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
     registration: null as EventRegistration | null,
     registrations: [] as EventRegistration[],
     statuses: [] as EventRegistrationStatus[],
   }),
+  getters: {
+    isLoading: (state) => state.status === 'Loading',
+  },
   actions: {
     async create(
       data: CreateRegistrationDto | CreateVolunteerRegistrationDto,
