@@ -28,9 +28,9 @@
               solo
               hide-details
               @change="onChangeField"
-            ></v-select>
+            />
 
-            <v-spacer></v-spacer>
+            <v-spacer />
 
             <v-text-field
               v-model="search"
@@ -40,7 +40,7 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
           </v-card-title>
 
           <v-data-table
@@ -73,66 +73,82 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+  useFetch,
+} from '@nuxtjs/composition-api'
+import { useAttachments } from '../../../../store/useAttachments'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const state = reactive({
+      search: '',
+      field: '',
+    })
+
+    const headers = [
+      { text: 'Id', value: 'id' },
+      { text: 'Status', value: 'status' },
+      { text: 'User', value: 'user' },
+      {
+        text: 'Edit',
+        value: 'edit',
+        sortable: false,
+      },
+    ]
+
+    const statuses = [
+      { text: 'Pending', value: 'pending' },
+      { text: 'Approved', value: 'approved' },
+      { text: 'Denied', value: 'denied' },
+      { text: 'Cancelled', value: 'cancelled' },
+    ]
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/files/attachments',
+      },
+      {
+        text: 'Attachments',
+      },
+    ]
+
+    const attachmentStore = useAttachments()
+
+    const getStatus = (value: string) => {
+      const status = statuses.find((s) => s.value === value)
+
+      return status?.text || 'Unknown'
+    }
+
+    const fields = computed(() => attachmentStore.fields)
+    const attachments = computed(() => attachmentStore.attachments)
+
+    const onChangeField = async () => {
+      await attachmentStore.findAllAttachments(state.field)
+    }
+
+    // TODO? Is this find all fields?
+    useFetch(async () => await attachmentStore.findAll())
+
+    return {
+      ...toRefs(state),
+      headers,
+      statuses,
+      breadcrumbs,
+      getStatus,
+      fields,
+      attachments,
+      onChangeField,
+    }
+  },
   head: {
     title: 'Attachments',
   },
 })
-export default class AttachmentsIndexPage extends Vue {
-  search = ''
-  field = ''
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Status', value: 'status' },
-    { text: 'User', value: 'user' },
-    {
-      text: 'Edit',
-      value: 'edit',
-      sortable: false,
-    },
-  ]
-
-  statuses = [
-    { text: 'Pending', value: 'pending' },
-    { text: 'Approved', value: 'approved' },
-    { text: 'Denied', value: 'denied' },
-    { text: 'Cancelled', value: 'cancelled' },
-  ]
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/files/attachments',
-    },
-    {
-      text: 'Attachments',
-    },
-  ]
-
-  getStatus(value: string) {
-    const status = this.statuses.find((s) => s.value === value)
-
-    return status?.text || 'Unknown'
-  }
-
-  get fields() {
-    return this.$accessor.files.fields
-  }
-
-  get attachments() {
-    return this.$accessor.files.attachments
-  }
-
-  async onChangeField() {
-    await this.$accessor.files.findAllAttachments(this.field)
-  }
-
-  async fetch() {
-    await this.$accessor.files.findAllFields()
-  }
-}
 </script>

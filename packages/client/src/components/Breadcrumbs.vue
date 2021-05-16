@@ -12,12 +12,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 
-@Component
-export default class Breadcrumbs extends Vue {
-  @Prop(Array) items!: any[]
-}
+export default defineComponent({
+  props: {
+    items: {
+      type: Array,
+      required: true,
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

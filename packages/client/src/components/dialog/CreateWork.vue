@@ -1,6 +1,6 @@
 <template>
   <dialog-form
-    ref="dialogEl"
+    ref="dialog"
     :expands="false"
     width="440"
     @submit:form="onSubmit"
@@ -34,7 +34,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model.number="dto.hours"
             rules="required"
             label="Hours"
@@ -45,7 +45,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model.number="dto.notes"
             label="Notes"
             outlined
@@ -54,7 +54,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-select-validated
+          <VSelectValidated
             v-model="dto.status"
             rules="required"
             :items="workStatuses"
@@ -69,7 +69,7 @@
     <v-card-actions>
       <v-spacer />
 
-      <v-btn text @click="dialog.close()">Cancel</v-btn>
+      <v-btn text @click="dialog && dialog.close()">Cancel</v-btn>
       <v-btn text type="submit" :loading="isLoading" color="secondary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
@@ -84,39 +84,59 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref, Vue } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  ref,
+  toRefs,
+} from '@nuxtjs/composition-api'
 import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum'
-import { workStatuses } from '../../utils/constants'
-import DialogForm from './Form.vue'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useWork } from '@/store/useWork'
+import { workStatuses } from '@/utils/constants'
+import DialogForm from '@/components/dialog/Form.vue'
 
-@Component
-export default class DialogCreateWork extends Vue {
-  @Ref('dialogEl') readonly dialog!: DialogForm
-
-  success = false
-  workStatuses = workStatuses
-
-  dto = {
-    project: null as null | number,
-    user: null as null | number,
-    hours: 0,
-    notes: '',
-    status: VolunteerWorkStatus.APPROVED,
-  }
-
-  get isLoading() {
-    return this.$accessor.volunteers.isLoading
-  }
-
-  async onSubmit() {
-    const work = await this.$accessor.volunteers.createWork(this.dto as any)
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack('Error while creating new work :(')
+export default defineComponent({
+  setup(_, { emit }) {
+    const refs = {
+      dialog: ref<InstanceType<typeof DialogForm>>(),
     }
 
-    this.$emit('create:work', work)
-    this.dialog.close()
-  }
-}
+    const state = reactive({
+      success: false,
+      dto: {
+        project: null as null | number,
+        user: null as null | number,
+        hours: 0,
+        notes: '',
+        status: VolunteerWorkStatus.APPROVED,
+      },
+    })
+
+    const workStore = useWork()
+    const snackbar = useSnackbar()
+
+    const isLoading = computed(() => workStore.isLoading)
+
+    const onSubmit = async () => {
+      const work = await workStore.create({
+        project: state.dto.project!,
+        user: state.dto.user!,
+        hours: state.dto.hours,
+        notes: state.dto.notes,
+        status: state.dto.status,
+      })
+
+      if (workStore.error) {
+        snackbar.error(workStore.error.message)
+      }
+
+      emit('create:work', work)
+      refs.dialog.value!.close()
+    }
+
+    return { ...refs, ...toRefs(state), workStatuses, isLoading, onSubmit }
+  },
+})
 </script>

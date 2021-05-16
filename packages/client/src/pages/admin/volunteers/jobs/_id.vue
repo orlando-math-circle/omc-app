@@ -100,95 +100,107 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash'
-import { Component, Vue } from 'nuxt-property-decorator'
 import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
 import { UpdateJobDto } from '@server/volunteer-job/dto/update-job.dto'
-import { shallowDiff } from '~/utils/utilities'
+import { shallowDiff } from '@/utils/utilities'
+import {
+  computed,
+  defineComponent,
+  ref,
+  useRoute,
+  useRouter,
+} from '@nuxtjs/composition-api'
+import { useJobs } from '@/store/useJobs'
+import { useSnackbar } from '@/composables/useSnackbar'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const job = ref<VolunteerJob | null>()
+    const route = useRoute()
+    const router = useRouter()
+    const jobStore = useJobs()
+    const snackbar = useSnackbar()
+
+    const isLoading = computed(() => jobStore.isLoading)
+
+    const changes = computed(() => {
+      if (!job.value) return {}
+
+      const dto: UpdateJobDto = {
+        name: job.value.name,
+        description: job.value.description,
+        hours: job.value.hours,
+      }
+
+      return shallowDiff(jobStore.job!, dto)
+    })
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Jobs',
+        href: '/admin/volunteers/jobs',
+      },
+      {
+        text: 'Job',
+      },
+    ]
+
+    /**
+     * Reloads the job
+     */
+    const refresh = async (load = true) => {
+      if (load) {
+        await jobStore.findOne(+route.value.params.id)
+      }
+
+      job.value = cloneDeep(jobStore.job)
+    }
+
+    /**
+     * Deletes the active job.
+     */
+    const onDelete = async () => {
+      await jobStore.delete(job.value!.id)
+
+      if (jobStore.error) {
+        return snackbar.error('Failed to delete job :(')
+      }
+
+      snackbar.success('Job Deleted')
+
+      router.push('/admin/volunteers/jobs')
+    }
+
+    const onSubmit = async () => {
+      await jobStore.update(job.value!.id, changes.value)
+
+      if (jobStore.error) {
+        return snackbar.error(jobStore.error.message)
+      }
+
+      snackbar.success('Job Updated!')
+
+      await refresh(false)
+    }
+
+    return { job, breadcrumbs, isLoading, onDelete, onSubmit }
+  },
+  async asyncData({ pinia, route }) {
+    const jobStore = useJobs(pinia)
+
+    await jobStore.findOne(+route.params.id)
+
+    return {
+      job: cloneDeep(jobStore.job),
+    }
+  },
   head: {
     title: 'Edit Job',
   },
-  async asyncData({ app: { $accessor }, route }) {
-    await $accessor.volunteers.findOne(route.params.id)
-
-    return {
-      job: cloneDeep($accessor.volunteers.job),
-    }
-  },
 })
-export default class VolunteerJobAdminPage extends Vue {
-  job: null | VolunteerJob = null
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Jobs',
-      href: '/admin/volunteers/jobs',
-    },
-    {
-      text: 'Job',
-    },
-  ]
-
-  get isLoading() {
-    return this.$accessor.volunteers.isLoading
-  }
-
-  get changes() {
-    if (!this.job) return {}
-
-    const dto: UpdateJobDto = {
-      name: this.job.name,
-      description: this.job.description,
-      hours: this.job.hours,
-    }
-
-    return shallowDiff(this.$accessor.volunteers.job!, dto)
-  }
-
-  /**
-   * Reloads the job
-   */
-  async refresh(load = true) {
-    if (load) {
-      await this.$accessor.volunteers.findOne(this.$route.params.id)
-    }
-
-    this.job = cloneDeep(this.$accessor.volunteers.job)
-  }
-
-  /**
-   * Deletes the active job.
-   */
-  async onDelete() {
-    await this.$accessor.volunteers.delete(this.job!.id)
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack('Failed to delete job :(')
-    }
-
-    this.$snack('Job Deleted')
-
-    this.$router.push('/admin/volunteers/jobs')
-  }
-
-  async onSubmit() {
-    await this.$accessor.volunteers.update({
-      id: this.job!.id,
-      updateJobDto: this.changes,
-    })
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack(this.$accessor.volunteers.error!.message)
-    }
-
-    this.$snack('Job Updated!')
-    await this.refresh(false)
-  }
-}
 </script>

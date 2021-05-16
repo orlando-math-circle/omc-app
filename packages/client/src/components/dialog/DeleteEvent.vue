@@ -18,7 +18,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn text @click="dialog = false">Close</v-btn>
         <v-btn @click="confirm">OK</v-btn>
@@ -28,19 +28,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, reactive, toRefs } from '@nuxtjs/composition-api'
 
-@Component
-export default class DialogDeleteEvent extends Vue {
-  dialog = false
-  mode: 'single' | 'future' | 'all' = 'single'
+export default defineComponent({
+  setup(_, { emit }) {
+    const state = reactive({
+      dialog: false,
+      mode: 'single' as 'single' | 'future' | 'all',
+    })
 
-  open() {
-    this.dialog = true
-  }
+    const open = () => {
+      state.dialog = true
+    }
 
-  confirm() {
-    this.$emit('delete:confirm', this.mode)
-  }
-}
+    const confirm = () => {
+      emit('delete:confirm', state.mode)
+    }
+
+    return { ...toRefs(state), open, confirm }
+  },
+})
 </script>

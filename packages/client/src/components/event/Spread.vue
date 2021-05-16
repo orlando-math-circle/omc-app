@@ -43,56 +43,72 @@
 
 <script lang="ts">
 import { format } from 'date-fns'
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Event } from '@server/event/event.entity'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  useContext,
+} from '@nuxtjs/composition-api'
 
-@Component
-export default class EventSpread extends Vue {
-  @Prop({ required: true }) readonly event!: Event
+export default defineComponent({
+  props: {
+    event: {
+      type: Object as PropType<Event>,
+      required: true,
+    },
+  },
+  setup(props) {
+    const { $config } = useContext()
 
-  get background() {
-    const url = this.event.picture
+    const background = computed(() => {
+      const url = props.event.picture
 
-    if (url.startsWith('http')) return url
+      if (url.startsWith('http')) return url
 
-    return `${this.$config.staticBase}${url}`
-  }
+      return `${$config.staticBase}${url}`
+    })
 
-  get time() {
-    const date = new Date(this.event.dtstart)
-    return `${format(date, 'EEE, LLLL do')} at ${format(date, 'h:mm aaaa')}`
-  }
+    const time = computed(() => {
+      const date = new Date(props.event.dtstart)
+      return `${format(date, 'EEE, LLLL do')} at ${format(date, 'h:mm aaaa')}`
+    })
 
-  get status() {
-    if (this.event.isClosed) return 'Closed'
+    const status = computed(() => {
+      if (props.event.isClosed) return 'Closed'
 
-    if (this.event.isLate) return 'Late Fee'
+      if (props.event.isLate) return 'Late Fee'
 
-    return 'Open'
-  }
+      return 'Open'
+    })
 
-  get fee() {
-    if (this.event.course?.fee) {
-      const isLate = this.event.course.isLate
+    const fee = computed(() => {
+      if (props.event.course?.fee) {
+        const isLate = props.event.course.isLate
 
-      if (isLate) {
-        return this.event.course.fee.lateAmount || this.event.course.fee.amount
-      } else {
-        return this.event.course.fee.amount
+        if (isLate) {
+          return (
+            props.event.course.fee.lateAmount || props.event.course.fee.amount
+          )
+        } else {
+          return props.event.course.fee.amount
+        }
       }
-    }
 
-    if (this.event.fee) {
-      const isLate = this.event.isLate
+      if (props.event.fee) {
+        const isLate = props.event.isLate
 
-      if (isLate) {
-        return this.event.fee.lateAmount || this.event.fee.amount
-      } else {
-        return this.event.fee.amount
+        if (isLate) {
+          return props.event.fee.lateAmount || props.event.fee.amount
+        } else {
+          return props.event.fee.amount
+        }
       }
-    }
-  }
-}
+    })
+
+    return { background, time, status, fee }
+  },
+})
 </script>
 
 <style lang="scss" scoped>

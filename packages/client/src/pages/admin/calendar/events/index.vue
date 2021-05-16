@@ -16,20 +16,17 @@
       </v-col>
 
       <v-col cols="auto" class="ml-auto">
-        <dialog-create-event
-          :date="calendar.date"
-          @event:create="onEventCreated"
-        >
+        <DialogCreateEvent :date="calendar.date" @event:create="onEventCreated">
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" color="primary" v-on="on">Create Event</v-btn>
           </template>
-        </dialog-create-event>
+        </DialogCreateEvent>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col>
-        <calendar
+        <Calendar
           ref="calendar"
           v-model="calendar.date"
           click-redirect-base="/admin/calendar/events"
@@ -65,69 +62,84 @@
 </template>
 
 <script lang="ts">
-import { format, isSameDay, parseISO } from 'date-fns'
-import { Component, Ref, Vue } from 'nuxt-property-decorator'
-import { formatDate } from '../../../../utils/utilities'
-import Calendar from '~/components/Calendar.vue'
+import Calendar from '@/components/Calendar.vue'
+import {
+  defineComponent,
+  ref,
+  toRefs,
+  reactive,
+  computed,
+} from '@nuxtjs/composition-api'
+import { formatDate } from '@/utils/utilities'
+import { useEvents } from '@/store/useEvents'
+import { useDates } from '../../../../composables/useDates'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
   transition: 'admin',
-})
-export default class CalendarAdminPage extends Vue {
-  @Ref('calendar') readonly cal!: Calendar
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Start', value: 'start' },
-    { text: 'End', value: 'end' },
-    { text: 'Edit', value: 'edit' },
-  ]
-
-  calendar = {
-    type: 'simple',
-    types: [
-      { value: 'simple', text: 'Simple' },
-      { value: 'month', text: 'Month' },
-      { value: 'week', text: 'Week' },
-      { value: 'day', text: 'Day' },
-      { value: '4day', text: '4-Day' },
-    ],
-    date: new Date().toISOString().substr(0, 10),
-  }
-
-  get dateNative() {
-    return parseISO(this.calendar.date)
-  }
-
-  get events() {
-    return this.$accessor.events.calendarEvents
-  }
-
-  get eventsForDate() {
-    return this.events.filter((event) =>
-      isSameDay(this.dateNative, parseISO(event.dtstart))
-    )
-  }
-
-  get header() {
-    const date = format(this.dateNative, 'EEEE, LLLL do')
-
-    if (!this.eventsForDate.length) {
-      return `Nothing scheduled for ${date}`
+  setup() {
+    const refs = {
+      calendar: ref<InstanceType<typeof Calendar>>(),
     }
 
-    return `Events on ${date}`
-  }
+    const headers = [
+      { text: 'Id', value: 'id' },
+      { text: 'Name', value: 'name' },
+      { text: 'Description', value: 'description' },
+      { text: 'Start', value: 'start' },
+      { text: 'End', value: 'end' },
+      { text: 'Edit', value: 'edit' },
+    ]
 
-  format(date: Date | string, formatString: string) {
-    return formatDate(date, formatString)
-  }
+    const state = reactive({
+      calendar: {
+        type: 'simple',
+        types: [
+          { value: 'simple', text: 'Simple' },
+          { value: 'month', text: 'Month' },
+          { value: 'week', text: 'Week' },
+          { value: 'day', text: 'Day' },
+          { value: '4day', text: '4-Day' },
+        ],
+        date: new Date().toISOString().substr(0, 10),
+      },
+    })
 
-  async onEventCreated() {
-    await this.cal.refresh()
-  }
-}
+    const eventStore = useEvents()
+    const dateUtil = useDates()
+
+    const dateNative = computed(() => dateUtil.toDate(state.calendar.date))
+    const events = computed(() => eventStore.calendarEvents)
+    const eventsForDate = computed(() =>
+      events.value.filter((e) =>
+        dateUtil.isSameDay(dateNative.value, dateUtil.toDate(e.dtstart))
+      )
+    )
+    const header = computed(() => {
+      const date = format(dateNative.value, 'EEEE, LLLL do')
+
+      if (!eventsForDate.value.length) {
+        return `Nothing scheduled for ${date}`
+      }
+
+      return `Events on ${date}`
+    })
+
+    const format = (date: Date | string, formatString: string) =>
+      formatDate(date, formatString)
+
+    const onEventCreated = async () => await refs.calendar.value!.onLoadRange()
+
+    return {
+      ...refs,
+      ...toRefs(state),
+      headers,
+      dateNative,
+      events,
+      eventsForDate,
+      header,
+      onEventCreated,
+    }
+  },
+})
 </script>

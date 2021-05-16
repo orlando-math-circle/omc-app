@@ -2,6 +2,8 @@ import { defineNuxtPlugin } from '@nuxtjs/composition-api'
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 
+declare module 'vuetify-loader'
+
 Vue.use(Vuetify)
 
 export default defineNuxtPlugin((ctx) => {

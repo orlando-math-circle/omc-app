@@ -77,36 +77,32 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, reactive, toRefs } from '@nuxtjs/composition-api'
 import { genders } from '../../utils/constants'
 
-// export default defineComponent({
-//   const state = reactive({
-//     dialog: false,
+export default defineComponent({
+  setup() {
+    const state = reactive({
+      dialog: false,
+      dto: {
+        first: '',
+        last: '',
+        email: '',
+        dob: null as string | null,
+        gender: null,
+      },
+    })
 
-//   })
+    const onSubmit = () => {
+      //  TODO: NYI
+      console.log('Submitting Form')
+    }
 
-//   return {
-//     ...toRefs(state),
-//     genders,
-//   }
-// })
-
-@Component
-export default class DialogUpdateUser extends Vue {
-  dialog = false
-  genders = genders
-
-  dto = {
-    first: '',
-    last: '',
-    email: '',
-    dob: null as string | null,
-    gender: null,
-  }
-
-  onSubmit() {
-    console.log('Submitting Form')
-  }
-}
+    return {
+      ...toRefs(state),
+      genders,
+      onSubmit,
+    }
+  },
+})
 </script>

@@ -1,14 +1,13 @@
 <template>
   <v-row>
     <v-col cols="12" md="4">
-      <chart-card
+      <ChartCard
         title="New Users"
         subtitle="Users added this month"
         icon="mdi-account-plus-outline"
         :options="userChartOptions"
         :series="userChartSeries"
-      >
-      </chart-card>
+      />
     </v-col>
 
     <v-col cols="12" md="4">
@@ -25,7 +24,7 @@
 import {
   computed,
   defineComponent,
-  ssrRef,
+  ref,
   useContext,
   useFetch,
 } from '@nuxtjs/composition-api'
@@ -34,14 +33,11 @@ export default defineComponent({
   layout: 'admin',
   setup() {
     const { $axios } = useContext()
-    const state = ssrRef(
-      {
-        statistics: {
-          users: null as any,
-        },
+    const state = ref({
+      statistics: {
+        users: null as any,
       },
-      'statistics'
-    )
+    })
 
     const userChartSeries = computed(() => {
       if (!state.value.statistics.users) {

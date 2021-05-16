@@ -132,145 +132,123 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
 import { cloneDeep } from 'lodash'
 import { Project } from '@server/project/project.entity'
 import { UpdateProjectDto } from '@server/project/dto/update-project.dto'
 import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
-import { shallowDiff } from '~/utils/utilities'
+import { shallowDiff } from '@/utils/utilities'
+import {
+  computed,
+  defineComponent,
+  ref,
+  useContext,
+  useFetch,
+  useRoute,
+  useRouter,
+} from '@nuxtjs/composition-api'
+import { useProjects } from '@/store/useProjects'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useJobs } from '@/store/useJobs'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const { $config } = useContext()
+    const route = useRoute()
+    const router = useRouter()
+    const projectStore = useProjects()
+    const jobStore = useJobs()
+    const snackbar = useSnackbar()
+
+    const project = ref<Project | null>(null)
+
+    const isLoading = computed(() => projectStore.isLoading)
+    const jobs = computed(() => project.value?.jobs || [])
+    const background = computed(() => {
+      if (typeof project.value?.picture !== 'string') return null
+
+      const url = project.value.picture
+
+      if (url.startsWith('http')) return url
+
+      return `${$config.staticBase}${url}`
+    })
+    const changes = computed(() => {
+      if (!project.value) return {}
+
+      const dto: UpdateProjectDto = {
+        name: project.value.name,
+        description: project.value.description,
+        picture: project.value.picture,
+      }
+
+      return shallowDiff(projectStore.project!, dto)
+    })
+
+    const onDelete = async () => {
+      await projectStore.delete(+route.value.params.id)
+
+      if (projectStore.error) {
+        return snackbar.error(projectStore.error.message)
+      }
+
+      snackbar.success('Project Deleted')
+
+      router.push('/admin/calendar/projects')
+    }
+
+    const onCreateJob = async (job: CreateJobDto) => {
+      await jobStore.create({
+        ...job,
+        ...{ project: project.value!.id },
+      })
+
+      if (jobStore.error) {
+        snackbar.error(jobStore.error.message)
+      } else {
+        snackbar.success('Job Added')
+
+        await refresh()
+      }
+    }
+
+    const refresh = async (load = true) => {
+      if (load) {
+        await projectStore.findOne(+route.value.params.id)
+      }
+
+      project.value = cloneDeep(projectStore.project)
+    }
+
+    useFetch(async () => await refresh())
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Projects',
+        href: '/admin/calendar/projects',
+      },
+      {
+        text: 'Project',
+      },
+    ]
+
+    return {
+      project,
+      breadcrumbs,
+      isLoading,
+      jobs,
+      changes,
+      background,
+      onDelete,
+      onCreateJob,
+    }
+  },
   head: {
     title: 'Edit Project',
   },
-  async asyncData({ app: { $accessor }, route }) {
-    await $accessor.projects.findOne(route.params.id)
-
-    return {
-      project: cloneDeep($accessor.projects.project),
-    }
-  },
 })
-export default class AdminProjectEditPage extends Vue {
-  project: null | Project = null
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Projects',
-      href: '/admin/calendar/projects',
-    },
-    {
-      text: 'Project',
-    },
-  ]
-
-  get isLoading() {
-    return this.$accessor.projects.isLoading
-  }
-
-  get jobs() {
-    return this.project?.jobs || []
-  }
-
-  get background() {
-    if (
-      !this.project ||
-      !this.project.picture ||
-      typeof this.project.picture !== 'string'
-    )
-      return null
-
-    const url = this.project.picture
-
-    if (url.startsWith('http')) return url
-
-    return `${this.$config.staticBase}${url}`
-  }
-
-  get changes() {
-    if (!this.project) return {}
-
-    const dto: UpdateProjectDto = {
-      name: this.project.name,
-      description: this.project.description,
-      picture: this.project.picture,
-    }
-
-    return shallowDiff(this.$accessor.projects.project!, dto)
-  }
-
-  async onDelete() {
-    await this.$accessor.projects.delete(this.$route.params.id)
-
-    if (this.$accessor.projects.isErrored) {
-      return this.$snack('Failed to delete project')
-    }
-
-    this.$accessor.snackbar.show({
-      text: 'Project Deleted',
-    })
-
-    this.$router.push('/admin/calendar/projects')
-  }
-
-  async onCreateJob(job: CreateJobDto) {
-    await this.$accessor.volunteers.create({
-      ...job,
-      ...{ project: this.project!.id },
-    })
-
-    if (this.$accessor.volunteers.isErrored) {
-      this.$snack(this.$accessor.volunteers.error!.message)
-    } else {
-      this.$snack('Job Added!')
-
-      await this.refresh()
-    }
-  }
-
-  async onSubmit() {
-    const changed = this.project!
-
-    const url = (await this.$accessor.files.filesToURL(changed.picture)) as
-      | string
-      | null
-
-    if (this.$accessor.files.isErrored) {
-      return this.$accessor.snackbar.show({
-        text: this.$accessor.files.error!.message,
-      })
-    }
-
-    const dto =
-      typeof url === 'string'
-        ? Object.assign({}, this.changes, { picture: url })
-        : this.changes
-
-    await this.$accessor.projects.update({
-      id: this.project!.id,
-      updateProjectDto: dto,
-    })
-
-    this.$accessor.snackbar.show({
-      text: this.$accessor.projects.isErrored
-        ? this.$accessor.projects.error!.message
-        : 'Project Updated',
-    })
-
-    await this.refresh(false)
-  }
-
-  async refresh(load = true) {
-    if (load) {
-      await this.$accessor.projects.findOne(this.$route.params.id)
-    }
-
-    this.project = cloneDeep(this.$accessor.projects.project)
-  }
-}
 </script>

@@ -98,7 +98,7 @@
         </v-toolbar>
 
         <div class="cropper-wrapper">
-          <image ref="cropper" :src="objectURL" />
+          <image ref="cropperEl" :src="objectURL" />
         </div>
 
         <v-card-actions>
@@ -113,123 +113,165 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
 import Cropper from 'cropperjs'
-import { Uploads } from '~/types/uploads.interface'
+import { Uploads } from '@/types/uploads.interface'
 import 'cropperjs/dist/cropper.css'
+import {
+  defineComponent,
+  onBeforeMount,
+  PropType,
+  reactive,
+  ref,
+  watch,
+  nextTick,
+  computed,
+  toRefs,
+} from '@nuxtjs/composition-api'
 
-@Component
-export default class FileUpload extends Vue {
-  @Prop() value?: Uploads
-  @Ref('cropper') readonly cropperEl!: HTMLImageElement
-  @Prop({ default: 'file' }) field!: string
-  @Prop({ default: false }) multiple!: boolean
-  @Prop({ default: 'upload' }) initialMode!: 'upload' | 'url'
+export default defineComponent({
+  props: {
+    value: {
+      type: Object as PropType<Uploads>,
+      default: null,
+    },
+    field: {
+      type: String,
+      default: 'file',
+    },
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
+    initialMode: {
+      type: String as PropType<'upload' | 'url'>,
+      default: 'upload',
+    },
+  },
+  setup(props, { emit, attrs }) {
+    const cropperEl = ref<HTMLImageElement>()
 
-  dialog = false
-  url = ''
-  window: 'upload' | 'url' = this.initialMode
-  files: Uploads = this.multiple ? [] : null
-  cropper: Cropper | null = null
-  objectURL: string | null = null
-  preview: string | null = null
-  ratio: string | null = null
-
-  ratios = [
-    { text: '16:9', value: 16 / 9 },
-    { text: '4:3', value: 4 / 3 },
-    { text: '1:1', value: 1 },
-    { text: '2:3', value: 2 / 3 },
-    { text: 'Free', value: null },
-  ]
-
-  @Watch('files')
-  onFilesChange(files: Uploads) {
-    if (this.window !== 'upload') return
-
-    this.$emit('input', files)
-  }
-
-  @Watch('url')
-  onURLChange(url: string) {
-    if (this.window !== 'url') return
-
-    this.$emit('input', url)
-  }
-
-  beforeMount() {
-    if (typeof this.value === 'string') {
-      this.url = this.value
-    } else if (
-      this.value instanceof File ||
-      (Array.isArray(this.value) && this.value.every((f) => f instanceof File))
-    ) {
-      this.files = this.value
-    }
-  }
-
-  openDialog() {
-    if (!this.files) return
-
-    this.dialog = true
-    this.onDialogOpen()
-  }
-
-  closeDialog() {
-    this.dialog = false
-
-    this.cropper!.destroy()
-  }
-
-  onDialogOpen() {
-    if (this.cropper) {
-      this.cropper.destroy()
-    }
-
-    if (this.objectURL) {
-      window.URL.revokeObjectURL(this.objectURL)
-    }
-
-    this.objectURL = window.URL.createObjectURL(this.files)
-    this.$nextTick(this.setup)
-  }
-
-  onCrop() {
-    this.cropper!.getCroppedCanvas().toBlob((blob) => {
-      if (!blob) return
-
-      this.files = new File([blob], (this.files as File).name)
+    const state = reactive({
+      dialog: false,
+      url: '',
+      window: props.initialMode,
+      files: props.multiple ? [] : (null as Uploads),
+      cropper: null as Cropper | null,
+      objectURL: null as string | null,
+      preview: null as string | null,
+      ratio: null as number | null,
     })
 
-    this.closeDialog()
-  }
+    const ratios = [
+      { text: '16:9', value: 16 / 9 },
+      { text: '4:3', value: 4 / 3 },
+      { text: '1:1', value: 1 },
+      { text: '2:3', value: 2 / 3 },
+      { text: 'Free', value: null },
+    ]
 
-  @Watch('ratio')
-  onChangeRatio(ratio: number) {
-    this.cropper!.setAspectRatio(ratio)
-  }
+    watch(
+      () => state.files,
+      (files: Uploads) => {
+        if (state.window !== 'upload') return
 
-  setup() {
-    this.cropper = new Cropper(this.cropperEl, {
-      // aspectRatio: 1,
-      viewMode: 2,
+        emit('input', files)
+      }
+    )
+
+    watch(
+      () => state.url,
+      (url: string) => {
+        if (state.window !== 'url') return
+
+        emit('input', url)
+      }
+    )
+
+    onBeforeMount(() => {
+      if (typeof props.value === 'string') {
+        state.url = props.value
+      } else if (
+        props.value instanceof File ||
+        (Array.isArray(props.value) &&
+          props.value.every((f) => f instanceof File))
+      ) {
+        state.files = props.value
+      }
     })
-  }
 
-  switchTo(type: 'upload' | 'url') {
-    this.window = type
-  }
+    const openDialog = () => {
+      if (!state.files) return
 
-  get hasFile() {
-    return this.files && !(Array.isArray(this.files) && this.files.length === 0)
-  }
+      state.dialog = true
+      onDialogOpen()
+    }
 
-  get attributes() {
-    // Werid typescript nonsense.
-    const attrs = this.$attrs as object
-    return Object.assign({}, attrs, this.multiple && { multiple: true })
-  }
-}
+    const closeDialog = () => {
+      state.dialog = false
+      state.cropper!.destroy()
+    }
+
+    const onDialogOpen = () => {
+      if (state.cropper) {
+        state.cropper.destroy()
+      }
+
+      if (state.objectURL) {
+        window.URL.revokeObjectURL(state.objectURL)
+      }
+
+      state.objectURL = window.URL.createObjectURL(state.files)
+      nextTick(setup)
+    }
+
+    const onCrop = () => {
+      state.cropper!.getCroppedCanvas().toBlob((blob) => {
+        if (!blob) return
+
+        state.files = new File([blob], (state.files as File).name)
+      })
+
+      closeDialog()
+    }
+
+    watch(
+      () => state.ratio,
+      (ratio) => state.cropper!.setAspectRatio(ratio!)
+    )
+
+    const setup = () => {
+      state.cropper = new Cropper(cropperEl.value!, {
+        // aspectRatio: 1,
+        viewMode: 2,
+      })
+    }
+
+    const switchTo = (type: 'upload' | 'url') => {
+      state.window = type
+    }
+
+    const hasFile = computed(
+      () =>
+        state.files && !(Array.isArray(state.files) && state.files.length === 0)
+    )
+
+    const attributes = computed(() => ({
+      ...attrs,
+      ...(props.multiple && { multiple: true }),
+    }))
+
+    return {
+      ...toRefs(state),
+      cropperEl,
+      onCrop,
+      ratios,
+      openDialog,
+      switchTo,
+      hasFile,
+      attributes,
+    }
+  },
+})
 </script>
 
 <style lang="scss" scoped>

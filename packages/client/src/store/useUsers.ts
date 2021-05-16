@@ -14,6 +14,9 @@ export const useUsers = defineStore({
     user: null as DTOUser | null,
     users: [] as DTOUser[],
   }),
+  getters: {
+    test: (state) => state.user,
+  },
   actions: {
     async create(createUserDto: CreateUserDto) {
       this.user = await this.$nuxt.$axios.$post('/user', createUserDto)

@@ -21,16 +21,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent, PropType } from '@nuxtjs/composition-api'
 
 export type Breadcrumb = {
   text: string
   href?: string
 }
 
-@Component
-export default class AdminHeader extends Vue {
-  @Prop({ required: true, type: String }) title!: string
-  @Prop({ required: true }) breadcrumbs!: Breadcrumb[]
-}
+export default defineComponent({
+  props: {
+    value: {
+      type: String,
+      required: true,
+    },
+    breadcrumbs: {
+      type: Array as PropType<Breadcrumb[]>,
+      required: true,
+    },
+  },
+})
 </script>

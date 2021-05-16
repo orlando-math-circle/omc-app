@@ -1,4 +1,5 @@
 import {
+  format,
   addDays,
   endOfDay,
   endOfMonth,
@@ -7,6 +8,7 @@ import {
   startOfDay,
   startOfMonth,
   startOfWeek,
+  isSameDay,
 } from 'date-fns'
 
 type DateTime = Date | string
@@ -17,6 +19,8 @@ export const useDates = () => {
 
   const utils = {
     toDate: (date: DateTime) => toDate(date),
+    format: (date: DateTime, formatString: string) =>
+      format(toDate(date), formatString),
     addDays: (date: DateTime, amount: number) => addDays(toDate(date), amount),
     startOfDay: (date: DateTime) => startOfDay(toDate(date)),
     endOfDay: (date: DateTime) => endOfDay(toDate(date)),
@@ -26,6 +30,8 @@ export const useDates = () => {
     startOfMonth: (date: DateTime) => startOfMonth(toDate(date)),
     endOfMonth: (date: DateTime, andDay = true) =>
       endOfMonth(andDay ? utils.endOfDay(toDate(date)) : toDate(date)),
+    isSameDay: (first: DateTime, second: DateTime) =>
+      isSameDay(toDate(first), toDate(second)),
   }
 
   return { ...utils }
