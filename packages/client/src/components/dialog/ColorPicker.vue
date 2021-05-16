@@ -13,12 +13,11 @@
           hide-mode-switch
           mode="hexa"
           @input="$emit('input', $event || null)"
-        >
-        </v-color-picker>
+        />
       </v-card-text>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn>Close</v-btn>
       </v-card-actions>
@@ -27,16 +26,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent, ref } from '@nuxtjs/composition-api'
 
-@Component
-export default class DialogColorPicker extends Vue {
-  @Prop({ required: true }) value!: string
+export default defineComponent({
+  props: {
+    value: {
+      type: String,
+      required: true,
+    },
+  },
+  setup() {
+    const dialog = ref(false)
 
-  dialog = false
+    const open = () => (dialog.value = true)
 
-  open() {
-    this.dialog = true
-  }
-}
+    return { dialog, open }
+  },
+})
 </script>

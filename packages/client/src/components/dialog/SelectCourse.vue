@@ -1,6 +1,5 @@
 <template>
   <v-dialog v-model="dialog">
-    <!-- Slot: Activator -->
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }">
         <v-btn v-bind="attrs" large icon v-on="on">
@@ -27,7 +26,7 @@
           outlined
           autocomplete="off"
           hide-details="auto"
-        ></v-text-field>
+        />
 
         <v-expand-transition>
           <v-data-table
@@ -44,7 +43,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn text @click="dialog = false">Close</v-btn>
       </v-card-actions>
     </v-card>
@@ -52,97 +51,115 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
-import { throttle } from 'lodash'
-import { DataTableOptions } from '../../types/data-table.interface'
+import { DataTableOptions } from '@/types/data-table.interface'
+import { PropType } from 'vue-demi'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+  useFetch,
+  watch,
+} from '@nuxtjs/composition-api'
+import { useCourses } from '../../store/useCourses'
+import { useDebouncedRef } from '../../composables/useDebouncedRef'
 
-@Component
-export default class DialogSelectCourse extends Vue {
-  @Prop() value!: number | null
-  @Prop() project!: number
+const headers = [
+  { text: 'Name', value: 'name' },
+  { text: 'Description', value: 'description' },
+  { text: 'Payment Type', value: 'paymentType' },
+]
 
-  dialog = false
-  search = ''
-  bouncing = false
-
-  headers = [
-    { text: 'Name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Payment Type', value: 'paymentType' },
-  ]
-
-  pagination = {
-    total: 0,
-    limit: 10,
-    offset: 10,
-    sort: [] as string[],
-  }
-
-  get id() {
-    return this.value
-  }
-
-  set id(value: number | null) {
-    this.$emit('input', value)
-  }
-
-  get courses() {
-    return this.$accessor.courses.courses
-  }
-
-  get isLoading() {
-    return this.$accessor.courses.isLoading
-  }
-
-  @Watch('search')
-  onSearch() {
-    this.bouncing = true
-    this.$fetch()
-  }
-
-  async fetch() {
-    await this.$accessor.courses.findAllByProject({
-      project: this.project,
-      findAllCoursesDto: {
-        limit: this.pagination.limit,
-        offset: this.pagination.offset,
+export default defineComponent({
+  props: {
+    value: {
+      type: Number as PropType<number | null>,
+      required: true,
+    },
+    project: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const state = reactive({
+      dialog: false,
+      bouncing: false,
+      pagination: {
+        total: 0,
+        limit: 10,
+        offset: 10,
+        sort: [] as string[],
       },
     })
-  }
 
-  findAllThrottled = throttle(() => this.findAll())
+    const search = useDebouncedRef('')
 
-  findAll() {
-    const all = this.pagination.limit === -1
-
-    this.$accessor.courses.findAll({
-      contains: this.search,
-      limit: all ? undefined : this.pagination.limit,
-      offset: all ? undefined : this.pagination.offset,
-      sort: this.pagination.sort.length ? this.pagination.sort : undefined,
+    const id = computed({
+      get() {
+        return props.value
+      },
+      set(value: number | null) {
+        emit('input', value)
+      },
     })
-    this.bouncing = false
-  }
 
-  onTableSelected(value: any) {
-    this.id = value.item.id
-  }
+    const courseStore = useCourses()
 
-  onOptionsChange(options: DataTableOptions) {
-    this.pagination.limit = options.itemsPerPage
-    this.pagination.offset = this.pagination.limit * (options.page - 1)
+    const courses = computed(() => courseStore.courses)
+    const isLoading = computed(() => courseStore.isLoading)
 
-    if (options.sortBy.length) {
-      this.pagination.sort = []
+    const load = async () => {
+      const all = state.pagination.limit === -1
 
-      for (let i = 0; i < options.sortBy.length; i++) {
-        this.pagination.sort[i] = `${options.sortBy[i]}:${
-          options.sortDesc[i] ? 'DESC' : 'ASC'
-        }`
-      }
+      await courseStore.findAllByProject(props.project, {
+        contains: search.value,
+        limit: all ? undefined : state.pagination.limit,
+        offset: all ? undefined : state.pagination.offset,
+        sort: state.pagination.sort.length ? state.pagination.sort : undefined,
+      })
+
+      state.bouncing = false
     }
 
-    this.$fetch()
-  }
-}
+    watch(search, async () => {
+      state.bouncing = true
+      await load()
+    })
+
+    useFetch(async () => await load())
+
+    const onTableSelected = (value: any) => {
+      id.value = value.item.id
+    }
+
+    const onOptionsChange = (options: DataTableOptions) => {
+      state.pagination.limit = options.itemsPerPage
+      state.pagination.offset = state.pagination.limit * (options.page - 1)
+
+      if (options.sortBy.length) {
+        state.pagination.sort = []
+
+        for (let i = 0; i < options.sortBy.length; i++) {
+          state.pagination.sort[i] = `${options.sortBy[i]}:${
+            options.sortDesc[i] ? 'DESC' : 'ASC'
+          }`
+        }
+      }
+
+      load()
+    }
+
+    return {
+      ...toRefs(state),
+      search,
+      headers,
+      id,
+      courses,
+      isLoading,
+      onTableSelected,
+      onOptionsChange,
+    }
+  },
+})
 </script>

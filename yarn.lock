@@ -3176,7 +3176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxtjs/composition-api@npm:^0.23.4":
+"@nuxtjs/composition-api@npm:0.23.4":
   version: 0.23.4
   resolution: "@nuxtjs/composition-api@npm:0.23.4"
   dependencies:
@@ -3319,17 +3319,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/client@workspace:packages/client"
   dependencies:
-    "@nuxt/postcss8": ^1.1.3
+    "@nuxt/postcss8": 1.1.3
     "@nuxt/types": 2.15.6
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.1
-    "@nuxtjs/composition-api": ^0.23.4
+    "@nuxtjs/composition-api": 0.23.4
     "@nuxtjs/dotenv": 1.4.1
     "@nuxtjs/eslint-config-typescript": 6.0.0
     "@nuxtjs/pwa": 3.3.5
     "@types/dropzone": 5.7.3
     "@types/lodash": 4.14.169
-    "@vueuse/core": ^4.10.0
+    "@vueuse/core": 4.11.0
     animate.css: 4.1.1
     apexcharts: 3.26.2
     cookie-universal-nuxt: 2.1.4
@@ -3345,9 +3345,7 @@ __metadata:
     moment: 2.29.1
     nuxt: 2.15.6
     nuxt-dropzone: 1.0.4
-    nuxt-property-decorator: 2.9.1
-    nuxt-typed-vuex: 0.2.0
-    pinia: ^0.4.1
+    pinia: 0.4.1
     prettier: 2.3.0
     rrule: 2.6.8
     sass: 1.32.13
@@ -5005,13 +5003,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/core@npm:^4.10.0":
-  version: 4.10.0
-  resolution: "@vueuse/core@npm:4.10.0"
+"@vueuse/core@npm:4.11.0":
+  version: 4.11.0
+  resolution: "@vueuse/core@npm:4.11.0"
   dependencies:
-    "@vueuse/shared": 4.10.0
+    "@vueuse/shared": 4.11.0
     vue-demi: "*"
-  checksum: 78dc749efcacc73878da70ccb8b73296288ffb691e55ef94c215e37fe673927ee1f0b301ed1ae7396ddc20880850bdfe0dae9ad0ad30385cec5a880283659663
+  checksum: c1ce270c6d6d44aadb98a64ab56727416929286a37b25628092ef8cd1e6aceb86f86363992761b62a8a0c50fda33cf9ca4cdfe9d24f05c8599adddadc307e0fa
   languageName: node
   linkType: hard
 
@@ -5041,12 +5039,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/shared@npm:4.10.0":
-  version: 4.10.0
-  resolution: "@vueuse/shared@npm:4.10.0"
+"@vueuse/shared@npm:4.11.0":
+  version: 4.11.0
+  resolution: "@vueuse/shared@npm:4.11.0"
   dependencies:
     vue-demi: "*"
-  checksum: 70c190614649caf981b476cff797998b1c4f012d46e48ce93bf67cb85cd2d02d39852589eb047a208b6151224680f8ebaee9dd0d81af88f4b8a00c37703208ad
+  checksum: 2031d0499cded6754a92f3739ea80b794c5708646aacf02b057dabab1f073176a4f1be04b4a93a2514326d967c3c1a58188c9a50d27fefcd87b3ea2f33321da9
   languageName: node
   linkType: hard
 
@@ -15370,30 +15368,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"nuxt-property-decorator@npm:2.9.1":
-  version: 2.9.1
-  resolution: "nuxt-property-decorator@npm:2.9.1"
-  dependencies:
-    vue-class-component: ^7.2.6
-    vue-property-decorator: ^9.0.0
-    vuex-class: ^0.3.2
-    vuex-module-decorators: ^1.0.1
-  checksum: 38eefe59c76fa6a5fcf0e177f38dd58e5e106e4d046e720c9b7e802fef22eb86a4961466a19b10d6a87f62c6e7b554f66138204501a2794d3f4cb86691621b2e
-  languageName: node
-  linkType: hard
-
-"nuxt-typed-vuex@npm:0.2.0":
-  version: 0.2.0
-  resolution: "nuxt-typed-vuex@npm:0.2.0"
-  dependencies:
-    typed-vuex: 0.2.0
-    upath: ^2.0.1
-  peerDependencies:
-    "@nuxt/types": ^2.15.4
-  checksum: dcd93260167f106edf691e49889e46700891e67f60452c15628428f4ca4a4bd5a10342a43dfc7753018cc4890be582ce40547f66239997b11d6ecba3bd3ea057
-  languageName: node
-  linkType: hard
-
 "nuxt@npm:2.15.6":
   version: 2.15.6
   resolution: "nuxt@npm:2.15.6"
@@ -16401,7 +16375,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"pinia@npm:^0.4.1":
+"pinia@npm:0.4.1":
   version: 0.4.1
   resolution: "pinia@npm:0.4.1"
   checksum: 0cec339db0921cc6e607a4f5d8a4dd869afd6574ae6e4f6c8f5de3a200aad5f0299493714217daf2eee148c3d3f1a7a43b4a45fb963610031e94a3689572377e
@@ -21017,15 +20991,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"typed-vuex@npm:0.2.0":
-  version: 0.2.0
-  resolution: "typed-vuex@npm:0.2.0"
-  peerDependencies:
-    vuex: ^3.6.2
-  checksum: d718b42552f4ac3ce82b2b7054023f26bad12f4e171995119c9214b495c9d6d2125ad3c85e5b2686f95689bbd940c4965b066f4f2907d785dcb47b16fa2dc7ee
-  languageName: node
-  linkType: hard
-
 "typedarray-to-buffer@npm:^3.1.5":
   version: 3.1.5
   resolution: "typedarray-to-buffer@npm:3.1.5"
@@ -21720,15 +21685,6 @@ typescript@4.2.3:
   languageName: node
   linkType: hard
 
-"vue-class-component@npm:^7.2.6":
-  version: 7.2.6
-  resolution: "vue-class-component@npm:7.2.6"
-  peerDependencies:
-    vue: ^2.0.0
-  checksum: 1cc05c1b69525e012a293f7611f574bbdd052bfc43a1c3577e34248760fde9a1b9d1ec7492cb5288fbba5063f68eda07c8095679f8a66116bfc81161285c15ba
-  languageName: node
-  linkType: hard
-
 "vue-client-only@npm:^2.0.0":
   version: 2.0.0
   resolution: "vue-client-only@npm:2.0.0"
@@ -21863,16 +21819,6 @@ vue-demi@latest:
   languageName: node
   linkType: hard
 
-"vue-property-decorator@npm:^9.0.0":
-  version: 9.1.2
-  resolution: "vue-property-decorator@npm:9.1.2"
-  peerDependencies:
-    vue: "*"
-    vue-class-component: "*"
-  checksum: a4af390197a0f0695f72804be2d71b1fb3530b34d9f425f38c42aae2fc3024d85fc0ccfd60aefb5e3413a8b3fcba7428f4c12379e110831c53616082fb6730a6
-  languageName: node
-  linkType: hard
-
 "vue-router@npm:^3.5.1":
   version: 3.5.1
   resolution: "vue-router@npm:3.5.1"
@@ -21960,27 +21906,6 @@ vue-demi@latest:
   peerDependencies:
     vue: ^2.6.4
   checksum: 2360290608c06da840533d7aa4c3c387a4a371498a891897167cfb382e86d96c8e801e5f58ae78bb3225d29f47aa1f7bed96630077aaee61502ec1fae5144c22
-  languageName: node
-  linkType: hard
-
-"vuex-class@npm:^0.3.2":
-  version: 0.3.2
-  resolution: "vuex-class@npm:0.3.2"
-  peerDependencies:
-    vue: ^2.5.0
-    vue-class-component: ^6.0.0 || ^7.0.0
-    vuex: ^3.0.0
-  checksum: 418b8abcfdc22363aff91814225e77c9b2cebe042a2771f80c9e6a53a64f3171d2586f82c1eb2ad489539cca7276a1e760a4b62040cf5db543c11c9a6f06e990
-  languageName: node
-  linkType: hard
-
-"vuex-module-decorators@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "vuex-module-decorators@npm:1.0.1"
-  peerDependencies:
-    vue: ">=2"
-    vuex: 3
-  checksum: b37554d8f9e1fe97afb92194b3c70e8e3613c19bf6c0887b93d2eb27786927e638fc7e71f87ea832a7d9507e6c60e8170d5ca931ca4dc51fda44e8011645e481
   languageName: node
   linkType: hard
 

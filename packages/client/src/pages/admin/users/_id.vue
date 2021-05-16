@@ -316,29 +316,167 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
 import { format } from 'date-fns'
 import { cloneDeep } from 'lodash'
 import { UpdateUserDto } from '@server/user/dtos/update-user.dto'
 import { Account } from '@server/account/account.entity'
-import { DTOUser } from '~/store/users'
-import { shallowDiff } from '~/utils/utilities'
-import { grades } from '~/utils/events'
-import { genders, roles } from '~/utils/constants'
-import { DTO } from '~/types/date-to-string.interface'
+import { shallowDiff } from '@/utils/utilities'
+import { grades } from '@/utils/events'
+import { genders, roles } from '@/utils/constants'
+import { DTO } from '@/types/date-to-string.interface'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  useRoute,
+} from '@nuxtjs/composition-api'
+import { DTOUser, useUsers } from '@/store/useUsers'
+import { useAuth } from '@/store/useAuth'
+import { useSnackbar } from '@/composables/useSnackbar'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
-  head: {
-    title: 'Edit User',
+  setup() {
+    const state = reactive({
+      user: null as DTOUser | null,
+      account: null as DTO<Account> | null,
+      showPassword: false,
+      password: '',
+      panel: [0],
+    })
+
+    const route = useRoute()
+    const authStore = useAuth()
+    const userStore = useUsers()
+    const snackbar = useSnackbar()
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Users',
+        href: '/admin/users',
+      },
+      {
+        text: 'Edit User',
+      },
+    ]
+
+    const formatDate = (date: string, formatString: string) => {
+      return format(new Date(date), formatString)
+    }
+
+    const toggleLocked = () => {
+      if (!state.user) return
+
+      state.user.locked = !state.user.locked
+
+      onSubmit()
+    }
+
+    const onUpdateAvatar = () => {
+      onReset()
+
+      if (+route.value.params.id === authStore.user?.id) {
+        authStore.getMyUser()
+      }
+    }
+
+    const changes = computed<UpdateUserDto>(() =>
+      shallowDiff(authStore.user!, {
+        first: state.user!.first,
+        last: state.user!.last,
+        avatar: state.user!.avatar,
+        dob: state.user!.dob,
+        grade: state.user!.grade,
+        email: state.user!.email,
+        omcEmail: state.user!.omcEmail,
+        emailVerified: state.user!.emailVerified,
+        locked: state.user!.locked,
+        password: state.user!.password,
+        roles: state.user!.roles,
+        gender: state.user!.gender,
+        industry: state.user!.industry,
+      })
+    )
+
+    const onResetEmail = async () => {
+      if (!state.user?.email) return
+
+      await authStore.forgotPassword(state.user.email)
+
+      snackbar.show('Email Sent')
+    }
+
+    const changePassword = async () => {
+      await userStore.update(state.user!.id, { password: state.password })
+
+      snackbar.success('User password changed')
+    }
+
+    const onVerify = async (value: boolean) => {
+      await userStore.update(state.user!.id, { emailVerified: value })
+
+      if (userStore.error) {
+        return snackbar.error(userStore.error.message)
+      }
+
+      snackbar.success(`User ${value ? 'Verified' : 'Unverified'}`)
+    }
+
+    const onReset = async () => {
+      await userStore.findOne(+route.value.params.id)
+
+      state.user = cloneDeep(userStore.user) as DTOUser
+
+      if (!state.user.industry) {
+        state.user.industry = {
+          profession: '',
+          jobTitle: '',
+          company: '',
+        }
+      }
+    }
+
+    const onSubmit = async () => {
+      if (!Object.keys(changes.value).length) return
+
+      await userStore.update(state.user!.id, changes.value)
+
+      if (userStore.error) {
+        snackbar.error(userStore.error.message)
+      } else {
+        await onReset()
+
+        snackbar.error('Changes successfully saved.')
+      }
+    }
+
+    return {
+      grades,
+      roles,
+      genders,
+      breadcrumbs,
+      formatDate,
+      toggleLocked,
+      onUpdateAvatar,
+      onVerify,
+      onResetEmail,
+      changePassword,
+    }
   },
-  async asyncData({ app: { $accessor }, route }) {
+  async asyncData({ pinia, route }) {
+    const userStore = useUsers(pinia)
+    const authStore = useAuth(pinia)
+
     await Promise.all([
-      $accessor.users.getUser(route.params.id),
-      $accessor.auth.getAccountByUser(route.params.id),
+      userStore.findOne(+route.params.id),
+      authStore.findAccountByUser(+route.params.id),
     ])
 
-    const user = cloneDeep($accessor.users.user)!
+    const user = cloneDeep(userStore.user)!
 
     if (!user.industry) {
       user.industry = {
@@ -350,153 +488,11 @@ import { DTO } from '~/types/date-to-string.interface'
 
     return {
       user,
-      account: cloneDeep($accessor.auth.account),
+      account: cloneDeep(authStore.account),
     }
   },
+  head: {
+    title: 'Edit User',
+  },
 })
-export default class UserPage extends Vue {
-  user: DTOUser | null = null
-  account: DTO<Account> | null = null
-  showPassword = false
-  password = ''
-  grades = grades
-  genders = genders
-  roles = roles
-  panel = [0]
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Users',
-      href: '/admin/users',
-    },
-    {
-      text: 'Edit User',
-    },
-  ]
-
-  formatDate(date: string, formatString: string) {
-    return format(new Date(date), formatString)
-  }
-
-  toggleLocked() {
-    if (!this.user) return
-
-    this.user.locked = !this.user.locked
-
-    this.onSubmit()
-  }
-
-  onUpdateAvatar() {
-    this.onReset()
-
-    if (+this.$route.params.id === this.$accessor.auth.user?.id) {
-      this.$accessor.auth.getMe()
-    }
-  }
-
-  get changes(): UpdateUserDto {
-    const old = this.$accessor.users.user!
-    const user = this.user!
-
-    const dto: UpdateUserDto = {
-      first: user.first,
-      last: user.last,
-      avatar: user.avatar,
-      dob: user.dob,
-      grade: user.grade,
-      email: user.email,
-      omcEmail: user.omcEmail,
-      emailVerified: user.emailVerified,
-      locked: user.locked,
-      password: user.password,
-      roles: user.roles,
-      gender: user.gender,
-      industry: user.industry,
-    }
-
-    // Obtain the differences from the old user and the dto.
-    const diff: any = shallowDiff(old, dto)
-
-    return diff
-  }
-
-  async onResetEmail() {
-    if (!this.user || !this.user.email) return
-
-    await this.$accessor.auth.forgotPassword(this.user.email)
-
-    this.$accessor.snackbar.show({
-      text: 'Sent',
-      timeout: 2000,
-    })
-  }
-
-  async changePassword() {
-    await this.$accessor.users.update({
-      id: this.user!.id,
-      updateUserDto: { password: this.password },
-    })
-
-    this.$accessor.snackbar.show({
-      text: 'User password changed',
-      timeout: 2000,
-    })
-  }
-
-  async onVerify(value: boolean) {
-    await this.$accessor.users.update({
-      id: this.user!.id,
-      updateUserDto: { emailVerified: value },
-    })
-
-    if (this.$accessor.users.isErrored) {
-      return this.$accessor.snackbar.show({
-        text: this.$accessor.users.error!.message,
-        timeout: 10000,
-      })
-    }
-
-    this.$accessor.snackbar.show({
-      text: `User ${value ? 'Verified' : 'Unverified'}`,
-    })
-  }
-
-  async onReset() {
-    await this.$accessor.users.getUser(this.$route.params.id)
-
-    this.user = cloneDeep(this.$accessor.users.user) as DTOUser
-
-    if (!this.user.industry) {
-      this.user.industry = {
-        profession: '',
-        jobTitle: '',
-        company: '',
-      }
-    }
-  }
-
-  async onSubmit() {
-    if (!Object.keys(this.changes).length) return
-
-    await this.$accessor.users.update({
-      id: this.user!.id,
-      updateUserDto: this.changes,
-    })
-
-    if (this.$accessor.users.error) {
-      console.error(this.$accessor.users.error)
-    } else {
-      await this.onReset()
-
-      this.$accessor.snackbar.show({
-        text: 'Changes successfully saved.',
-        timeout: 2000,
-      })
-    }
-  }
-}
 </script>

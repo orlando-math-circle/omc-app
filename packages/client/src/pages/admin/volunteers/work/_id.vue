@@ -105,107 +105,115 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash'
-import { Component, Vue } from 'nuxt-property-decorator'
 import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity'
 import { UpdateWorkDto } from '@server/volunteer-work/dto/update-work.dto'
-import { shallowDiff } from '~/utils/utilities'
-import { workStatuses } from '~/utils/constants'
+import { shallowDiff } from '@/utils/utilities'
+import { workStatuses } from '@/utils/constants'
+import { reactive } from 'vue-demi'
+import { useWork } from '@/store/useWork'
+import {
+  computed,
+  defineComponent,
+  useRoute,
+  useRouter,
+} from '@nuxtjs/composition-api'
+import { useSnackbar } from '@/composables/useSnackbar'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const state = reactive({
+      work: null as VolunteerWork | null,
+      user: null as number | null,
+      project: null as number | null,
+    })
+
+    const workStore = useWork()
+    const route = useRoute()
+    const router = useRouter()
+    const snackbar = useSnackbar()
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Volunteer Work',
+        href: '/admin/volunteers/work',
+      },
+      {
+        text: 'Work',
+      },
+    ]
+
+    const isLoading = computed(() => workStore.isLoading)
+
+    const changes = computed(() => {
+      if (!state.work) return {}
+
+      const dto: UpdateWorkDto = Object.assign(
+        { hours: state.work.hours },
+        workStore!.user.id !== state.user && {
+          user: state.user || undefined,
+        },
+        workStore!.project?.id !== state.project && {
+          project: state.project || undefined,
+        }
+      )
+
+      return shallowDiff(workStore.work!, dto)
+    })
+
+    const refresh = async (load = true) => {
+      if (load) {
+        await workStore.findOne(+route.value.params.id)
+      }
+
+      state.work = cloneDeep(workStore.work!)
+      state.user = state.work!.user.id
+      state.project = state.work!.project?.id || null
+    }
+
+    const onDelete = async () => {
+      await workStore.delete(state.work!.id)
+
+      if (workStore.error) {
+        return snackbar.error('Failed to delete work :(')
+      }
+
+      snackbar.success('Work Deleted!')
+
+      router.push('/admin/volunteers/work')
+    }
+
+    const onSubmit = async () => {
+      await workStore.update(state.work!.id, changes.value)
+
+      if (workStore.error) {
+        return snackbar.error('Failed to update work :(')
+      }
+
+      snackbar.success('Work Updated')
+
+      refresh()
+    }
+
+    return { workStatuses, breadcrumbs, isLoading, onDelete, onSubmit }
+  },
+  async asyncData({ pinia, route }) {
+    const workStore = useWork(pinia)
+
+    await workStore.findOne(+route.params.id)
+
+    return {
+      work: cloneDeep(workStore.work),
+      user: workStore.work!.user.id,
+      project: workStore.work!.project?.id || null,
+    }
+  },
   head: {
     title: 'Edit Work',
   },
-  async asyncData({ app: { $accessor }, route }) {
-    await $accessor.volunteers.findOneWork(route.params.id)
-
-    return {
-      work: cloneDeep($accessor.volunteers.work),
-      user: $accessor.volunteers.work!.user.id,
-      project: $accessor.volunteers.work!.project?.id || null,
-    }
-  },
 })
-export default class VolunteerWorkAdminPage extends Vue {
-  work: null | VolunteerWork = null
-  user: null | number = null
-  project: null | number = null
-  workStatuses = workStatuses
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Volunteer Work',
-      href: '/admin/volunteers/work',
-    },
-    {
-      text: 'Work',
-    },
-  ]
-
-  get isLoading() {
-    return this.$accessor.volunteers.isLoading
-  }
-
-  get changes() {
-    if (!this.work) return {}
-
-    const dto: UpdateWorkDto = Object.assign(
-      { hours: this.work.hours },
-      this.$accessor.volunteers.work!.user.id !== this.user && {
-        user: this.user || undefined,
-      },
-      this.$accessor.volunteers.work!.project?.id !== this.project && {
-        project: this.project || undefined,
-      }
-    )
-
-    return shallowDiff(this.$accessor.volunteers.work!, dto)
-  }
-
-  /**
-   * Reloads the work
-   */
-  async refresh(load = true) {
-    if (load) {
-      await this.$accessor.volunteers.findOneWork(this.$route.params.id)
-    }
-
-    this.work = cloneDeep(this.$accessor.volunteers.work)
-    this.user = this.work!.user.id
-    this.project = this.work!.project?.id || null
-  }
-
-  /**
-   * Deletes the active work.
-   */
-  async onDelete() {
-    await this.$accessor.volunteers.deleteWork(this.work!.id)
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack('Failed to delete work :(')
-    }
-
-    this.$snack('Work Deleted!')
-
-    this.$router.push('/admin/volunteers/work')
-  }
-
-  async onSubmit() {
-    await this.$accessor.volunteers.updateWork({
-      id: this.work!.id,
-      updateWorkDto: this.changes,
-    })
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack(this.$accessor.volunteers.error!.message)
-    }
-
-    this.$snack('Work Updated!')
-    await this.refresh()
-  }
-}
 </script>

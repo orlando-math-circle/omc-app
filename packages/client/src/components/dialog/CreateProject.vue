@@ -30,7 +30,7 @@
         <v-spacer></v-spacer>
       </v-toolbar>
 
-      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
+      <VFormValidated v-slot="{ passes }" @submit:form="onSubmit">
         <v-card-text>
           <alert-error v-if="error" :error="error" />
 
@@ -111,70 +111,68 @@
             Create
           </v-btn>
         </v-card-actions>
-      </v-form-validated>
+      </VFormValidated>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
 import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
 import { CreateProjectDto } from '@server/project/dto/create-project.dto'
-import { Nullable } from '~/types/nullable.type'
-import { Uploads } from '~/types/uploads.interface'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { useProjects } from '@/store/useProjects'
+import { useFiles } from '@/store/useFiles'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { Nullable } from '@/types/nullable.type'
 
-@Component
-export default class DialogCreateProject extends Vue {
-  dialog = false
-  project: number | null = null
-  jobs: CreateJobDto[] = []
-  files: Uploads = null
-  dto: Nullable<CreateProjectDto> = {
-    name: null,
-    description: null,
-    picture: null,
-  }
+export default defineComponent({
+  setup(_, { emit }) {
+    const state = reactive({
+      dialog: false,
+      project: null as number | null,
+      jobs: [] as CreateJobDto[],
+      file: null as File | null,
+      dto: {
+        name: null,
+        description: null,
+        picture: null,
+      } as Nullable<CreateProjectDto>,
+    })
 
-  get projects() {
-    return this.$accessor.projects.projects
-  }
+    const snackbar = useSnackbar()
+    const projectStore = useProjects()
+    const fileStore = useFiles()
 
-  get error() {
-    return this.$accessor.projects.error
-  }
+    const projects = computed(() => projectStore.projects)
+    const isLoading = computed(() => projectStore.isLoading)
 
-  get isLoading() {
-    return this.$accessor.files.isLoading || this.$accessor.projects.isLoading
-  }
+    const onCreateJob = (job: CreateJobDto) => state.jobs.push(job)
 
-  onCreateJob(job: CreateJobDto) {
-    this.jobs.push(job)
-  }
+    const onSubmit = async () => {
+      const file = await fileStore.create(state.file!)
 
-  async onSubmit() {
-    // Type asserted as this is not multi-file upload.
-    const url = (await this.$accessor.files.filesToURL(this.files)) as
-      | string
-      | null
+      if (fileStore.error) {
+        snackbar.error(fileStore.error.message)
+      }
 
-    if (this.$accessor.files.error) {
-      console.error(this.$accessor.files.error)
+      const project = await projectStore.create({
+        ...state.dto,
+        ...(file && { picture: file.root }),
+        ...(state.jobs.length && { jobs: state.jobs }),
+      })
+
+      if (!projectStore.error) {
+        emit('create:project', project)
+        state.dialog = false
+      }
     }
 
-    const project = await this.$accessor.projects.create(
-      Object.assign(
-        {
-          ...(this.dto as CreateProjectDto),
-        },
-        url && { picture: url },
-        this.jobs.length && { jobs: this.jobs }
-      )
-    )
-
-    if (!this.error) {
-      this.$emit('create:project', project)
-      this.dialog = false
-    }
-  }
-}
+    return { ...toRefs(state), projects, isLoading, onCreateJob, onSubmit }
+  },
+})
 </script>

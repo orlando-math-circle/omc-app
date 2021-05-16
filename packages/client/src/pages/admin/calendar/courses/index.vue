@@ -39,7 +39,7 @@
               solo
               hide-details
             ></v-text-field>
-            <v-btn class="ml-3" icon large @click="onRefresh(null)">
+            <v-btn class="ml-3" icon large @click="onRefresh">
               <v-icon>mdi-refresh</v-icon>
             </v-btn>
           </v-card-title>
@@ -75,58 +75,54 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { formatDate } from '~/utils/utilities'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { formatDate } from '@/utils/utilities'
+import { useDebouncedRef } from '@/composables/useDebouncedRef'
+import { useCourses } from '@/store/useCourses'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  transition: 'admin',
+  setup() {
+    const search = useDebouncedRef('')
+
+    const courseStore = useCourses()
+
+    const onCourseCreate = async () => {
+      await onRefresh()
+    }
+
+    const onRefresh = async () => {
+      await courseStore.findAll()
+    }
+
+    return {
+      search,
+      courses: computed(() => courseStore.courses),
+      isLoading: computed(() => courseStore.isLoading),
+      format: (date: string, formatString: string) =>
+        formatDate(date, formatString),
+      onCourseCreate,
+      onRefresh,
+      headers: [
+        { text: 'Id', value: 'id' },
+        { text: 'name', value: 'name' },
+        { text: 'Description', value: 'description' },
+        { text: 'Edit', value: 'edit' },
+      ],
+      breadcrumbs: [
+        {
+          text: 'Dashboard',
+          href: '/admin/',
+        },
+        {
+          text: 'Courses',
+        },
+      ],
+    }
+  },
   head: {
     title: 'Courses',
   },
-  transition: 'admin',
 })
-export default class AdminCoursesPage extends Vue {
-  search = ''
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Courses',
-    },
-  ]
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Edit', value: 'edit' },
-  ]
-
-  get courses() {
-    return this.$accessor.courses.courses
-  }
-
-  get isLoading() {
-    return this.$accessor.courses.isLoading
-  }
-
-  format(date: string, formatString: string) {
-    return formatDate(date, formatString)
-  }
-
-  async onCourseCreate() {
-    await this.onRefresh(null)
-  }
-
-  async onCreate() {
-    await this.$fetch()
-  }
-
-  async onRefresh(options: any) {
-    await this.$accessor.courses.findAll(options)
-  }
-}
 </script>

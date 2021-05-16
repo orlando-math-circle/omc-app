@@ -1,7 +1,13 @@
-import { defineNuxtPlugin, onGlobalSetup } from '@nuxtjs/composition-api'
-import { PiniaPluginContext } from 'pinia'
-import { useAuth } from '@/store/useAuth'
 import { useCookies } from '@/composables/useCookies'
+import { useAuth } from '@/store/useAuth'
+import {
+  computed,
+  defineNuxtPlugin,
+  onGlobalSetup,
+  ref,
+  set,
+} from '@nuxtjs/composition-api'
+import { PiniaPluginContext, PiniaStorePlugin } from 'pinia'
 import {
   COOKIE_CALENDAR_TYPE,
   COOKIE_COMPLETE,
@@ -28,9 +34,7 @@ type Procedure = (...args: any[]) => any
 type StoreType = PiniaPluginContext['store']
 
 const wrap = <F extends Procedure>(fn: F, store: StoreType) => {
-  const wrappedFn = async (
-    ...args: Parameters<F>
-  ): Promise<ReturnType<F> | undefined> => {
+  const wrappedFn = async (...args: any[]) => {
     try {
       store.status = 'Loading'
       store.error = null
@@ -48,26 +52,68 @@ const wrap = <F extends Procedure>(fn: F, store: StoreType) => {
   return wrappedFn
 }
 
-export function useState({ options, store }: PiniaPluginContext) {
-  store.status = 'Idle'
-  store.error = null
+const plugin: PiniaStorePlugin = ({ store, options }) => {
+  if (!Object.prototype.hasOwnProperty.call(store.$state, 'status')) {
+    const statusRef = ref('Idle')
+    set(store.$state, 'status', statusRef)
+    set(store, 'status', statusRef)
 
-  options.getters = options.getters || {}
-  options.getters.isLoading = (state) => state.status === 'Loading'
+    const loadingRef = computed(() => store.status === 'Loading')
+    set(store.$state, 'isLoading', loadingRef)
+    set(store, 'isLoading', loadingRef)
+  }
 
-  options.actions = options.actions || {}
+  if (!options.actions) return
+
   return Object.keys(options.actions).reduce(
-    (wrappedActions: PiniaPluginContext['store']['actions'], action) => {
-      wrappedActions[action] = wrap(store[action], store)
+    (result: Record<string, Procedure>, action) => {
+      // wrappedActions[action] = wrap(store[action], store)
+      result[action] = () => {
+        const wrappedFn = async (...args: any[]) => {
+          try {
+            store.status = 'Loading'
 
-      return wrappedActions
+            const resp = await Promise.resolve(store[action](...args))
+
+            store.status = 'Idle'
+
+            return resp
+          } catch (error) {
+            store.status = 'Error'
+            store.error = error
+          }
+        }
+
+        return wrappedFn
+      }
+
+      return result
     },
     {}
   )
 }
+// store.status = ref('Idle')
+// store.error = ref(null)
+// store.isLoading = computed(() => store.status === 'Loading')
+// // options.getters = options.getters || {}
+// // options.getters.isLoading = (store) => store.status === 'Loading'
+
+// // options.getters = options.getters || {}
+// // options.getters.isLoading = (store) => store.status === 'Loading'
+
+// options.actions = options.actions || {}
+// return Object.keys(options.actions).reduce(
+//   (wrappedActions: PiniaPluginContext['store']['actions'], action) => {
+//     wrappedActions[action] = wrap(store[action], store)
+
+//     return wrappedActions
+//   },
+//   {}
+// )
+// }
 
 export default defineNuxtPlugin(({ pinia }) => {
-  pinia.use(useState)
+  pinia.use(plugin)
 
   onGlobalSetup(async () => {
     const auth = useAuth()

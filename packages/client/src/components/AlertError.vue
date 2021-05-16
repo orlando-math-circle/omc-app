@@ -11,19 +11,21 @@
 </template>
 
 <script lang="ts">
-import { Vue, Prop, Component } from 'nuxt-property-decorator'
-import { StateError } from '../types/state-error.interface'
+import { computed, defineComponent, PropType } from '@nuxtjs/composition-api'
+import { StateError } from '@/types/state-error.interface'
 
-@Component
-export default class AlertError extends Vue {
-  @Prop({ required: true }) error!: StateError
-
-  get status() {
-    return this.error.status
-  }
-
-  get message(): string {
-    return this.error.message
-  }
-}
+export default defineComponent({
+  props: {
+    error: {
+      type: Object as PropType<StateError>,
+      required: true,
+    },
+  },
+  setup(props) {
+    return {
+      status: computed(() => props.error.status),
+      message: computed(() => props.error.message),
+    }
+  },
+})
 </script>

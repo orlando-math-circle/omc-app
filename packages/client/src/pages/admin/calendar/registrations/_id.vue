@@ -37,28 +37,37 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, useRoute, useRouter } from '@nuxtjs/composition-api'
+import { useRegistrations } from '@/store/useRegistrations'
 
-@Component
-export default class RegistrationIdAdminPage extends Vue {
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Registrations',
-      href: '/admin/calendar/registrations',
-    },
-    {
-      text: 'Edit Registration',
-    },
-  ]
+export default defineComponent({
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
 
-  async onDeleteConfirm() {
-    await this.$accessor.registrations.delete(this.$route.params.id)
+    const registrationStore = useRegistrations()
 
-    this.$router.push('/admin/calendar/registrations')
-  }
-}
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Registrations',
+        href: '/admin/calendar/registrations',
+      },
+      {
+        text: 'Edit Registration',
+      },
+    ]
+
+    const onDeleteConfirm = async () => {
+      await registrationStore.delete(+route.value.params.id)
+
+      router.push('/admin/calendar/registrations')
+    }
+
+    return { breadcrumbs, onDeleteConfirm }
+  },
+})
 </script>

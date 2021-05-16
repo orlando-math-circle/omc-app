@@ -3,13 +3,13 @@
     <admin-header title="Users" :breadcrumbs="breadcrumbs">
       <v-row>
         <v-col cols="auto" align-self="center">
-          <dialog-create-account>
+          <DialogCreateAccount>
             <template #activator="{ on, attrs }">
               <v-btn color="primary" v-bind="attrs" v-on="on">
                 Create Account
               </v-btn>
             </template>
-          </dialog-create-account>
+          </DialogCreateAccount>
         </v-col>
 
         <v-col cols="auto" align-self="center">
@@ -22,7 +22,8 @@
 
     <v-row>
       <v-col>
-        <v-card>
+        <v-card :loading="isLoading">
+          <span>Loading: {{ isLoading }}</span>
           <v-toolbar v-if="filters.panel" flat class="pa-3">
             <v-row>
               <v-col>
@@ -34,7 +35,7 @@
                   multiple
                   hide-details="auto"
                   clearable
-                  @change="onRefresh(options)"
+                  @change="findAll()"
                 >
                   <template #selection="{ index }">
                     <v-chip v-if="index < gradeGroups.length">
@@ -53,23 +54,28 @@
                   outlined
                   multiple
                   clearable
-                  @change="onRefresh(options)"
+                  @change="findAll()"
                 />
               </v-col>
             </v-row>
           </v-toolbar>
 
           <v-card-title>
-            <v-menu v-if="selected.length" offset-y>
+            <v-menu offset-y>
               <template #activator="{ on, attrs }">
-                <v-btn v-bind="attrs" color="primary" v-on="on"
-                  >Actions
+                <v-btn
+                  :disabled="!selected.length"
+                  v-bind="attrs"
+                  color="primary"
+                  v-on="on"
+                >
+                  Actions
                   <v-icon>mdi-chevron-down</v-icon>
                 </v-btn>
               </template>
 
               <v-list nav dense>
-                <dialog-email :users="selected">
+                <DialogEmail :users="selected">
                   <template #activator="{ on, attrs }">
                     <v-list-item v-bind="attrs" v-on="on">
                       <v-list-item-icon>
@@ -81,7 +87,7 @@
                       </v-list-item-content>
                     </v-list-item>
                   </template>
-                </dialog-email>
+                </DialogEmail>
 
                 <v-list-item>
                   <v-list-item-icon>
@@ -95,32 +101,89 @@
               </v-list>
             </v-menu>
 
-            <v-spacer></v-spacer>
+            <v-spacer />
 
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              placeholder="filter for id, name, email, etc"
+              placeholder="Filter for id, name, email, ...etc"
               label="Search"
               clearable
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
 
-            <v-btn class="ml-3" icon large @click="onRefresh(options)">
+            <v-btn class="ml-3" icon large @click="findAll()">
               <v-icon>mdi-refresh</v-icon>
             </v-btn>
           </v-card-title>
 
-          <data-table-users
+          <v-data-table-paginated
             v-model="selected"
-            :users="$accessor.users.users"
-            :search="search"
+            :headers="headers"
+            :items="users"
             :loading="isLoading"
             show-select
           >
-          </data-table-users>
+            <template #[`item.id`]="{ item }">
+              # <LinkCopy :text="item.id" />
+            </template>
+
+            <template #[`item.email`]="{ item }">
+              <div class="d-flex align-center py-1">
+                <v-avatar size="32px" class="elevation-1">
+                  <v-img :src="$avatar(item)" />
+                </v-avatar>
+
+                <div class="ml-2">
+                  <link-copy v-if="item.email" :text="item.email"></link-copy>
+                  <span v-else>No Email</span>
+                </div>
+              </div>
+            </template>
+
+            <template #[`item.grade`]="{ item }">
+              {{
+                typeof item.grade === 'number'
+                  ? grades[item.grade].text
+                  : 'No Grade'
+              }}
+            </template>
+
+            <template #[`item.roles`]="{ item }">
+              <v-chip
+                v-for="role in item.roles"
+                :key="role"
+                :color="getRoleColor(role)"
+                label
+                dark
+                class="font-weight-bold mr-2"
+              >
+                {{ role.charAt(0).toUpperCase() }}
+              </v-chip>
+            </template>
+
+            <template #[`item.emailVerified`]="{ item }">
+              <v-icon :class="`${item.emailVerified ? 'success--text' : ''}`">
+                {{
+                  item.emailVerified ? 'mdi-check-circle' : 'mdi-circle-outline'
+                }}
+              </v-icon>
+            </template>
+
+            <template #[`item.feeWaived`]="{ item }">
+              <v-icon :class="`${item.feeWaived ? 'success--text' : ''}`">
+                {{ item.feeWaived ? 'mdi-check-circle' : 'mdi-circle-outline' }}
+              </v-icon>
+            </template>
+
+            <template #[`item.edit`]="{ item }">
+              <v-btn icon :to="`/admin/users/${item.id}`">
+                <v-icon>mdi-open-in-new</v-icon>
+              </v-btn>
+            </template>
+          </v-data-table-paginated>
         </v-card>
       </v-col>
     </v-row>
@@ -128,97 +191,112 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { Roles } from '@server/app.roles'
 import {
-  contiguousGradeRanges,
-  gradeGroups,
-  grades,
-} from '../../../utils/events'
-import { formatDate } from '~/utils/utilities'
+  computed,
+  defineComponent,
+  reactive,
+  useFetch,
+  toRefs,
+  watch,
+} from '@nuxtjs/composition-api'
+import { Roles } from '@server/app.roles'
+import { useDebouncedRef } from '@/composables/useDebouncedRef'
+import { useUsers } from '@/store/useUsers'
+import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
 
-@Component({
+const breadcrumbs = [
+  {
+    text: 'Dashboard',
+    href: '/admin/',
+  },
+  {
+    text: 'Users',
+  },
+]
+
+const roles = [
+  { text: 'Administrator', value: Roles.ADMIN },
+  { text: 'Volunteer', value: Roles.VOLUNTEER },
+]
+
+export default defineComponent({
   layout: 'admin',
+  transition: 'admin',
+  setup() {
+    const userStore = useUsers()
+
+    const state = reactive({
+      selected: [],
+      options: null,
+      filters: {
+        panel: false,
+        grades: [],
+        roles: [],
+      },
+    })
+
+    const search = useDebouncedRef('')
+
+    const headers = [
+      { text: 'ID', value: 'id' },
+      { text: 'Name', value: 'name' },
+      { text: 'Email', value: 'email' },
+      { text: 'Verified', value: 'emailVerified' },
+      { text: 'Grades', value: 'grade' },
+      { text: 'Roles', value: 'roles' },
+      { text: 'Fee Waived', value: 'feeWaived' },
+      {
+        text: 'Edit',
+        value: 'edit',
+        sortable: false,
+        filterable: false,
+      },
+    ]
+
+    const groups = computed(() =>
+      gradeGroups(contiguousGradeRanges(state.filters.grades))
+    )
+
+    const getRoleColor = (role: string) => {
+      switch (role) {
+        case 'admin':
+          return '#ec407a'
+        case 'volunteer':
+          return '#2196f3'
+        default:
+          return ''
+      }
+    }
+
+    const findAll = async () => {
+      await userStore.findAll({
+        ...(state.filters.grades.length && { grade: state.filters.grades }),
+        ...(state.filters.roles.length && { role: state.filters.roles }),
+        ...(search.value.length && { contains: search.value }),
+      })
+    }
+
+    useFetch(async () => await findAll())
+    watch(search, async () => await findAll())
+
+    return {
+      ...toRefs(state),
+      search,
+      headers,
+      grades,
+      breadcrumbs,
+      roles,
+      getRoleColor,
+      gradeGroups: groups,
+      users: computed(() => userStore.users),
+      isLoading: computed(() => userStore.isLoading),
+      findAll,
+    }
+  },
   head: {
     title: 'Users',
   },
-  transition: 'admin',
 })
-export default class AdminUsersPage extends Vue {
-  search = ''
-  selected = []
-  grades = grades
-  options = null
-
-  filters = {
-    panel: false,
-    grades: [],
-    roles: [],
-  }
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Users',
-    },
-  ]
-
-  roles = [
-    { text: 'Administrator', value: Roles.ADMIN },
-    { text: 'Volunteer', value: Roles.VOLUNTEER },
-  ]
-
-  get isLoading() {
-    return this.$accessor.users.isLoading
-  }
-
-  get gradeGroups() {
-    return gradeGroups(contiguousGradeRanges(this.filters.grades))
-  }
-
-  getRoleColor(role: string) {
-    switch (role) {
-      case 'admin':
-        return '#ec407a'
-      case 'volunteer':
-        return '#2196f3'
-      default:
-        return ''
-    }
-  }
-
-  parseDate(date: string) {
-    return formatDate(new Date(date), 'MMM d, yyyy')
-  }
-
-  parseDateTime(date: string) {
-    return formatDate(new Date(date), 'MMM d, yyyy h:mm a')
-  }
-
-  async onRefresh(options: any) {
-    if (this.options === null) {
-      this.options = options
-
-      return // Prevent fetching twice on first page load.
-    }
-
-    await this.$accessor.users.findAll(
-      Object.assign(
-        {},
-        options,
-        this.filters.grades.length && { grade: this.filters.grades },
-        this.filters.roles.length && { role: this.filters.roles }
-      )
-    )
-  }
-
-  async fetch() {
-    await this.$accessor.users.findAll()
-  }
-}
 </script>
 
 <style lang="scss" scoped>

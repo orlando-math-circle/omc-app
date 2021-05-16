@@ -1,5 +1,5 @@
 <template>
-  <dialog-form ref="refDialog" @submit:form="onSubmit">
+  <dialog-form ref="dialog" @submit:form="onSubmit">
     <template #title>Create Event</template>
 
     <template #activator="{ on, attrs }">
@@ -333,6 +333,14 @@
           <v-list-item-content>
             <v-row>
               <v-col>
+                <VAutoCompleteValidated
+                  v-model="course"
+                  label="Course"
+                  item-text="name"
+                  item-value="id"
+                  placeholder="Search for a course"
+                  @search="onCourseSearch"
+                />
                 <auto-complete-course
                   v-model="course"
                   item-value="id"
@@ -469,7 +477,7 @@
     <v-card-actions>
       <v-spacer />
 
-      <v-btn text @click="dialog.close()">Cancel</v-btn>
+      <v-btn text @click="dialog && dialog.close()">Cancel</v-btn>
       <v-btn type="submit" :loading="isLoading" color="primary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
@@ -484,8 +492,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Ref } from 'nuxt-property-decorator'
-import { addDays, format, isBefore, isSameDay, parse, parseISO } from 'date-fns'
+import { addDays, format, isBefore, parse, parseISO } from 'date-fns'
 import { Options } from 'rrule'
 import { Course } from '@server/course/course.entity'
 import { Grade } from '@server/user/enums/grade.enum'
@@ -493,14 +500,24 @@ import { Project } from '@server/project/project.entity'
 import { FeeType } from '@server/event/enums/fee-type.enum'
 import { Gender } from '@server/user/enums/gender.enum'
 import { EventTimeThreshold } from '@server/event/enums/event-time-threshold.enum'
+import { gradeGroups, contiguousGradeRanges, grades } from '@/utils/events'
+import { EventRecurrenceDto } from '@/types/events/event-recurrence.interface'
+import { addTime, isValidDate, roundDate, toDate } from '@/utils/utilities'
+import Calendar from '@/components/Calendar.vue'
+import {
+  defineComponent,
+  ref,
+  reactive,
+  toRefs,
+  computed,
+  onBeforeMount,
+} from '@nuxtjs/composition-api'
+import { useEvents } from '@/store/useEvents'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useFiles } from '@/store/useFiles'
+import { useDates } from '../../composables/useDates'
 import RecurrenceDialog from '../dialog/Recurrence.vue'
-import { Uploads } from '../../types/uploads.interface'
 import DialogForm from './Form.vue'
-import { gradeGroups, contiguousGradeRanges, grades } from '~/utils/events'
-import { EventRecurrenceDto } from '~/types/events/event-recurrence.interface'
-import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
-import Calendar from '~/components/Calendar.vue'
-import { genders } from '~/utils/constants'
 
 export type RRuleOptions = Partial<Options>
 
@@ -509,253 +526,267 @@ export type RepeatingTypes = {
   rrule?: RRuleOptions
 }
 
-@Component
-export default class DialogCreateEvent extends Vue {
-  @Ref('recurrenceDialog') readonly recurrenceDialog!: RecurrenceDialog
-  @Ref('calendar') readonly calendar!: Calendar
-  @Ref('refDialog') readonly dialog!: DialogForm
-  @Prop({ default: new Date().toISOString().substr(0, 10) }) date!: string
-  @Prop({ default: format(roundDate(new Date(), 30), 'HH:mm') }) time!: string
+const timeThresholds = [
+  { text: 'Never', value: EventTimeThreshold.NEVER },
+  { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
+  { text: 'After Event Starts', value: EventTimeThreshold.AFTER_START },
+  { text: 'Minutes From Start', value: EventTimeThreshold.OFFSET_START },
+  { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
+]
 
-  success = false
-  grades = grades
-  colorMenu = false
+const feeTypes = [
+  { text: 'Free', value: FeeType.FREE },
+  { text: 'Pay Per Event', value: FeeType.EVENT },
+  { text: 'Pay Per Course', value: FeeType.COURSE },
+]
 
-  dates = {
-    allday: false,
-    start: {
-      menu: false,
-      date: '',
+export default defineComponent({
+  props: {
+    date: {
+      type: String,
+      default: () => new Date().toISOString().substring(0, 10),
     },
-    end: {
-      menu: false,
-      date: '',
+    time: {
+      type: String,
+      default: () => format(roundDate(new Date(), 30), 'HH:mm'),
     },
-  }
+  },
+  setup(props, { emit }) {
+    const refs = {
+      recurrenceDialog: ref<InstanceType<typeof RecurrenceDialog>>(),
+      calendar: ref<InstanceType<typeof Calendar>>(),
+      dialog: ref<InstanceType<typeof DialogForm>>(),
+    }
 
-  times = {
-    start: {
-      menu: false,
-      time: '',
-    },
-    end: {
-      menu: false,
-      time: '',
-    },
-    times: [] as string[],
-  }
+    const state = reactive({
+      success: false,
+      colorMenu: false,
+      dates: {
+        allday: false,
+        start: {
+          menu: false,
+          date: '',
+        },
+        end: {
+          menu: false,
+          date: '',
+        },
+      },
+      times: {
+        start: {
+          menu: false,
+          time: '',
+        },
+        end: {
+          menu: false,
+          time: '',
+        },
+        times: [] as string[],
+      },
+      rrule: null as EventRecurrenceDto | null,
+      feeType: FeeType.FREE,
+      fee: {
+        amount: 0,
+        lateAmount: 0,
+      },
+      meta: {
+        name: '',
+        description: '',
+        color: '#000000',
+        location: '',
+        locationTitle: 'Online',
+        cutoffThreshold: EventTimeThreshold.AFTER_END,
+        cutoffOffset: 0,
+        lateThreshold: EventTimeThreshold.AFTER_START,
+        lateOffset: 0,
+        permissions: {
+          grades: [
+            Grade.KINDERGARTEN,
+            Grade.FIRST,
+            Grade.SECOND,
+            Grade.THIRD,
+            Grade.FOURTH,
+            Grade.FIFTH,
+            Grade.SIXTH,
+            Grade.SEVENTH,
+            Grade.EIGHTH,
+            Grade.NINTH,
+            Grade.TENTH,
+            Grade.ELEVENTH,
+            Grade.TWELFTH,
+          ],
+          genders: [Gender.MALE, Gender.FEMALE],
+        },
+      },
+      project: null as number | null,
+      course: null as number | null,
+      files: null as File | null,
+    })
 
-  genders = genders
+    const eventStore = useEvents()
+    const fileStore = useFiles()
+    const snackbar = useSnackbar()
+    const dateUtils = useDates()
 
-  rrule = null as EventRecurrenceDto | null
-
-  timeThresholds = [
-    { text: 'Never', value: EventTimeThreshold.NEVER },
-    { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
-    { text: 'After Event Starts', value: EventTimeThreshold.AFTER_START },
-    { text: 'Minutes From Start', value: EventTimeThreshold.OFFSET_START },
-    { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
-  ]
-
-  feeType: FeeType = FeeType.FREE
-  feeTypes = [
-    { text: 'Free', value: FeeType.FREE },
-    { text: 'Pay Per Event', value: FeeType.EVENT },
-    { text: 'Pay Per Course', value: FeeType.COURSE },
-  ]
-
-  fee = {
-    amount: 0,
-    lateAmount: 0,
-  }
-
-  meta = {
-    name: '',
-    description: '',
-    color: '#000000',
-    location: '',
-    locationTitle: 'Online',
-    cutoffThreshold: EventTimeThreshold.AFTER_END,
-    cutoffOffset: 0,
-    lateThreshold: EventTimeThreshold.AFTER_START,
-    lateOffset: 0,
-    permissions: {
-      grades: [
-        Grade.KINDERGARTEN,
-        Grade.FIRST,
-        Grade.SECOND,
-        Grade.THIRD,
-        Grade.FOURTH,
-        Grade.FIFTH,
-        Grade.SIXTH,
-        Grade.SEVENTH,
-        Grade.EIGHTH,
-        Grade.NINTH,
-        Grade.TENTH,
-        Grade.ELEVENTH,
-        Grade.TWELFTH,
-      ],
-      genders: [Gender.MALE, Gender.FEMALE],
-    },
-  }
-
-  project: null | number = null
-  course: null | number = null
-  files: Uploads = null
-
-  get error() {
-    return this.$accessor.events.error || this.$accessor.files.error
-  }
-
-  get isLoading() {
-    return this.$accessor.events.isLoading
-  }
-
-  get gradeGroups() {
-    return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
-  }
-
-  get swatch() {
-    return {
+    const error = computed(() => eventStore.error || fileStore.error)
+    const isLoading = computed(() => eventStore.isLoading)
+    const intGradeGroups = computed(() =>
+      gradeGroups(contiguousGradeRanges(state.meta.permissions.grades))
+    )
+    const swatch = computed(() => ({
       height: '40px',
       width: '40px',
-      backgroundColor: this.meta.color,
+      backgroundColor: state.meta.color,
       cursor: 'pointer',
-      borderRadius: this.colorMenu ? '50%' : '4px',
+      borderRadius: state.colorMenu ? '50%' : '4px',
       transition: 'border-radius 200ms ease-in-out',
+    }))
+
+    onBeforeMount(() => {
+      const now = new Date()
+      state.dates.start.date = props.date
+      state.dates.end.date = props.date
+      state.times.start.time = props.time
+      state.times.end.time = addTime(props.time, 1, 30)
+
+      // If the end time loops around to being before
+      // the starting time, increment the day.
+      if (
+        isBefore(
+          parse(state.times.end.time, 'HH:mm', now),
+          parse(state.times.start.time, 'HH:mm', now)
+        )
+      ) {
+        state.dates.end.date = addDays(parseISO(props.date), 1)
+          .toISOString()
+          .substr(0, 10)
+      }
+
+      const hours = [
+        '12',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+      ]
+      const minutes = ['00', '15', '30', '45']
+      const times: string[] = []
+
+      for (let i = 0; i <= 23; i++) {
+        for (let j = 0; j < minutes.length; j++) {
+          times.push(`${hours[i % 12]}:${minutes[j]}${i < 12 ? 'am' : 'pm'}`)
+        }
+      }
+
+      state.times.times = times
+    })
+
+    const isSameDay = (dateA: string, dateB: string): boolean =>
+      dateUtils.isSameDay(new Date(dateA), new Date(dateB))
+
+    const format = (dateString: string) => {
+      if (dateString === '') return 'Select a Date'
+
+      const [year, month, day] = dateString.split('-')
+      const date = new Date(+year, +month - 1, +day)
+
+      if (!isValidDate(date)) return 'Invalid Date'
+
+      return dateUtils.format(date, 'EEE, LLL d, yyyy')
     }
-  }
 
-  beforeMount() {
-    const now = new Date()
-    this.dates.start.date = this.date
-    this.dates.end.date = this.date
-    this.times.start.time = this.time
-    this.times.end.time = addTime(this.time, 1, 30)
+    const onSubmit = async () => {
+      const file = await fileStore.create(state.files!)
 
-    // If the end time loops around to being before
-    // the starting time, increment the day.
-    if (
-      isBefore(
-        parse(this.times.end.time, 'HH:mm', now),
-        parse(this.times.start.time, 'HH:mm', now)
+      if (fileStore.error) {
+        snackbar.error(fileStore.error.message)
+      }
+
+      const dto = Object.assign(
+        {
+          rrule: state.rrule || undefined,
+          project: state.project || undefined,
+          course: state.course || undefined,
+          ...state.meta,
+        },
+        state.dates.allday
+          ? { dtend: toDate(state.dates.start.date, '23:59').toISOString() }
+          : {
+              dtend: toDate(
+                state.dates.end.date,
+                state.times.end.time
+              ).toISOString(),
+            },
+        !state.rrule && {
+          dtstart: toDate(
+            state.dates.start.date,
+            state.times.start.time
+          ).toISOString(),
+        },
+        state.feeType !== 'free' && {
+          feeType: state.feeType,
+          fee: {
+            amount: state.fee.amount.toFixed(2),
+            lateAmount: state.fee.lateAmount?.toFixed(2),
+          },
+        },
+        file && { picture: file.root }
       )
-    ) {
-      this.dates.end.date = addDays(parseISO(this.date), 1)
-        .toISOString()
-        .substr(0, 10)
-    }
 
-    const hours = [
-      '12',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      '11',
-    ]
-    const minutes = ['00', '15', '30', '45']
-    const times: string[] = []
+      if (state.dates.allday) {
+        // Incomplete, allday is not accurate
+      }
 
-    for (let i = 0; i <= 23; i++) {
-      for (let j = 0; j < minutes.length; j++) {
-        times.push(`${hours[i % 12]}:${minutes[j]}${i < 12 ? 'am' : 'pm'}`)
+      await eventStore.create(dto)
+
+      if (eventStore.error) {
+        snackbar.error(eventStore.error.message)
+      } else {
+        emit('event:create')
+
+        state.success = true
+        refs.dialog.value!.close(1500)
       }
     }
 
-    this.times.times = times
-  }
-
-  isSameDay(dateA: string, dateB: string) {
-    return isSameDay(new Date(dateA), new Date(dateB))
-  }
-
-  format(dateString: string) {
-    if (dateString === '') return 'Select a Date'
-
-    const [year, month, day] = dateString.split('-')
-    const date = new Date(+year, +month - 1, +day)
-
-    if (!isValidDate(date)) return 'Invalid Date'
-
-    return format(date, 'EEE, LLL d, yyyy')
-  }
-
-  async onSubmit() {
-    // Type asserted as this is not multi-file upload.
-    const url = (await this.$accessor.files.filesToURL(this.files)) as
-      | string
-      | null
-
-    if (this.$accessor.files.error) {
-      console.error(this.$accessor.files.error)
+    const onProjectSelect = (id: number) => {
+      state.project = id
     }
 
-    const dto = Object.assign(
-      {
-        rrule: this.rrule || undefined,
-        project: this.project || undefined,
-        course: this.course || undefined,
-        ...this.meta,
-      },
-      this.dates.allday
-        ? { dtend: toDate(this.dates.start.date, '23:59').toISOString() }
-        : {
-            dtend: toDate(
-              this.dates.end.date,
-              this.times.end.time
-            ).toISOString(),
-          },
-      !this.rrule && {
-        dtstart: toDate(
-          this.dates.start.date,
-          this.times.start.time
-        ).toISOString(),
-      },
-      this.feeType !== 'free' && {
-        feeType: this.feeType,
-        fee: {
-          amount: this.fee.amount.toFixed(2),
-          lateAmount: this.fee.lateAmount?.toFixed(2),
-        },
-      },
-      url && { picture: url }
-    )
-
-    if (this.dates.allday) {
-      // Incomplete, allday is not accurate
+    const onProjectCreated = (project: Project) => {
+      state.project = project.id
     }
 
-    await this.$accessor.events.create(dto)
-
-    if (this.$accessor.events.error) {
-      console.error(this.$accessor.events.error)
-    } else {
-      this.$emit('event:create')
-
-      this.success = true
-      this.dialog.close(1500)
+    const onCourseCreated = (course: Course) => {
+      state.course = course.id
     }
-  }
 
-  onProjectSelect(id: number) {
-    this.project = id
-  }
-
-  onProjectCreated(project: Project) {
-    this.project = project.id
-  }
-
-  onCourseCreated(course: Course) {
-    this.course = course.id
-  }
-}
+    return {
+      ...refs,
+      ...toRefs(state),
+      grades,
+      timeThresholds,
+      error,
+      isLoading,
+      feeTypes,
+      gradeGroups: intGradeGroups,
+      swatch,
+      isSameDay,
+      format,
+      onSubmit,
+      onProjectSelect,
+      onProjectCreated,
+      onCourseCreated,
+    }
+  },
+})
 </script>
 
 <style lang="scss" scoped>

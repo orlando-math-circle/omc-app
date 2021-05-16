@@ -11,44 +11,51 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { computed, defineComponent, reactive } from '@nuxtjs/composition-api'
+import { useSnackbar } from '@/composables/useSnackbar'
 
-@Component
-export default class LinkCopy extends Vue {
-  @Prop() text!: string
+export default defineComponent({
+  props: {
+    text: {
+      type: String,
+      required: true,
+    },
+  },
+  setup(props) {
+    const snackbar = useSnackbar()
 
-  animating = false
-  tooltip = 'Copy'
-
-  animate() {
-    this.animating = true
-    this.tooltip = 'Copied!'
-
-    this.$accessor.snackbar.show({
-      text: 'Copied to clipboard!',
-      timeout: 4000,
+    const state = reactive({
+      animating: false,
+      tooltip: 'Copy',
     })
 
-    setTimeout(() => (this.animating = false), 500)
-    setTimeout(() => (this.tooltip = 'Copy'), 2000)
+    const animate = () => {
+      state.animating = true
+      state.tooltip = 'Copied!'
 
-    if (!navigator || !navigator.clipboard) {
-      console.warn('Unable to invoke clipboard')
-    } else {
-      navigator.clipboard.writeText(this.text)
+      snackbar.show('Copied to Clipboard!')
+
+      setTimeout(() => (state.animating = false), 500)
+      setTimeout(() => (state.tooltip = 'Copy'), 2000)
+
+      if (!navigator || !navigator.clipboard) {
+        console.warn('Unable to invoke clipboard')
+      } else {
+        navigator.clipboard.writeText(props.text)
+      }
     }
-  }
 
-  get classes() {
-    return {
+    const classes = computed(() => ({
       'font-weight-bold': true,
       animate__faster: true,
       animate__animated: true,
       copylabel: true,
-      animate__heartBeat: this.animating,
-    }
-  }
-}
+      animate__heartBeat: state.animating,
+    }))
+
+    return { classes, animate }
+  },
+})
 </script>
 
 <style lang="scss" scoped>

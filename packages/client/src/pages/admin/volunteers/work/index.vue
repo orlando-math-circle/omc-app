@@ -35,38 +35,35 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { computed, defineComponent, useFetch } from '@nuxtjs/composition-api'
+import { useWork } from '@/store/useWork'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const workStore = useWork()
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Volunteer Work',
+      },
+    ]
+
+    const works = computed(() => workStore.works)
+
+    const onWorkCreate = async () => await refresh()
+
+    const refresh = async () => await workStore.findAll()
+
+    useFetch(async () => await workStore.findAll())
+
+    return { breadcrumbs, onWorkCreate, works }
+  },
   head: {
     title: 'Work',
   },
-  async fetch({ app: { $accessor } }) {
-    await $accessor.volunteers.findAllWork()
-  },
 })
-export default class VolunteerWorkAdminPage extends Vue {
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Volunteer Work',
-    },
-  ]
-
-  get works() {
-    return this.$accessor.volunteers.works
-  }
-
-  async onWorkCreate() {
-    await this.refresh()
-  }
-
-  async refresh() {
-    await this.$accessor.volunteers.findAllWork()
-  }
-}
 </script>

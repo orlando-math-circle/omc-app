@@ -3,10 +3,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
 })
-export default class FilesPage extends Vue {}
 </script>

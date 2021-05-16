@@ -73,51 +73,48 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { formatDate } from '~/utils/utilities'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { formatDate } from '@/utils/utilities'
+import { useDebouncedRef } from '@/composables/useDebouncedRef'
+import { useProjects } from '@/store/useProjects'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const search = useDebouncedRef('')
+
+    const projectStore = useProjects()
+
+    const onRefresh = async () => {
+      await projectStore.findAll()
+    }
+
+    return {
+      search,
+      onRefresh,
+      isLoading: computed(() => projectStore.isLoading),
+      projects: computed(() => projectStore.projects),
+      format: (date: string, formatString: string) =>
+        formatDate(date, formatString),
+      breadcrumbs: [
+        {
+          text: 'Dashboard',
+          href: '/admin/',
+        },
+        {
+          text: 'Projects',
+        },
+      ],
+      headers: [
+        { text: 'Id', value: 'id' },
+        { text: 'Name', value: 'name' },
+        { text: 'Description', value: 'description' },
+        { text: 'Edit', value: 'edit' },
+      ],
+    }
+  },
   head: {
     title: 'Users',
   },
 })
-export default class ProjectsPage extends Vue {
-  search = ''
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Projects',
-    },
-  ]
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Edit', value: 'edit' },
-  ]
-
-  get isLoading() {
-    return this.$accessor.projects.isLoading
-  }
-
-  get projects() {
-    return this.$accessor.projects.projects
-  }
-
-  format(date: string, formatString: string) {
-    return formatDate(date, formatString)
-  }
-
-  async onRefresh(options: any) {
-    await this.$accessor.projects.findAll(options)
-  }
-
-  async onCreate() {}
-}
 </script>

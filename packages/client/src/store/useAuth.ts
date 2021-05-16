@@ -4,7 +4,6 @@ import { RegisterAccountDto } from '@server/account/dto/register.dto'
 import { Roles } from '@server/app.roles'
 import { ChangePasswordDto } from '@server/auth/dtos/change-password.dto'
 import { User } from '@server/user/user.entity'
-import { StateError } from '@/types/state-error.interface'
 import { COOKIE_COMPLETE, COOKIE_JWT } from '@/utils/constants'
 import { useCookies } from '@/composables/useCookies'
 import { ResetPasswordDto } from '@server/auth/dtos/reset-password.dto'
@@ -12,8 +11,6 @@ import { ResetPasswordDto } from '@server/auth/dtos/reset-password.dto'
 export const useAuth = defineStore({
   id: 'auth',
   state: () => ({
-    status: 'Idle' as 'Idle' | 'Loading' | 'Error',
-    error: null as StateError | null,
     user: null as User | null,
     account: null as Account | null,
     token: null as string | null,
@@ -83,6 +80,9 @@ export const useAuth = defineStore({
     },
     async getMyAccount() {
       this.account = await this.$nuxt.$axios.$get('/account/me')
+    },
+    async findAccountByUser(id: number) {
+      this.account = await this.$nuxt.$axios.$get('/account/user/' + id)
     },
     async switchUser(id: number | string) {
       const cookies = useCookies(this.$nuxt)

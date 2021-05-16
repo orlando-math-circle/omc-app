@@ -62,42 +62,47 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { useRegistrations } from '@/store/useRegistrations'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Registrations',
+        href: '/admin/calendar/registrations',
+      },
+      {
+        text: 'Edit Registration',
+      },
+    ]
+
+    const headers = [
+      { text: 'Id', value: 'id' },
+      { text: 'User', value: 'user' },
+      { text: 'Event', value: 'event' },
+      { text: 'Invoice', value: 'invoice' },
+      { text: 'Edit', value: 'edit', sortable: false },
+    ]
+
+    const registrationStore = useRegistrations()
+
+    const registrations = computed(() => registrationStore.registrations)
+
+    return { breadcrumbs, headers, registrations }
+  },
+  async asyncData({ pinia }) {
+    const registrationStore = useRegistrations(pinia)
+
+    await registrationStore.findAll()
+  },
   head: {
     title: 'Registrations',
   },
-  async asyncData({ app: { $accessor } }) {
-    await $accessor.registrations.findAll()
-  },
 })
-export default class RegistrationsAdminPage extends Vue {
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Registrations',
-      href: '/admin/calendar/registrations',
-    },
-    {
-      text: 'Edit Registration',
-    },
-  ]
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'User', value: 'user' },
-    { text: 'Event', value: 'event' },
-    { text: 'Invoice', value: 'invoice' },
-    { text: 'Edit', value: 'edit', sortable: false },
-  ]
-
-  get registrations() {
-    return this.$accessor.registrations.registrations
-  }
-}
 </script>

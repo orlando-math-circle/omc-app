@@ -215,6 +215,7 @@ export default defineComponent({
       onClickEvent,
       setRangeByMonth,
       setRange,
+      onLoadRange,
     }
   },
 })

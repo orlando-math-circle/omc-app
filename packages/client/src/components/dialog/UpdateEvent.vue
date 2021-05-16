@@ -496,7 +496,6 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
 import { Event } from '@server/event/event.entity'
 import { format, isSameDay } from 'date-fns'
 import RRule, { Frequency, Options, RRuleSet, rrulestr } from 'rrule'
@@ -524,7 +523,6 @@ import { genders } from '~/utils/constants'
 import { contiguousGradeRanges, gradeGroups, grades } from '~/utils/events'
 import { DTO } from '~/types/date-to-string.interface'
 
-@Component
 export default class DialogUpdateEvent extends Vue {
   @Ref('refDialog') readonly dialog!: DialogForm
   @Ref('typeDialog') readonly typeDialog!: DialogUpdateEventType
@@ -879,7 +877,7 @@ export default class DialogUpdateEvent extends Vue {
       options = rrule.origOptions
     }
 
-    return (this.cleanRRule(options) as unknown) as DTO<EventRecurrenceDto>
+    return this.cleanRRule(options) as unknown as DTO<EventRecurrenceDto>
   }
 
   /**
@@ -895,7 +893,7 @@ export default class DialogUpdateEvent extends Vue {
       }
     }
 
-    return (object as unknown) as EventRecurrenceDto
+    return object as unknown as EventRecurrenceDto
   }
 
   /**
