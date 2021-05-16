@@ -1,14 +1,20 @@
 import { defineStore } from 'pinia'
-import { Course } from '../../../server/src/course/course.entity'
-import { CreateCourseDto } from '../../../server/src/course/dto/create-course.dto'
-import { FindAllCoursesDto } from '../../../server/src/course/dto/find-all-courses.dto'
+import { Course } from '@server/course/course.entity'
+import { CreateCourseDto } from '@server/course/dto/create-course.dto'
+import { FindAllCoursesDto } from '@server/course/dto/find-all-courses.dto'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export const useCourses = defineStore({
   id: 'courses',
   state: () => ({
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
     course: null as Course | null,
     courses: [] as Course[],
   }),
+  getters: {
+    isLoading: (state) => state.status === 'Loading',
+  },
   actions: {
     async create(createCourseDto: CreateCourseDto) {
       this.course = await this.$nuxt.$axios.$post('/course', createCourseDto)

@@ -7,10 +7,13 @@ import { User } from '@server/user/user.entity'
 import { COOKIE_COMPLETE, COOKIE_JWT } from '@/utils/constants'
 import { useCookies } from '@/composables/useCookies'
 import { ResetPasswordDto } from '@server/auth/dtos/reset-password.dto'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export const useAuth = defineStore({
   id: 'auth',
   state: () => ({
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
     user: null as User | null,
     account: null as Account | null,
     token: null as string | null,
@@ -21,6 +24,7 @@ export const useAuth = defineStore({
     },
   }),
   getters: {
+    isLoading: (state) => state.status === 'Loading',
     primaryUser: (state) => state.account?.primaryUser,
     isAdmin: (state) => state.user?.roles.includes(Roles.ADMIN),
     isVolunteer: (state) => state.user?.roles.includes(Roles.VOLUNTEER),

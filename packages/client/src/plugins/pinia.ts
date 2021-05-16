@@ -1,12 +1,6 @@
 import { useCookies } from '@/composables/useCookies'
 import { useAuth } from '@/store/useAuth'
-import {
-  computed,
-  defineNuxtPlugin,
-  onGlobalSetup,
-  ref,
-  set,
-} from '@nuxtjs/composition-api'
+import { defineNuxtPlugin, onGlobalSetup } from '@nuxtjs/composition-api'
 import { PiniaPluginContext, PiniaStorePlugin } from 'pinia'
 import {
   COOKIE_CALENDAR_TYPE,
@@ -53,64 +47,33 @@ const wrap = <F extends Procedure>(fn: F, store: StoreType) => {
 }
 
 const plugin: PiniaStorePlugin = ({ store, options }) => {
-  if (!Object.prototype.hasOwnProperty.call(store.$state, 'status')) {
-    const statusRef = ref('Idle')
-    set(store.$state, 'status', statusRef)
-    set(store, 'status', statusRef)
+  // TODO: Disabled until https://github.com/posva/pinia/discussions/497 is resolved.
+  //
+  // if (!Object.prototype.hasOwnProperty.call(store.$state, 'status')) {
+  //   const statusRef = ref('Idle')
+  //   set(store.$state, 'status', statusRef)
+  //   set(store, 'status', statusRef)
 
-    const loadingRef = computed(() => store.status === 'Loading')
-    set(store.$state, 'isLoading', loadingRef)
-    set(store, 'isLoading', loadingRef)
-  }
+  //   const loadingRef = computed(() => store.status === 'Loading')
+  //   set(store.$state, 'isLoading', loadingRef)
+  //   set(store, 'isLoading', loadingRef)
+  // }
 
-  if (!options.actions) return
+  if (
+    !options.actions ||
+    !Object.prototype.hasOwnProperty.call(store.$state, 'status')
+  )
+    return
 
   return Object.keys(options.actions).reduce(
     (result: Record<string, Procedure>, action) => {
-      // wrappedActions[action] = wrap(store[action], store)
-      result[action] = () => {
-        const wrappedFn = async (...args: any[]) => {
-          try {
-            store.status = 'Loading'
-
-            const resp = await Promise.resolve(store[action](...args))
-
-            store.status = 'Idle'
-
-            return resp
-          } catch (error) {
-            store.status = 'Error'
-            store.error = error
-          }
-        }
-
-        return wrappedFn
-      }
+      result[action] = wrap(store[action], store)
 
       return result
     },
     {}
   )
 }
-// store.status = ref('Idle')
-// store.error = ref(null)
-// store.isLoading = computed(() => store.status === 'Loading')
-// // options.getters = options.getters || {}
-// // options.getters.isLoading = (store) => store.status === 'Loading'
-
-// // options.getters = options.getters || {}
-// // options.getters.isLoading = (store) => store.status === 'Loading'
-
-// options.actions = options.actions || {}
-// return Object.keys(options.actions).reduce(
-//   (wrappedActions: PiniaPluginContext['store']['actions'], action) => {
-//     wrappedActions[action] = wrap(store[action], store)
-
-//     return wrappedActions
-//   },
-//   {}
-// )
-// }
 
 export default defineNuxtPlugin(({ pinia }) => {
   pinia.use(plugin)

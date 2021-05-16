@@ -1,20 +1,24 @@
 import { defineStore } from 'pinia'
 import { FindAllEventsDto } from '@server/event/dto/find-all-events.dto'
-import { DTOEvent } from '@/store/events'
+import { Event } from '@server/event/event.entity'
 import { CreateEventDto } from '@server/event/dto/create-event.dto'
 import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
 import { UpdateEventDto } from '@server/event/dto/update-event.dto'
 import { DTO } from '@/types/date-to-string.interface'
-import { toLocalISO } from '../utils/utilities'
+import { toLocalISO } from '@/utils/utilities'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export const useEvents = defineStore({
   id: 'events',
   state: () => ({
-    event: null as DTOEvent | null,
-    events: [] as DTOEvent[],
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
+    event: null as DTO<Event> | null,
+    events: [] as DTO<Event>[],
     defaultPicture: require('~/assets/images/programmer.jpg'),
   }),
   getters: {
+    isLoading: (state) => state.status === 'Loading',
     calendarEvents: (state) =>
       state.events.map((e) => ({
         ...e,

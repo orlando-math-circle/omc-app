@@ -3,13 +3,19 @@ import { Project } from '@server/project/project.entity'
 import { CreateProjectDto } from '@server/project/dto/create-project.dto'
 import { FindAllProjectsDto } from '@server/project/dto/find-all-projects.dto'
 import { UpdateProjectDto } from '@server/project/dto/update-project.dto'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export const useProjects = defineStore({
   id: 'projects',
   state: () => ({
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
     project: null as Project | null,
     projects: [] as Project[],
   }),
+  getters: {
+    isLoading: (state) => state.status === 'Loading',
+  },
   actions: {
     async create(createProjectDto: CreateProjectDto) {
       const project = await this.$nuxt.$axios.$post(

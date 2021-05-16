@@ -5,17 +5,20 @@ import { UpdateOwnUserDto } from '@server/user/dtos/update-own-user.dto'
 import { UpdateUserDto } from '@server/user/dtos/update-user.dto'
 import { DTO } from '@/types/date-to-string.interface'
 import { User } from '@server/user/user.entity'
+import { StateStatus, StateError } from '@/types/state.interface'
 
 export type DTOUser = DTO<User>
 
 export const useUsers = defineStore({
   id: 'user',
   state: () => ({
+    status: 'Idle' as StateStatus,
+    error: null as StateError | null,
     user: null as DTOUser | null,
     users: [] as DTOUser[],
   }),
   getters: {
-    test: (state) => state.user,
+    isLoading: (state) => state.status === 'Loading',
   },
   actions: {
     async create(createUserDto: CreateUserDto) {

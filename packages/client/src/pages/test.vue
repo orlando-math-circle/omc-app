@@ -26,8 +26,6 @@ export default defineComponent({
   setup() {
     const userStore = useUsers()
 
-    console.log(userStore.isLoading)
-
     return {
       store: userStore,
       userAction: () => userStore.findAll(),
