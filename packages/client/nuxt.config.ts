@@ -53,9 +53,10 @@ const config: NuxtConfig = {
   loading: { color: '#44d9e6' },
   plugins: [
     '~/plugins/pinia',
+    '~/plugins/auth',
+    '~/plugins/axios',
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
-    '~/plugins/axios',
     '~/plugins/avatar',
     '~/plugins/snackbar',
     '~/plugins/background',
@@ -97,6 +98,11 @@ const config: NuxtConfig = {
         // @ts-ignore Outdated @types/sass-loader
         additionalData: "@import '~assets/styles/variables.scss'",
       },
+    },
+  },
+  vue: {
+    config: {
+      productionTip: false,
     },
   },
 }

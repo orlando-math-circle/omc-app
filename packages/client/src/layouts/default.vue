@@ -191,13 +191,6 @@ export default defineComponent({
       onResend,
     }
   },
-  async asyncData({ pinia }) {
-    const authStore = useAuth(pinia)
-
-    if (authStore.user) return
-
-    await authStore.getMyUser()
-  },
 })
 </script>
 
