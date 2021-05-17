@@ -53,6 +53,7 @@ export const useAuth = defineStore({
       this.complete = complete
       cookies.set(COOKIE_JWT, token)
       cookies.set(COOKIE_COMPLETE, complete)
+      this.$nuxt.$axios.setToken(token, 'Bearer')
     },
     async logout(everywhere?: boolean) {
       const cookies = useCookies(this.$nuxt)
@@ -97,6 +98,7 @@ export const useAuth = defineStore({
       this.complete = complete
       cookies.set(COOKIE_JWT, token)
       cookies.set(COOKIE_COMPLETE, complete)
+      this.$nuxt.$axios.setToken(token, 'Bearer')
     },
     async forgotPassword(email: string) {
       await this.$nuxt.$axios.$post('/password/forgot', { email })

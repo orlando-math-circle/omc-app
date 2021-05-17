@@ -23,7 +23,6 @@
     <v-row>
       <v-col>
         <v-card :loading="isLoading">
-          <span>Loading: {{ isLoading }}</span>
           <v-toolbar v-if="filters.panel" flat class="pa-3">
             <v-row>
               <v-col>

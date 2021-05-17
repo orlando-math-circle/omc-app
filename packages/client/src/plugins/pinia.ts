@@ -75,37 +75,38 @@ const plugin: PiniaStorePlugin = ({ store, options }) => {
   )
 }
 
-export default defineNuxtPlugin(({ pinia }) => {
+export default defineNuxtPlugin(({ pinia, $axios }) => {
   pinia.use(plugin)
 
   onGlobalSetup(async () => {
-    const auth = useAuth()
-    const cookies = useCookies()
-
-    const token = cookies.get(COOKIE_JWT)
-    const complete = cookies.get(COOKIE_COMPLETE) || false
-    const calendarType = cookies.get(COOKIE_CALENDAR_TYPE)
-
-    if (calendarType) {
-      auth.settings.calendarType = calendarType
-    }
-
-    if (!token) return
-
-    cookies.set(COOKIE_JWT, token)
-    cookies.set(COOKIE_COMPLETE, complete)
-    auth.token = token
-    auth.complete = complete
-
-    if (complete) {
-      await auth.getMyUser()
-    } else {
-      await auth.getMyAccount()
-    }
-
-    if (auth.error?.status === 401) {
-      cookies.remove(COOKIE_JWT)
-      cookies.remove(COOKIE_COMPLETE)
-    }
+    // const auth = useAuth()
+    // const cookies = useCookies()
+    // const token = cookies.get(COOKIE_JWT)
+    // const complete = cookies.get(COOKIE_COMPLETE) || false
+    // const calendarType = cookies.get(COOKIE_CALENDAR_TYPE)
+    // console.log(
+    //   `Global Setup [${token.substr(token.length - 5)}] [${complete}]`
+    // )
+    // if (calendarType) {
+    //   auth.settings.calendarType = calendarType
+    // }
+    // if (!token) return
+    // cookies.set(COOKIE_JWT, token)
+    // cookies.set(COOKIE_COMPLETE, complete)
+    // auth.token = token
+    // auth.complete = complete
+    // $axios.setToken(token, 'Bearer')
+    // if (complete) {
+    //   await auth.getMyUser()
+    // } else {
+    //   await auth.getMyAccount()
+    // }
+    // if (auth.error?.status === 401) {
+    //   auth.token = null
+    //   auth.complete = false
+    //   cookies.remove(COOKIE_JWT)
+    //   cookies.remove(COOKIE_COMPLETE)
+    //   $axios.setToken(false)
+    // }
   })
 })

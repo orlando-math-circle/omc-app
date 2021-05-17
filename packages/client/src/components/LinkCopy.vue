@@ -11,13 +11,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive } from '@nuxtjs/composition-api'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+} from '@nuxtjs/composition-api'
 import { useSnackbar } from '@/composables/useSnackbar'
 
 export default defineComponent({
   props: {
     text: {
-      type: String,
+      type: [String, Number, Boolean, Object],
       required: true,
     },
   },
@@ -53,7 +58,7 @@ export default defineComponent({
       animate__heartBeat: state.animating,
     }))
 
-    return { classes, animate }
+    return { ...toRefs(state), classes, animate }
   },
 })
 </script>

@@ -24,7 +24,7 @@
     "moment": "2.29.1",
     "nuxt": "2.15.6",
     "nuxt-dropzone": "1.0.4",
-    "pinia": "0.4.1",
+    "pinia": "0.5.1",
     "rrule": "2.6.8",
     "vee-validate": "3.4.5",
     "vue-apexcharts": "1.6.1",
