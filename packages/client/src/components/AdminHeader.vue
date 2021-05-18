@@ -30,12 +30,12 @@ export type Breadcrumb = {
 
 export default defineComponent({
   props: {
-    value: {
-      type: String,
-      required: true,
-    },
     breadcrumbs: {
       type: Array as PropType<Breadcrumb[]>,
+      required: true,
+    },
+    title: {
+      type: String,
       required: true,
     },
   },
