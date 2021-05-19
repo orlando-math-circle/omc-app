@@ -11,29 +11,27 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from '@nuxtjs/composition-api'
 import { useSnackbar } from '@/store/useSnackbar'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   setup() {
     const snackbar = useSnackbar()
 
-    const show = ref(false)
-    const timeout = ref<number | null>(null)
-
-    watch(
-      () => snackbar.message,
-      () => {
-        timeout.value = snackbar.timeout
-        show.value = true
-      }
-    )
+    const show = computed({
+      get() {
+        return snackbar.show
+      },
+      set(value: boolean) {
+        snackbar.show = value
+      },
+    })
 
     return {
       show,
-      timeout,
       message: computed(() => snackbar.message),
       color: computed(() => snackbar.color),
+      timeout: computed(() => snackbar.timeout),
     }
   },
 })
