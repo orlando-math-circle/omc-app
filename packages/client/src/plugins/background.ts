@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Plugin } from '@nuxt/types'
 import { defineNuxtPlugin } from '@nuxtjs/composition-api'
 import { Event } from '@server/event/event.entity'
 

@@ -57,8 +57,6 @@ const config: NuxtConfig = {
     '~/plugins/axios',
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
-    '~/plugins/avatar',
-    '~/plugins/snackbar',
     '~/plugins/background',
     {
       src: '~/plugins/apex-charts',
