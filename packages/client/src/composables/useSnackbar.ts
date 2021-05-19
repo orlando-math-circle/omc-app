@@ -4,7 +4,11 @@ export const useSnackbar = () => {
   const snackbarStore = useSnack()
 
   const show = (message: string, timeout = 5000, color?: string) => {
-    snackbarStore.$patch({ message, timeout, color })
+    snackbarStore.show = false
+
+    setTimeout(() => {
+      snackbarStore.$patch({ message, timeout, color, show: true })
+    }, 250)
   }
 
   const success = (message: string, timeout = 5000) =>
