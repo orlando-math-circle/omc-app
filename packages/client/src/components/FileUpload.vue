@@ -98,7 +98,7 @@
         </v-toolbar>
 
         <div class="cropper-wrapper">
-          <image ref="cropperEl" :src="objectURL" />
+          <img ref="cropperEl" class="cropper" :src="objectURL" />
         </div>
 
         <v-card-actions>
@@ -131,7 +131,7 @@ import {
 export default defineComponent({
   props: {
     value: {
-      type: Object as PropType<Uploads>,
+      type: [Object, File] as PropType<Uploads>,
       default: null,
     },
     field: {
@@ -229,7 +229,7 @@ export default defineComponent({
         if (!blob) return
 
         state.files = new File([blob], (state.files as File).name)
-      })
+      }, mimeType.value!)
 
       closeDialog()
     }
@@ -237,6 +237,10 @@ export default defineComponent({
     watch(
       () => state.ratio,
       (ratio) => state.cropper!.setAspectRatio(ratio!)
+    )
+
+    const mimeType = computed(() =>
+      state.files instanceof File ? state.files.type : null
     )
 
     const setup = () => {
@@ -269,12 +273,18 @@ export default defineComponent({
       switchTo,
       hasFile,
       attributes,
+      closeDialog,
     }
   },
 })
 </script>
 
 <style lang="scss" scoped>
+.cropper {
+  display: block;
+  max-width: 100%;
+}
+
 .aspect-selector {
   width: 50px;
 }
