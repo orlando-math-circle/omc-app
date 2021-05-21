@@ -16,8 +16,8 @@
       </v-toolbar>
 
       <v-card-text>
-        <template v-if="upload">
-          <file-upload v-model="file" outlined label="Upload Avatar" />
+        <template v-if="custom">
+          <FileUpload v-model="file" outlined label="Upload Avatar" />
 
           <v-divider class="my-3" />
         </template>
@@ -75,7 +75,7 @@ import { useSnackbar } from '@/composables/useSnackbar'
 
 export default defineComponent({
   props: {
-    upload: {
+    custom: {
       type: Boolean,
       default: false,
     },
@@ -93,7 +93,7 @@ export default defineComponent({
     const state = reactive({
       dialog: false,
       selected: 0,
-      file: null as File | null,
+      file: null as File | string | null,
       avatars: [...Array(10).keys()].map((k) =>
         k.toString()
       ) as DefaultAvatar[],
@@ -103,9 +103,12 @@ export default defineComponent({
       `${config.staticBase}${config.avatarBase}/${avatar}.png`
 
     const onSubmit = async () => {
-      const isUpload = props.upload && state.file
-
-      if (isUpload) {
+      // Custom Image URL
+      if (props.custom && typeof state.file === 'string') {
+        await userStore.update(props.user.id, { avatar: state.file })
+      }
+      // Custom Image Upload
+      else if (props.custom && state.file instanceof File) {
         await fileStore.create(state.file!)
 
         if (fileStore.error) {
@@ -113,7 +116,9 @@ export default defineComponent({
         }
 
         await userStore.update(props.user.id, { avatar: fileStore.file!.root })
-      } else {
+      }
+      // Default Avatar Selected
+      else {
         await userStore.update(
           props.user.id,
           { avatar: state.avatars[state.selected] },

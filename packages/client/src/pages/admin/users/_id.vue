@@ -49,16 +49,16 @@
                         </v-avatar>
                       </v-col>
 
-                      <dialog-select-avatar
+                      <DialogSelectAvatar
                         v-slot="{ on, attrs }"
-                        :upload="true"
                         :user="user"
+                        custom
                         @update:avatar="onUpdateAvatar"
                       >
                         <v-btn class="mt-1" text v-bind="attrs" v-on="on">
                           Edit Avatar
                         </v-btn>
-                      </dialog-select-avatar>
+                      </DialogSelectAvatar>
                     </div>
                   </v-col>
 
