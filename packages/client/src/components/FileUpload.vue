@@ -131,8 +131,8 @@ import {
 export default defineComponent({
   props: {
     value: {
-      type: [Object, File] as PropType<Uploads>,
-      default: null,
+      type: null as any as PropType<Uploads>,
+      required: true,
     },
     field: {
       type: String,
