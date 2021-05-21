@@ -35,7 +35,7 @@
     "@nuxt/types": "2.15.4",
     "@nuxt/typescript-build": "2.1.0",
     "@nuxtjs/eslint-config-typescript": "6.0.0",
-    "@types/lodash": "4.14.168",
+    "@types/lodash": "4.14.170",
     "deepmerge": "4.2.2",
     "eslint": "7.24.0",
     "eslint-config-prettier": "8.2.0",

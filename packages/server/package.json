@@ -33,7 +33,7 @@
     "@nestjs/platform-express": "7.6.15",
     "@nestjs/schedule": "0.4.3",
     "@sendgrid/mail": "7.4.2",
-    "@types/lodash": "4.14.168",
+    "@types/lodash": "4.14.170",
     "accesscontrol": "2.2.1",
     "bcrypt": "5.0.1",
     "cache-manager": "3.4.3",
