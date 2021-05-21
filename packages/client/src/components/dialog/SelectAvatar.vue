@@ -103,9 +103,11 @@ export default defineComponent({
       `${config.staticBase}${config.avatarBase}/${avatar}.png`
 
     const onSubmit = async () => {
+      const isOwn = !props.custom
+
       // Custom Image URL
       if (props.custom && typeof state.file === 'string') {
-        await userStore.update(props.user.id, { avatar: state.file })
+        await userStore.update(props.user.id, { avatar: state.file }, isOwn)
       }
       // Custom Image Upload
       else if (props.custom && state.file instanceof File) {
@@ -115,14 +117,18 @@ export default defineComponent({
           return snackbar.error(fileStore.error.message)
         }
 
-        await userStore.update(props.user.id, { avatar: fileStore.file!.root })
+        await userStore.update(
+          props.user.id,
+          { avatar: fileStore.file!.root },
+          isOwn
+        )
       }
       // Default Avatar Selected
       else {
         await userStore.update(
           props.user.id,
           { avatar: state.avatars[state.selected] },
-          true
+          isOwn
         )
       }
 
