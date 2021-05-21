@@ -22,7 +22,7 @@
 
     <v-row>
       <v-col>
-        <v-card :loading="isLoading">
+        <v-card>
           <v-toolbar v-if="filters.panel" flat class="pa-3">
             <v-row>
               <v-col>
@@ -103,7 +103,7 @@
             <v-spacer />
 
             <v-text-field
-              v-model="search"
+              v-model.trim="search"
               append-icon="mdi-magnify"
               placeholder="Filter for id, name, email, ...etc"
               label="Search"
@@ -132,7 +132,7 @@
             <template #[`item.email`]="{ item }">
               <div class="d-flex align-center py-1">
                 <v-avatar size="32px" class="elevation-1">
-                  <v-img :src="$avatar(item)" />
+                  <v-img :src="item.avatarUrl" />
                 </v-avatar>
 
                 <div class="ml-2">
@@ -234,7 +234,7 @@ export default defineComponent({
       },
     })
 
-    const search = useDebouncedRef('')
+    const search = useDebouncedRef<string | null>('')
 
     const headers = [
       { text: 'ID', value: 'id' },
@@ -271,7 +271,7 @@ export default defineComponent({
       await userStore.findAll({
         ...(state.filters.grades.length && { grade: state.filters.grades }),
         ...(state.filters.roles.length && { role: state.filters.roles }),
-        ...(search.value.length && { contains: search.value }),
+        ...(search.value?.length && { contains: search.value }),
       })
     }
 
