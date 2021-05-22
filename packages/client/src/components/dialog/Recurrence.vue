@@ -281,7 +281,8 @@ export default defineComponent({
   props: {
     value: {
       type: Object as PropType<Options | null>,
-      required: true,
+      required: false,
+      default: null,
     },
     dateString: {
       type: String,
@@ -542,6 +543,7 @@ export default defineComponent({
       weekdays,
       formattedUntilDate,
       monthTypes,
+      frequencies,
       selections,
       onSetRule,
       close,
