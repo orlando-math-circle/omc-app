@@ -16,9 +16,9 @@
             <nuxt-link class="pl-2" to="/login">Log in</nuxt-link>
           </span>
 
-          <AlertError v-if="error" :error="error" class="mt-3" />
+          <AlertError :error="error" class="mt-3" />
 
-          <VFormValidated @submit:form="onSubmit">
+          <VFormValidated @form:submit="onSubmit">
             <v-row>
               <v-col cols="6">
                 <VTextFieldValidated
@@ -137,7 +137,7 @@
               <v-checkbox
                 v-model="isNotify"
                 label="Receive emails reminding me of registered events"
-              ></v-checkbox>
+              />
 
               <v-btn block class="my-4" type="submit" color="secondary">
                 Sign up
