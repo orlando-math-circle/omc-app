@@ -184,13 +184,11 @@ import { CreateUserDto } from '@server/user/dtos/create-user.dto'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
 import { Gender } from '@server/user/enums/gender.enum'
 import { Grade } from '@server/user/enums/grade.enum'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useUsers } from '@/store/useUsers'
-import { useAuth } from '@/store/useAuth'
-import { education, genders, reminders } from '~/utils/constants'
-import { useStateReset } from '~/composables/useStateReset'
-import { grades } from '~/utils/events'
-import FormDialog from '~/components/form/Dialog.vue'
+import { useSnackbar, useStateReset } from '@/composables'
+import { useUsers, useAuth } from '@/stores'
+import { education, genders, reminders } from '@/utils/constants'
+import { grades } from '@/utils/events'
+import FormDialog from '@/components/form/Dialog.vue'
 
 export default defineComponent({
   setup() {

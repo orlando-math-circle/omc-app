@@ -169,8 +169,8 @@ import {
 } from '@nuxtjs/composition-api'
 import { Gender } from '@server/user/enums/gender.enum'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
-import { useAuth } from '@/store/useAuth'
-import { genders } from '../utils/constants'
+import { useAuth } from '@/stores'
+import { genders } from '@/utils/constants'
 
 export default defineComponent({
   layout: 'landing',

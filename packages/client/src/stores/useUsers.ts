@@ -3,19 +3,16 @@ import { CreateUserDto } from '@server/user/dtos/create-user.dto'
 import { FindUsersDto } from '@server/user/dtos/find-users.dto'
 import { UpdateOwnUserDto } from '@server/user/dtos/update-own-user.dto'
 import { UpdateUserDto } from '@server/user/dtos/update-user.dto'
-import { DTO } from '@/types/date-to-string.interface'
-import { User } from '@server/user/user.entity'
+import { UserEntity } from '@/stores'
 import { StateStatus, StateError } from '@/types/state.interface'
-
-export type DTOUser = DTO<User>
 
 export const useUsers = defineStore({
   id: 'user',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    user: null as DTOUser | null,
-    users: [] as DTOUser[],
+    user: null as UserEntity | null,
+    users: [] as UserEntity[],
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',

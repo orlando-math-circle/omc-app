@@ -128,11 +128,10 @@ import {
   defineComponent,
   reactive,
   useRouter,
+  toRefs,
 } from '@nuxtjs/composition-api'
-import { toRefs } from '@vueuse/core'
-import { useAuth } from '@/store/useAuth'
-import { useDarkMode } from '@/composables/useDarkMode'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { useAuth } from '@/stores'
+import { useDarkMode, useSnackbar } from '@/composables'
 
 export default defineComponent({
   middleware: 'auth',

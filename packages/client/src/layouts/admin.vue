@@ -162,10 +162,10 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app>
+    <v-app-bar app flat class="appbar">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-toolbar-title class="title">OMC Admin</v-toolbar-title>
+      <v-toolbar-title class="title">Orlando Math Circle</v-toolbar-title>
 
       <v-spacer />
 
@@ -179,7 +179,7 @@
         </template>
 
         <v-list dense nav>
-          <v-list-item link to="/account/settings">
+          <v-list-item link to="/dashboard">
             <v-list-item-icon>
               <v-icon>mdi-account-box-outline</v-icon>
             </v-list-item-icon>
@@ -221,7 +221,7 @@
     </v-app-bar>
 
     <v-main>
-      <v-container class="pa-6">
+      <v-container fluid>
         <Nuxt />
       </v-container>
     </v-main>
@@ -237,8 +237,8 @@ import {
   ref,
   useRouter,
 } from '@nuxtjs/composition-api'
-import { useDarkMode } from '@/composables/useDarkMode'
-import { useAuth } from '@/store/useAuth'
+import { useDarkMode } from '@/composables'
+import { useAuth } from '@/stores'
 
 export default defineComponent({
   middleware: ['auth', 'admin'],
@@ -268,6 +268,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+.appbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
 // VList
 .v-list-item__action:first-child,
 .v-list-item__icon:first-child {

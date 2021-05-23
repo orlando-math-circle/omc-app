@@ -1,12 +1,12 @@
 <template>
-  <dialog-form ref="dialog">
+  <FormDialog ref="dialog">
     <template #title>Create Account</template>
 
     <template #activator="{ on, attrs }">
       <slot name="activator" v-bind="{ on, attrs }"></slot>
     </template>
 
-    <v-card-text>
+    <template #form>
       <v-row>
         <v-col cols="6">
           <v-text-field-validated
@@ -45,14 +45,14 @@
           />
         </v-col>
       </v-row>
-    </v-card-text>
-  </dialog-form>
+    </template>
+  </FormDialog>
 </template>
 
 <script lang="ts">
 import { defineComponent, toRefs } from '@nuxtjs/composition-api'
-import { useStateReset } from '../../composables/useStateReset'
-import BirthdayPickerValidated from '../inputs/BirthdayPickerValidated.vue'
+import { useStateReset } from '@/composables/useStateReset'
+import BirthdayPickerValidated from '@/components/inputs/BirthdayPickerValidated.vue'
 
 export default defineComponent({
   components: { BirthdayPickerValidated },

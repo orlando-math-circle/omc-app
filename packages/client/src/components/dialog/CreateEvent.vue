@@ -1,5 +1,5 @@
 <template>
-  <dialog-form ref="dialog" @submit:form="onSubmit">
+  <FormDialog ref="dialog" expands @form:submit="onSubmit">
     <template #title>Create Event</template>
 
     <template #activator="{ on, attrs }">
@@ -9,7 +9,7 @@
     </template>
 
     <v-card-text>
-      <alert-error v-if="error" class="mx-4" :error="error" />
+      <AlertError v-if="error" class="mx-4" :error="error" />
 
       <v-list dense>
         <!-- Name -->
@@ -19,15 +19,14 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               v-model="meta.name"
               label="Title"
               hide-details="auto"
               vid="title"
               rules="required"
               outlined
-            >
-            </v-text-field-validated>
+            />
           </v-list-item-content>
         </v-list-item>
 
@@ -53,33 +52,32 @@
           <v-list-item-content>
             <v-row wrap>
               <v-col :cols="dates.allday ? 12 : 8">
-                <v-menu v-model="dates.start.menu" offset-y min-width="290px">
+                <v-menu offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <!-- TODO: Investigate why using VTextFieldValidated
+                    causes the menu to not render properly -->
+                    <VTextFieldValidated
                       :value="format(dates.start.date)"
                       :label="dates.allday ? 'Date' : 'Start Date'"
-                      hide-details="auto"
-                      vid="startdate"
                       :rules="{
                         required: true,
                         startdate: dates.allday
                           ? false
                           : { target: '@enddate' },
                       }"
+                      vid="startdate"
+                      hide-details="auto"
                       outlined
                       v-bind="attrs"
                       v-on="on"
-                    ></v-text-field-validated>
+                    />
                   </template>
 
-                  <v-date-picker
-                    v-model="dates.start.date"
-                    @input="dates.start.menu = false"
-                  ></v-date-picker>
+                  <v-date-picker v-model="dates.start.date" />
                 </v-menu>
               </v-col>
 
-              <v-col v-if="!dates.allday" cols="4">
+              <v-col v-show="!dates.allday" cols="4">
                 <PickerTime
                   v-model="times.start.time"
                   vid="starttime"
@@ -96,30 +94,27 @@
                 />
               </v-col>
 
-              <v-col v-if="!dates.allday" cols="8">
-                <v-menu v-model="dates.end.menu" offset-y min-width="290px">
+              <v-col v-show="!dates.allday" cols="8">
+                <v-menu offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       :value="format(dates.end.date)"
                       :rules="{ required: !dates.allday }"
                       vid="enddate"
                       readonly
                       hide-details="auto"
                       label="End Date"
-                      v-bind="attrs"
                       outlined
+                      v-bind="attrs"
                       v-on="on"
-                    >
-                    </v-text-field-validated>
+                    />
                   </template>
-                  <v-date-picker
-                    v-model="dates.end.date"
-                    @input="dates.end.menu = false"
-                  ></v-date-picker>
+
+                  <v-date-picker v-model="dates.end.date" />
                 </v-menu>
               </v-col>
 
-              <v-col v-if="!dates.allday" cols="4">
+              <v-col v-show="!dates.allday" cols="4">
                 <PickerTime
                   v-model="times.end.time"
                   vid="endtime"
@@ -183,7 +178,7 @@
               </v-col>
 
               <v-col v-if="meta.lateThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.lateOffset"
                   label="Minute Offset"
                   type="number"
@@ -204,7 +199,7 @@
               </v-col>
 
               <v-col v-if="meta.cutoffThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.cutoffOffset"
                   label="Minute Offset"
                   type="number"
@@ -248,7 +243,7 @@
           <v-list-item-content>
             <v-row>
               <v-col cols="12">
-                <v-combobox-validated
+                <VComboboxValidated
                   v-model="meta.locationTitle"
                   rules="required"
                   :items="['Online', 'Zoom', 'In-Person']"
@@ -288,7 +283,7 @@
                   auto-grow
                   hide-details="auto"
                   outlined
-                ></v-textarea>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -305,18 +300,29 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-project
+                <VAutocompleteValidated
                   v-model="project"
+                  :items="projectStore.projects"
+                  :loading="projectStore.isLoading"
                   label="Project (Optional)"
+                  hide-details="auto"
                   item-value="id"
+                  item-text="name"
+                  clearable
                   outlined
+                  debounce
+                  @search="projectStore.findAll()"
                 />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-project v-model="project" />
+                <DialogSelectProject v-model="project" />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
-                <dialog-create-project @create:project="onProjectCreated" />
+                <DialogCreateProject
+                  @create:project="(proj) => (project = proj.id)"
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -341,7 +347,7 @@
                   placeholder="Search for a course"
                   @search="onCourseSearch"
                 />
-                <auto-complete-course
+                <AutoCompleteCourse
                   v-model="course"
                   item-value="id"
                   :project="project"
@@ -350,11 +356,11 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-course v-model="course" :project="project" />
+                <DialogSelectCourse v-model="course" :project="project" />
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-create-course
+                <DialogCreateCourse
                   :project="project"
                   @create:course="onCourseCreated"
                 />
@@ -372,7 +378,7 @@
           <v-list-item-content>
             <v-row>
               <v-col cols="12">
-                <v-select-validated
+                <VSelectValidated
                   v-model="feeType"
                   :items="feeTypes"
                   :rules="{ required: true, has_course: { course } }"
@@ -384,7 +390,7 @@
 
               <template v-if="feeType !== 'free'">
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.amount"
                     rules="required"
                     label="Event Fee"
@@ -395,7 +401,7 @@
                 </v-col>
 
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.lateAmount"
                     label="Late Fee (Optional)"
                     type="number"
@@ -417,7 +423,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <file-upload
+            <FileUpload
               v-model="files"
               outlined
               label="Picture (Optional)"
@@ -436,7 +442,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               :value="meta.color"
               class="ma-0 pa-0 shrink-append"
               mask="'#XXXXXXXX'"
@@ -458,26 +464,22 @@
 
                   <v-card>
                     <v-card-text class="pa-0">
-                      <v-color-picker
-                        v-model="meta.color"
-                        flat
-                      ></v-color-picker>
+                      <v-color-picker v-model="meta.color" flat />
                     </v-card-text>
                   </v-card>
                 </v-menu>
               </template>
-            </v-text-field-validated>
+            </VTextFieldValidated>
           </v-list-item-content>
         </v-list-item>
-
-        <v-divider />
       </v-list>
     </v-card-text>
 
-    <v-card-actions>
+    <template #actions>
       <v-spacer />
 
-      <v-btn text @click="dialog && dialog.close()">Cancel</v-btn>
+      <v-btn text @click="dialog.close()">Cancel</v-btn>
+
       <v-btn type="submit" :loading="isLoading" color="primary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
@@ -487,8 +489,8 @@
 
         Create Event
       </v-btn>
-    </v-card-actions>
-  </dialog-form>
+    </template>
+  </FormDialog>
 </template>
 
 <script lang="ts">
@@ -496,11 +498,11 @@ import { addDays, format, isBefore, parse, parseISO } from 'date-fns'
 import { Options } from 'rrule'
 import { Course } from '@server/course/course.entity'
 import { Grade } from '@server/user/enums/grade.enum'
-import { Project } from '@server/project/project.entity'
 import { FeeType } from '@server/event/enums/fee-type.enum'
 import { Gender } from '@server/user/enums/gender.enum'
 import { EventTimeThreshold } from '@server/event/enums/event-time-threshold.enum'
 import { gradeGroups, contiguousGradeRanges, grades } from '@/utils/events'
+import { genders } from '@/utils/constants'
 import { EventRecurrenceDto } from '@/types/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '@/utils/utilities'
 import Calendar from '@/components/Calendar.vue'
@@ -512,12 +514,10 @@ import {
   computed,
   onBeforeMount,
 } from '@nuxtjs/composition-api'
-import { useEvents } from '@/store/useEvents'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useFiles } from '@/store/useFiles'
-import { useDates } from '../../composables/useDates'
-import RecurrenceDialog from '../dialog/Recurrence.vue'
-import DialogForm from './Form.vue'
+import { useEvents, useFiles, useProjects } from '@/stores'
+import { useSnackbar, useDates, useTemplateRef } from '@/composables'
+import RecurrenceDialog from '@/components/dialog/Recurrence.vue'
+import DialogForm from '@/components/dialog/Form.vue'
 
 export type RRuleOptions = Partial<Options>
 
@@ -525,6 +525,8 @@ export type RepeatingTypes = {
   label: string
   rrule?: RRuleOptions
 }
+
+export type DialogComponent = InstanceType<typeof DialogForm>
 
 const timeThresholds = [
   { text: 'Never', value: EventTimeThreshold.NEVER },
@@ -555,7 +557,7 @@ export default defineComponent({
     const refs = {
       recurrenceDialog: ref<InstanceType<typeof RecurrenceDialog>>(),
       calendar: ref<InstanceType<typeof Calendar>>(),
-      dialog: ref<InstanceType<typeof DialogForm>>(),
+      dialog: useTemplateRef<DialogComponent>('dialog'),
     }
 
     const state = reactive({
@@ -627,6 +629,7 @@ export default defineComponent({
     const fileStore = useFiles()
     const snackbar = useSnackbar()
     const dateUtils = useDates()
+    const projectStore = useProjects()
 
     const error = computed(() => eventStore.error || fileStore.error)
     const isLoading = computed(() => eventStore.isLoading)
@@ -703,10 +706,14 @@ export default defineComponent({
     }
 
     const onSubmit = async () => {
-      const file = await fileStore.create(state.files!)
+      let file = null
 
-      if (fileStore.error) {
-        snackbar.error(fileStore.error.message)
+      if (state.files) {
+        file = await fileStore.create(state.files!)
+
+        if (fileStore.error) {
+          snackbar.error(fileStore.error.message)
+        }
       }
 
       const dto = Object.assign(
@@ -756,14 +763,6 @@ export default defineComponent({
       }
     }
 
-    const onProjectSelect = (id: number) => {
-      state.project = id
-    }
-
-    const onProjectCreated = (project: Project) => {
-      state.project = project.id
-    }
-
     const onCourseCreated = (course: Course) => {
       state.course = course.id
     }
@@ -772,7 +771,9 @@ export default defineComponent({
       ...refs,
       ...toRefs(state),
       grades,
+      genders,
       timeThresholds,
+      projectStore,
       error,
       isLoading,
       feeTypes,
@@ -781,8 +782,6 @@ export default defineComponent({
       isSameDay,
       format,
       onSubmit,
-      onProjectSelect,
-      onProjectCreated,
       onCourseCreated,
     }
   },

@@ -37,7 +37,7 @@ export class AccountController {
   @UserAuth('account', 'read:any')
   @Get('/user/:id')
   findByUser(@Param('id') id: number) {
-    return this.accountService.findOneOrFail({ primaryUser: { id } });
+    return this.accountService.findOneOrFail({ users: { id } }, ['users']);
   }
 
   @UserAuth('account', 'delete:any')

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog ref="dialog" v-model="dialog" max-width="300px">
+    <v-dialog v-model="dialog" max-width="300px">
       <v-card>
         <template v-if="manual">
           <v-card-title>Set Time</v-card-title>
@@ -82,7 +82,7 @@ export default defineComponent({
       referenceTime: props.value,
     })
 
-    const friendlyTime = () => friendlyTimeUtil(time.value)
+    const friendlyTime = computed(() => friendlyTimeUtil(time.value))
 
     const time = computed({
       get() {

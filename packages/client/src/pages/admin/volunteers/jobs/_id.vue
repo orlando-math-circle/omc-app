@@ -110,8 +110,8 @@ import {
   useRoute,
   useRouter,
 } from '@nuxtjs/composition-api'
-import { useJobs } from '@/store/useJobs'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { useJobs } from '@/stores'
+import { useSnackbar } from '@/composables'
 
 export default defineComponent({
   layout: 'admin',

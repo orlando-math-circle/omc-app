@@ -94,8 +94,8 @@ import {
   computed,
   useFetch,
 } from '@nuxtjs/composition-api'
-import { useSnackbar } from '../composables/useSnackbar'
-import { useAuth } from '../store/useAuth'
+import { useSnackbar } from '@/composables'
+import { useAuth } from '@/stores'
 
 export default defineComponent({
   layout: 'landing',

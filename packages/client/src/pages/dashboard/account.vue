@@ -82,8 +82,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed } from '@nuxtjs/composition-api'
 import { User } from '@server/user/user.entity'
-import { useAuth } from '@/store/useAuth'
-import { useUsers } from '@/store/useUsers'
+import { useAuth, useUsers } from '@/stores'
 import DialogUserEdit from '@/components/dialog/UserEdit.vue'
 import DialogConfirm from '@/components/dialog/Confirm.vue'
 import { genders } from '@/utils/constants'

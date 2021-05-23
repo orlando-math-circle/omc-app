@@ -1,10 +1,5 @@
 <template>
-  <dialog-form
-    ref="dialog"
-    :expands="false"
-    width="440"
-    @submit:form="onSubmit"
-  >
+  <DialogForm ref="dialog" :expands="false" width="440" @form:submit="onSubmit">
     <template #title>Create Job</template>
 
     <template #activator="{ on, attrs }">
@@ -36,7 +31,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="dto.name"
             rules="required"
             label="Job Name"
@@ -46,7 +41,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-textarea-validated
+          <VTextareaValidated
             v-model="dto.description"
             label="Description"
             outlined
@@ -55,7 +50,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model.number="dto.hours"
             type="number"
             label="Volunteer Hours"
@@ -81,7 +76,7 @@
         Create Job
       </v-btn>
     </v-card-actions>
-  </dialog-form>
+  </DialogForm>
 </template>
 
 <script lang="ts">
@@ -92,8 +87,8 @@ import {
   ref,
   toRefs,
 } from '@nuxtjs/composition-api'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useJobs } from '@/store/useJobs'
+import { useSnackbar } from '@/composables'
+import { useJobs } from '@/stores'
 import DialogForm from '@/components/dialog/Form.vue'
 
 export default defineComponent({

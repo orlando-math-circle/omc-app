@@ -22,7 +22,7 @@
 
     <v-row>
       <v-col>
-        <calendar
+        <Calendar
           ref="calendar"
           v-model="date"
           :type.sync="type"
@@ -95,8 +95,7 @@ import {
 } from '@nuxtjs/composition-api'
 import { format, isSameDay, parseISO } from 'date-fns'
 import Calendar from '@/components/Calendar.vue'
-import { useProjects } from '@/store/useProjects'
-import { useEvents } from '@/store/useEvents'
+import { useProjects, useEvents } from '@/stores'
 import { calendarTypes } from '@/utils/constants'
 
 export default defineComponent({

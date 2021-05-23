@@ -21,15 +21,16 @@
 
       <VFormValidated v-slot="{ passes }" @form:submit="onSubmit">
         <v-card-text>
-          <alert-error v-if="error" :error="error" />
+          <AlertError :error="error" />
 
           <v-row>
             <v-col v-if="!project" cols="12">
               <VAutocompleteValidated
                 v-model="newProject"
-                label="Project (Optional)"
+                label="Project"
                 :rules="{ required: !project }"
                 item-value="id"
+                hide-details="auto"
                 outlined
               />
             </v-col>
@@ -74,9 +75,9 @@ import {
   defineComponent,
   PropType,
   reactive,
+  toRefs,
 } from '@nuxtjs/composition-api'
-import { toRefs } from '@vueuse/core'
-import { useCourses } from '@/store/useCourses'
+import { useCourses } from '@/stores'
 
 export default defineComponent({
   props: {

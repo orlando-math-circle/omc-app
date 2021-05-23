@@ -1,5 +1,5 @@
 import { defineNuxtPlugin } from '@nuxtjs/composition-api'
-import { useAuth } from '@/store/useAuth'
+import { useAuth } from '@/stores'
 
 /**
  * Plugin: Axios Interceptor

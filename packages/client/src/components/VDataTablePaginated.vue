@@ -27,12 +27,14 @@ import {
   reactive,
   watch,
 } from '@nuxtjs/composition-api'
+import { useVModel } from '@vueuse/core'
 
 export default defineComponent({
   props: {
     value: {
       type: [String, Number, Boolean, Object, Array],
-      required: true,
+      required: false,
+      default: () => [],
     },
     search: {
       type: String as PropType<string | null>,
@@ -40,14 +42,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const selections = computed({
-      get() {
-        return props.value
-      },
-      set(value: any) {
-        emit('input', value)
-      },
-    })
+    const selections = useVModel(props)
 
     const state = reactive({
       pagination: {

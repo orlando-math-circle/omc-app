@@ -61,8 +61,8 @@ import {
   useFetch,
   watch,
 } from '@nuxtjs/composition-api'
-import { useCourses } from '../../store/useCourses'
-import { useDebouncedRef } from '../../composables/useDebouncedRef'
+import { useCourses } from '@/stores'
+import { useDebouncedRef } from '@/composables/useDebouncedRef'
 
 const headers = [
   { text: 'Name', value: 'name' },

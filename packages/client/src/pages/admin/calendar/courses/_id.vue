@@ -43,11 +43,15 @@
 
           <v-row>
             <v-col class="pt-0">
-              <breadcrumbs
-                class="pa-0"
-                :items="breadcrumbs"
-                large
-              ></breadcrumbs>
+              <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col>
+              <v-card>
+                <v-card-title>Page Incomplete</v-card-title>
+              </v-card>
             </v-col>
           </v-row>
         </v-col>
@@ -63,10 +67,10 @@ import {
   useRoute,
   computed,
 } from '@nuxtjs/composition-api'
-import { useCourses } from '@/store/useCourses'
+import { useCourses } from '@/stores'
 
 export default defineComponent({
-  layout: 'addmin',
+  layout: 'admin',
   setup() {
     const route = useRoute()
     const courseStore = useCourses()

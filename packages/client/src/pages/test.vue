@@ -3,13 +3,7 @@
     <v-card-title>Test State</v-card-title>
 
     <v-card-text>
-      <pre>{{
-        JSON.stringify(
-          { loading: store.isLoading, status: store.status },
-          null,
-          2
-        )
-      }}</pre>
+      <pre>{{ JSON.stringify(state, null, 2) }}</pre>
     </v-card-text>
 
     <v-card-actions>
@@ -19,16 +13,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api'
-import { useUsers } from '@/store/useUsers'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { useAuth } from '@/stores'
 
 export default defineComponent({
   setup() {
-    const userStore = useUsers()
+    const authStore = useAuth()
+
+    const state = computed(() => ({
+      status: authStore.status,
+      isLoading: authStore.isLoading,
+    }))
 
     return {
-      store: userStore,
-      userAction: () => userStore.findAll(),
+      state,
+      userAction: () => authStore.getMyUser(),
     }
   },
 })

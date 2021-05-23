@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Edit Event" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Edit Event" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" v-on="on">
@@ -38,12 +38,24 @@
           </v-list-item>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
-    <dialog-delete-event
+    <DialogDeleteEvent
       ref="deleteModeSelector"
       @delete:confirm="onDeleteConfirm"
     />
+
+    <template v-if="$fetchState.pending">
+      <v-row>
+        <v-col>
+          <v-card>
+            <v-card-title>Loading...</v-card-title>
+
+            <v-card-text>Fetching event</v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </template>
 
     <v-row>
       <v-col>
@@ -114,8 +126,8 @@ import {
 } from '@nuxtjs/composition-api'
 import { format, isSameDay, isSameWeek, parseISO } from 'date-fns'
 import DialogDeleteEvent from '@/components/dialog/DeleteEvent.vue'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useEvents } from '@/store/useEvents'
+import { useSnackbar } from '@/composables'
+import { useEvents } from '@/stores'
 
 export default defineComponent({
   layout: 'admin',

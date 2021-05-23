@@ -1,5 +1,5 @@
 import { defineNuxtPlugin } from '@nuxtjs/composition-api'
-import { useAuth } from '@/store/useAuth'
+import { useAuth } from '@/stores'
 import { COOKIE_COMPLETE, COOKIE_JWT } from '@/utils/constants'
 
 /**

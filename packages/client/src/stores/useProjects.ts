@@ -12,6 +12,7 @@ export const useProjects = defineStore({
     error: null as StateError | null,
     project: null as Project | null,
     projects: [] as Project[],
+    total: null as number | null,
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',
@@ -32,6 +33,7 @@ export const useProjects = defineStore({
       const resp = await this.$nuxt.$axios.$get('/project', { params })
 
       this.projects = resp[0]
+      this.total = resp[1]
     },
     async update(id: number, updateProjectDto: UpdateProjectDto) {
       this.project = await this.$nuxt.$axios.$patch(

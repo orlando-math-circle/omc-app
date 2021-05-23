@@ -78,7 +78,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from '@nuxtjs/composition-api'
-import { genders } from '../../utils/constants'
+import { genders } from '@/utils/constants'
 
 export default defineComponent({
   setup() {

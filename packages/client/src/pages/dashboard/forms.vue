@@ -169,13 +169,9 @@ import { User } from '@server/user/user.entity'
 import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum'
 import { computed, defineComponent, ref } from '@nuxtjs/composition-api'
 import { FileAttachment } from '@server/file-attachment/file-attachment.entity'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useProjects } from '@/store/useProjects'
-import { useWork } from '@/store/useWork'
-import { useAttachments } from '@/store/useAttachments'
-import { useStateReset } from '../../composables/useStateReset'
-import VFormValidated from '../../components/inputs/VFormValidated.vue'
-import { useAuth } from '../../store/useAuth'
+import { useSnackbar, useStateReset } from '@/composables'
+import { useAuth, useProjects, useWork, useAttachments } from '@/stores'
+import VFormValidated from '@/components/inputs/VFormValidated.vue'
 
 export default defineComponent({
   transition: 'slide-right',

@@ -22,12 +22,16 @@
       <slot name="image" />
 
       <VFormValidated
-        ref="form"
+        ref="formRef"
         v-slot="form"
         @form:submit="$emit('form:submit')"
       >
+        <slot v-bind="form"></slot>
+
         <v-card-text>
-          <slot name="form" v-bind="form"></slot>
+          <v-row>
+            <slot name="form" v-bind="form"></slot>
+          </v-row>
         </v-card-text>
 
         <v-card-actions>
@@ -43,11 +47,13 @@ import {
   computed,
   defineComponent,
   reactive,
-  ref,
   toRefs,
   useContext,
 } from '@nuxtjs/composition-api'
-import VFormValidated from '../inputs/VFormValidated.vue'
+import { useTemplateRef } from '@/composables'
+import VFormValidated from '@/components/inputs/VFormValidated.vue'
+
+type FormComponent = InstanceType<typeof VFormValidated>
 
 export default defineComponent({
   props: {
@@ -63,7 +69,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { $vuetify } = useContext()
 
-    const form = ref<InstanceType<typeof VFormValidated>>()
+    const formRef = useTemplateRef<FormComponent>('formRef')
 
     const state = reactive({
       dialog: false,
@@ -96,12 +102,11 @@ export default defineComponent({
     }
 
     const resetValidation = () => {
-      form.value!.resetValidation()
+      formRef.value!.resetValidation()
     }
 
     return {
       ...toRefs(state),
-      form,
       open,
       close,
       cardAttrs,

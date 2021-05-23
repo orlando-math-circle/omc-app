@@ -45,8 +45,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@nuxtjs/composition-api'
-import { useAuth } from '@/store/useAuth'
-import { useAttachments } from '@/store/useAttachments'
+import { useAuth, useAttachments } from '@/stores'
 
 export default defineComponent({
   setup() {

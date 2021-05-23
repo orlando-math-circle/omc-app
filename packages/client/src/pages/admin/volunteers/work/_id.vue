@@ -109,15 +109,15 @@ import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity'
 import { UpdateWorkDto } from '@server/volunteer-work/dto/update-work.dto'
 import { shallowDiff } from '@/utils/utilities'
 import { workStatuses } from '@/utils/constants'
-import { reactive } from 'vue-demi'
-import { useWork } from '@/store/useWork'
+import { useWork } from '@/stores'
 import {
   computed,
   defineComponent,
   useRoute,
   useRouter,
+  reactive,
 } from '@nuxtjs/composition-api'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { useSnackbar } from '@/composables'
 
 export default defineComponent({
   layout: 'admin',

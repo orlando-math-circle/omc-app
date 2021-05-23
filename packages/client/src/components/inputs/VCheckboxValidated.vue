@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :rules="rules">
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-checkbox
       v-model="data"
       :error-messages="errors"
@@ -25,6 +25,11 @@ export default defineComponent({
     },
     value: {
       type: [Boolean],
+      required: false,
+      default: null,
+    },
+    vid: {
+      type: String,
       required: false,
       default: null,
     },

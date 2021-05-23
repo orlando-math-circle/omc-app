@@ -56,8 +56,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@nuxtjs/composition-api'
-import { useInvoices } from '@/store/useInvoices'
-import { formatDate } from '~/utils/utilities'
+import { useInvoices } from '@/stores'
+import { formatDate } from '@/utils/utilities'
 
 export default defineComponent({
   transition(_to, from) {

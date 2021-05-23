@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :rules="rules">
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-textarea
       v-model="data"
       :error-messages="errors"
@@ -24,6 +24,11 @@ export default defineComponent({
       default: '',
     },
     value: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    vid: {
       type: String,
       required: false,
       default: null,

@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import { useSnackbar } from '@/composables/useSnackbar'
-import { usePayPal } from '@/store/usePayPal'
+import { useSnackbar } from '@/composables'
+import { usePayPal } from '@/stores'
 import {
   defineComponent,
   PropType,

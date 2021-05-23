@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :rules="rules">
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-combobox
       v-model="data"
       :error-messages="errors"
@@ -30,15 +30,22 @@ export default defineComponent({
     ValidationProvider,
   },
   props: {
+    value: {
+      type: null as any,
+      required: true,
+    },
     rules: {
       type: [String, Object],
       default: '',
     },
+    vid: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   setup(props) {
-    const data = useVModel(props)
-
-    return { data }
+    return { data: useVModel(props) }
   },
 })
 </script>

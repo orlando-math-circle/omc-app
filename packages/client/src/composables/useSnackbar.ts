@@ -1,4 +1,4 @@
-import { useSnackbar as useSnack } from '@/store/useSnackbar'
+import { useSnackbar as useSnack } from '@/stores'
 
 export const useSnackbar = () => {
   const snackbarStore = useSnack()

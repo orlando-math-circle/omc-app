@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, useFetch } from '@nuxtjs/composition-api'
-import { useWork } from '@/store/useWork'
+import { useWork } from '@/stores'
 
 export default defineComponent({
   layout: 'admin',

@@ -59,8 +59,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, useFetch } from '@nuxtjs/composition-api'
-import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import { useAttachments } from '@/store/useAttachments'
+import { useDebouncedRef } from '@/composables'
+import { useAttachments } from '@/stores'
 
 export default defineComponent({
   layout: 'admin',

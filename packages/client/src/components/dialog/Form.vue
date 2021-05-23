@@ -60,7 +60,7 @@ import VFormValidated from '~/components/inputs/VFormValidated.vue'
 export default defineComponent({
   props: {
     width: {
-      type: Number,
+      type: [Number, String],
       default: 570,
     },
     expands: {
