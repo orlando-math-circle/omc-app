@@ -52,9 +52,9 @@ const config: NuxtConfig = {
   },
   loading: { color: '#44d9e6' },
   plugins: [
+    '~/plugins/error',
     '~/plugins/pinia',
     '~/plugins/auth',
-    '~/plugins/axios',
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
     '~/plugins/background',

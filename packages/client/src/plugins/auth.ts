@@ -44,6 +44,8 @@ export default defineNuxtPlugin(async ({ $cookies, $axios, $pinia }) => {
     if (!authStore.error) {
       authStore.token = token
       authStore.complete = complete
+    } else if (authStore.error.status === 401) {
+      authStore.logout()
     }
   }
 

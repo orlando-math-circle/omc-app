@@ -1,6 +1,8 @@
 import { StateError, StateStatus } from '@/types/state.interface'
 import { defineNuxtPlugin } from '@nuxtjs/composition-api'
 import { PiniaPluginContext } from 'pinia'
+import { parseAxiosError } from '@/utils/utilities'
+import { StateErrorHandler } from '@/plugins/error'
 
 declare module 'pinia' {
   export interface PiniaCustomStateProperties {
@@ -13,7 +15,11 @@ declare module 'pinia' {
 type Procedure = (...args: any[]) => any
 type StoreType = PiniaPluginContext['store']
 
-const wrap = <F extends Procedure>(fn: F, store: StoreType) => {
+const wrap = <F extends Procedure>(
+  fn: F,
+  store: StoreType,
+  $error: StateErrorHandler
+) => {
   const wrappedFn = async (...args: any[]) => {
     try {
       store.status = 'Loading'
@@ -26,15 +32,18 @@ const wrap = <F extends Procedure>(fn: F, store: StoreType) => {
       return result
     } catch (error) {
       store.status = 'Error'
-      store.error = error
+      store.error = parseAxiosError(error)
+
+      $error(error)
     }
   }
   return wrappedFn
 }
 
-export default defineNuxtPlugin(({ pinia }) => {
-  pinia.use(({ store, options }) => {
+export default defineNuxtPlugin(({ $pinia, $error }) => {
+  $pinia.use(({ store, options }) => {
     // Disabled until https://github.com/posva/pinia/discussions/497 is resolved.
+    //
     // if (!Object.hasOwnProperty.call(store.$state, 'status')) {
     //   const statusRef = ref('Idle')
     //   set(store.$state, 'status', statusRef)
@@ -49,7 +58,7 @@ export default defineNuxtPlugin(({ pinia }) => {
 
     return Object.keys(options.actions).reduce(
       (actions: Record<string, Procedure>, action) => {
-        actions[action] = wrap(store[action], store)
+        actions[action] = wrap(store[action], store, $error)
 
         return actions
       },
