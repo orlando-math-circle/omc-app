@@ -74,6 +74,7 @@ export class AuthService {
         `${account.logoutHash}${this.config.get('SECRET')}`,
       ),
       complete: !!payload.uid,
+      user,
     };
   }
 

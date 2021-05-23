@@ -47,16 +47,25 @@ export const useAuth = defineStore({
     async login(email: string, password: string, remember: boolean) {
       const cookies = useCookies(this.$nuxt)
 
-      const { token, complete } = await this.$nuxt.$axios.$post('/login', {
-        email,
-        password,
-      })
+      const { token, complete, user } = await this.$nuxt.$axios.$post(
+        '/login',
+        {
+          email,
+          password,
+        }
+      )
 
       this.remember = remember
       this.token = token
       this.complete = complete
+
+      if (complete) {
+        this.user = user
+      }
+
       cookies.set(COOKIE_JWT, token)
       cookies.set(COOKIE_COMPLETE, complete)
+
       this.$nuxt.$axios.setToken(token, 'Bearer')
     },
     async logout(everywhere?: boolean) {
