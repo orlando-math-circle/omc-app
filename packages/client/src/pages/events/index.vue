@@ -91,7 +91,6 @@ import {
   reactive,
   ref,
   toRefs,
-  useFetch,
 } from '@nuxtjs/composition-api'
 import { format, isSameDay, parseISO } from 'date-fns'
 import Calendar from '@/components/Calendar.vue'
@@ -106,10 +105,6 @@ export default defineComponent({
 
     const projectStore = useProjects()
     const eventStore = useEvents()
-
-    useFetch(async () => {
-      await projectStore.findAll()
-    })
 
     const state = reactive({
       type: 'simple',
@@ -160,6 +155,9 @@ export default defineComponent({
       onFilterChange,
       onResetDate,
     }
+  },
+  async asyncData({ $pinia }) {
+    await useProjects($pinia).findAll()
   },
   head: {
     title: 'Events',

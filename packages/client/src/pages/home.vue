@@ -7,22 +7,24 @@
         <v-col v-if="events.length" class="py-0">
           <v-slide-group class="mb-4">
             <v-slide-item
-              v-for="event in events.slice(0, 10)"
-              :key="event.id"
+              v-for="event in events"
+              :key="`event_${event.id}`"
               class="padded-block"
             >
-              <event-block
-                :event="event"
-                :link="`/events/${event.id}`"
-                class="mr-4"
-              ></event-block>
+              <div>
+                <EventBlock
+                  :event="event"
+                  :link="`/events/${event.id}`"
+                  class="mr-4"
+                />
+              </div>
             </v-slide-item>
           </v-slide-group>
         </v-col>
 
-        <v-col v-else class="pb-4">
+        <!-- <v-col v-else class="pb-4">
           <span>No upcoming events.</span>
-        </v-col>
+        </v-col> -->
       </v-row>
 
       <h2 class="headline">Latest News</h2>
@@ -69,11 +71,12 @@ export default defineComponent({
     )
 
     const format = (date: string) => formatDate(date, 'MMMM do, yyyy')
+    const events = computed(() => eventStore.events.slice(0, 10))
 
     return {
       format,
       nonReplyTweets,
-      events: computed(() => eventStore.events),
+      events,
     }
   },
   async asyncData({ pinia }) {
