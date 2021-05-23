@@ -57,7 +57,7 @@ export default defineComponent({
           onApprove: async (data: any, actions: { restart: () => void }) => {
             const invoices = await paypalStore.captureOrder(
               props.event,
-              data.orderId
+              data.orderID
             )
 
             if (paypalStore.error) {
@@ -71,7 +71,7 @@ export default defineComponent({
             emit('payment:complete', invoices)
           },
         })
-        .render(buttons)
+        .render(buttons.value)
     }
 
     useScriptTag(
@@ -81,7 +81,6 @@ export default defineComponent({
 
     return {
       buttons,
-      onScriptLoad,
     }
   },
 })

@@ -7,6 +7,7 @@ import { EntityDTO } from '@server/shared/types/entity-dto'
 import { StateStatus, StateError } from '@/types/state.interface'
 
 export type RegistrationEntity = EntityDTO<EventRegistration>
+export type RegistrationStatusEntity = EntityDTO<EventRegistrationStatus>
 
 export const useRegistrations = defineStore({
   id: 'registrations',
@@ -16,7 +17,7 @@ export const useRegistrations = defineStore({
     registration: null as RegistrationEntity | null,
     registrations: [] as RegistrationEntity[],
     total: null as number | null,
-    statuses: [] as EventRegistrationStatus[],
+    statuses: [] as RegistrationStatusEntity[],
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',

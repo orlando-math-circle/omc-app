@@ -184,7 +184,7 @@
                     >
                       <template #default="{ active }">
                         <v-list-item-avatar>
-                          <v-img :src="$avatar(status.user)" />
+                          <v-img :src="status.user.avatarUrl" />
                         </v-list-item-avatar>
 
                         <v-list-item-content>
@@ -217,7 +217,7 @@
               </v-card-text>
 
               <v-card-actions>
-                <v-btn v-if="isValidated" disabled rounded block>
+                <v-btn v-if="!isVerified" disabled rounded block>
                   Email Verification Required
                 </v-btn>
 
@@ -249,7 +249,7 @@
           </v-stepper-content>
 
           <v-stepper-content class="pa-0" step="2">
-            <v-card :loading="$accessor.paypal.isLoading">
+            <v-card :loading="isPayPalLoading">
               <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
               <v-card-text>
@@ -295,7 +295,7 @@
                 <template #selection="data">
                   <v-chip v-bind="data.attrs">
                     <v-avatar left>
-                      <v-img :src="$avatar(data.item.user)" />
+                      <v-img :src="data.item.user.avatarUrl" />
                     </v-avatar>
 
                     {{ data.item.user.name }}
@@ -304,7 +304,7 @@
 
                 <template #item="data">
                   <v-list-item-avatar>
-                    <v-img :src="$avatar(data.item.user)" />
+                    <v-img :src="data.item.user.avatarUrl" />
                   </v-list-item-avatar>
 
                   <v-list-item-content>
@@ -345,9 +345,9 @@
       </v-card>
     </v-col>
 
-    <dialog-confirm ref="cancelDialog" @confirm="onCancel">
+    <DialogConfirm ref="cancelDialog" @confirm="onCancel">
       You may re-register at any time for no charge.
-    </dialog-confirm>
+    </DialogConfirm>
   </v-row>
 </template>
 
@@ -358,7 +358,13 @@ import { EventRegistration } from '@server/event-registration/event-registration
 import { Roles } from '@server/app.roles'
 import { Gender } from '@server/user/enums/gender.enum'
 import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
-import { useRegistrations, useEvents, useAuth } from '@/stores'
+import {
+  useRegistrations,
+  useEvents,
+  useAuth,
+  usePayPal,
+  UserEntity,
+} from '@/stores'
 import DialogConfirm from '@/components/dialog/Confirm.vue'
 import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
 import { formatDate } from '@/utils/utilities'
@@ -367,6 +373,7 @@ import {
   defineComponent,
   reactive,
   ref,
+  toRefs,
   useContext,
   useRoute,
 } from '@nuxtjs/composition-api'
@@ -386,6 +393,7 @@ export default defineComponent({
     const route = useRoute()
     const eventStore = useEvents()
     const authStore = useAuth()
+    const payPalStore = usePayPal()
     const registrationStore = useRegistrations()
     const snackbar = useSnackbar()
 
@@ -524,7 +532,7 @@ export default defineComponent({
       () => !!(event.value.isClosed || event.value.course?.isClosed)
     )
 
-    const grade = (user: User) => {
+    const grade = (user: UserEntity) => {
       if (!user.grade) return null
 
       if (user.grade < 13) return grades[user.grade].text
@@ -550,12 +558,15 @@ export default defineComponent({
     }
 
     const onVolunteer = async () => {
-      await registrationStore.volunteer({
-        eventId: +route.value.params.id,
-        users: [
-          { userId: state.volunteer!, job: state.volunteerJob || undefined },
-        ],
-      })
+      await registrationStore.create(
+        {
+          eventId: +route.value.params.id,
+          users: [
+            { userId: state.volunteer!, job: state.volunteerJob || undefined },
+          ],
+        },
+        true
+      )
 
       if (registrationStore.error) {
         return snackbar.error(registrationStore.error.message)
@@ -586,6 +597,7 @@ export default defineComponent({
     }
 
     return {
+      ...toRefs(state),
       cancelDialog,
       event,
       date,
@@ -597,13 +609,16 @@ export default defineComponent({
       checkoutCost,
       perms,
       isClosed,
-      isValidated: computed(() => authStore.isValidated),
+      isVerified: computed(() => authStore.isVerified),
+      isPayPalLoading: computed(() => payPalStore.isLoading),
       grade,
+      usersRequiringPayment,
       registeredUsers,
       unregisteredUsers,
       unregisteredVolunteers,
       onPaymentComplete,
       onCancel,
+      onRegister,
       onVolunteer,
     }
   },

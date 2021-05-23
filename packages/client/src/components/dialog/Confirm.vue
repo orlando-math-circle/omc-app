@@ -38,7 +38,6 @@ export default defineComponent({
     })
 
     const open = (value: any) => {
-      console.log('Opening Confirm Dialog')
       state.data = value
       state.dialog = true
     }
