@@ -20,7 +20,6 @@ export const useTemplateRef = <T extends object>(key: string) => {
     return {
       get() {
         track()
-        console.log(instance?.proxy?.$refs[key])
         return instance?.proxy?.$refs[key] ?? null
       },
       set() {},

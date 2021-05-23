@@ -32,6 +32,7 @@ export const useAuth = defineStore({
     primaryUser: (state) => state.account?.primaryUser,
     isAdmin: (state) => state.user?.roles.includes(Roles.ADMIN),
     isVolunteer: (state) => state.user?.roles.includes(Roles.VOLUNTEER),
+    isVerified: (state) => state.user?.emailVerified,
     isLoggedIn: (state) => !!state.user,
     isPrimaryUser: (state) => state.account?.primaryUser.id === state.user?.id,
     accountUsers: (state) => state.account?.users,

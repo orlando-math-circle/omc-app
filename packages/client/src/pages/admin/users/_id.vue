@@ -458,7 +458,6 @@ export default defineComponent({
 
     const onSubmit = async (shouldReset = true) => {
       if (!Object.keys(changes.value).length) return
-      console.log('Changes', changes.value)
 
       await userStore.update(state.user!.id, changes.value)
 
