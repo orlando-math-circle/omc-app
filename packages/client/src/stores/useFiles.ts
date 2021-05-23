@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
-import { File as FileEntity } from '@server/file/file.entity'
+import { File as FileEnt } from '@server/file/file.entity'
 import { StateStatus, StateError } from '@/types/state.interface'
+import { EntityDTO } from '../../../server/src/shared/types/entity-dto'
+
+export type FileEntity = EntityDTO<FileEnt>
 
 export const useFiles = defineStore({
   id: 'files',
@@ -14,7 +17,7 @@ export const useFiles = defineStore({
     isLoading: (state) => state.status === 'Loading',
   },
   actions: {
-    async create(...files: File[]) {
+    async create(...files: File[]): Promise<FileEntity> {
       const formData = new FormData()
 
       files.forEach((f) => formData.append('file', f))

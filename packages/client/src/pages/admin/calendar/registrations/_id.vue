@@ -29,7 +29,7 @@
     <v-row>
       <v-col>
         <v-card>
-          <v-card-title></v-card-title>
+          <v-card-title>Registration Editing Not Yet Implemented</v-card-title>
         </v-card>
       </v-col>
     </v-row>
@@ -38,9 +38,10 @@
 
 <script lang="ts">
 import { defineComponent, useRoute, useRouter } from '@nuxtjs/composition-api'
-import { useRegistrations } from '@/store/useRegistrations'
+import { useRegistrations } from '@/stores'
 
 export default defineComponent({
+  layout: 'admin',
   setup() {
     const route = useRoute()
     const router = useRouter()

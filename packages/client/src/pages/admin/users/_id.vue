@@ -19,17 +19,9 @@
 
           <v-row>
             <v-col class="pt-0">
-              <breadcrumbs
-                class="pa-0"
-                :items="breadcrumbs"
-                large
-              ></breadcrumbs>
+              <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
             </v-col>
           </v-row>
-        </v-col>
-
-        <v-col cols="auto" align-self="center">
-          <v-btn>Create User</v-btn>
         </v-col>
       </v-row>
 
@@ -38,14 +30,14 @@
           <v-card>
             <v-card-title>Basic Information</v-card-title>
 
-            <v-card-text>
-              <v-form-validated>
+            <VFormValidated @form:submit="onSubmit">
+              <v-card-text>
                 <v-row>
                   <v-col cols="12" sm="auto">
                     <div class="d-flex flex-column">
                       <v-col class="d-flex justify-center">
                         <v-avatar size="100px">
-                          <v-img :src="$avatar(user)" />
+                          <v-img :src="user.avatarUrl" />
                         </v-avatar>
                       </v-col>
 
@@ -65,55 +57,55 @@
                   <v-col>
                     <v-row>
                       <v-col cols="6">
-                        <v-text-field-validated
+                        <VTextFieldValidated
                           v-model="user.first"
                           label="First Name"
                           rules="required"
                           hide-details="auto"
                           outlined
                           required
-                        ></v-text-field-validated>
+                        />
                       </v-col>
 
                       <v-col cols="6">
-                        <v-text-field-validated
+                        <VTextFieldValidated
                           v-model="user.last"
                           label="Last Name"
                           rules="required"
                           hide-details="auto"
                           outlined
                           required
-                        ></v-text-field-validated>
+                        />
                       </v-col>
 
                       <v-col cols="12" lg="6">
-                        <v-text-field-validated
+                        <VTextFieldValidated
                           v-model="user.email"
                           name="Email"
                           label="Email (Optional)"
                           hide-details="auto"
                           rules="email"
                           outlined
-                        ></v-text-field-validated>
+                        />
                       </v-col>
 
                       <v-col cols="12" lg="6">
-                        <v-text-field-validated
+                        <VTextFieldValidated
                           v-model="user.omcEmail"
                           name="OMC Email"
                           label="OMC Email (Optional)"
                           hide-details="auto"
                           rules="email"
                           outlined
-                        ></v-text-field-validated>
+                        />
                       </v-col>
 
                       <v-col cols="12">
-                        <birthday-picker v-model="user.dob" outlined />
+                        <BirthdayPicker v-model="user.dob" outlined />
                       </v-col>
 
                       <v-col cols="12" xl="4">
-                        <v-select-validated
+                        <VSelectValidated
                           v-model="user.gender"
                           :items="genders"
                           label="Gender"
@@ -124,18 +116,17 @@
                       </v-col>
 
                       <v-col cols="12" xl="4">
-                        <v-select-validated
+                        <VSelectValidated
                           v-model="user.grade"
                           :items="grades"
                           label="Grade"
-                          rules="required"
                           hide-details="auto"
                           outlined
                         />
                       </v-col>
 
                       <v-col cols="12" xl="4">
-                        <v-select-validated
+                        <VSelectValidated
                           v-model="user.roles"
                           :items="roles"
                           label="Roles"
@@ -146,58 +137,57 @@
                       </v-col>
 
                       <v-col v-if="user.industry" cols="12" xl="4">
-                        <v-text-field-validated
+                        <VTextFieldValidated
                           v-model="user.industry.profession"
                           label="Profession (Optional)"
                           hide-details="auto"
                           outlined
-                        ></v-text-field-validated>
+                        />
                       </v-col>
 
                       <v-col v-if="user.industry" cols="12" xl="4">
-                        <v-text-field-validated
+                        <VTextFieldValidated
                           v-model="user.industry.jobTitle"
                           label="Job Title (Optional)"
                           hide-details="auto"
                           outlined
-                        ></v-text-field-validated>
+                        />
                       </v-col>
 
                       <v-col v-if="user.industry" cols="12" xl="4">
-                        <v-text-field-validated
+                        <VTextFieldValidated
                           v-model="user.industry.company"
                           label="Company or Workplace (Optional)"
                           hide-details="auto"
                           outlined
-                        ></v-text-field-validated>
+                        />
                       </v-col>
                     </v-row>
                   </v-col>
                 </v-row>
-              </v-form-validated>
-            </v-card-text>
+              </v-card-text>
 
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-slide-x-transition>
+              <v-card-actions>
+                <v-spacer />
+
+                <v-slide-x-transition>
+                  <v-btn
+                    v-show="Object.keys(changes).length"
+                    text
+                    @click="reset"
+                    >Reset</v-btn
+                  >
+                </v-slide-x-transition>
+
                 <v-btn
-                  v-show="Object.keys(changes).length"
-                  text
-                  @click="onReset"
+                  :disabled="!Object.keys(changes).length"
+                  :loading="isLoading"
+                  type="submit"
                 >
-                  Reset
+                  Save Changes
                 </v-btn>
-              </v-slide-x-transition>
-
-              <v-btn
-                :disabled="!Object.keys(changes).length"
-                :loading="$accessor.users.isLoading"
-                color="primary"
-                @click="onSubmit"
-              >
-                Save Changes
-              </v-btn>
-            </v-card-actions>
+              </v-card-actions>
+            </VFormValidated>
           </v-card>
         </v-col>
       </v-row>
@@ -230,7 +220,7 @@
                     Sends the primary user on their account an email prompting
                     them to reset their password.
                   </div>
-                  <v-btn class="mb-2" color="primary" @click="onResetEmail">
+                  <v-btn class="mb-2" color="primary" @click="resetEmail">
                     <v-icon left>mdi-email</v-icon>
                     Send Reset Password Email
                   </v-btn>
@@ -246,7 +236,7 @@
                   </div>
 
                   <div class="mb-3">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       v-model="password"
                       class="my-2"
                       label="Change Password (Optional)"
@@ -259,7 +249,7 @@
 
                   <v-btn
                     :disabled="!password || password.length === 0"
-                    :loading="$accessor.users.isLoading"
+                    :loading="isLoading"
                     color="primary"
                     @click="changePassword"
                     >Change Password
@@ -319,29 +309,29 @@
 import { format } from 'date-fns'
 import { cloneDeep } from 'lodash'
 import { UpdateUserDto } from '@server/user/dtos/update-user.dto'
-import { Account } from '@server/account/account.entity'
 import { shallowDiff } from '@/utils/utilities'
 import { grades } from '@/utils/events'
 import { genders, roles } from '@/utils/constants'
-import { DTO } from '@/types/date-to-string.interface'
 import {
   computed,
   defineComponent,
   reactive,
   useRoute,
+  toRefs,
+  useFetch,
 } from '@nuxtjs/composition-api'
-import { DTOUser, useUsers } from '@/store/useUsers'
-import { useAuth } from '@/store/useAuth'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { UserEntity, AccountEntity, useAuth, useUsers } from '@/stores'
+import { useSnackbar } from '@/composables'
 
 export default defineComponent({
   layout: 'admin',
   setup() {
     const state = reactive({
-      user: null as DTOUser | null,
-      account: null as DTO<Account> | null,
+      user: null as UserEntity | null,
+      account: null as AccountEntity | null,
       showPassword: false,
       password: '',
+      lock: false,
       panel: [0],
     })
 
@@ -349,6 +339,7 @@ export default defineComponent({
     const authStore = useAuth()
     const userStore = useUsers()
     const snackbar = useSnackbar()
+    // const dateUtil = useDates()
 
     const breadcrumbs = [
       {
@@ -364,28 +355,49 @@ export default defineComponent({
       },
     ]
 
+    const isLoading = computed(() => userStore.isLoading)
+
     const formatDate = (date: string, formatString: string) => {
       return format(new Date(date), formatString)
     }
 
-    const toggleLocked = () => {
+    const toggleLocked = async () => {
       if (!state.user) return
 
-      state.user.locked = !state.user.locked
+      await userStore.update(+route.value.params.id, {
+        locked: !state.user.locked,
+      })
 
-      onSubmit()
+      if (userStore.error) {
+        snackbar.error('Unable to save changes')
+      } else {
+        snackbar.success('Changes Saved')
+      }
+
+      await reset()
     }
 
     const onUpdateAvatar = () => {
-      onReset()
+      reset()
 
       if (+route.value.params.id === authStore.user?.id) {
         authStore.getMyUser()
       }
     }
 
-    const changes = computed<UpdateUserDto>(() =>
-      shallowDiff(authStore.user!, {
+    const changes = computed<UpdateUserDto>(() => {
+      if (state.lock) return {}
+
+      const storeUser = { ...userStore.user }
+
+      // Accomodate for possibly null industry property
+      storeUser.industry = storeUser.industry || {
+        profession: '',
+        jobTitle: '',
+        company: '',
+      }
+
+      return shallowDiff(storeUser, {
         first: state.user!.first,
         last: state.user!.last,
         avatar: state.user!.avatar,
@@ -400,9 +412,9 @@ export default defineComponent({
         gender: state.user!.gender,
         industry: state.user!.industry,
       })
-    )
+    })
 
-    const onResetEmail = async () => {
+    const resetEmail = async () => {
       if (!state.user?.email) return
 
       await authStore.forgotPassword(state.user.email)
@@ -426,10 +438,12 @@ export default defineComponent({
       snackbar.success(`User ${value ? 'Verified' : 'Unverified'}`)
     }
 
-    const onReset = async () => {
+    const reset = async () => {
+      state.lock = true
+
       await userStore.findOne(+route.value.params.id)
 
-      state.user = cloneDeep(userStore.user) as DTOUser
+      state.user = cloneDeep(userStore.user!)
 
       if (!state.user.industry) {
         state.user.industry = {
@@ -438,57 +452,67 @@ export default defineComponent({
           company: '',
         }
       }
+
+      state.lock = false
     }
 
-    const onSubmit = async () => {
+    const onSubmit = async (shouldReset = true) => {
       if (!Object.keys(changes.value).length) return
+      console.log('Changes', changes.value)
 
       await userStore.update(state.user!.id, changes.value)
 
       if (userStore.error) {
         snackbar.error(userStore.error.message)
       } else {
-        await onReset()
+        if (shouldReset) {
+          await reset()
+        }
 
-        snackbar.error('Changes successfully saved.')
+        snackbar.success('Changes successfully saved.')
       }
     }
 
-    return {
-      grades,
-      roles,
-      genders,
-      breadcrumbs,
-      formatDate,
-      toggleLocked,
-      onUpdateAvatar,
-      onVerify,
-      onResetEmail,
-      changePassword,
-    }
-  },
-  async asyncData({ pinia, route }) {
-    const userStore = useUsers(pinia)
-    const authStore = useAuth(pinia)
+    useFetch(async () => {
+      await Promise.all([
+        userStore.findOne(+route.value.params.id),
+        authStore.findAccountByUser(+route.value.params.id),
+      ])
 
-    await Promise.all([
-      userStore.findOne(+route.params.id),
-      authStore.findAccountByUser(+route.params.id),
-    ])
+      if (userStore.error || authStore.error) {
+        throw new Error(
+          userStore.error?.message ||
+            authStore.error?.message ||
+            'Unable to retrieve user information'
+        )
+      }
 
-    const user = cloneDeep(userStore.user)!
+      state.user = cloneDeep(userStore.user!)
+      state.account = cloneDeep(authStore.account)
 
-    if (!user.industry) {
-      user.industry = {
+      state.user.industry = state.user.industry || {
         profession: '',
         jobTitle: '',
         company: '',
       }
-    }
+    })
 
     return {
-      user,
-      account: cloneDeep(authStore.account),
+      ...toRefs(state),
+      grades,
+      roles,
+      genders,
+      changes,
+      breadcrumbs,
+      isLoading,
+      formatDate,
+      toggleLocked,
+      onUpdateAvatar,
+      onVerify,
+      onSubmit,
+      reset,
+      resetEmail,
+      changePassword,
     }
   },
   head: {

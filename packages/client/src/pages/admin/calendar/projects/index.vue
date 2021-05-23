@@ -10,17 +10,17 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>
 
       <v-col cols="auto" align-self="center">
-        <dialog-create-project @create:project="onCreate">
+        <DialogCreateProject @create:project="onRefresh">
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" v-on="on">Create Project</v-btn>
           </template>
-        </dialog-create-project>
+        </DialogCreateProject>
       </v-col>
     </v-row>
 
@@ -28,7 +28,7 @@
       <v-col>
         <v-card>
           <v-card-title>
-            <v-spacer></v-spacer>
+            <v-spacer />
 
             <v-text-field
               v-model="search"
@@ -38,10 +38,10 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
           </v-card-title>
 
-          <v-data-table-paginated
+          <VDataTablePaginated
             :headers="headers"
             :items="projects"
             :search="search"
@@ -65,7 +65,7 @@
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>
             </template>
-          </v-data-table-paginated>
+          </VDataTablePaginated>
         </v-card>
       </v-col>
     </v-row>
@@ -75,8 +75,8 @@
 <script lang="ts">
 import { computed, defineComponent } from '@nuxtjs/composition-api'
 import { formatDate } from '@/utils/utilities'
-import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import { useProjects } from '@/store/useProjects'
+import { useDebouncedRef } from '@/composables'
+import { useProjects } from '@/stores'
 
 export default defineComponent({
   layout: 'admin',
@@ -86,7 +86,7 @@ export default defineComponent({
     const projectStore = useProjects()
 
     const onRefresh = async () => {
-      await projectStore.findAll()
+      await projectStore.findAll({ contains: search.value })
     }
 
     return {
@@ -94,8 +94,7 @@ export default defineComponent({
       onRefresh,
       isLoading: computed(() => projectStore.isLoading),
       projects: computed(() => projectStore.projects),
-      format: (date: string, formatString: string) =>
-        formatDate(date, formatString),
+      format: formatDate,
       breadcrumbs: [
         {
           text: 'Dashboard',

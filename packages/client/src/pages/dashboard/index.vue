@@ -206,12 +206,10 @@ import {
   toRefs,
 } from '@nuxtjs/composition-api'
 import { User } from '@server/user/user.entity'
-import { useAuth } from '@/store/useAuth'
-import { useUsers } from '@/store/useUsers'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { genders, reminders } from '~/utils/constants'
-import { grades } from '~/utils/events'
-import { useStateReset } from '~/composables/useStateReset'
+import { useAuth, useUsers } from '@/stores'
+import { useSnackbar, useStateReset } from '@/composables'
+import { genders, reminders } from '@/utils/constants'
+import { grades } from '@/utils/events'
 
 export default defineComponent({
   transition: 'slide-left',

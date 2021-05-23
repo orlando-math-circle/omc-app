@@ -110,7 +110,7 @@
                 :key="status.user.id"
               >
                 <v-list-item-avatar>
-                  <v-img :src="$avatar(status.user)" />
+                  <v-img :src="status.user.avatarUrl" />
                 </v-list-item-avatar>
 
                 <v-list-item-content>
@@ -217,12 +217,7 @@
               </v-card-text>
 
               <v-card-actions>
-                <v-btn
-                  v-if="!$accessor.auth.isValidated"
-                  disabled
-                  rounded
-                  block
-                >
+                <v-btn v-if="isValidated" disabled rounded block>
                   Email Verification Required
                 </v-btn>
 
@@ -363,7 +358,7 @@ import { EventRegistration } from '@server/event-registration/event-registration
 import { Roles } from '@server/app.roles'
 import { Gender } from '@server/user/enums/gender.enum'
 import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
-import { useRegistrations } from '@/store/useRegistrations'
+import { useRegistrations, useEvents, useAuth } from '@/stores'
 import DialogConfirm from '@/components/dialog/Confirm.vue'
 import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
 import { formatDate } from '@/utils/utilities'
@@ -375,8 +370,7 @@ import {
   useContext,
   useRoute,
 } from '@nuxtjs/composition-api'
-import { useEvents } from '@/store/useEvents'
-import { useSnackbar } from '../../composables/useSnackbar'
+import { useSnackbar } from '@/composables'
 
 enum RegisterStep {
   SELECTION = 1,
@@ -391,6 +385,7 @@ export default defineComponent({
     const { $config } = useContext()
     const route = useRoute()
     const eventStore = useEvents()
+    const authStore = useAuth()
     const registrationStore = useRegistrations()
     const snackbar = useSnackbar()
 
@@ -602,6 +597,7 @@ export default defineComponent({
       checkoutCost,
       perms,
       isClosed,
+      isValidated: computed(() => authStore.isValidated),
       grade,
       registeredUsers,
       unregisteredUsers,

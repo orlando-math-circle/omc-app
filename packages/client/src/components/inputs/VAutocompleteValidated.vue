@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :rules="rules">
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="$attrs.vid">
     <v-autocomplete
       :value="value"
       :error-messages="errors"
@@ -37,8 +37,8 @@ export default defineComponent({
       default: '',
     },
     value: {
-      type: [String, Number, Boolean, Object, Array],
-      default: null,
+      type: null as any,
+      required: true,
     },
     debounce: {
       type: Boolean,

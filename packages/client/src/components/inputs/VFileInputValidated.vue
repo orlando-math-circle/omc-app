@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :rules="rules">
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-file-input
       :error-messages="errors"
       :hide-details="hideDetails"
@@ -30,6 +30,10 @@ export default defineComponent({
     ValidationProvider,
   },
   props: {
+    value: {
+      type: null as any,
+      required: true,
+    },
     rules: {
       type: [String, Object],
       default: '',
@@ -37,6 +41,11 @@ export default defineComponent({
     hideDetails: {
       type: String,
       default: 'auto',
+    },
+    vid: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   setup(_, { emit }) {

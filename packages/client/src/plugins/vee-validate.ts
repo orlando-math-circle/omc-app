@@ -1,8 +1,14 @@
 import { differenceInYears, isAfter, parse } from 'date-fns'
 import { isNumber } from 'lodash'
 import { extend, setInteractionMode } from 'vee-validate'
-// eslint-disable-next-line camelcase
 import { email, min_value, max_value } from 'vee-validate/dist/rules'
+
+/**
+ * Plugin: VeeValidate
+ *
+ * This file contains the installed rules that components with
+ * `Validated` in their name can use in the `rules` field.
+ */
 
 /**
  * Reduces the aggressiveness of vee-validate to not throw errors while the user

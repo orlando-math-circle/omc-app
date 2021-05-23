@@ -1,5 +1,5 @@
 import { defineNuxtMiddleware } from '@nuxtjs/composition-api'
-import { useAuth } from '@/store/useAuth'
+import { useAuth } from '@/stores'
 
 /**
  * Admin Access Middleware

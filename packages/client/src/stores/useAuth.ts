@@ -5,17 +5,21 @@ import { Roles } from '@server/app.roles'
 import { ChangePasswordDto } from '@server/auth/dtos/change-password.dto'
 import { User } from '@server/user/user.entity'
 import { COOKIE_COMPLETE, COOKIE_JWT } from '@/utils/constants'
-import { useCookies } from '@/composables/useCookies'
+import { useCookies } from '@/composables'
 import { ResetPasswordDto } from '@server/auth/dtos/reset-password.dto'
 import { StateStatus, StateError } from '@/types/state.interface'
+import { EntityDTO } from '@server/shared/types/entity-dto'
+
+export type UserEntity = EntityDTO<User>
+export type AccountEntity = EntityDTO<Account>
 
 export const useAuth = defineStore({
   id: 'auth',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    user: null as User | null,
-    account: null as Account | null,
+    user: null as UserEntity | null,
+    account: null as AccountEntity | null,
     token: null as string | null,
     complete: false,
     remember: true,
@@ -30,7 +34,7 @@ export const useAuth = defineStore({
     isVolunteer: (state) => state.user?.roles.includes(Roles.VOLUNTEER),
     isLoggedIn: (state) => !!state.user,
     isPrimaryUser: (state) => state.account?.primaryUser.id === state.user?.id,
-    accountUsers: (state) => (state.account?.users || []) as User[],
+    accountUsers: (state) => state.account?.users,
     roleTitle: (state) =>
       // TODO: Refactor this onto the server side.
       state.user?.roles.includes(Roles.ADMIN)
@@ -66,6 +70,7 @@ export const useAuth = defineStore({
       this.token = null
       cookies.remove(COOKIE_JWT)
       cookies.remove(COOKIE_COMPLETE)
+      this.$nuxt.$axios.setToken(false)
     },
     async register(registerAccountDto: RegisterAccountDto) {
       const cookies = useCookies(this.$nuxt)

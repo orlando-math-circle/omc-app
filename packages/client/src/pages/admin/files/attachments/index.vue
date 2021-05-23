@@ -80,7 +80,7 @@ import {
   toRefs,
   useFetch,
 } from '@nuxtjs/composition-api'
-import { useAttachments } from '../../../../store/useAttachments'
+import { useAttachments } from '@/stores'
 
 export default defineComponent({
   layout: 'admin',
@@ -130,7 +130,7 @@ export default defineComponent({
     const attachments = computed(() => attachmentStore.attachments)
 
     const onChangeField = async () => {
-      await attachmentStore.findAllAttachments(state.field)
+      await attachmentStore.findAll(state.field)
     }
 
     // TODO? Is this find all fields?

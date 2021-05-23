@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { useSnackbar } from '@/store/useSnackbar'
+import { useSnackbar } from '@/stores'
 import { computed, defineComponent } from '@nuxtjs/composition-api'
 
 export default defineComponent({

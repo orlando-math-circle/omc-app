@@ -57,8 +57,7 @@
 import { computed, defineComponent } from '@nuxtjs/composition-api'
 import { addDays } from 'date-fns'
 import { formatDate } from '@/utils/utilities'
-import { useTwitter } from '@/store/useTwitter'
-import { useEvents } from '@/store/useEvents'
+import { useTwitter, useEvents } from '@/stores'
 
 export default defineComponent({
   setup() {

@@ -1,5 +1,6 @@
 <template>
   <v-alert
+    v-if="error"
     type="error"
     border="left"
     icon="mdi-fire"
@@ -17,14 +18,15 @@ import { StateError } from '@/types/state-error.interface'
 export default defineComponent({
   props: {
     error: {
-      type: Object as PropType<StateError>,
-      required: true,
+      type: Object as PropType<StateError | null>,
+      default: null,
+      validator: (prop) => prop === null || typeof prop === 'object',
     },
   },
   setup(props) {
     return {
-      status: computed(() => props.error.status),
-      message: computed(() => props.error.message),
+      status: computed(() => props.error?.status),
+      message: computed(() => props.error?.message),
     }
   },
 })

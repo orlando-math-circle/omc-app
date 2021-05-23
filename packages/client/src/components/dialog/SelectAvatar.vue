@@ -69,9 +69,8 @@ import {
   useContext,
   toRefs,
 } from '@nuxtjs/composition-api'
-import { useUsers } from '@/store/useUsers'
-import { useFiles } from '@/store/useFiles'
-import { useSnackbar } from '@/composables/useSnackbar'
+import { useUsers, useFiles } from '@/stores'
+import { useSnackbar } from '@/composables'
 
 export default defineComponent({
   props: {

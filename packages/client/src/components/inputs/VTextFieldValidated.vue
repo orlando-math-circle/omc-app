@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :rules="rules">
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="$attrs.vid">
     <v-text-field
       v-model="data"
       :error-messages="errors"
@@ -31,6 +31,7 @@ export default defineComponent({
   components: {
     ValidationProvider,
   },
+  inheritAttrs: false,
   props: {
     rules: {
       type: [String, Object],
@@ -51,9 +52,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const data = useVModel(props)
-
-    return { data }
+    return { data: useVModel(props) }
   },
 })
 </script>

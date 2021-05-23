@@ -4,17 +4,20 @@ import { Event } from '@server/event/event.entity'
 import { CreateEventDto } from '@server/event/dto/create-event.dto'
 import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
 import { UpdateEventDto } from '@server/event/dto/update-event.dto'
-import { DTO } from '@/types/date-to-string.interface'
 import { toLocalISO } from '@/utils/utilities'
+import { EntityDTO } from '@server/shared/types/entity-dto'
 import { StateStatus, StateError } from '@/types/state.interface'
+
+export type EventEntity = EntityDTO<Event>
+export type EventMode = 'single' | 'future' | 'all'
 
 export const useEvents = defineStore({
   id: 'events',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    event: null as DTO<Event> | null,
-    events: [] as DTO<Event>[],
+    event: null as EventEntity | null,
+    events: [] as EventEntity[],
     defaultPicture: require('~/assets/images/programmer.jpg'),
   }),
   getters: {
@@ -43,12 +46,12 @@ export const useEvents = defineStore({
     },
     async update(
       id: number,
-      data: DTO<UpdateEventDto> | DTO<UpdateEventsDto>,
-      mode: 'single' | 'future' | 'all'
+      data: EntityDTO<UpdateEventDto> | EntityDTO<UpdateEventsDto>,
+      mode: EventMode
     ) {
       await this.$nuxt.$axios.$patch(`/event/${id}/${mode}`, data)
     },
-    async delete(id: number, mode: 'single' | 'future' | 'all') {
+    async delete(id: number, mode: EventMode) {
       await this.$nuxt.$axios.$delete(`/event/${id}/${mode}`)
     },
   },

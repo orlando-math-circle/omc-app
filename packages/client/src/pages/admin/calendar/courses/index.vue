@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Courses" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Courses" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-course @create:course="onCourseCreate">
+          <DialogCreateCourse @create:course="onCourseCreate">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -21,15 +21,17 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-course>
+          </DialogCreateCourse>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row>
       <v-col>
         <v-card :loading="isLoading">
           <v-card-title>
+            <v-spacer />
+
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -38,13 +40,14 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
+
             <v-btn class="ml-3" icon large @click="onRefresh">
               <v-icon>mdi-refresh</v-icon>
             </v-btn>
           </v-card-title>
 
-          <v-data-table-paginated
+          <VDataTablePaginated
             :headers="headers"
             :items="courses"
             :search="search"
@@ -67,7 +70,7 @@
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>
             </template>
-          </v-data-table-paginated>
+          </VDataTablePaginated>
         </v-card>
       </v-col>
     </v-row>
@@ -77,8 +80,8 @@
 <script lang="ts">
 import { computed, defineComponent } from '@nuxtjs/composition-api'
 import { formatDate } from '@/utils/utilities'
-import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import { useCourses } from '@/store/useCourses'
+import { useDebouncedRef } from '@/composables'
+import { useCourses } from '@/stores'
 
 export default defineComponent({
   layout: 'admin',
@@ -93,7 +96,7 @@ export default defineComponent({
     }
 
     const onRefresh = async () => {
-      await courseStore.findAll()
+      await courseStore.findAll({ contains: search.value })
     }
 
     return {

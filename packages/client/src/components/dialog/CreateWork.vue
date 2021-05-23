@@ -92,8 +92,8 @@ import {
   toRefs,
 } from '@nuxtjs/composition-api'
 import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useWork } from '@/store/useWork'
+import { useSnackbar } from '@/composables'
+import { useWork } from '@/stores'
 import { workStatuses } from '@/utils/constants'
 import DialogForm from '@/components/dialog/Form.vue'
 

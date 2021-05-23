@@ -19,7 +19,7 @@
       </slot>
     </template>
 
-    <v-card :loading="loading">
+    <v-card :loading="isLoading">
       <v-toolbar flat>
         <v-btn icon @click="dialog = false">
           <v-icon>mdi-chevron-left</v-icon>
@@ -35,14 +35,14 @@
           outlined
           autocomplete="off"
           hide-details="auto"
-        ></v-text-field>
+        />
 
         <v-expand-transition>
           <v-data-table
-            :items="$store.state.projects.projects"
+            :items="projects"
             :headers="headers"
             :search="search"
-            :server-items-length="$store.state.projects.total"
+            :server-items-length="total"
             show-select
             single-select
             @item-selected="onTableSelected"
@@ -60,100 +60,104 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { throttle } from 'lodash'
-import { FindAllProjectsDto } from '@server/project/dto/find-all-projects.dto'
-import { DataTableOptions } from '../../types/data-table.interface'
+import {
+  defineComponent,
+  useFetch,
+  computed,
+  reactive,
+  watch,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { DataTableOptions } from '@/types/data-table.interface'
+import { useProjects } from '@/stores'
+import { useDebouncedRef } from '@/composables'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     value: {
       type: Number,
       default: 0,
     },
   },
-  data() {
-    return {
+  setup(props, { emit }) {
+    const projectStore = useProjects()
+
+    const search = useDebouncedRef('')
+
+    const state = reactive({
       dialog: false,
-      search: '',
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Description', value: 'description' },
       ],
-      bouncing: false,
       pagination: {
         total: 0,
         limit: 10,
         offset: 0,
         sort: [] as string[],
       },
-    }
-  },
-  async fetch() {
-    if (this.$store.state.projects.projects.length < this.pagination.limit) {
-      await this.$store.dispatch('projects/findAll', {
-        limit: this.pagination.limit,
-        offset: this.pagination.offset,
-      })
-    }
-  },
-  computed: {
-    id: {
-      get(): number {
-        return this.value
-      },
-      set(id: number) {
-        this.$emit('input', id)
-      },
-    },
-    loading(): boolean {
-      return this.bouncing || this.$store.getters['projects/isLoading']
-    },
-  },
-  watch: {
-    search(): void {
-      this.bouncing = true
-      this.refresh()
-    },
-  },
-  methods: {
-    findAll: throttle<(dto: FindAllProjectsDto) => void>(function (
-      this: any,
-      dto: FindAllProjectsDto
-    ) {
-      this.$store.dispatch('projects/findAll', dto)
-      this.bouncing = false
-    },
-    250),
-    onTableSelected(value: any) {
-      this.id = value.item.id
-    },
-    async refresh() {
-      const all = this.pagination.limit === -1
+    })
 
-      await this.findAll({
-        contains: this.search,
-        limit: all ? undefined : this.pagination.limit,
-        offset: all ? undefined : this.pagination.offset,
-        sort: this.pagination.sort.length ? this.pagination.sort : undefined,
-      })
-    },
-    onOptionsChange(options: DataTableOptions) {
-      this.pagination.limit = options.itemsPerPage
-      this.pagination.offset = this.pagination.limit * (options.page - 1)
+    useFetch(async () => {
+      if (projectStore.projects.length < state.pagination.limit) {
+        await projectStore.findAll({
+          limit: state.pagination.limit,
+          offset: state.pagination.offset,
+        })
+      }
+    })
+
+    const id = computed({
+      get() {
+        return props.value
+      },
+      set(value: number) {
+        emit('input', value)
+      },
+    })
+
+    const onTableSelected = (value: any) => (id.value = value.item.id)
+
+    const onOptionsChange = (options: DataTableOptions) => {
+      state.pagination.limit = options.itemsPerPage
+      state.pagination.offset = state.pagination.limit * (options.page - 1)
 
       if (options.sortBy.length) {
-        this.pagination.sort = []
+        state.pagination.sort = []
 
         for (let i = 0; i < options.sortBy.length; i++) {
-          this.pagination.sort[i] = `${options.sortBy[i]}:${
+          state.pagination.sort[i] = `${options.sortBy[i]}:${
             options.sortDesc[i] ? 'DESC' : 'ASC'
           }`
         }
       }
 
-      this.refresh()
-    },
+      getProjects()
+    }
+
+    const getProjects = async () => {
+      const all = state.pagination.limit === -1
+
+      await projectStore.findAll({
+        contains: search.value || '',
+        limit: all ? undefined : state.pagination.limit,
+        offset: all ? undefined : state.pagination.offset,
+        sort: state.pagination.sort.length ? state.pagination.sort : undefined,
+      })
+    }
+
+    watch(search, getProjects)
+
+    return {
+      ...toRefs(state),
+      search,
+      id,
+      isLoading: computed(() => projectStore.isLoading),
+      projects: computed(() => projectStore.projects),
+      total: computed(() => projectStore.total),
+      onTableSelected,
+      onOptionsChange,
+    }
   },
 })
 </script>

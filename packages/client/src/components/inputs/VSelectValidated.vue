@@ -1,5 +1,5 @@
 <template>
-  <ValidationProvider v-slot="{ errors }" :rules="rules">
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-select
       v-model="data"
       :error-messages="errors"
@@ -42,6 +42,11 @@ export default defineComponent({
     },
     value: {
       type: [String, Number, Object, Array],
+      required: false,
+      default: null,
+    },
+    vid: {
+      type: String,
       required: false,
       default: null,
     },

@@ -7,6 +7,7 @@
       max_age: maxAge,
     }"
     :custom-messages="customMessages"
+    :vid="vid"
   >
     <BirthdayPicker
       v-model="data"
@@ -58,6 +59,11 @@ export default defineComponent({
       type: Object as PropType<CustomMessages>,
       required: false,
       default: () => ({}),
+    },
+    vid: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   setup(props) {

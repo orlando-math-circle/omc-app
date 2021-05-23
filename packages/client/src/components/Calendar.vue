@@ -50,7 +50,7 @@
 import { VCalendar } from 'vuetify/src/components/VCalendar'
 import { Event } from '@server/event/event.entity'
 import { CalendarType, months } from '@/utils/constants'
-import { useDates } from '@/composables/useDates'
+import { useDates } from '@/composables'
 import {
   computed,
   defineComponent,
@@ -63,7 +63,7 @@ import {
   useRouter,
   watch,
 } from '@nuxtjs/composition-api'
-import { useEvents } from '@/store/useEvents'
+import { useEvents } from '@/stores'
 import { CalendarTimestamp } from 'vuetify'
 
 export default defineComponent({

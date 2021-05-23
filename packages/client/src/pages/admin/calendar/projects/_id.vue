@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-job @create:job="onCreateJob">
+          <DialogCreateJob @create:job="onCreateJob">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -21,9 +21,9 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-job>
+          </DialogCreateJob>
 
-          <dialog-confirm @confirm="onDelete">
+          <DialogConfirm @confirm="onDelete">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -37,7 +37,7 @@
             </template>
 
             <span>Are you sure you wish to delete this project?</span>
-          </dialog-confirm>
+          </DialogConfirm>
         </v-list>
       </v-menu>
     </admin-header>
@@ -47,7 +47,7 @@
         <v-card>
           <v-card-title>Information</v-card-title>
 
-          <v-form-validated @submit:form="onSubmit">
+          <VFormValidated @submit:form="onSubmit">
             <v-card-text>
               <v-row>
                 <v-expand-transition>
@@ -57,44 +57,44 @@
                       class="rounded"
                       max-height="100"
                       cover
-                    ></v-img>
+                    />
                   </v-col>
                 </v-expand-transition>
 
                 <v-col cols="12">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model="project.name"
                     label="Name"
                     rules="required"
                     hide-details="auto"
                     outlined
-                  ></v-text-field-validated>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <v-textarea-validated
+                  <VTextareaValidated
                     v-model="project.description"
                     label="Description"
                     rules="required"
                     hide-details="auto"
                     outlined
-                  ></v-textarea-validated>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <file-upload
+                  <FileUpload
                     v-model="project.picture"
                     outlined
                     hide-details="auto"
                     label="Picture (Optional)"
                     persistent-hint
-                  ></file-upload>
+                  />
                 </v-col>
               </v-row>
             </v-card-text>
 
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer />
 
               <v-btn text @click="refresh">Reset</v-btn>
               <v-btn
@@ -106,7 +106,7 @@
                 Save Changes
               </v-btn>
             </v-card-actions>
-          </v-form-validated>
+          </VFormValidated>
         </v-card>
       </v-col>
 
@@ -115,7 +115,7 @@
         <v-card>
           <v-card-title>Project Jobs</v-card-title>
 
-          <data-table-jobs :jobs="jobs" />
+          <DataTableJobs :jobs="jobs" />
         </v-card>
       </v-col>
 
@@ -124,7 +124,7 @@
         <v-card>
           <v-card-title>Project Events</v-card-title>
 
-          <data-table-events :events="project.events" />
+          <DataTableEvents :events="project.events" />
         </v-card>
       </v-col>
     </v-row>
@@ -146,9 +146,8 @@ import {
   useRoute,
   useRouter,
 } from '@nuxtjs/composition-api'
-import { useProjects } from '@/store/useProjects'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { useJobs } from '@/store/useJobs'
+import { useProjects, useJobs } from '@/stores'
+import { useSnackbar } from '@/composables'
 
 export default defineComponent({
   layout: 'admin',
@@ -236,6 +235,8 @@ export default defineComponent({
       },
     ]
 
+    const onSubmit = () => {}
+
     return {
       project,
       breadcrumbs,
@@ -243,8 +244,10 @@ export default defineComponent({
       jobs,
       changes,
       background,
+      refresh,
       onDelete,
       onCreateJob,
+      onSubmit,
     }
   },
   head: {

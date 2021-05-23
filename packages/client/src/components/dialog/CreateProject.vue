@@ -27,16 +27,16 @@
 
         <v-toolbar-title>Create Project</v-toolbar-title>
 
-        <v-spacer></v-spacer>
+        <v-spacer />
       </v-toolbar>
 
-      <VFormValidated v-slot="{ passes }" @submit:form="onSubmit">
+      <VFormValidated v-slot="{ passes }" @form:submit="onSubmit">
         <v-card-text>
-          <alert-error v-if="error" :error="error" />
+          <AlertError :error="error" />
 
           <v-row>
             <v-col cols="12">
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="dto.name"
                 label="Name"
                 rules="required"
@@ -47,7 +47,7 @@
             </v-col>
 
             <v-col cols="12">
-              <v-textarea
+              <VTextareaValidated
                 v-model="dto.description"
                 label="Description"
                 hide-details="auto"
@@ -56,8 +56,8 @@
             </v-col>
 
             <v-col cols="12">
-              <file-upload
-                v-model="files"
+              <FileUpload
+                v-model="file"
                 label="Upload Image (Optional)"
                 endpoint="/file"
                 hide-details="auto"
@@ -93,13 +93,13 @@
         </v-card-text>
 
         <v-card-actions>
-          <dialog-create-job @create:job="onCreateJob">
+          <DialogCreateJob @create:job="onCreateJob">
             <template #activator="{ on, attrs }">
               <v-btn text v-bind="attrs" v-on="on">Create Job</v-btn>
             </template>
-          </dialog-create-job>
+          </DialogCreateJob>
 
-          <v-spacer></v-spacer>
+          <v-spacer />
 
           <v-btn
             text
@@ -125,8 +125,7 @@ import {
   reactive,
   toRefs,
 } from '@nuxtjs/composition-api'
-import { useProjects } from '@/store/useProjects'
-import { useFiles } from '@/store/useFiles'
+import { useProjects, useFiles } from '@/stores'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { Nullable } from '@/types/nullable.type'
 
@@ -136,7 +135,7 @@ export default defineComponent({
       dialog: false,
       project: null as number | null,
       jobs: [] as CreateJobDto[],
-      file: null as File | null,
+      file: null as File | string | null,
       dto: {
         name: null,
         description: null,
@@ -150,19 +149,28 @@ export default defineComponent({
 
     const projects = computed(() => projectStore.projects)
     const isLoading = computed(() => projectStore.isLoading)
+    const error = computed(() => projectStore.error)
 
     const onCreateJob = (job: CreateJobDto) => state.jobs.push(job)
 
     const onSubmit = async () => {
-      const file = await fileStore.create(state.file!)
+      let picture: string | null
 
-      if (fileStore.error) {
-        snackbar.error(fileStore.error.message)
+      if (state.file instanceof File) {
+        const file = await fileStore.create(state.file)
+
+        if (fileStore.error) {
+          return snackbar.error(fileStore.error.message)
+        }
+
+        picture = file.root
+      } else if (typeof state.file === 'string') {
+        picture = state.file
       }
 
       const project = await projectStore.create({
         ...state.dto,
-        ...(file && { picture: file.root }),
+        ...(picture && { picture }),
         ...(state.jobs.length && { jobs: state.jobs }),
       })
 
@@ -172,7 +180,14 @@ export default defineComponent({
       }
     }
 
-    return { ...toRefs(state), projects, isLoading, onCreateJob, onSubmit }
+    return {
+      ...toRefs(state),
+      error,
+      projects,
+      isLoading,
+      onCreateJob,
+      onSubmit,
+    }
   },
 })
 </script>

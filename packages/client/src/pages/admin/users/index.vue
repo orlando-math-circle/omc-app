@@ -199,8 +199,8 @@ import {
   watch,
 } from '@nuxtjs/composition-api'
 import { Roles } from '@server/app.roles'
-import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import { useUsers } from '@/store/useUsers'
+import { useDebouncedRef } from '@/composables'
+import { useUsers } from '@/stores'
 import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
 
 const breadcrumbs = [

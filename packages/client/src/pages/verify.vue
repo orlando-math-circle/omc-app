@@ -22,8 +22,8 @@ import {
   useFetch,
   useRoute,
 } from '@nuxtjs/composition-api'
-import { useAuth } from '@/store/useAuth'
-import { useSnackbar } from '../composables/useSnackbar'
+import { useAuth } from '@/stores'
+import { useSnackbar } from '@/composables'
 
 export default defineComponent({
   fetchOnServer: false,

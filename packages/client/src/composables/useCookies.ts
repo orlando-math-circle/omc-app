@@ -2,7 +2,7 @@ import { Context } from '@nuxt/types'
 import { useContext } from '@nuxtjs/composition-api'
 import { CookieSerializeOptions } from 'cookie'
 import { GetOptions } from 'cookie-universal-nuxt'
-import { useAuth } from '@/store/useAuth'
+import { useAuth } from '@/stores'
 
 const THOUSAND_YEARS = 365 * 24 * 60 * 60 * 1000
 

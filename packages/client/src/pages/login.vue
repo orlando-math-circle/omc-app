@@ -87,7 +87,7 @@ import {
   toRefs,
   useRouter,
 } from '@nuxtjs/composition-api'
-import { useAuth } from '@/store/useAuth'
+import { useAuth } from '@/stores'
 
 export default defineComponent({
   layout: 'landing',

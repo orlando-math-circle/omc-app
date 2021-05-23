@@ -27,35 +27,43 @@
     <v-row>
       <v-col>
         <Calendar
-          ref="calendar"
+          ref="calendarRef"
           v-model="calendar.date"
-          click-redirect-base="/admin/calendar/events"
           :type.sync="calendar.type"
+          click-redirect-base="/admin/calendar/events"
         />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col>
-        <v-data-table-paginated :items="eventsForDate" :headers="headers">
-          <template #[`item.id`]="{ item }">
-            # <link-copy :text="item.id"></link-copy>
-          </template>
+        <!-- TODO: Investigate SSR hydration warning. -->
+        <client-only>
+          <v-data-table-paginated
+            v-model="events"
+            :items="eventsForDate"
+            no-data-text="No Events for Date"
+            :headers="headers"
+          >
+            <template #[`item.id`]="{ item }">
+              # <link-copy :text="item.id"></link-copy>
+            </template>
 
-          <template #[`item.start`]="{ item }">
-            {{ format(item.dtstart, 'EEE, MMM do, yyyy') }}
-          </template>
+            <template #[`item.start`]="{ item }">
+              {{ format(item.dtstart, 'EEE, MMM do, yyyy') }}
+            </template>
 
-          <template #[`item.end`]="{ item }">
-            {{ format(item.dtend, 'EEE, MMM do, yyyy') }}
-          </template>
+            <template #[`item.end`]="{ item }">
+              {{ format(item.dtend, 'EEE, MMM do, yyyy') }}
+            </template>
 
-          <template #[`item.edit`]="{ item }">
-            <v-btn icon :to="`/admin/calendar/events/${item.id}`">
-              <v-icon>mdi-open-in-new</v-icon>
-            </v-btn>
-          </template>
-        </v-data-table-paginated>
+            <template #[`item.edit`]="{ item }">
+              <v-btn icon :to="`/admin/calendar/events/${item.id}`">
+                <v-icon>mdi-open-in-new</v-icon>
+              </v-btn>
+            </template>
+          </v-data-table-paginated>
+        </client-only>
       </v-col>
     </v-row>
   </div>
@@ -65,22 +73,20 @@
 import Calendar from '@/components/Calendar.vue'
 import {
   defineComponent,
-  ref,
   toRefs,
   reactive,
   computed,
 } from '@nuxtjs/composition-api'
-import { formatDate } from '@/utils/utilities'
-import { useEvents } from '@/store/useEvents'
-import { useDates } from '../../../../composables/useDates'
+import { useEvents } from '@/stores'
+import { useTemplateRef, useDates } from '@/composables'
+
+type CalendarComponent = InstanceType<typeof Calendar>
 
 export default defineComponent({
   layout: 'admin',
   transition: 'admin',
   setup() {
-    const refs = {
-      calendar: ref<InstanceType<typeof Calendar>>(),
-    }
+    const calendarRef = useTemplateRef<CalendarComponent>('calendarRef')
 
     const headers = [
       { text: 'Id', value: 'id' },
@@ -94,6 +100,7 @@ export default defineComponent({
     const state = reactive({
       calendar: {
         type: 'simple',
+        events: [] as number[],
         types: [
           { value: 'simple', text: 'Simple' },
           { value: 'month', text: 'Month' },
@@ -115,29 +122,16 @@ export default defineComponent({
         dateUtil.isSameDay(dateNative.value, dateUtil.toDate(e.dtstart))
       )
     )
-    const header = computed(() => {
-      const date = format(dateNative.value, 'EEEE, LLLL do')
 
-      if (!eventsForDate.value.length) {
-        return `Nothing scheduled for ${date}`
-      }
-
-      return `Events on ${date}`
-    })
-
-    const format = (date: Date | string, formatString: string) =>
-      formatDate(date, formatString)
-
-    const onEventCreated = async () => await refs.calendar.value!.onLoadRange()
+    const onEventCreated = async () => await calendarRef.value.onLoadRange()
 
     return {
-      ...refs,
       ...toRefs(state),
       headers,
       dateNative,
       events,
+      format: dateUtil.format,
       eventsForDate,
-      header,
       onEventCreated,
     }
   },
