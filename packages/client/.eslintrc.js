@@ -14,6 +14,23 @@ module.exports = {
       'error',
       { ignores: ['/^[a-z]+(?:-[a-z]+)*:[a-z]+(?:-[a-z]+)*$/u'] },
     ],
+    'vue/html-self-closing': [
+      'warn',
+      {
+        html: {
+          void: 'any',
+          component: 'always',
+        },
+      },
+    ],
+    'vue/component-name-in-template-casing': [
+      'warn',
+      'PascalCase',
+      {
+        registeredComponentsOnly: false,
+        ignores: ['/^v-/', 'nuxt', 'nuxt-link', 'client-only'],
+      },
+    ],
   },
   overrides: [
     {

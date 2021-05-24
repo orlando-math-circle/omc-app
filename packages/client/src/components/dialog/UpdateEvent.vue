@@ -17,7 +17,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               v-model="meta.name"
               label="Title"
               hide-details="auto"
@@ -52,7 +52,7 @@
               <v-col :cols="dates.allday ? 12 : 8">
                 <v-menu v-model="dates.start.menu" offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       :value="format(dates.start.date)"
                       :label="dates.allday ? 'Date' : 'Start Date'"
                       hide-details="auto"
@@ -66,13 +66,13 @@
                       outlined
                       v-bind="attrs"
                       v-on="on"
-                    ></v-text-field-validated>
+                    />
                   </template>
 
                   <v-date-picker
                     v-model="dates.start.date"
                     @input="dates.start.menu = false"
-                  ></v-date-picker>
+                  />
                 </v-menu>
               </v-col>
 
@@ -96,7 +96,7 @@
               <v-col v-if="!dates.allday" cols="8">
                 <v-menu v-model="dates.end.menu" offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       :value="format(dates.end.date)"
                       :rules="{ required: !dates.allday }"
                       vid="enddate"
@@ -106,13 +106,13 @@
                       v-bind="attrs"
                       outlined
                       v-on="on"
-                    >
-                    </v-text-field-validated>
+                    />
                   </template>
+
                   <v-date-picker
                     v-model="dates.end.date"
                     @input="dates.end.menu = false"
-                  ></v-date-picker>
+                  />
                 </v-menu>
               </v-col>
 
@@ -180,7 +180,7 @@
               </v-col>
 
               <v-col v-if="meta.lateThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.lateOffset"
                   label="Minute Offset"
                   type="number"
@@ -201,7 +201,7 @@
               </v-col>
 
               <v-col v-if="meta.cutoffThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.cutoffOffset"
                   label="Minute Offset"
                   type="number"
@@ -285,7 +285,7 @@
                   auto-grow
                   hide-details="auto"
                   outlined
-                ></v-textarea>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -316,9 +316,11 @@
                   @search="projectStore.findAll()"
                 />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-project v-model="meta.project" />
+                <DialogSelectProject v-model="meta.project" />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
                 <DialogSelectProject
                   @create:project="(project) => (meta.project = project.id)"
@@ -339,7 +341,7 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-course
+                <AutoCompleteCourse
                   v-model="meta.course"
                   :project="meta.project"
                   item-value="id"
@@ -348,7 +350,7 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-course
+                <DialogSelectCourse
                   v-model="meta.course"
                   :project="meta.project"
                   item-value="id"
@@ -376,7 +378,7 @@
           <v-list-item-content>
             <v-row>
               <v-col cols="12">
-                <v-select-validated
+                <VSelectValidated
                   v-model="feeType"
                   :items="feeTypes"
                   :rules="{
@@ -391,7 +393,7 @@
 
               <template v-if="feeType !== 'free'">
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.amount"
                     rules="required"
                     label="Event Fee"
@@ -402,7 +404,7 @@
                 </v-col>
 
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.lateAmount"
                     label="Late Fee (Optional)"
                     type="number"
@@ -442,7 +444,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               :value="meta.color"
               class="ma-0 pa-0 shrink-append"
               mask="'#XXXXXXXX'"
@@ -459,20 +461,17 @@
                   :close-on-content-click="false"
                 >
                   <template #activator="{ on }">
-                    <div :style="swatch" v-on="on"></div>
+                    <div :style="swatch" v-on="on" />
                   </template>
 
                   <v-card>
                     <v-card-text class="pa-0">
-                      <v-color-picker
-                        v-model="meta.color"
-                        flat
-                      ></v-color-picker>
+                      <v-color-picker v-model="meta.color" flat />
                     </v-card-text>
                   </v-card>
                 </v-menu>
               </template>
-            </v-text-field-validated>
+            </VTextFieldValidated>
           </v-list-item-content>
         </v-list-item>
 

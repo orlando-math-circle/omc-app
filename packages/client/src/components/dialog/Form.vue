@@ -18,7 +18,7 @@
     >
       <v-toolbar :flat="flat">
         <v-toolbar-title>
-          <slot name="title"></slot>
+          <slot name="title" />
         </v-toolbar-title>
 
         <v-btn small absolute right fab icon @click="dialog = false">
@@ -27,21 +27,21 @@
       </v-toolbar>
 
       <v-card-subtitle v-if="$slots.footer">
-        <slot name="subtitle"></slot>
+        <slot name="subtitle" />
       </v-card-subtitle>
 
-      <slot name="image"></slot>
+      <slot name="image" />
 
       <VFormValidated ref="formRef" v-slot="data" @form:submit="submit">
-        <slot v-bind="{ ...data, closing }"></slot>
+        <slot v-bind="{ ...data, closing }" />
 
         <v-card-text>
           <v-row>
-            <slot name="form" v-bind="{ ...data, closing }"></slot>
+            <slot name="form" v-bind="{ ...data, closing }" />
           </v-row>
         </v-card-text>
 
-        <slot name="actions" v-bind="{ ...data, closing }"></slot>
+        <slot name="actions" v-bind="{ ...data, closing }" />
       </VFormValidated>
     </v-card>
   </v-dialog>

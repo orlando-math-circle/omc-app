@@ -13,7 +13,7 @@
 
             <v-spacer />
 
-            <dialog-lightbox :image="picture">
+            <DialogLightbox :image="picture">
               <template #activator="{ on, attrs }">
                 <v-btn icon v-bind="attrs" v-on="on">
                   <v-sheet class="pa-2 rounded">
@@ -21,7 +21,7 @@
                   </v-sheet>
                 </v-btn>
               </template>
-            </dialog-lightbox>
+            </DialogLightbox>
           </v-toolbar>
         </v-img>
       </v-card>
@@ -208,7 +208,7 @@
                         </v-list-item-content>
 
                         <v-list-item-action v-if="status.eligible">
-                          <v-checkbox :input-value="active"></v-checkbox>
+                          <v-checkbox :input-value="active" />
                         </v-list-item-action>
                       </template>
                     </v-list-item>

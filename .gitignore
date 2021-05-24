@@ -36,3 +36,4 @@ lerna-debug.log*
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+tsconfig.tsbuildinfo

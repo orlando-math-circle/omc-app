@@ -1,6 +1,6 @@
 <template>
   <v-card width="270" :to="'/events/' + event.id">
-    <v-img class="align-end" height="150px" :src="background"></v-img>
+    <v-img class="align-end" height="150px" :src="background" />
 
     <div class="card--bottom">
       <v-card-title class="card--title mr-15">{{ event.name }}</v-card-title>

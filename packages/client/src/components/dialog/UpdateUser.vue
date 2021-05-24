@@ -18,45 +18,45 @@
 
         <v-toolbar-title>Update User</v-toolbar-title>
 
-        <v-spacer></v-spacer>
+        <v-spacer />
       </v-toolbar>
 
       <VFormValidated>
         <v-card-text>
           <v-row>
             <v-col>
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="dto.first"
                 label="First Name"
                 rules="required"
                 required
                 outlined
-              ></v-text-field-validated>
+              />
             </v-col>
             <v-col>
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="dto.last"
                 label="Last Name"
                 rules="required"
                 required
                 outlined
-              ></v-text-field-validated>
+              />
             </v-col>
           </v-row>
 
-          <birthday-picker v-model="dto.dob" outlined></birthday-picker>
+          <BirthdayPicker v-model="dto.dob" outlined />
 
           <v-row>
             <v-col>
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="dto.email"
                 label="Email"
                 rules="required"
                 required
                 outlined
-              ></v-text-field-validated>
+              />
 
-              <v-select-validated
+              <VSelectValidated
                 v-model="dto.gender"
                 :items="genders"
                 label="Gender"

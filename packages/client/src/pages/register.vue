@@ -13,7 +13,7 @@
           <span class="subheader">Welcome to Orlando Math Circle</span>
           <span class="d-flex subheader">
             Already registered?
-            <nuxt-link class="pl-2" to="/login">Log in</nuxt-link>
+            <NuxtLink class="pl-2" to="/login">Log in</NuxtLink>
           </span>
 
           <AlertError :error="error" class="mt-3" />

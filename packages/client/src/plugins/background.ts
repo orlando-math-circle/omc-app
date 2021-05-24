@@ -17,12 +17,6 @@ declare module '@nuxt/types' {
   }
 }
 
-declare module 'vuex/types/index' {
-  interface Store<S> {
-    $background: (eventOrPicture: Event | string) => string
-  }
-}
-
 export default defineNuxtPlugin((ctx, inject) => {
   inject('background', (eventOrPicture: Event | string) => {
     const url =

@@ -86,7 +86,7 @@
                   </v-chip-group>
                 </v-col>
 
-                <v-col cols="auto" class="align-self-center"> </v-col>
+                <v-col cols="auto" class="align-self-center" />
               </v-row>
             </v-col>
           </v-row>

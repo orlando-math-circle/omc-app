@@ -1,9 +1,10 @@
 <template>
   <v-breadcrumbs :items="items" v-bind="$attrs">
     <template #item="{ item }">
-      <nuxt-link v-if="item.href" :to="item.href" class="breadcrumb">
+      <NuxtLink v-if="item.href" :to="item.href" class="breadcrumb">
         {{ item.text }}
-      </nuxt-link>
+      </NuxtLink>
+
       <span v-else class="breadcrumb">
         {{ item.text }}
       </span>

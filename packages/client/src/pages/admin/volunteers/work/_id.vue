@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-confirm @confirm="onDelete">
+          <DialogConfirm @confirm="onDelete">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -23,7 +23,7 @@
             </template>
 
             <span>Are you sure you wish to delete this volunteer work?</span>
-          </dialog-confirm>
+          </DialogConfirm>
         </v-list>
       </v-menu>
     </AdminHeader>
@@ -33,28 +33,28 @@
         <v-card>
           <v-card-title>Information</v-card-title>
 
-          <v-form-validated @form:submit="onSubmit">
+          <VFormValidated @form:submit="onSubmit">
             <v-card-text>
               <v-row>
                 <client-only>
                   <v-col cols="12">
-                    <auto-complete-user
+                    <AutoCompleteUser
                       v-model="user"
                       rules="required"
                       item-value="id"
                       label="User"
                       outlined
-                    ></auto-complete-user>
+                    />
                   </v-col>
 
                   <v-col cols="12">
-                    <auto-complete-project
+                    <AutoCompleteProject
                       v-model="project"
                       rules="required"
                       item-value="id"
                       label="Project (Optional)"
                       outlined
-                    ></auto-complete-project>
+                    />
                   </v-col>
                 </client-only>
 
@@ -66,11 +66,11 @@
                     hide-details="auto"
                     label="Volunteer Hours"
                     persistent-hint
-                  ></v-text-field>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <v-select-validated
+                  <VSelectValidated
                     v-model="work.status"
                     :items="workStatuses"
                     rules="required"
@@ -78,13 +78,13 @@
                     hide-details="auto"
                     label="Work Status"
                     persistent-hint
-                  ></v-select-validated>
+                  />
                 </v-col>
               </v-row>
             </v-card-text>
 
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer />
 
               <v-btn text @click="refresh">Reset</v-btn>
               <v-btn
@@ -96,7 +96,7 @@
                 Save Changes
               </v-btn>
             </v-card-actions>
-          </v-form-validated>
+          </VFormValidated>
         </v-card>
       </v-col>
     </v-row>

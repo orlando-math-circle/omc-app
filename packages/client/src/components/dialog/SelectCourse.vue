@@ -16,7 +16,7 @@
 
         <v-toolbar-title>Search Courses</v-toolbar-title>
 
-        <v-spacer></v-spacer>
+        <v-spacer />
       </v-toolbar>
 
       <v-card-text>
@@ -38,7 +38,7 @@
             single-select
             @item-selected="onTableSelected"
             @update:options="onOptionsChange"
-          ></v-data-table>
+          />
         </v-expand-transition>
       </v-card-text>
 

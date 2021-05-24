@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-work :is-static="false" @create:work="onWorkCreate">
+          <DialogCreateWork :is-static="false" @create:work="onWorkCreate">
             <template #activator="cw">
               <v-list-item v-bind="cw.attrs" v-on="cw.on">
                 <v-list-item-icon>
@@ -21,14 +21,14 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-work>
+          </DialogCreateWork>
         </v-list>
       </v-menu>
     </AdminHeader>
 
     <v-row>
       <v-col>
-        <data-table-works :works="works" />
+        <DataTableWorks :works="works" />
       </v-col>
     </v-row>
   </div>

@@ -10,7 +10,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-registration>
+          <DialogCreateRegistration>
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -22,7 +22,7 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-registration>
+          </DialogCreateRegistration>
         </v-list>
       </v-menu>
     </AdminHeader>

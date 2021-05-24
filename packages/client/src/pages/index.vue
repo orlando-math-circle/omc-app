@@ -4,12 +4,12 @@
       <v-col cols="12">
         <v-row>
           <v-col align="center">
-            <v-img class="logo" :src="logo"></v-img>
+            <v-img class="logo" :src="logo" />
           </v-col>
         </v-row>
         <v-row>
           <v-col class="mx-5">
-            <div class="wave"></div>
+            <div class="wave" />
             <v-btn block color="primary" to="/login" class="mb-4">
               Log in
             </v-btn>

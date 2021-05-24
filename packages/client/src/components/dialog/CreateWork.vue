@@ -1,36 +1,31 @@
 <template>
-  <dialog-form
-    ref="dialog"
-    :expands="false"
-    width="440"
-    @form:submit="onSubmit"
-  >
+  <DialogForm ref="dialog" :expands="false" width="440" @form:submit="onSubmit">
     <template #title>Create Work</template>
 
     <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }"></slot>
+      <slot name="activator" v-bind="{ on, attrs }" />
     </template>
 
     <v-card-text>
       <v-row>
         <v-col cols="12">
-          <auto-complete-user
+          <AutoCompleteUser
             v-model="dto.user"
             rules="required"
             item-value="id"
             label="User"
             outlined
-          ></auto-complete-user>
+          />
         </v-col>
 
         <v-col cols="12">
-          <auto-complete-project
+          <AutoCompleteProject
             v-model="dto.project"
             rules="required"
             item-value="id"
             label="Project (Optional)"
             outlined
-          ></auto-complete-project>
+          />
         </v-col>
 
         <v-col cols="12">
@@ -80,7 +75,7 @@
         Create Work
       </v-btn>
     </v-card-actions>
-  </dialog-form>
+  </DialogForm>
 </template>
 
 <script lang="ts">

@@ -9,13 +9,13 @@
 
       <v-row>
         <v-col class="pt-0">
-          <breadcrumbs class="pa-0" :items="breadcrumbs" />
+          <Breadcrumbs class="pa-0" :items="breadcrumbs" />
         </v-col>
       </v-row>
     </v-col>
 
     <v-col cols="auto" align-self="center">
-      <slot></slot>
+      <slot />
     </v-col>
   </v-row>
 </template>

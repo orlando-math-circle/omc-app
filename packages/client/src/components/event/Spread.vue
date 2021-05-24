@@ -3,7 +3,7 @@
     <v-row class="px-3">
       <v-col cols="auto relative">
         <v-avatar height="100" width="110" rounded>
-          <v-img :src="background"></v-img>
+          <v-img :src="background" />
         </v-avatar>
       </v-col>
 
