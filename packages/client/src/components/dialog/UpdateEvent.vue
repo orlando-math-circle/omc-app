@@ -395,7 +395,10 @@
                 <v-col cols="6">
                   <VTextFieldValidated
                     v-model.number="fee.amount"
+                    data-type="currency"
                     rules="required"
+                    placeholder="0.00"
+                    step="0.50"
                     label="Event Fee"
                     type="number"
                     hide-details="auto"
@@ -607,8 +610,8 @@ export default defineComponent({
         times: [] as string[],
       },
       fee: {
-        amount: null as number | null,
-        lateAmount: null as number | null,
+        amount: null as string | null,
+        lateAmount: null as string | null,
       },
       feeType: FeeType.FREE,
       upload: null as File | string | null,
@@ -652,8 +655,13 @@ export default defineComponent({
 
     const feeDTO = computed(
       (): CreateEventFeeDto => ({
-        amount: (state.fee.amount || 0).toPrecision(2),
-        lateAmount: (state.fee.lateAmount || 0).toPrecision(2),
+        amount: parseFloat(state.fee.amount || '0').toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+        }),
+        lateAmount: parseFloat(state.fee.lateAmount || '0').toLocaleString(
+          'en-US',
+          { minimumFractionDigits: 2 }
+        ),
       })
     )
 
@@ -862,14 +870,14 @@ export default defineComponent({
           const fee = state.internalEvent.fee
 
           state.feeType = FeeType.EVENT
-          state.fee.amount = +fee.amount
-          state.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
+          state.fee.amount = fee.amount
+          state.fee.lateAmount = fee.lateAmount || '0.00'
         } else if (state.internalEvent.course?.fee) {
           const fee = state.internalEvent.course.fee
 
           state.feeType = FeeType.COURSE
-          state.fee.amount = +fee.amount
-          state.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
+          state.fee.amount = fee.amount
+          state.fee.lateAmount = fee.lateAmount || '0.00'
         } else {
           state.feeType = FeeType.FREE
         }
