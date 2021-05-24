@@ -105,7 +105,6 @@
                       <v-col cols="auto" class="inline-height"> On </v-col>
                       <v-col>
                         <v-dialog
-                          ref="dateDialog"
                           v-model="dateDialog"
                           :return-value.sync="options.until"
                           width="290px"
@@ -128,15 +127,8 @@
                             <v-btn text @click="dateDialog = false"
                               >Cancel
                             </v-btn>
-                            <v-btn
-                              text
-                              @click="
-                                datePickerDialog &&
-                                  datePickerDialog.save(options.until)
-                              "
-                            >
-                              Ok
-                            </v-btn>
+
+                            <v-btn text> Ok </v-btn>
                           </v-date-picker>
                         </v-dialog>
                       </v-col>
@@ -292,7 +284,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const refs = {
       occurrences: ref<InstanceType<typeof HTMLFormElement>>(),
-      datePickerDialog: ref<{ save: (value: any) => void }>(),
     }
 
     const state = reactive({
@@ -336,11 +327,11 @@ export default defineComponent({
       },
     })
 
-    const formattedUntilDate = () => {
+    const formattedUntilDate = computed(() => {
       if (!state.options.until) return ''
 
       return format(new Date(state.options.until), 'LLL do, yyyy')
-    }
+    })
 
     const monthTypes = computed(() => [
       {

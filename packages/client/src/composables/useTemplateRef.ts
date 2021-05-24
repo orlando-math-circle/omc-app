@@ -11,7 +11,7 @@ import {
  *
  * Taken from the `vueuse` repository and modded to not be nullish.
  */
-export const useTemplateRef = <T extends object>(key: string) => {
+export const useTemplateRef = <T extends object = any>(key: string) => {
   const instance = getCurrentInstance()
   let _trigger = () => {}
 
