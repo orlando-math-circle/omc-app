@@ -48,16 +48,12 @@
     <template v-if="$fetchState.pending">
       <v-row>
         <v-col>
-          <v-card>
-            <v-card-title>Loading...</v-card-title>
-
-            <v-card-text>Fetching event</v-card-text>
-          </v-card>
+          <v-skeleton-loader class="mx-auto" type="card" />
         </v-col>
       </v-row>
     </template>
 
-    <v-row>
+    <v-row v-else>
       <v-col>
         <v-card>
           <div class="d-flex flex-no-wrap justify-space-between">
