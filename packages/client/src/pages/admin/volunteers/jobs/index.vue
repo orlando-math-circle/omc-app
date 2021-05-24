@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Volunteer Jobs" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Volunteer Jobs" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-job :is-static="false" @create:job="onCreateJob">
+          <DialogCreateJob :is-static="false" @create:job="onCreateJob">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -21,14 +21,14 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-job>
+          </DialogCreateJob>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row>
       <v-col>
-        <data-table-jobs :jobs="jobs" />
+        <DataTableJobs :jobs="jobs" />
       </v-col>
     </v-row>
   </div>

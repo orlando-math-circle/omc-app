@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Volunteer Work" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Volunteer Work" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -24,7 +24,7 @@
           </dialog-create-work>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row>
       <v-col>

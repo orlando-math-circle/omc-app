@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Users" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Users" :breadcrumbs="breadcrumbs">
       <v-row>
         <v-col cols="auto" align-self="center">
           <DialogCreateAccount>
@@ -18,7 +18,7 @@
           </v-btn>
         </v-col>
       </v-row>
-    </admin-header>
+    </AdminHeader>
 
     <v-row>
       <v-col>

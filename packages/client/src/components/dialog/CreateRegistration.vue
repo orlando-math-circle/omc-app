@@ -1,5 +1,5 @@
 <template>
-  <DialogForm ref="refDialog" @submit:form="onSubmit">
+  <DialogForm ref="refDialog" @form:submit="onSubmit">
     <template #title>Create Registration</template>
     <template #subtitle>
       Registers a user to an event. This will bypass payment requirements.

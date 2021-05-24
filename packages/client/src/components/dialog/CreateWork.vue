@@ -3,7 +3,7 @@
     ref="dialog"
     :expands="false"
     width="440"
-    @submit:form="onSubmit"
+    @form:submit="onSubmit"
   >
     <template #title>Create Work</template>
 
