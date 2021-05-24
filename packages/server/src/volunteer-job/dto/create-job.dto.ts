@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateJobDto {
   @IsString()
@@ -8,7 +8,7 @@ export class CreateJobDto {
   @IsString()
   description?: string;
 
-  @IsPositive()
+  @Min(0)
   @IsNumber()
   hours?: number;
 
