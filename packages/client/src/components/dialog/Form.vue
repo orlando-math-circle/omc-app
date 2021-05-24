@@ -32,7 +32,7 @@
 
       <slot name="image"></slot>
 
-      <VFormValidated ref="form" v-slot="data" @submit:form="submit">
+      <VFormValidated ref="formRef" v-slot="data" @form:submit="submit">
         <slot v-bind="{ ...data, closing }"></slot>
 
         <v-card-text>
@@ -55,7 +55,9 @@ import {
   toRefs,
   watch,
 } from '@nuxtjs/composition-api'
-import VFormValidated from '~/components/inputs/VFormValidated.vue'
+import VFormValidated from '@/components/inputs/VFormValidated.vue'
+
+export type FormComponent = InstanceType<typeof VFormValidated>
 
 export default defineComponent({
   props: {
@@ -77,7 +79,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const form = ref<InstanceType<typeof VFormValidated>>()
+    const formRef = ref<FormComponent>()
     const state = reactive({
       dialog: false,
       closing: false,
@@ -88,7 +90,7 @@ export default defineComponent({
       () => state.dialog,
       () => {
         if (state.dialog === false && props.resetValidation) {
-          form.value!.reset()
+          formRef.value!.resetValidation()
         }
 
         if (state.dialog) {
@@ -112,7 +114,7 @@ export default defineComponent({
       setTimeout(() => emit('dialog:state', (state.dialog = false)), delay)
     }
 
-    const submit = () => emit('submit:form')
+    const submit = () => emit('form:submit')
 
     watch(
       () => state.dialog,
@@ -131,7 +133,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      form,
+      formRef,
       open,
       close,
       submit,

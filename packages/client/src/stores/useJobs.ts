@@ -15,6 +15,7 @@ export const useJobs = defineStore({
     error: null as StateError | null,
     job: null as JobEntity | null,
     jobs: [] as JobEntity[],
+    total: null as number | null,
   }),
   actions: {
     async create(createJobDto: CreateJobDto) {
@@ -26,9 +27,12 @@ export const useJobs = defineStore({
       this.job = await this.$nuxt.$axios.$get('/volunteer-job/' + id)
     },
     async findAll(findAllJobsDto?: FindAllJobsDto) {
-      this.jobs = await this.$nuxt.$axios.$get('/volunteer-job', {
+      const resp = await this.$nuxt.$axios.$get('/volunteer-job', {
         params: findAllJobsDto,
       })
+
+      this.jobs = resp[0]
+      this.total = resp[1]
     },
     async update(id: number, updateJobDto: UpdateJobDto) {
       this.job = await this.$nuxt.$axios.$patch(

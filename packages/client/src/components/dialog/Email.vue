@@ -1,5 +1,5 @@
 <template>
-  <dialog-form ref="dialog" @submit:form="onSubmit" @dialog:close="reset">
+  <dialog-form ref="dialog" @form:submit="onSubmit" @dialog:close="reset">
     <template #title>Email Users</template>
     <template #subtitle>
       Generate an email to the selected users. Note that users without emails

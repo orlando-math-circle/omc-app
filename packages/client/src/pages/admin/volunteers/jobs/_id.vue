@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Edit Job" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Edit Job" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-confirm @confirm="onDelete">
+          <DialogConfirm @confirm="onDelete">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -23,54 +23,54 @@
             </template>
 
             <span>Are you sure you wish to delete this volunteer job?</span>
-          </dialog-confirm>
+          </DialogConfirm>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row v-if="job">
       <v-col cols="12">
-        <v-card>
-          <v-card-title>Information</v-card-title>
+        <VFormValidated @form:submit="onSubmit">
+          <v-card>
+            <v-card-title>Information</v-card-title>
 
-          <v-form-validated @submit:form="onSubmit">
             <v-card-text>
               <v-row>
                 <v-col cols="12">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model="job.name"
                     label="Name"
                     rules="required"
                     hide-details="auto"
                     outlined
-                  ></v-text-field-validated>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <v-textarea-validated
+                  <VTextareaValidated
                     v-model="job.description"
                     label="Description (Optional)"
                     rules="required"
                     hide-details="auto"
                     outlined
-                  ></v-textarea-validated>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <v-text-field
+                  <VTextFieldValidated
                     v-model="job.hours"
                     type="tel"
                     outlined
                     hide-details="auto"
                     label="Volunteer Hours"
                     persistent-hint
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </v-card-text>
 
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer />
 
               <v-btn text @click="refresh">Reset</v-btn>
               <v-btn
@@ -82,8 +82,8 @@
                 Save Changes
               </v-btn>
             </v-card-actions>
-          </v-form-validated>
-        </v-card>
+          </v-card>
+        </VFormValidated>
       </v-col>
 
       <!-- Project -->
@@ -100,7 +100,6 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash'
-import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
 import { UpdateJobDto } from '@server/volunteer-job/dto/update-job.dto'
 import { shallowDiff } from '@/utils/utilities'
 import {
@@ -109,14 +108,15 @@ import {
   ref,
   useRoute,
   useRouter,
+  useFetch,
 } from '@nuxtjs/composition-api'
-import { useJobs } from '@/stores'
+import { JobEntity, useJobs } from '@/stores'
 import { useSnackbar } from '@/composables'
 
 export default defineComponent({
   layout: 'admin',
   setup() {
-    const job = ref<VolunteerJob | null>()
+    const job = ref<JobEntity | null>()
     const route = useRoute()
     const router = useRouter()
     const jobStore = useJobs()
@@ -136,6 +136,12 @@ export default defineComponent({
       return shallowDiff(jobStore.job!, dto)
     })
 
+    useFetch(async () => {
+      await jobStore.findOne(+route.value.params.id)
+
+      job.value = cloneDeep(jobStore.job)
+    })
+
     const breadcrumbs = [
       {
         text: 'Dashboard',
@@ -146,7 +152,7 @@ export default defineComponent({
         href: '/admin/volunteers/jobs',
       },
       {
-        text: 'Job',
+        text: 'Edit Job',
       },
     ]
 
@@ -188,16 +194,7 @@ export default defineComponent({
       await refresh(false)
     }
 
-    return { job, breadcrumbs, isLoading, onDelete, onSubmit }
-  },
-  async asyncData({ pinia, route }) {
-    const jobStore = useJobs(pinia)
-
-    await jobStore.findOne(+route.params.id)
-
-    return {
-      job: cloneDeep(jobStore.job),
-    }
+    return { job, changes, breadcrumbs, isLoading, onDelete, onSubmit, refresh }
   },
   head: {
     title: 'Edit Job',

@@ -21,13 +21,7 @@
     <v-card-text>
       <v-row>
         <v-col v-if="!isStatic" cols="12">
-          <auto-complete-project
-            v-model="project"
-            label="Project (Optional)"
-            :rules="{ required: !isStatic }"
-            item-value="id"
-            outlined
-          ></auto-complete-project>
+          <AutocompleteProject v-model="project" rules="required" />
         </v-col>
 
         <v-col cols="12">

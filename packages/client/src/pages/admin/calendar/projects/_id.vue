@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Edit Project" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Edit Project" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -40,14 +40,14 @@
           </DialogConfirm>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row v-if="project">
       <v-col cols="12">
         <v-card>
           <v-card-title>Information</v-card-title>
 
-          <VFormValidated @submit:form="onSubmit">
+          <VFormValidated @form:submit="onSubmit">
             <v-card-text>
               <v-row>
                 <v-expand-transition>
