@@ -1,5 +1,5 @@
 <template>
-  <FormDialog ref="dialog" expands @form:submit="onSubmit">
+  <DialogForm ref="dialog" expands @form:submit="onSubmit">
     <template #title>Create Event</template>
 
     <template #activator="{ on, attrs }">
@@ -490,7 +490,7 @@
         Create Event
       </v-btn>
     </template>
-  </FormDialog>
+  </DialogForm>
 </template>
 
 <script lang="ts">

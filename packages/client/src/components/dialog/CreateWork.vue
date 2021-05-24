@@ -9,22 +9,13 @@
     <v-card-text>
       <v-row>
         <v-col cols="12">
-          <AutoCompleteUser
-            v-model="dto.user"
-            rules="required"
-            item-value="id"
-            label="User"
-            outlined
-          />
+          <AutocompleteUser v-model="dto.user" rules="required" />
         </v-col>
 
         <v-col cols="12">
-          <AutoCompleteProject
+          <AutocompleteProject
             v-model="dto.project"
-            rules="required"
-            item-value="id"
             label="Project (Optional)"
-            outlined
           />
         </v-col>
 

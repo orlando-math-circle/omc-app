@@ -28,7 +28,7 @@
       </v-menu>
     </AdminHeader>
 
-    <v-row v-if="work">
+    <v-row v-if="state && state.work">
       <v-col cols="12">
         <v-card>
           <v-card-title>Information</v-card-title>
@@ -38,29 +38,20 @@
               <v-row>
                 <client-only>
                   <v-col cols="12">
-                    <AutoCompleteUser
-                      v-model="user"
-                      rules="required"
-                      item-value="id"
-                      label="User"
-                      outlined
-                    />
+                    <AutocompleteUser v-model="state.userId" />
                   </v-col>
 
                   <v-col cols="12">
-                    <AutoCompleteProject
-                      v-model="project"
-                      rules="required"
-                      item-value="id"
+                    <AutocompleteProject
+                      v-model="state.projectId"
                       label="Project (Optional)"
-                      outlined
                     />
                   </v-col>
                 </client-only>
 
                 <v-col cols="12">
                   <v-text-field
-                    v-model.number="work.hours"
+                    v-model.number="state.work.hours"
                     type="tel"
                     outlined
                     hide-details="auto"
@@ -71,7 +62,7 @@
 
                 <v-col cols="12">
                   <VSelectValidated
-                    v-model="work.status"
+                    v-model="state.work.status"
                     :items="workStatuses"
                     rules="required"
                     outlined
@@ -105,16 +96,16 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash'
-import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity'
 import { UpdateWorkDto } from '@server/volunteer-work/dto/update-work.dto'
 import { shallowDiff } from '@/utils/utilities'
 import { workStatuses } from '@/utils/constants'
-import { useWork } from '@/stores'
+import { useWork, WorkEntity } from '@/stores'
 import {
   computed,
   defineComponent,
-  useRoute,
   useRouter,
+  useRoute,
+  useFetch,
   reactive,
 } from '@nuxtjs/composition-api'
 import { useSnackbar } from '@/composables'
@@ -122,16 +113,30 @@ import { useSnackbar } from '@/composables'
 export default defineComponent({
   layout: 'admin',
   setup() {
-    const state = reactive({
-      work: null as VolunteerWork | null,
-      user: null as number | null,
-      project: null as number | null,
-    })
-
-    const workStore = useWork()
-    const route = useRoute()
     const router = useRouter()
     const snackbar = useSnackbar()
+    const workStore = useWork()
+    const route = useRoute()
+
+    const state = reactive({
+      work: null as WorkEntity | null,
+      userId: null as number | null,
+      projectId: null as number | null,
+    })
+
+    const fetch = async () => {
+      await workStore.findOne(+route.value.params.id)
+
+      if (workStore.error) {
+        return snackbar.error(workStore.error.message)
+      }
+
+      state.work = cloneDeep(workStore.work)
+      state.userId = workStore.work!.user.id
+      state.projectId = workStore.work!.project?.id || null
+    }
+
+    useFetch(fetch)
 
     const breadcrumbs = [
       {
@@ -150,30 +155,20 @@ export default defineComponent({
     const isLoading = computed(() => workStore.isLoading)
 
     const changes = computed(() => {
-      if (!state.work) return {}
+      if (!state?.work) return {}
 
       const dto: UpdateWorkDto = Object.assign(
         { hours: state.work.hours },
-        workStore!.user.id !== state.user && {
-          user: state.user || undefined,
+        workStore.work!.user.id !== state.userId && {
+          user: state.userId || undefined,
         },
-        workStore!.project?.id !== state.project && {
-          project: state.project || undefined,
+        workStore.work!.project?.id !== state.projectId && {
+          project: state.projectId || undefined,
         }
       )
 
       return shallowDiff(workStore.work!, dto)
     })
-
-    const refresh = async (load = true) => {
-      if (load) {
-        await workStore.findOne(+route.value.params.id)
-      }
-
-      state.work = cloneDeep(workStore.work!)
-      state.user = state.work!.user.id
-      state.project = state.work!.project?.id || null
-    }
 
     const onDelete = async () => {
       await workStore.delete(state.work!.id)
@@ -196,20 +191,18 @@ export default defineComponent({
 
       snackbar.success('Work Updated')
 
-      refresh()
+      fetch()
     }
 
-    return { workStatuses, breadcrumbs, isLoading, onDelete, onSubmit }
-  },
-  async asyncData({ pinia, route }) {
-    const workStore = useWork(pinia)
-
-    await workStore.findOne(+route.params.id)
-
     return {
-      work: cloneDeep(workStore.work),
-      user: workStore.work!.user.id,
-      project: workStore.work!.project?.id || null,
+      state,
+      workStatuses,
+      breadcrumbs,
+      isLoading,
+      onDelete,
+      onSubmit,
+      refresh: fetch,
+      changes,
     }
   },
   head: {

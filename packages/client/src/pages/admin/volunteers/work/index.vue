@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <DialogCreateWork :is-static="false" @create:work="onWorkCreate">
+          <DialogCreateWork :is-static="false" @create:work="fetch">
             <template #activator="cw">
               <v-list-item v-bind="cw.attrs" v-on="cw.on">
                 <v-list-item-icon>
@@ -28,20 +28,50 @@
 
     <v-row>
       <v-col>
-        <DataTableWorks :works="works" />
+        <v-card>
+          <v-card-title>
+            <v-spacer />
+
+            <v-text-field
+              v-model.trim="search"
+              append-icon="mdi-magnify"
+              placeholder="Filter..."
+              label="Search"
+              clearable
+              single-line
+              solo
+              hide-details
+            />
+
+            <v-btn class="ml-3" icon large @click="fetch">
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+          </v-card-title>
+
+          <DataTableWork :works="works" />
+        </v-card>
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, useFetch } from '@nuxtjs/composition-api'
+import {
+  computed,
+  defineComponent,
+  useFetch,
+  watch,
+} from '@nuxtjs/composition-api'
 import { useWork } from '@/stores'
+import { useDebouncedRef } from '@/composables'
 
 export default defineComponent({
   layout: 'admin',
   setup() {
     const workStore = useWork()
+
+    const search = useDebouncedRef('')
+
     const breadcrumbs = [
       {
         text: 'Dashboard',
@@ -54,13 +84,13 @@ export default defineComponent({
 
     const works = computed(() => workStore.works)
 
-    const onWorkCreate = async () => await refresh()
+    const fetch = async () =>
+      await workStore.findAll({ contains: search.value })
 
-    const refresh = async () => await workStore.findAll()
+    useFetch(fetch)
+    watch(search, fetch)
 
-    useFetch(async () => await workStore.findAll())
-
-    return { breadcrumbs, onWorkCreate, works }
+    return { breadcrumbs, fetch, works, search }
   },
   head: {
     title: 'Work',

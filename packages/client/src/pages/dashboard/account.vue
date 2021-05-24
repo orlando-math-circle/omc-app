@@ -5,7 +5,7 @@
       correct any information on the account please contact an administrator.
     </DialogConfirm>
 
-    <DialogUserEdit ref="editDialog" />
+    <DialogUpdateUser ref="editDialog" @user:update="onUpdateUser" />
 
     <v-card-title>Account Management</v-card-title>
     <v-card-subtitle>
@@ -81,9 +81,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from '@nuxtjs/composition-api'
-import { User } from '@server/user/user.entity'
-import { useAuth, useUsers } from '@/stores'
-import DialogUserEdit from '@/components/dialog/UserEdit.vue'
+import { useAuth, UserEntity, useUsers } from '@/stores'
+import DialogUpdateUser from '@/components/dialog/UpdateUser.vue'
 import DialogConfirm from '@/components/dialog/Confirm.vue'
 import { genders } from '@/utils/constants'
 import { grades } from '@/utils/events'
@@ -100,25 +99,28 @@ export default defineComponent({
     const authStore = useAuth()
     const userStore = useUsers()
 
-    const editDialog = ref<InstanceType<typeof DialogUserEdit>>()
+    const editDialog = ref<InstanceType<typeof DialogUpdateUser>>()
     const deleteDialog = ref<InstanceType<typeof DialogConfirm>>()
 
-    const gender = (user: User) =>
+    const gender = (user: UserEntity) =>
       genders.find((gender) => gender.value === user.gender)?.text
 
-    const onDeleteConfirm = async (user: User) => {
+    const onDeleteConfirm = async (user: UserEntity) => {
       await userStore.delete(user.id)
       await authStore.getMyAccount()
     }
+
+    const onUpdateUser = async () => await authStore.getMyAccount()
 
     return {
       gender,
       grades,
       editDialog,
       deleteDialog,
-      users: computed(() => authStore.accountUsers),
+      users: computed(() => authStore.accountUsers!),
       primary: computed(() => authStore.primaryUser!),
       onDeleteConfirm,
+      onUpdateUser,
     }
   },
 })

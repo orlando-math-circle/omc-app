@@ -1,47 +1,36 @@
 <template>
-  <v-dialog
-    v-model="dialog"
-    :fullscreen="expands ? $vuetify.breakpoint.mobile : false"
-    :max-width="width"
-    persistent
-    @click:outside="handler"
-  >
-    <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" color="secondary" v-on="on">Create</v-btn>
-      </slot>
+  <v-dialog v-model="dialog" v-bind="dialogAttrs">
+    <template #activator="activator">
+      <slot name="activator" v-bind="activator" />
     </template>
 
-    <v-card
-      :style="{ borderRadius: $vuetify.breakpoint.mobile ? '0px' : 'inherit' }"
-      @mousedown="setMouseDown"
-    >
+    <v-card v-bind="cardAttrs">
       <v-toolbar :flat="flat">
         <v-toolbar-title>
           <slot name="title" />
         </v-toolbar-title>
 
-        <v-btn small absolute right fab icon @click="dialog = false">
+        <v-btn small absolute right fab icon class="mr-0" @click="close">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
 
-      <v-card-subtitle v-if="$slots.footer">
-        <slot name="subtitle" />
-      </v-card-subtitle>
-
-      <slot name="image" />
-
-      <VFormValidated ref="formRef" v-slot="data" @form:submit="submit">
+      <VFormValidated
+        ref="formRef"
+        v-slot="data"
+        @form:submit="$emit('form:submit')"
+      >
         <slot v-bind="{ ...data, closing }" />
 
-        <v-card-text>
+        <v-card-text v-if="$scopedSlots.form">
           <v-row>
             <slot name="form" v-bind="{ ...data, closing }" />
           </v-row>
         </v-card-text>
 
-        <slot name="actions" v-bind="{ ...data, closing }" />
+        <v-card-actions v-if="$scopedSlots.actions">
+          <slot name="actions" v-bind="{ ...data, closing }" />
+        </v-card-actions>
       </VFormValidated>
     </v-card>
   </v-dialog>
@@ -49,10 +38,12 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   reactive,
   ref,
   toRefs,
+  useContext,
   watch,
 } from '@nuxtjs/composition-api'
 import VFormValidated from '@/components/inputs/VFormValidated.vue'
@@ -67,29 +58,41 @@ export default defineComponent({
     },
     expands: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     flat: {
       type: Boolean,
       default: true,
     },
-    resetValidation: {
+    resetOnClose: {
       type: Boolean,
       default: true,
     },
   },
   setup(props, { emit }) {
     const formRef = ref<FormComponent>()
+
+    const { $vuetify } = useContext()
+
     const state = reactive({
       dialog: false,
       closing: false,
       downInner: false,
     })
 
+    const dialogAttrs = computed(() => ({
+      fullscreen: (props.expands && $vuetify.breakpoint.mobile) || false,
+      maxWidth: props.width,
+    }))
+
+    const cardAttrs = computed(() => ({
+      style: { borderRadius: $vuetify.breakpoint.mobile ? '0px' : 'inherit ' },
+    }))
+
     watch(
       () => state.dialog,
       () => {
-        if (state.dialog === false && props.resetValidation) {
+        if (state.dialog === false && props.resetOnClose) {
           formRef.value!.resetValidation()
         }
 
@@ -105,40 +108,30 @@ export default defineComponent({
 
     const open = () => (state.dialog = true)
 
-    const close = (delay: number = 0) => {
+    const close = (delay = 0) => {
       if (!delay) {
-        return emit('dialog:state', (state.dialog = false))
+        emit('dialog:state', false)
+        emit('dialog:close')
+        state.dialog = false
+        state.closing = false
+
+        return
       }
 
       state.closing = true
-      setTimeout(() => emit('dialog:state', (state.dialog = false)), delay)
+      setTimeout(() => close(), delay)
     }
 
-    const submit = () => emit('form:submit')
-
-    watch(
-      () => state.dialog,
-      () => (state.downInner = false)
-    )
-
-    const setMouseDown = () => (state.downInner = true)
-
-    const handler = () => {
-      if (state.downInner === false) {
-        state.dialog = false
-      }
-
-      state.downInner = true
-    }
+    const resetValidation = () => formRef.value!.resetValidation()
 
     return {
       ...toRefs(state),
       formRef,
       open,
       close,
-      submit,
-      setMouseDown,
-      handler,
+      dialogAttrs,
+      cardAttrs,
+      resetValidation,
     }
   },
 })
