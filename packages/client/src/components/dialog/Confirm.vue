@@ -1,14 +1,14 @@
 <template>
   <v-dialog v-model="dialog" max-width="440px">
     <template #activator="activator">
-      <slot name="activator" v-bind="activator"></slot>
+      <slot name="activator" v-bind="activator" />
     </template>
 
     <v-card>
       <v-card-title>{{ title }}</v-card-title>
 
       <v-card-text>
-        <slot></slot>
+        <slot />
       </v-card-text>
 
       <v-card-actions>

@@ -26,16 +26,16 @@
         v-slot="form"
         @form:submit="$emit('form:submit')"
       >
-        <slot v-bind="form"></slot>
+        <slot v-bind="form" />
 
         <v-card-text>
           <v-row>
-            <slot name="form" v-bind="form"></slot>
+            <slot name="form" v-bind="form" />
           </v-row>
         </v-card-text>
 
         <v-card-actions>
-          <slot name="actions" v-bind="{ ...form, closing, close }"></slot>
+          <slot name="actions" v-bind="{ ...form, closing, close }" />
         </v-card-actions>
       </VFormValidated>
     </v-card>

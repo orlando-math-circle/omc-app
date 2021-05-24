@@ -1,22 +1,23 @@
 <template>
-  <dialog-form ref="dialog" @form:submit="onSubmit" @dialog:close="reset">
+  <DialogForm ref="dialog" @form:submit="onSubmit" @dialog:close="reset">
     <template #title>Email Users</template>
+
     <template #subtitle>
       Generate an email to the selected users. Note that users without emails
       are safely ignored.
     </template>
 
-    <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }"></slot>
+    <template #activator="activator">
+      <slot name="activator" v-bind="activator" />
     </template>
 
     <v-card-text>
       <v-col cols="12">
-        <auto-complete-user v-model="internalUsers" item-value="id" multiple />
+        <AutocompleteUser v-model="userIds" multiple />
       </v-col>
 
       <v-col cols="12">
-        <v-text-field-validated
+        <VTextFieldValidated
           v-model="subject"
           label="Subject"
           rules="required"
@@ -26,7 +27,7 @@
       </v-col>
 
       <v-col cols="12">
-        <v-textarea-validated
+        <VTextareaValidated
           v-model="body"
           label="Body"
           rules="required"
@@ -37,17 +38,16 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <v-btn text>Clear</v-btn>
       <v-btn type="submit" :loading="loading" color="secondary">Send</v-btn>
     </v-card-actions>
-  </dialog-form>
+  </DialogForm>
 </template>
 
 <script lang="ts">
 import { CreateEmailDto } from '@server/email/dto/create-email.dto'
-import { User } from '@server/user/user.entity'
 import {
   defineComponent,
   PropType,
@@ -55,31 +55,33 @@ import {
   useContext,
   watch,
 } from '@nuxtjs/composition-api'
-import DialogForm from '~/components/dialog/Form.vue'
-import { useStateReset } from '~/composables/useStateReset'
+import DialogForm from '@/components/dialog/Form.vue'
+import { UserEntity } from '@/stores'
+import { useSnackbar, useStateReset } from '@/composables'
 
 export default defineComponent({
   props: {
     users: {
-      type: Array as PropType<User[]>,
+      type: Array as PropType<UserEntity[]>,
       required: true,
     },
   },
   setup(props) {
-    const { $axios, $snack } = useContext()
+    const { $axios } = useContext()
+    const snackbar = useSnackbar()
     const dialog = ref<InstanceType<typeof DialogForm>>()
 
     const { state, reset } = useStateReset({
       subject: '',
       body: '',
       loading: false,
-      internalUsers: [] as number[],
+      userIds: [] as number[],
     })
 
     watch(
       () => props.users,
-      (users: User[]) => {
-        state.internalUsers = users.map((u) => u.id)
+      (users: UserEntity[]) => {
+        state.userIds = users.map((u) => u.id)
       },
       { immediate: true }
     )
@@ -89,17 +91,17 @@ export default defineComponent({
         state.loading = true
 
         const dto: CreateEmailDto = {
-          userIds: state.internalUsers,
+          userIds: state.userIds,
           subject: state.subject,
           body: state.body,
         }
 
         await $axios.$post('/email', dto)
       } catch (error) {
-        $snack('An error occured attempting to email')
+        snackbar.error('An error occured attempting to email')
       } finally {
         state.loading = false
-        $snack('Email Successfully Sent')
+        snackbar.success('Email Successfully Sent')
         dialog.value!.close()
       }
     }

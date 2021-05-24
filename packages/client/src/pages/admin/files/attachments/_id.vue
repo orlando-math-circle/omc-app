@@ -10,7 +10,7 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>
@@ -20,7 +20,7 @@
       <v-col>
         <v-card>
           <v-card-title>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -29,7 +29,7 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
           </v-card-title>
         </v-card>
       </v-col>

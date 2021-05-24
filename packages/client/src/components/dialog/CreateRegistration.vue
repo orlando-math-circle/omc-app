@@ -6,7 +6,7 @@
     </template>
 
     <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }"></slot>
+      <slot name="activator" v-bind="{ on, attrs }" />
     </template>
 
     <v-card-text>
@@ -17,7 +17,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <auto-complete-user v-model="user" />
+            <AutoCompleteUser v-model="user" />
           </v-list-item-content>
         </v-list-item>
 

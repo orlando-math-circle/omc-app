@@ -54,7 +54,7 @@
             @refresh="onRefresh"
           >
             <template #[`item.id`]="{ item }">
-              # <link-copy :text="item.id"></link-copy>
+              # <LinkCopy :text="item.id" />
             </template>
 
             <template #[`item.createdAt`]="{ item }">

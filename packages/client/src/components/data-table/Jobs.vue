@@ -4,9 +4,7 @@
     :headers="headers"
     @refresh="$emit('refresh:jobs')"
   >
-    <template #[`item.id`]="{ item }">
-      #<link-copy :text="item.id"></link-copy>
-    </template>
+    <template #[`item.id`]="{ item }"> #<LinkCopy :text="item.id" /> </template>
 
     <template #[`item.hours`]="{ item }">
       <v-chip>{{ item.hours }}</v-chip>

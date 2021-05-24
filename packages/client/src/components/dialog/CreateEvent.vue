@@ -41,7 +41,7 @@
           <v-list-item-content>All-day</v-list-item-content>
 
           <v-list-item-action>
-            <v-switch v-model="dates.allday" color="secondary"></v-switch>
+            <v-switch v-model="dates.allday" color="secondary" />
           </v-list-item-action>
         </v-list-item>
 
@@ -459,7 +459,7 @@
                   :close-on-content-click="false"
                 >
                   <template #activator="{ on }">
-                    <div :style="swatch" v-on="on"></div>
+                    <div :style="swatch" v-on="on" />
                   </template>
 
                   <v-card>

@@ -2,7 +2,7 @@
   <div ref="animator" :class="classes" @click="animate">
     <v-tooltip bottom>
       <template #activator="{ on, attrs }">
-        <span v-bind="attrs" v-on="on" v-text="text"></span>
+        <span v-bind="attrs" v-on="on" v-text="text" />
       </template>
 
       <span>{{ tooltip }}</span>

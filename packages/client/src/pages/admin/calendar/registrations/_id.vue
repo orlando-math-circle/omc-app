@@ -10,19 +10,19 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>
 
       <v-col cols="auto" align-self="center">
-        <dialog-confirm @confirm="onDeleteConfirm">
+        <DialogConfirm @confirm="onDeleteConfirm">
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" v-on="on">Delete</v-btn>
           </template>
 
           Are you sure you wish to delete this event registration?
-        </dialog-confirm>
+        </DialogConfirm>
       </v-col>
     </v-row>
 

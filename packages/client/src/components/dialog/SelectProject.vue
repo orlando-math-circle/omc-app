@@ -47,12 +47,12 @@
             single-select
             @item-selected="onTableSelected"
             @update:options="onOptionsChange"
-          ></v-data-table>
+          />
         </v-expand-transition>
       </v-card-text>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn text @click="dialog = false">Close</v-btn>
       </v-card-actions>
     </v-card>

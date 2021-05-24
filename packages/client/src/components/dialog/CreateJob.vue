@@ -11,7 +11,7 @@
               attrs: { ...attrs, ...tooltip.attrs },
               on: { ...tooltip.on, ...on },
             }"
-          ></slot>
+          />
         </template>
 
         <span>Create Job</span>

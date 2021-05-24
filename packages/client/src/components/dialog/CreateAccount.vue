@@ -3,13 +3,13 @@
     <template #title>Create Account</template>
 
     <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }"></slot>
+      <slot name="activator" v-bind="{ on, attrs }" />
     </template>
 
     <template #form>
       <v-row>
         <v-col cols="6">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="first"
             label="First Name"
             rules="required"
@@ -18,7 +18,7 @@
         </v-col>
 
         <v-col cols="6">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="last"
             label="Last Name"
             rules="required"
@@ -37,7 +37,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="email"
             label="Email"
             rules="required|email"

@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-update-event
+          <DialogUpdateEvent
             :event="event"
             @event:refresh="onEventRefresh"
             @event:update="onEventRefresh"
@@ -25,7 +25,7 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-update-event>
+          </DialogUpdateEvent>
 
           <v-list-item @click="onDeleteMenu">
             <v-list-item-icon>
@@ -78,7 +78,7 @@
                     </v-list-item-content>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
                     <v-list-item-icon>
@@ -98,13 +98,13 @@
 
             <div class="ma-3">
               <v-avatar size="125" rounded class="elevation-2">
-                <v-img :src="background"></v-img>
+                <v-img :src="background" />
               </v-avatar>
             </div>
           </div>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
 
             <v-btn :to="`/events/${event.id}`" text>Visit on App</v-btn>
           </v-card-actions>

@@ -136,7 +136,7 @@
                 </v-avatar>
 
                 <div class="ml-2">
-                  <link-copy v-if="item.email" :text="item.email"></link-copy>
+                  <LinkCopy v-if="item.email" :text="item.email" />
                   <span v-else>No Email</span>
                 </div>
               </div>

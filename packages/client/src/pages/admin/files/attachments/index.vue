@@ -10,7 +10,7 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>

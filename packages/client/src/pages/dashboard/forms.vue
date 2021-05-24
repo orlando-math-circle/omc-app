@@ -96,7 +96,7 @@
                 </v-list-item-action>
               </v-list-item>
 
-              <v-divider :key="attachment.id + '-divider'"></v-divider>
+              <v-divider :key="attachment.id + '-divider'" />
             </template>
           </v-list>
 

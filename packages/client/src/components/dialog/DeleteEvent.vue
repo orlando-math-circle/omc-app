@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" max-width="350">
     <template #activator="activator">
-      <slot name="activator" v-bind="activator"></slot>
+      <slot name="activator" v-bind="activator" />
     </template>
 
     <v-card>

@@ -1,22 +1,22 @@
 <template>
   <v-card>
-    <v-card-title v-text="title"></v-card-title>
+    <v-card-title v-text="title" />
 
     <div class="d-flex flex-column flex-grow-1">
       <div class="px-2 pb-2">
         <div class="d-flex align-center">
-          <h4 v-text="current"></h4>
+          <h4 v-text="current" />
           <v-spacer />
 
-          <div class="d-flex flex-column text-right" v-text="subtitle"></div>
+          <div class="d-flex flex-column text-right" v-text="subtitle" />
         </div>
       </div>
 
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <div style="min-height: 60px">
         <client-only>
-          <apex-chart
+          <ApexChart
             class="chart"
             height="60"
             :options="chartOptions"

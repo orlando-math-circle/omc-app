@@ -163,7 +163,7 @@
     </v-navigation-drawer>
 
     <v-app-bar app flat class="appbar">
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
 
       <v-toolbar-title class="title">Orlando Math Circle</v-toolbar-title>
 
@@ -173,7 +173,7 @@
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" icon elevation="2" v-on="on">
             <v-avatar>
-              <v-img :src="user.avatarUrl"></v-img>
+              <v-img :src="user.avatarUrl" />
             </v-avatar>
           </v-btn>
         </template>

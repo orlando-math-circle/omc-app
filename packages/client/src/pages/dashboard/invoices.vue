@@ -45,10 +45,7 @@
           </v-list-item-action>
         </v-list-item>
 
-        <v-divider
-          v-if="i < invoices.length"
-          :key="invoice.id + '-divider'"
-        ></v-divider>
+        <v-divider v-if="i < invoices.length" :key="invoice.id + '-divider'" />
       </template>
     </v-list>
   </v-card>

@@ -211,7 +211,7 @@
                     label="Email Verified"
                     hide-details
                     @change="onVerify"
-                  ></v-checkbox>
+                  />
                 </div>
 
                 <div v-if="account && account.id" class="my-2">
@@ -226,7 +226,7 @@
                   </v-btn>
                 </div>
 
-                <v-divider class="my-5"></v-divider>
+                <v-divider class="my-5" />
 
                 <div class="my-2">
                   <div class="title">Change Password</div>
@@ -256,7 +256,7 @@
                   </v-btn>
                 </div>
 
-                <v-divider class="my-5"></v-divider>
+                <v-divider class="my-5" />
 
                 <div class="my-2">
                   <div class="title">Lock User</div>
@@ -294,7 +294,7 @@
 
                 <div class="my-2">
                   <span class="font-weight-bold">Raw Data</span>
-                  <codeblock :code="user"></codeblock>
+                  <Codeblock :code="user" />
                 </div>
               </v-expansion-panel-content>
             </v-expansion-panel>
