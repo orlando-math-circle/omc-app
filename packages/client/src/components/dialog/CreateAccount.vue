@@ -1,5 +1,5 @@
 <template>
-  <FormDialog ref="dialog">
+  <DialogForm ref="dialog">
     <template #title>Create Account</template>
 
     <template #activator="{ on, attrs }">
@@ -46,7 +46,7 @@
         </v-col>
       </v-row>
     </template>
-  </FormDialog>
+  </DialogForm>
 </template>
 
 <script lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <FormDialog ref="form" @form:submit="onSubmit" @dialog:close="onClose">
+  <DialogForm ref="form" @form:submit="onSubmit" @dialog:close="onClose">
     <template #title>Create User</template>
 
     <template #activator="activator">
@@ -7,158 +7,156 @@
     </template>
 
     <template #form>
-      <v-row>
-        <v-col cols="6">
-          <VTextFieldValidated
-            v-model="first"
-            label="First Name"
-            rules="required"
-            required
-          />
-        </v-col>
+      <v-col cols="6">
+        <VTextFieldValidated
+          v-model="first"
+          label="First Name"
+          rules="required"
+          required
+        />
+      </v-col>
 
-        <v-col cols="6">
-          <VTextFieldValidated
-            v-model="last"
-            label="Last Name"
-            rules="required"
-            hide-details="auto"
-            required
-            outlined
-          />
-        </v-col>
+      <v-col cols="6">
+        <VTextFieldValidated
+          v-model="last"
+          label="Last Name"
+          rules="required"
+          hide-details="auto"
+          required
+          outlined
+        />
+      </v-col>
 
-        <v-col cols="12">
-          <BirthdayPickerValidated v-model="dob" :min-age="0" :max-age="100" />
-        </v-col>
+      <v-col cols="12">
+        <BirthdayPickerValidated v-model="dob" :min-age="0" :max-age="100" />
+      </v-col>
 
-        <v-col cols="12">
-          <VTextFieldValidated
-            v-model="email"
-            label="Email (Optional)"
-            rules="email"
-            type="email"
-            name="Email"
-            hide-details="auto"
-            outlined
-          />
-        </v-col>
+      <v-col cols="12">
+        <VTextFieldValidated
+          v-model="email"
+          label="Email (Optional)"
+          rules="email"
+          type="email"
+          name="Email"
+          hide-details="auto"
+          outlined
+        />
+      </v-col>
 
-        <v-expand-transition>
-          <v-col v-show="email && email.length" cols="12">
-            <v-select
-              v-model="reminderFreq"
-              label="Event Email Reminders (Optional)"
-              :items="reminders"
-              hide-details="auto"
-              chips
-              multiple
-              clearable
-              outlined
-            />
-          </v-col>
-        </v-expand-transition>
-
-        <v-col cols="12">
+      <v-expand-transition>
+        <v-col v-show="email && email.length" cols="12">
           <v-select
-            v-model="gender"
-            label="Gender"
-            :items="genders"
+            v-model="reminderFreq"
+            label="Event Email Reminders (Optional)"
+            :items="reminders"
             hide-details="auto"
+            chips
+            multiple
+            clearable
             outlined
           />
         </v-col>
+      </v-expand-transition>
 
-        <v-col cols="12">
-          <v-checkbox
-            v-show="!industry.professional"
-            v-model="industry.student"
-            persistent-hint
-            dense
-            hint="Only students can register for events."
-            label="Are they a student?"
-          />
+      <v-col cols="12">
+        <v-select
+          v-model="gender"
+          label="Gender"
+          :items="genders"
+          hide-details="auto"
+          outlined
+        />
+      </v-col>
+
+      <v-col cols="12">
+        <v-checkbox
+          v-show="!industry.professional"
+          v-model="industry.student"
+          persistent-hint
+          dense
+          hint="Only students can register for events."
+          label="Are they a student?"
+        />
+      </v-col>
+
+      <v-expand-transition>
+        <v-col v-show="industry.student">
+          <v-row>
+            <v-col cols="6">
+              <VSelectValidated
+                v-model="industry.education"
+                label="Education Level"
+                :items="Object.keys(education)"
+                :rules="{ required: industry.student }"
+                outlined
+              />
+            </v-col>
+
+            <v-col cols="6">
+              <VSelectValidated
+                v-model="grade"
+                :label="
+                  industry.education === 'College'
+                    ? 'Level of Study'
+                    : 'Grade Level'
+                "
+                :items="education[industry.education]"
+                :rules="{ required: industry.student }"
+                outlined
+              />
+            </v-col>
+
+            <v-col cols="12">
+              <VTextFieldValidated
+                v-model="industry.institution"
+                label="School Name"
+                hint="Enter the name of their school or institution."
+                :rules="{ required: industry.student }"
+                outlined
+              />
+            </v-col>
+          </v-row>
         </v-col>
+      </v-expand-transition>
 
-        <v-expand-transition>
-          <v-col v-show="industry.student">
-            <v-row>
-              <v-col cols="6">
-                <VSelectValidated
-                  v-model="industry.education"
-                  label="Education Level"
-                  :items="Object.keys(education)"
-                  :rules="{ required: industry.student }"
-                  outlined
-                />
-              </v-col>
+      <v-col cols="12">
+        <v-checkbox
+          v-show="!industry.student"
+          v-model="industry.professional"
+          dense
+          label="Are they an industry professional?"
+        />
+      </v-col>
 
-              <v-col cols="6">
-                <VSelectValidated
-                  v-model="grade"
-                  :label="
-                    industry.education === 'College'
-                      ? 'Level of Study'
-                      : 'Grade Level'
-                  "
-                  :items="education[industry.education]"
-                  :rules="{ required: industry.student }"
-                  outlined
-                />
-              </v-col>
+      <v-expand-transition>
+        <v-col v-show="industry.professional">
+          <v-row>
+            <v-col cols="12">
+              <VTextFieldValidated
+                v-model="industry.profession"
+                label="Profession (Optional)"
+                outlined
+              />
+            </v-col>
 
-              <v-col cols="12">
-                <VTextFieldValidated
-                  v-model="industry.institution"
-                  label="School Name"
-                  hint="Enter the name of their school or institution."
-                  :rules="{ required: industry.student }"
-                  outlined
-                />
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-expand-transition>
+            <v-col cols="12">
+              <VTextFieldValidated
+                v-model="industry.jobTitle"
+                label="Job Title (Optional)"
+                outlined
+              />
+            </v-col>
 
-        <v-col cols="12">
-          <v-checkbox
-            v-show="!industry.student"
-            v-model="industry.professional"
-            dense
-            label="Are they an industry professional?"
-          />
+            <v-col cols="12">
+              <VTextFieldValidated
+                v-model="industry.company"
+                label="Company or Workplace (Optional)"
+                outlined
+              />
+            </v-col>
+          </v-row>
         </v-col>
-
-        <v-expand-transition>
-          <v-col v-show="industry.professional">
-            <v-row>
-              <v-col cols="12">
-                <VTextFieldValidated
-                  v-model="industry.profession"
-                  label="Profession (Optional)"
-                  outlined
-                />
-              </v-col>
-
-              <v-col cols="12">
-                <VTextFieldValidated
-                  v-model="industry.jobTitle"
-                  label="Job Title (Optional)"
-                  outlined
-                />
-              </v-col>
-
-              <v-col cols="12">
-                <VTextFieldValidated
-                  v-model="industry.company"
-                  label="Company or Workplace (Optional)"
-                  outlined
-                />
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-expand-transition>
-      </v-row>
+      </v-expand-transition>
     </template>
 
     <template #actions>
@@ -175,7 +173,7 @@
         Save
       </v-btn>
     </template>
-  </FormDialog>
+  </DialogForm>
 </template>
 
 <script lang="ts">
@@ -188,11 +186,11 @@ import { useSnackbar, useStateReset } from '@/composables'
 import { useUsers, useAuth } from '@/stores'
 import { education, genders, reminders } from '@/utils/constants'
 import { grades } from '@/utils/events'
-import FormDialog from '@/components/form/Dialog.vue'
+import DialogForm from '@/components/dialog/Form.vue'
 
 export default defineComponent({
   setup() {
-    const form = ref<InstanceType<typeof FormDialog>>()
+    const form = ref<InstanceType<typeof DialogForm>>()
 
     const snackbar = useSnackbar()
     const userStore = useUsers()

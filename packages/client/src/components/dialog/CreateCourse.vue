@@ -25,13 +25,9 @@
 
           <v-row>
             <v-col v-if="!project" cols="12">
-              <VAutocompleteValidated
+              <AutocompleteProject
                 v-model="newProject"
-                label="Project"
                 :rules="{ required: !project }"
-                item-value="id"
-                hide-details="auto"
-                outlined
               />
             </v-col>
 

@@ -1,5 +1,5 @@
 <template>
-  <FormDialog ref="dialogRef" @form:submit="onSubmit">
+  <DialogForm ref="dialogRef" @form:submit="onSubmit">
     <template #title>Edit Event</template>
 
     <template #activator="{ on, attrs }">
@@ -510,7 +510,7 @@
       :changeset="changeset"
       @submit:type="onSubmitType"
     />
-  </FormDialog>
+  </DialogForm>
 </template>
 
 <script lang="ts">
