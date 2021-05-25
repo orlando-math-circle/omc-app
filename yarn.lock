@@ -3195,16 +3195,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxtjs/dotenv@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@nuxtjs/dotenv@npm:1.4.1"
-  dependencies:
-    consola: ^2.10.1
-    dotenv: ^8.1.0
-  checksum: 2b8781f3c7c30098ad749461f4d0cd0be2215800e433ed626297f5280124356776e000fb20b1c7077da288adea3dad026737d5f9a1c89e3bf0cfcee8a5febf8f
-  languageName: node
-  linkType: hard
-
 "@nuxtjs/eslint-config-typescript@npm:6.0.0":
   version: 6.0.0
   resolution: "@nuxtjs/eslint-config-typescript@npm:6.0.0"
@@ -3324,7 +3314,6 @@ __metadata:
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.4
     "@nuxtjs/composition-api": 0.24.0
-    "@nuxtjs/dotenv": 1.4.1
     "@nuxtjs/eslint-config-typescript": 6.0.0
     "@nuxtjs/pwa": 3.3.5
     "@types/dropzone": 5.7.3
@@ -3342,7 +3331,6 @@ __metadata:
     eslint-plugin-prettier: 3.4.0
     fibers: 5.0.0
     lodash: 4.17.21
-    moment: 2.29.1
     nuxt: 2.15.6
     nuxt-dropzone: 1.0.4
     pinia: 0.5.1
@@ -7711,7 +7699,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"consola@npm:^2.10.0, consola@npm:^2.10.1, consola@npm:^2.15.0, consola@npm:^2.15.3, consola@npm:^2.6.0, consola@npm:^2.9.0":
+"consola@npm:^2.10.0, consola@npm:^2.15.0, consola@npm:^2.15.3, consola@npm:^2.6.0, consola@npm:^2.9.0":
   version: 2.15.3
   resolution: "consola@npm:2.15.3"
   checksum: 914e2b0b24605a41f1a83ae29a0238558d01a01c40ada5817db81b2dd1543a540d59e38e81e736d05360246379a18013e6930b32231650898dfc4adb52a93523
@@ -9073,7 +9061,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:8.2.0, dotenv@npm:^8.1.0, dotenv@npm:^8.2.0":
+"dotenv@npm:8.2.0, dotenv@npm:^8.2.0":
   version: 8.2.0
   resolution: "dotenv@npm:8.2.0"
   checksum: 16cb89cbd7b98b053899b8aba8c5044c8fb61a2db8a81fe70360b75035fce5fed53bd7a34d772be717d0880c0321122a4c09423f518025e1b52d96791521b1a7
