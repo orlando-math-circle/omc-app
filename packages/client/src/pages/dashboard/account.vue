@@ -89,11 +89,7 @@ import { grades } from '@/utils/events'
 
 export default defineComponent({
   transition(_to, from) {
-    if (from?.name === 'dashboard') {
-      return 'slide-right'
-    }
-
-    return 'slide-left'
+    return from?.name === 'dashboard' ? 'slide-right' : 'slide-left'
   },
   setup() {
     const authStore = useAuth()
