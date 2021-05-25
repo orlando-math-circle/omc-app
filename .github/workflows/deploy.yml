@@ -31,8 +31,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            yarn
+          script: yarn
 
       - name: Run Migrations
         uses: appleboy/ssh-action@master
@@ -40,8 +39,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            yarn server mikro-orm schema:update -r
+          script: yarn server mikro-orm schema:update -r
 
       - name: Build
         uses: appleboy/ssh-action@master
