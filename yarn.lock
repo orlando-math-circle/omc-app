@@ -3731,7 +3731,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cache-manager@npm:3.4.0":
+"@types/cache-manager@npm:^3.4.0":
   version: 3.4.0
   resolution: "@types/cache-manager@npm:3.4.0"
   checksum: 11a5d923d246e5956e23ccf6e02126c4abf1c1e57e057cd5fa758941e54eb764c504137d4623bc0a972e68edfc37f241bfd0b316f176e1211fbc2c36846e097e
@@ -11731,7 +11731,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"husky@npm:6.0.0":
+"husky@npm:^6.0.0":
   version: 6.0.0
   resolution: "husky@npm:6.0.0"
   bin:
