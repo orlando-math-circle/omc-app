@@ -47,7 +47,7 @@ jobs:
             cd ${{ env.directory }}
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            yarn server mikro-orm schema:update -r
+            yarn server mikro-orm schema:update -r --fk-checks
 
       - name: Build
         uses: appleboy/ssh-action@master
