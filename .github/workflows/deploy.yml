@@ -32,6 +32,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd ${{ env.directory }}
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             yarn
@@ -43,6 +44,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd ${{ env.directory }}
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             yarn server mikro-orm schema:update -r
@@ -54,6 +56,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd ${{ env.directory }}
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             yarn server build
@@ -66,6 +69,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd ${{ env.directory }}
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             pm2 restart server-dev
