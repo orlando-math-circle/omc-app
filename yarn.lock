@@ -3326,7 +3326,7 @@ __metadata:
     sass-loader: 10.2.0
     vee-validate: 3.4.5
     vue-apexcharts: 1.6.1
-    vuetify: 2.5.0
+    vuetify: 2.5.3
     vuetify-loader: 1.7.2
   languageName: unknown
   linkType: soft
@@ -22520,12 +22520,12 @@ vue-demi@latest:
   languageName: node
   linkType: hard
 
-"vuetify@npm:2.5.0":
-  version: 2.5.0
-  resolution: "vuetify@npm:2.5.0"
+"vuetify@npm:2.5.3":
+  version: 2.5.3
+  resolution: "vuetify@npm:2.5.3"
   peerDependencies:
     vue: ^2.6.4
-  checksum: 2360290608c06da840533d7aa4c3c387a4a371498a891897167cfb382e86d96c8e801e5f58ae78bb3225d29f47aa1f7bed96630077aaee61502ec1fae5144c22
+  checksum: eafc9bf9417bb06a0a7879cda0d3e2f76380118ae4de991493567d915bc089ad589c8e14bcda60e4f73b9d48f0b18e944d15640b9fb499bc5d2bc7a5a5fafd9f
   languageName: node
   linkType: hard
 

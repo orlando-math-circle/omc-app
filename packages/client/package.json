@@ -47,7 +47,7 @@
     "prettier": "2.3.0",
     "sass": "1.32.13",
     "sass-loader": "10.2.0",
-    "vuetify": "2.5.0"
+    "vuetify": "2.5.3"
   },
   "prettier": {
     "semi": false,
