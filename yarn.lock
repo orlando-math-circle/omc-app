@@ -3135,16 +3135,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxtjs/axios@npm:5.13.4":
-  version: 5.13.4
-  resolution: "@nuxtjs/axios@npm:5.13.4"
+"@nuxtjs/axios@npm:5.13.6":
+  version: 5.13.6
+  resolution: "@nuxtjs/axios@npm:5.13.6"
   dependencies:
     "@nuxtjs/proxy": ^2.1.0
     axios: ^0.21.1
     axios-retry: ^3.1.9
     consola: ^2.15.3
     defu: ^5.0.0
-  checksum: 2c51016ad406e433099ccfc0a6a22eec1096530a72fe9b5cd1effd940268db2975304d399558a8b78997ff1461656eb7d005152c7665e57846d198ca5ee5ba21
+  checksum: 0d88d5f3c8ef6e317af4cb2a8457e3a7276950cde1ae4cc241e31c4d534a1fa1d9cc83339891982ff9cc3e30f1993ef0a36034662681fcd81a138299a0a59fed
   languageName: node
   linkType: hard
 
@@ -3294,7 +3294,7 @@ __metadata:
     "@nuxt/postcss8": 1.1.3
     "@nuxt/types": 2.15.6
     "@nuxt/typescript-build": 2.1.0
-    "@nuxtjs/axios": 5.13.4
+    "@nuxtjs/axios": 5.13.6
     "@nuxtjs/composition-api": 0.24.0
     "@nuxtjs/eslint-config-typescript": 6.0.0
     "@nuxtjs/pwa": 3.3.5
