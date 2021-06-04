@@ -8,20 +8,15 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
-import { ConfigSchema } from '../app.config';
 import { BCRYPT_ROUNDS } from '../app.constants';
+import { ConfigService } from '../config/config.service';
 import { Email } from '../email/email.class';
-import {
-  SENDGRID_RESET_TEMPLATE,
-  SENDGRID_VERIFY_TEMPLATE,
-} from '../email/email.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -43,7 +38,7 @@ export class AuthService {
     @Inject(forwardRef(() => AccountService))
     private readonly accountService: AccountService,
     private readonly emailService: EmailService,
-    private readonly config: ConfigService<ConfigSchema>,
+    private readonly config: ConfigService,
     private readonly em: EntityManager,
   ) {}
 
@@ -71,7 +66,7 @@ export class AuthService {
     return {
       token: this.signJWT(
         payload,
-        `${account.logoutHash}${this.config.get('SECRET')}`,
+        `${account.logoutHash}${this.config.SECRET}`,
       ),
       complete: !!payload.uid,
       user,
@@ -104,7 +99,7 @@ export class AuthService {
     return {
       token: this.signJWT(
         { uid: id },
-        `${account.logoutHash}${this.config.get('SECRET')}`,
+        `${account.logoutHash}${this.config.SECRET}`,
       ),
       complete: true,
     };
@@ -145,7 +140,7 @@ export class AuthService {
       if (!req.account) throw new UnauthorizedException('Account missing');
     }
 
-    return `${req.account.logoutHash}${this.config.get('SECRET')}`;
+    return `${req.account.logoutHash}${this.config.SECRET}`;
   }
 
   /**
@@ -157,7 +152,7 @@ export class AuthService {
    * @param options optional options for signing
    */
   public signJWT(payload: any, secret?: string, options?: jwt.SignOptions) {
-    return jwt.sign(payload, secret || this.config.get('SECRET')!, options);
+    return jwt.sign(payload, secret || this.config.SECRET, options);
   }
 
   /**
@@ -173,11 +168,7 @@ export class AuthService {
     secret?: string,
     options?: jwt.VerifyOptions,
   ) {
-    return jwt.verify(
-      token,
-      secret || this.config.get('SECRET')!,
-      options,
-    ) as T;
+    return jwt.verify(token, secret || this.config.SECRET, options) as T;
   }
 
   /**
@@ -241,13 +232,12 @@ export class AuthService {
     });
 
     this.emailService.send(
-      new Email(user.email, 'Verify Your Email', {
-        templateId: SENDGRID_VERIFY_TEMPLATE,
-        templateData: {
-          name: user.name,
-          url: `${this.config.get('FRONTEND_URL')}/verify?token=${token}`,
-        },
-      }),
+      new Email()
+        .setTemplate(this.config.MAILERSEND.TEMPLATES.VERIFY)
+        .setTo(user.email, undefined, {
+          first_name: user.first,
+          verify_link: `${this.config.FILES.FRONTEND_URL}/verify?token=${token}`,
+        }),
     );
   }
 
@@ -302,7 +292,7 @@ export class AuthService {
     if (!user) throw new BadRequestException();
 
     // Errors here percolate to the `JsonWebTokenFilter`.
-    this.verifyJWT(token, `${user.password}${this.config.get('SECRET')}`);
+    this.verifyJWT(token, `${user.password}${this.config.SECRET}`);
 
     return user;
   }
@@ -320,17 +310,16 @@ export class AuthService {
 
     const token = this.signJWT(
       { uid: user.id },
-      `${user.password}${this.config.get('SECRET')}`,
+      `${user.password}${this.config.SECRET}`,
     );
 
     this.emailService.send(
-      new Email(email, 'Reset Your Password', {
-        templateId: SENDGRID_RESET_TEMPLATE,
-        templateData: {
-          name: user.name,
-          url: `${this.config.get('FRONTEND_URL')}/forgot?token=${token}`,
-        },
-      }),
+      new Email()
+        .setTemplate(this.config.MAILERSEND.TEMPLATES.RESET)
+        .setTo(email, undefined, {
+          first_name: user.first,
+          reset_link: `${this.config.FILES.FRONTEND_URL}/forgot?token=${token}`,
+        }),
     );
   }
 

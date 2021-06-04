@@ -1,7 +1,6 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import Joi from 'joi';
 import request from 'supertest';
@@ -11,6 +10,7 @@ import { CreateAccountDto } from '../src/account/dto/create-account.dto';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { ConfigModule } from '../src/config/config.module';
 import { EmailModule } from '../src/email/email.module';
 import { FileModule } from '../src/file/file.module';
 import { Gender } from '../src/user/enums/gender.enum';
@@ -37,8 +37,10 @@ describe('Accounts', () => {
           validationSchema: Joi.object({
             SECRET: Joi.string().default('test-secret'),
             PAYPAL_SANDBOXED: Joi.boolean().default(true),
-            SENDGRID_SANDBOXED: Joi.boolean().default(true),
-            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            EMAIL_SANDBOXED: Joi.boolean().default(true),
+            EMAIL_TEMPLATE_VERIFY: Joi.string().default('VERIFY_TEMPLATE'),
+            EMAIL_TEMPLATE_RESET: Joi.string().default('RESET_TEMPLATE'),
+            UPLOAD_DIRECTORY: Joi.string().default('../../uploads'),
             DEFAULT_EVENT_PICTURE: Joi.string().default(
               '/defaults/neon-math.jpg',
             ),

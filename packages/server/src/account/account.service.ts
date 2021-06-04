@@ -7,19 +7,16 @@ import {
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
-import { ConfigSchema } from '../app.config';
 import { BCRYPT_ROUNDS } from '../app.constants';
 import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
+import { ConfigService } from '../config/config.service';
 import { Email } from '../email/email.class';
-import { SENDGRID_VERIFY_TEMPLATE } from '../email/email.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
 import { Account } from './account.entity';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { RegisterAccountDto } from './dto/register.dto';
@@ -32,11 +29,10 @@ export class AccountService {
     @InjectRepository(Account)
     private readonly accountRepository: EntityRepository<Account>,
     private readonly emailService: EmailService,
-    private readonly userService: UserService,
     private readonly authService: AuthService,
-    private readonly config: ConfigService<ConfigSchema>,
+    private readonly config: ConfigService,
   ) {
-    this.ADMIN_EMAIL = config.get('ADMIN_EMAIL');
+    this.ADMIN_EMAIL = config.ADMIN_EMAIL;
   }
 
   /**
@@ -87,17 +83,14 @@ export class AccountService {
       },
     );
 
-    this.emailService.send(
-      new Email(account.primaryUser.email!, 'Verify Your Email', {
-        templateId: SENDGRID_VERIFY_TEMPLATE,
-        templateData: {
-          first_name: account.primaryUser.first,
-          verify_link: `${this.config.get(
-            'FRONTEND_URL',
-          )}/verify?token=${token}`,
-        },
-      }),
-    );
+    const email = new Email()
+      .setTemplate(this.config.MAILERSEND.TEMPLATES.VERIFY)
+      .setTo(account.primaryUser.email!, undefined, {
+        first_name: account.primaryUser.first,
+        verify_link: `${this.config.FILES.FRONTEND_URL}/verify?token=${token}`,
+      });
+
+    await this.emailService.send(email);
 
     return this.authService.login(account, account.primaryUser);
   }

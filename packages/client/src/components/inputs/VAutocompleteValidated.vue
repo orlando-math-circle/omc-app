@@ -8,11 +8,8 @@
       v-on="$listeners"
       @input="$emit('input', $event)"
     >
-      <template
-        v-for="(_, scopedSlotName) in $scopedSlots"
-        #[scopedSlotName]="slotData"
-      >
-        <slot :name="scopedSlotName" v-bind="slotData" />
+      <template v-for="(_, slotName) in $scopedSlots" #[slotName]="slotData">
+        <slot :name="slotName" v-bind="slotData" />
       </template>
 
       <template v-for="(_, slotName) in $slots" #[slotName]>
@@ -31,6 +28,7 @@ export default defineComponent({
   components: {
     ValidationProvider,
   },
+  inheritAttrs: false,
   props: {
     rules: {
       type: [String, Object],

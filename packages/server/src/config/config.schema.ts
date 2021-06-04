@@ -1,10 +1,19 @@
-import { Logger } from '@nestjs/common';
 import Joi from 'joi';
 
-const logger = new Logger('Configuration');
+/**
+ * ConfigSchema
+ *
+ * Note: Some services may utilize `process.env` without type checking.
+ * Changing the names of variables should be done carefully.
+ */
 
-export interface ConfigSchema extends Record<string, unknown> {
+export interface ConfigSchema extends Record<string, any> {
   NODE_ENV: 'development' | 'production' | 'test';
+  DATABASE_NAME: string;
+  DATABASE_HOST: string;
+  DATABASE_PORT: number;
+  DATABASE_USER: string;
+  DATABASE_PASS: string;
   PORT: number;
   SECRET: string;
   FRONTEND_URL: string;
@@ -12,16 +21,20 @@ export interface ConfigSchema extends Record<string, unknown> {
   PAYPAL_SANDBOXED: boolean;
   PAYPAL_CLIENT_ID: string;
   PAYPAL_SECRET_KEY: string;
-  SENDGRID_SANDBOXED: boolean;
-  SENDGRID_API_KEY: string;
-  FILE_DIRECTORY: string;
+  EMAIL_SANDBOXED: boolean;
+  EMAIL_KEY: string;
+  EMAIL_TEMPLATE_VERIFY: string;
+  EMAIL_TEMPLATE_RESET: string;
+  UPLOAD_DIRECTORY: string;
   FORM_SUBDIRECTORY: string;
   SERVE_STATIC: boolean;
   DEFAULT_EVENT_PICTURE: string;
   DEFAULT_AVATAR_FOLDER: string;
+  TWITTER_KEY: string;
+  TWITTER_SECRET: string;
 }
 
-const configSchema = Joi.object({
+export const configSchema = Joi.object<ConfigSchema>({
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test')
     .default('development'),
@@ -38,13 +51,15 @@ const configSchema = Joi.object({
   PAYPAL_SECRET_KEY: Joi.string().required(),
   TWITTER_KEY: Joi.string(),
   TWITTER_SECRET: Joi.string(),
-  SENDGRID_SANDBOXED: Joi.boolean().default(true),
-  SENDGRID_API_KEY: Joi.when('SENDGRID_SANDBOXED', {
+  EMAIL_SANDBOXED: Joi.boolean().default(true),
+  EMAIL_KEY: Joi.when('EMAIL_SANDBOXED', {
     is: false,
     then: Joi.string().required(),
     otherwise: Joi.string(),
   }),
-  FILE_DIRECTORY: Joi.string().default('../../../uploads'),
+  EMAIL_TEMPLATE_VERIFY: Joi.string().default('0p7kx4xo6249yjre'),
+  EMAIL_TEMPLATE_RESET: Joi.string().default('x2p0347m2k4zdrn7'),
+  UPLOAD_DIRECTORY: Joi.string().default('../../../uploads'),
   FORM_SUBDIRECTORY: Joi.string().default('form'),
   SERVE_STATIC: Joi.boolean().default(true),
   STATIC_BASE: Joi.string().default('http://localhost:3000'),
@@ -52,23 +67,3 @@ const configSchema = Joi.object({
   DEFAULT_EVENT_PICTURE: Joi.string().default('/defaults/neon-math.jpg'),
   DEFAULT_AVATAR_FOLDER: Joi.string().default('/defaults/avatars'),
 });
-
-export function validate(config: Record<string, unknown>) {
-  const validationResult = configSchema.validate(config, {
-    abortEarly: false,
-    convert: true,
-    stripUnknown: true,
-  });
-
-  if (validationResult.error) {
-    const message = [
-      'Failed to start the application due to a configuration issue. Please check the .env file.\n',
-      ...validationResult.error.details.map((d) => `\t ${d.message}`),
-    ].join('\n');
-
-    logger.error(message);
-    process.exit(1);
-  }
-
-  return validationResult.value;
-}

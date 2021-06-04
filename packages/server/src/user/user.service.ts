@@ -12,13 +12,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
 import { eachWeekOfInterval, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
 import { BCRYPT_ROUNDS } from '../app.constants';
 import { isBetweenInclusive, Populate, PopulateFail } from '../app.utils';
+import { ConfigService } from '../config/config.service';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { ApprovalStatus } from '../file/interfaces/approval-status.enum';
@@ -38,7 +38,7 @@ export class UserService {
     config: ConfigService,
   ) {
     for (let i = 0; i < 10; i++) {
-      this.avatars[i] = `${config.get('DEFAULT_AVATAR_FOLDER')}/${i}.png`;
+      this.avatars[i] = `${config.FILES.DEFAULT_AVATAR_FOLDER}/${i}.png`;
     }
   }
 

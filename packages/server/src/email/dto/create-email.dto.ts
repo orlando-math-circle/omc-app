@@ -1,15 +1,18 @@
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateEmailDto {
   @IsArray()
-  @IsNumber({}, { each: true })
-  userIds!: number[];
+  @IsEmail({}, { each: true })
+  emails!: string[];
 
   @IsString()
   subject!: string;
 
   @IsString()
-  body!: string;
+  html!: string;
+
+  @IsString()
+  text!: string;
 
   @IsOptional()
   @IsString()

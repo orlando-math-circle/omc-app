@@ -23,7 +23,7 @@ import { useProjects } from '@/stores'
 export default defineComponent({
   props: {
     value: {
-      type: [Object, Number, String, Boolean],
+      type: [Array, Object, Number, String, Boolean],
       required: false,
       default: null,
     },

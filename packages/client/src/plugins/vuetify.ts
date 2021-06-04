@@ -18,7 +18,8 @@ export default defineNuxtPlugin((ctx) => {
       dark: !!isDark,
       themes: {
         light: {
-          primary: '#44D9E6',
+          primary: '#0096C7',
+          // primary: '#44D9E6',
           accent: '#1B1E23',
           // primary: '#1B1E23',
           // accent: '#44D9E6',

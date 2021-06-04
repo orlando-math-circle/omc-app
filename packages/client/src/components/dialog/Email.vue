@@ -1,5 +1,10 @@
 <template>
-  <DialogForm ref="dialog" @form:submit="onSubmit" @dialog:close="reset">
+  <DialogForm
+    ref="dialog"
+    width="700"
+    @form:submit="onSubmit"
+    @dialog:close="reset"
+  >
     <template #title>Email Users</template>
 
     <template #subtitle>
@@ -11,37 +16,73 @@
       <slot name="activator" v-bind="activator" />
     </template>
 
-    <v-card-text>
-      <v-col cols="12">
-        <AutocompleteUser v-model="userIds" multiple />
-      </v-col>
+    <div class="email-editor">
+      <AutocompleteUser
+        v-model="state.users"
+        label="Email Recipients"
+        multiple
+        return-object
+        :clearable="false"
+        :outlined="false"
+        chips
+        deletable-chips
+        solo
+        flat
+      >
+        <!-- Disabled until implemented -->
+        <!-- <template #append-outer>
+          <v-btn icon> Cc </v-btn>
 
-      <v-col cols="12">
-        <VTextFieldValidated
-          v-model="subject"
-          label="Subject"
-          rules="required"
-          hide-details="auto"
-          outlined
-        />
-      </v-col>
+          <v-btn icon> Bcc </v-btn>
+        </template> -->
 
-      <v-col cols="12">
-        <VTextareaValidated
-          v-model="body"
-          label="Body"
-          rules="required"
-          outlined
-          counter
-        />
-      </v-col>
-    </v-card-text>
+        <template #item="{ item }">
+          <template v-if="!item.email">
+            <v-list-item-content>
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
+              <v-list-item-subtitle>No Email Address</v-list-item-subtitle>
+            </v-list-item-content>
+          </template>
+
+          <template v-else>
+            <v-list-item-avatar>
+              <v-img :src="item.avatarUrl" />
+            </v-list-item-avatar>
+
+            <v-list-item-content>
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
+              <v-list-item-subtitle>{{ item.email }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </template>
+        </template>
+      </AutocompleteUser>
+
+      <v-divider />
+
+      <VTextFieldValidated
+        v-model="state.subject"
+        label="Subject"
+        rules="required"
+        hide-details="auto"
+        :outlined="false"
+        solo
+        flat
+      />
+
+      <client-only>
+        <Editor v-model="state.html" />
+      </client-only>
+
+      <v-divider />
+    </div>
 
     <v-card-actions>
       <v-spacer />
 
       <v-btn text>Clear</v-btn>
-      <v-btn type="submit" :loading="loading" color="secondary">Send</v-btn>
+      <v-btn type="submit" :loading="state.loading" color="secondary">
+        Send
+      </v-btn>
     </v-card-actions>
   </DialogForm>
 </template>
@@ -73,36 +114,45 @@ export default defineComponent({
 
     const { state, reset } = useStateReset({
       subject: '',
-      body: '',
+      html: '',
       loading: false,
-      userIds: [] as number[],
+      users: [] as UserEntity[],
     })
 
     watch(
       () => props.users,
       (users: UserEntity[]) => {
-        state.userIds = users.map((u) => u.id)
+        state.users = [...users]
       },
       { immediate: true }
     )
+
+    const htmlToText = (html: string) => {
+      const divEl = document.createElement('div')
+
+      divEl.innerHTML = html
+
+      return divEl.textContent || divEl.innerText || ''
+    }
 
     const onSubmit = async () => {
       try {
         state.loading = true
 
         const dto: CreateEmailDto = {
-          userIds: state.userIds,
+          emails: state.users.map((u) => u.email!),
           subject: state.subject,
-          body: state.body,
+          html: state.html,
+          text: htmlToText(state.html),
         }
 
         await $axios.$post('/email', dto)
+        snackbar.success('Email Successfully Sent')
+        dialog.value!.close()
       } catch (error) {
         snackbar.error('An error occured attempting to email')
       } finally {
         state.loading = false
-        snackbar.success('Email Successfully Sent')
-        dialog.value!.close()
       }
     }
 

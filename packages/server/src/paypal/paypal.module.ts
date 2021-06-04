@@ -1,7 +1,6 @@
 import { HttpModule, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigSchema } from '../app.config';
 import { PAYPAL_ENV_TOKEN } from '../app.constants';
+import { ConfigService } from '../config/config.service';
 import { InvoiceModule } from '../invoice/invoice.module';
 import {
   LiveEnvironment,
@@ -13,10 +12,10 @@ import { PayPalService } from './paypal.service';
 
 const environmentFactory = {
   provide: PAYPAL_ENV_TOKEN,
-  useFactory: (config: ConfigService<ConfigSchema>) => {
-    const isSandboxed = config.get('PAYPAL_SANDBOXED') === true;
-    const clientId = config.get('PAYPAL_CLIENT_ID');
-    const secretKey = config.get('PAYPAL_SECRET_KEY');
+  useFactory: (config: ConfigService) => {
+    const isSandboxed = config.PAYPAL.SANDBOXED;
+    const clientId = config.PAYPAL.CLIENT_ID;
+    const secretKey = config.PAYPAL.SECRET_KEY;
 
     if (isSandboxed) {
       return new SandboxEnvironment(clientId, secretKey);

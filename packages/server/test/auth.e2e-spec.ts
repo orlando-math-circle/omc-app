@@ -1,7 +1,7 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule } from '../src/config/config.module';
 import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import Joi from 'joi';
@@ -15,8 +15,8 @@ import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { AccessGuard } from '../src/auth/guards/access-control.guard';
 import { CourseModule } from '../src/course/course.module';
+import { DevelopmentEmailService } from '../src/email/development-email.service';
 import { EmailModule } from '../src/email/email.module';
-import { EmailService } from '../src/email/email.service';
 import { FileModule } from '../src/file/file.module';
 import { CreateUserDto } from '../src/user/dtos/create-user.dto';
 import { Gender } from '../src/user/enums/gender.enum';
@@ -57,8 +57,10 @@ describe('Auth', () => {
           validationSchema: Joi.object({
             SECRET: Joi.string().default('test-secret'),
             PAYPAL_SANDBOXED: Joi.boolean().default(true),
-            SENDGRID_SANDBOXED: Joi.boolean().default(true),
-            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            EMAIL_SANDBOXED: Joi.boolean().default(true),
+            EMAIL_TEMPLATE_VERIFY: Joi.string().default('VERIFY_TEMPLATE'),
+            EMAIL_TEMPLATE_RESET: Joi.string().default('RESET_TEMPLATE'),
+            UPLOAD_DIRECTORY: Joi.string().default('../../uploads'),
             DEFAULT_EVENT_PICTURE: Joi.string().default(
               '/defaults/neon-math.jpg',
             ),
@@ -353,7 +355,7 @@ describe('Auth', () => {
     });
 
     it('should send an email to the user', async () => {
-      const spy = jest.spyOn(EmailService.prototype, 'send');
+      const spy = jest.spyOn(DevelopmentEmailService.prototype, 'send');
 
       await request(app.getHttpServer())
         .post('/password/forgot')
@@ -361,12 +363,12 @@ describe('Auth', () => {
         .expect(201);
 
       expect(spy).toBeCalled();
-      const email = spy.mock.calls[0][0].toSendGridRequest();
+      const email = spy.mock.calls[0][0].toRequest();
 
-      expect(email.dynamicTemplateData).toBeDefined();
-      forgotToken = email.dynamicTemplateData!.url.split('=')[1];
+      expect(email.personalization).toBeDefined();
+      forgotToken = email.personalization![0].data.reset_link.split('=')[1];
 
-      expect(email.to).toBe('jane@doe.com');
+      expect(email.to[0].email).toBe('jane@doe.com');
     });
   });
 

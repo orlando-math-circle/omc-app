@@ -24,12 +24,16 @@ export const useUsers = defineStore({
     async findOne(id: number | string) {
       this.user = await this.$nuxt.$axios.$get('/user/' + id)
     },
-    async findAll(findUsersDto?: FindUsersDto) {
+    async findAll(findUsersDto?: FindUsersDto, commit = true) {
       const resp = await this.$nuxt.$axios.$get('/user', {
         params: findUsersDto,
       })
 
-      this.users = resp[0]
+      if (commit) {
+        this.users = resp[0]
+      }
+
+      return resp
     },
     async update(
       id: number,

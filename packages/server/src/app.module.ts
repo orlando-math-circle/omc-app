@@ -1,10 +1,8 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import MikroORMConfig from '../mikro-orm.config';
 import { AccountModule } from './account/account.module';
-import { validate } from './app.config';
 import { AuthModule } from './auth/auth.module';
 import { CourseModule } from './course/course.module';
 import { EmailModule } from './email/email.module';
@@ -20,13 +18,15 @@ import { TwitterModule } from './twitter/twitter.module';
 import { UserModule } from './user/user.module';
 import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
 import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
+import { ConfigModule } from './config/config.module';
+import { configSchema } from './config/config.schema';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-      validate,
+      validationSchema: configSchema,
     }),
     MikroOrmModule.forRoot(MikroORMConfig),
     EmailModule,

@@ -6,10 +6,9 @@ import {
   NestInterceptor,
   Type,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { transformException } from '@nestjs/platform-express/multer/multer/multer.utils';
 import multer from 'multer';
-import { ConfigSchema } from '../../app.config';
+import { ConfigService } from '../../config/config.service';
 import { FileStorage } from '../../file/file.storage';
 import { FileFieldService } from '../file-field.service';
 
@@ -23,7 +22,7 @@ export function FileInterceptor(): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
     constructor(
       private readonly fileFieldService: FileFieldService,
-      private readonly config: ConfigService<ConfigSchema>,
+      private readonly config: ConfigService,
     ) {}
 
     async intercept(context: ExecutionContext, next: CallHandler) {
@@ -35,7 +34,7 @@ export function FileInterceptor(): Type<NestInterceptor> {
         name: req.params.name,
       });
       const fileStorage = new FileStorage(
-        this.config.get('FILE_DIRECTORY')!,
+        this.config.FILES.UPLOAD_DIRECTORY,
         fileField.folder,
       );
 

@@ -1,8 +1,7 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import FormData from 'form-data';
 import { lastValueFrom } from 'rxjs';
-import { ConfigSchema } from '../app.config';
+import { ConfigService } from '../config/config.service';
 
 const OMC_HANDLE = 'orlandomathcir';
 
@@ -12,7 +11,7 @@ export class TwitterService {
   private token?: string;
 
   constructor(
-    private readonly config: ConfigService<ConfigSchema>,
+    private readonly config: ConfigService,
     private readonly http: HttpService,
   ) {}
 
@@ -32,8 +31,8 @@ export class TwitterService {
   }
 
   private async getToken() {
-    const key = this.config.get('TWITTER_KEY');
-    const secret = this.config.get('TWITTER_SECRET');
+    const key = this.config.TWITTER.KEY;
+    const secret = this.config.TWITTER.SECRET;
     const token = Buffer.from(`${key}:${secret}`, 'utf-8').toString('base64');
 
     const data = new FormData();
