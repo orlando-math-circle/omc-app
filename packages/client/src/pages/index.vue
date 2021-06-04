@@ -4,12 +4,12 @@
       <v-col cols="12">
         <v-row>
           <v-col align="center">
-            <v-img class="logo" :src="logo"></v-img>
+            <v-img class="logo" :src="logo" />
           </v-col>
         </v-row>
         <v-row>
           <v-col class="mx-5">
-            <div class="wave"></div>
+            <div class="wave" />
             <v-btn block color="primary" to="/login" class="mb-4">
               Log in
             </v-btn>
@@ -22,22 +22,29 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { useDarkMode } from '@/composables/useDarkMode'
 
-@Component({
+export default defineComponent({
   layout: 'landing',
   middleware: 'guest',
+  setup() {
+    const isDark = useDarkMode()
+
+    const logo = computed(() =>
+      isDark.value
+        ? require('@/assets/images/logo_white.png')
+        : require('@/assets/images/logo_dark.png')
+    )
+
+    return {
+      logo,
+    }
+  },
   head: {
     title: 'Welcome',
   },
 })
-export default class IndexPage extends Vue {
-  get logo() {
-    return this.$vuetify.theme.dark
-      ? require('@/assets/images/logo_white.png')
-      : require('@/assets/images/logo_dark.png')
-  }
-}
 </script>
 
 <style lang="scss" scoped>

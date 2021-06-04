@@ -28,7 +28,7 @@
   <mj-body mj-class="bg-blue" width="600px">
     <mj-section full-width="full-width" padding-bottom="0">
       <mj-column width="100%">
-        <mj-image src="http://cdn.mcauto-images-production.sendgrid.net/e6ff301b0c92b432/40f4ef64-1344-4a05-ae9c-91fc187ee650/1200x377.png" width="600px" alt="" padding="0" href="https://mobile.orlandomathcircle.org/" />
+        <mj-image src="https://bucket.mailersendapp.com/0r83ql3eyx4zw1jm/ynrw7gyn8j42k8e3/images/938ab5bd-5ee6-403f-bc38-ba053be60b45.png" width="600px" alt="" padding="0" href="https://mobile.orlandomathcircle.org/" />
       </mj-column>
     </mj-section>
     <mj-wrapper padding-top="0" padding-bottom="0" css-class="body-section">
@@ -38,12 +38,12 @@
             Reset your password
           </mj-text>
           <mj-text color="#637381" font-size="16px">
-            Hi {{first_name}},
+            Hi {{ first_name }},
           </mj-text>
           <mj-text color="#637381" font-size="16px">
             We're sending you this email because you requested a password reset. Click on this link to create a new password:
           </mj-text>
-          <mj-button mj-class="bg-pink" align="center" color="#ffffff" font-size="17px" font-weight="bold" href="{{reset_link}}" width="300px">
+          <mj-button mj-class="bg-pink" align="center" color="#ffffff" font-size="17px" font-weight="bold" href="{{ reset_link }}" width="300px">
             Set a new password
           </mj-button>
         </mj-column>

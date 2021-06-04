@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Event Registrations" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Event Registrations" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" v-on="on">
@@ -10,7 +10,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-registration>
+          <DialogCreateRegistration>
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -22,82 +22,82 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-registration>
+          </DialogCreateRegistration>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row>
       <v-col>
-        <v-data-table-paginated :items="registrations" :headers="headers">
-          <template #[`item.id`]="{ item }">
-            # <link-copy :text="item.id"></link-copy>
-          </template>
+        <v-card :loading="isLoading">
+          <v-card-title>
+            <v-spacer />
 
-          <template #[`item.user`]="{ item }">
-            <div class="d-flex align-center py-1">
-              <v-avatar size="32px" class="elevation-1">
-                <v-img :src="$avatar(item.user)" />
-              </v-avatar>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              placeholder="Search..."
+              label="Search"
+              single-line
+              solo
+              hide-details
+            />
 
-              <div class="ml-2">
-                {{ item.user.name }}
-              </div>
-            </div>
-          </template>
-
-          <template #[`item.event`]="{ item }">
-            {{ item.event.name }}
-          </template>
-
-          <template #[`item.edit`]="{ item }">
-            <v-btn icon :to="`/admin/calendar/registrations/${item.id}`">
-              <v-icon>mdi-open-in-new</v-icon>
+            <v-btn class="ml-3" icon large @click="onRefresh">
+              <v-icon>mdi-refresh</v-icon>
             </v-btn>
-          </template>
-        </v-data-table-paginated>
+          </v-card-title>
+
+          <DataTableRegistrations
+            :registrations="registrations"
+            :search="search"
+            @refresh="onRefresh"
+          />
+        </v-card>
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { useRegistrations } from '@/stores'
+import { useDebouncedRef } from '@/composables'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const registrationStore = useRegistrations()
+
+    // TODO: Search NYI
+    const search = useDebouncedRef('')
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Registrations',
+      },
+    ]
+
+    const registrations = computed(() => registrationStore.registrations)
+    const isLoading = computed(() => registrationStore.isLoading)
+
+    const onRefresh = async () => {
+      await registrationStore.findAll()
+    }
+
+    return { search, breadcrumbs, registrations, onRefresh, isLoading }
+  },
+  async asyncData({ pinia }) {
+    const registrationStore = useRegistrations(pinia)
+
+    await registrationStore.findAll()
+  },
   head: {
     title: 'Registrations',
   },
-  async asyncData({ app: { $accessor } }) {
-    await $accessor.registrations.findAll()
-  },
 })
-export default class RegistrationsAdminPage extends Vue {
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Registrations',
-      href: '/admin/calendar/registrations',
-    },
-    {
-      text: 'Edit Registration',
-    },
-  ]
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'User', value: 'user' },
-    { text: 'Event', value: 'event' },
-    { text: 'Invoice', value: 'invoice' },
-    { text: 'Edit', value: 'edit', sortable: false },
-  ]
-
-  get registrations() {
-    return this.$accessor.registrations.registrations
-  }
-}
 </script>

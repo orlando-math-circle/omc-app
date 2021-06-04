@@ -12,13 +12,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
 import { eachWeekOfInterval, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
 import { BCRYPT_ROUNDS } from '../app.constants';
 import { isBetweenInclusive, Populate, PopulateFail } from '../app.utils';
+import { ConfigService } from '../config/config.service';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { ApprovalStatus } from '../file/interfaces/approval-status.enum';
@@ -38,18 +38,22 @@ export class UserService {
     config: ConfigService,
   ) {
     for (let i = 0; i < 10; i++) {
-      this.avatars[i] = `${config.get('DEFAULT_AVATAR_FOLDER')}/${i}.png`;
+      this.avatars[i] = `${config.FILES.DEFAULT_AVATAR_FOLDER}/${i}.png`;
     }
   }
 
   /**
    * Creates a new user for the given account.
+   * TODO: Add logic for validating these emails, age checks, ...etc.
    *
    * @param account Account to add the user to.
    * @param createUserDto Data necessary for creating a new user.
    */
   async create(account: Account, createUserDto: CreateUserDto) {
-    // TODO: Add logic for validating these emails, age checks, ...etc.
+    if (createUserDto.industry) {
+      createUserDto.industry = classToPlain(createUserDto.industry);
+    }
+
     const user = this.userRepository.create(createUserDto);
 
     account.users.add(user);
@@ -97,7 +101,7 @@ export class UserService {
     return this.userRepository.findAndCount(where, options);
   }
 
-  async update(
+  public async update(
     id: number,
     dto: UpdateUserDto | UpdateOwnUserDto,
     author?: User,
@@ -123,7 +127,7 @@ export class UserService {
     }
 
     if ('password' in dto) {
-      dto.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+      dto.password = await bcrypt.hash(dto.password!, BCRYPT_ROUNDS);
     }
 
     user.assign(dto);

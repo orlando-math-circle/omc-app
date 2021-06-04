@@ -9,28 +9,35 @@
 
       <v-row>
         <v-col class="pt-0">
-          <breadcrumbs class="pa-0" :items="breadcrumbs" />
+          <Breadcrumbs class="pa-0" :items="breadcrumbs" />
         </v-col>
       </v-row>
     </v-col>
 
     <v-col cols="auto" align-self="center">
-      <slot></slot>
+      <slot />
     </v-col>
   </v-row>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { defineComponent, PropType } from '@nuxtjs/composition-api'
 
 export type Breadcrumb = {
   text: string
   href?: string
 }
 
-@Component
-export default class AdminHeader extends Vue {
-  @Prop({ required: true, type: String }) title!: string
-  @Prop({ required: true }) breadcrumbs!: Breadcrumb[]
-}
+export default defineComponent({
+  props: {
+    breadcrumbs: {
+      type: Array as PropType<Breadcrumb[]>,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+  },
+})
 </script>

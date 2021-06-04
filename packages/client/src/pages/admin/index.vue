@@ -1,57 +1,64 @@
 <template>
   <v-row>
     <v-col cols="12" md="4">
-      <chart-card
+      <ChartCard
         title="New Users"
         subtitle="Users added this month"
         icon="mdi-account-plus-outline"
         :options="userChartOptions"
         :series="userChartSeries"
-      >
-      </chart-card>
+      />
     </v-col>
 
     <v-col cols="12" md="4">
-      <v-card></v-card>
+      <v-card />
     </v-col>
 
     <v-col cols="12" md="4">
-      <v-card></v-card>
+      <v-card />
     </v-col>
   </v-row>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import {
+  computed,
+  defineComponent,
+  ref,
+  useContext,
+  useFetch,
+} from '@nuxtjs/composition-api'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
-})
-export default class AdminIndex extends Vue {
-  statistics = {
-    users: null as null | any,
-  }
+  setup() {
+    const { $axios } = useContext()
+    const state = ref({
+      statistics: {
+        users: null as any,
+      },
+    })
 
-  get userChartSeries() {
-    if (!this.statistics.users)
+    const userChartSeries = computed(() => {
+      if (!state.value.statistics.users) {
+        return [
+          {
+            name: 'Missing',
+            type: 'area',
+            data: [],
+          },
+        ]
+      }
+
       return [
         {
-          name: 'Missing',
-          type: 'area',
-          data: [],
+          name: 'New Users',
+          data: Object.values(state.value.statistics.users.month),
         },
       ]
+    })
 
-    return [
-      {
-        name: 'New Users',
-        data: Object.values(this.statistics.users.month),
-      },
-    ]
-  }
-
-  get userChartOptions() {
-    return {
+    const userChartOptions = computed(() => ({
       chart: {
         height: 60,
         type: 'area',
@@ -74,12 +81,17 @@ export default class AdminIndex extends Vue {
         },
       },
       colors: ['#8c9eff'],
-      labels: this.statistics.users?.labels,
-    }
-  }
+      labels: state.value.statistics.users?.labels,
+    }))
 
-  async fetch() {
-    this.statistics.users = await this.$axios.$get('/user/statistics')
-  }
-}
+    useFetch(async () => {
+      state.value.statistics.users = await $axios.$get('/user/statistics')
+    })
+
+    return {
+      userChartSeries,
+      userChartOptions,
+    }
+  },
+})
 </script>

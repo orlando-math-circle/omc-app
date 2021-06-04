@@ -5,17 +5,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
 
 /**
  * Simplistic codeblock with no syntax highlighting.
  * If more advanced features are desired, see the PrismJS library.
  */
 
-@Component
-export default class Codeblock extends Vue {
-  @Prop() code: any
-}
+export default defineComponent({
+  props: {
+    code: {
+      type: [String, Number, Boolean, Object],
+      required: true,
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>

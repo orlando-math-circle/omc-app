@@ -33,18 +33,15 @@ const config: NuxtConfig = {
       },
       {
         rel: 'stylesheet',
-        href:
-          'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Spartan:wght@700&family=Quicksand:wght@400;500;600;700&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Spartan:wght@700&family=Quicksand:wght@400;500;600;700&display=swap',
       },
       {
         rel: 'stylesheet',
-        href:
-          'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css',
+        href: 'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css',
       },
       {
         rel: 'stylesheet',
-        href:
-          'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
+        href: 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
       },
     ],
   },
@@ -54,13 +51,12 @@ const config: NuxtConfig = {
     avatarBase: process.env.AVATAR_BASE || '/defaults/avatars',
   },
   loading: { color: '#44d9e6' },
-  css: [],
   plugins: [
+    '~/plugins/error',
+    '~/plugins/pinia',
+    '~/plugins/auth',
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
-    '~/plugins/axios',
-    '~/plugins/avatar',
-    '~/plugins/snackbar',
     '~/plugins/background',
     {
       src: '~/plugins/apex-charts',
@@ -71,8 +67,8 @@ const config: NuxtConfig = {
   buildModules: [
     '@nuxt/typescript-build',
     '@nuxtjs/composition-api/module',
-    'nuxt-typed-vuex',
     '@nuxt/postcss8',
+    'pinia/nuxt',
   ],
   modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
   axios: {
@@ -82,11 +78,6 @@ const config: NuxtConfig = {
   },
   typescript: {
     typeCheck: false,
-  },
-  vue: {
-    config: {
-      productionTip: false,
-    },
   },
   cli: {
     bannerColor: 'magenta',
@@ -98,18 +89,21 @@ const config: NuxtConfig = {
   },
   build: {
     parallel: true,
-    cache: process.env.BUILD_CACHE === 'true',
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {
       sass: {
-        implementation: require('sass'),
-        sassOptions: {
-          fiber: require('fibers'),
-          indentedSyntax: true,
-          additionalData: "@import '@/assets/styles/variables.scss'",
-        },
+        // @ts-ignore Outdated @types/sass-loader
+        additionalData: "@import '~assets/styles/variables.scss'",
       },
+    },
+  },
+  vue: {
+    config: {
+      devtools:
+        process.env.NODE_ENV === 'development' ||
+        process.env.DEVTOOLS === 'true',
+      productionTip: false,
     },
   },
 }

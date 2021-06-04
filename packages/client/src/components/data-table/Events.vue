@@ -1,7 +1,11 @@
 <template>
-  <v-data-table-paginated :headers="headers" :items="events" @refresh="refresh">
+  <VDataTablePaginated
+    :items="events"
+    :headers="headers"
+    @refresh="$emit('refresh:events')"
+  >
     <template #[`item.id`]="{ item }">
-      # <link-copy :text="item.id"></link-copy>
+      # <LinkCopy :text="item.id" />
     </template>
 
     <template #[`item.name`]="{ item }">
@@ -29,33 +33,34 @@
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
     </template>
-  </v-data-table-paginated>
+  </VDataTablePaginated>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { DTOEvent } from '../../store/events'
-import { formatDate } from '../../utils/utilities'
+import { defineComponent, PropType } from '@vue/composition-api'
+import { EventEntity } from '@/stores'
+import { useDates } from '@/composables'
 
-@Component
-export default class DataTableEvents extends Vue {
-  @Prop({ required: true }) readonly events!: DTOEvent[]
+export default defineComponent({
+  props: {
+    events: {
+      type: Array as PropType<EventEntity[]>,
+      required: true,
+    },
+  },
+  setup() {
+    const dateUtils = useDates()
 
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Start', value: 'start' },
-    { text: 'End', value: 'end' },
-    { text: 'Edit', value: 'edit', sortable: false, filterable: false },
-  ]
+    const headers = [
+      { text: 'Id', value: 'id' },
+      { text: 'Name', value: 'name' },
+      { text: 'Description', value: 'description' },
+      { text: 'Start', value: 'start' },
+      { text: 'End', value: 'end' },
+      { text: 'Edit', value: 'edit', sortable: false, filterable: false },
+    ]
 
-  refresh() {
-    this.$emit('refresh:event-table')
-  }
-
-  format(date: Date | string, formatString: string) {
-    return formatDate(date, formatString)
-  }
-}
+    return { headers, format: dateUtils.format }
+  },
+})
 </script>

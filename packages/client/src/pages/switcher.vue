@@ -14,7 +14,7 @@
       </v-row>
 
       <v-row v-for="user in account.users" :key="user.id">
-        <v-col justify="center" align="center" @click="switchUser(user)">
+        <v-col justify="center" align="center" @click="onSwitch(user.id)">
           <v-tooltip bottom>
             <template #activator="{ on, attrs }">
               <v-avatar
@@ -24,13 +24,13 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                <v-img :src="$avatar(user)" />
+                <v-img :src="user.avatarUrl" />
               </v-avatar>
             </template>
-            <span>{{ user.first }} {{ user.last }}</span>
+            <span>{{ user.name }}</span>
           </v-tooltip>
 
-          <div class="py-2">{{ user.first }} {{ user.last }}</div>
+          <div class="py-2">{{ user.name }}</div>
         </v-col>
       </v-row>
     </v-container>
@@ -38,33 +38,31 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
-import { User } from '@server/user/user.entity'
+import { computed, defineComponent, useRouter } from '@nuxtjs/composition-api'
+import { useAuth } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'landing',
-  head() {
+  setup() {
+    const authStore = useAuth()
+    const router = useRouter()
+
+    const onSwitch = async (id: number) => {
+      await Promise.all([authStore.switchUser(id), authStore.getMyUser()])
+
+      router.push('/home')
+    }
+
     return {
-      title: 'Switch User',
+      account: computed(() => authStore.account),
+      onSwitch,
     }
   },
+  async asyncData({ pinia }) {
+    await useAuth(pinia).getMyAccount()
+  },
+  head: {
+    title: 'Switch User',
+  },
 })
-export default class SwitcherPage extends Vue {
-  get account() {
-    return this.$accessor.auth.account
-  }
-
-  async fetch() {
-    if (this.account == null || this.account.users.length >= 0) {
-      await this.$accessor.auth.getAccount()
-    }
-  }
-
-  async switchUser(user: User) {
-    await this.$accessor.auth.switchUser(user.id)
-    await this.$accessor.auth.getMe()
-
-    this.$router.push('/home')
-  }
-}
 </script>

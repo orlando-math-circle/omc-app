@@ -1,85 +1,138 @@
 <template>
-  <v-dialog
-    v-model="dialog"
-    :fullscreen="expands ? $vuetify.breakpoint.mobile : false"
-    :max-width="width"
-    persistent
-    @input="onInput"
-    @click:outside="handler"
-  >
-    <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }">
-        <v-btn v-bind="attrs" color="secondary" v-on="on">Create</v-btn>
-      </slot>
+  <v-dialog v-model="dialog" v-bind="dialogAttrs">
+    <template #activator="activator">
+      <slot name="activator" v-bind="activator" />
     </template>
 
-    <v-card @mousedown="setMouseDown">
-      <v-toolbar flat>
+    <v-card v-bind="cardAttrs">
+      <v-toolbar :flat="flat">
         <v-toolbar-title>
-          <slot name="title"></slot>
+          <slot name="title" />
         </v-toolbar-title>
-        <v-btn small absolute right fab icon @click="dialog = false">
+
+        <v-btn small absolute right fab icon class="mr-0" @click="close">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
 
-      <v-card-subtitle v-if="$slots.footer">
-        <slot name="subtitle"></slot>
-      </v-card-subtitle>
+      <VFormValidated
+        ref="formRef"
+        v-slot="data"
+        @form:submit="$emit('form:submit')"
+      >
+        <slot v-bind="{ ...data, closing }" />
 
-      <slot name="image"></slot>
+        <v-card-text v-if="$scopedSlots.form">
+          <v-row>
+            <slot name="form" v-bind="{ ...data, closing }" />
+          </v-row>
+        </v-card-text>
 
-      <v-form-validated v-slot="data" @submit:form="submit">
-        <slot v-bind="{ ...data, closing }"></slot>
-      </v-form-validated>
+        <v-card-actions v-if="$scopedSlots.actions">
+          <slot name="actions" v-bind="{ ...data, closing }" />
+        </v-card-actions>
+      </VFormValidated>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  ref,
+  toRefs,
+  useContext,
+  watch,
+} from '@nuxtjs/composition-api'
+import VFormValidated from '@/components/inputs/VFormValidated.vue'
 
-@Component
-export default class DialogForm extends Vue {
-  @Prop({ default: 570 }) width?: number
-  @Prop({ default: true }) expands!: boolean
+export type FormComponent = InstanceType<typeof VFormValidated>
 
-  dialog = false
-  closing = false
-  downInner = false
+export default defineComponent({
+  props: {
+    width: {
+      type: [Number, String],
+      default: 570,
+    },
+    expands: {
+      type: Boolean,
+      default: false,
+    },
+    flat: {
+      type: Boolean,
+      default: true,
+    },
+    resetOnClose: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  setup(props, { emit }) {
+    const formRef = ref<FormComponent>()
 
-  onInput(value: boolean) {
-    this.$emit('dialog:state', value)
-  }
+    const { $vuetify } = useContext()
 
-  close(delay?: number) {
-    if (delay) {
-      this.closing = true
-      setTimeout(() => (this.dialog = false), delay)
-      return
+    const state = reactive({
+      dialog: false,
+      closing: false,
+      downInner: false,
+    })
+
+    const dialogAttrs = computed(() => ({
+      fullscreen: (props.expands && $vuetify.breakpoint.mobile) || false,
+      maxWidth: props.width,
+    }))
+
+    const cardAttrs = computed(() => ({
+      style: { borderRadius: $vuetify.breakpoint.mobile ? '0px' : 'inherit ' },
+    }))
+
+    watch(
+      () => state.dialog,
+      () => {
+        if (state.dialog === false && props.resetOnClose) {
+          formRef.value!.resetValidation()
+        }
+
+        if (state.dialog) {
+          emit('dialog:open')
+        } else {
+          emit('dialog:close')
+        }
+
+        emit('dialog:state', state.dialog)
+      }
+    )
+
+    const open = () => (state.dialog = true)
+
+    const close = (delay = 0) => {
+      if (!delay) {
+        emit('dialog:state', false)
+        emit('dialog:close')
+        state.dialog = false
+        state.closing = false
+
+        return
+      }
+
+      state.closing = true
+      setTimeout(() => close(), delay)
     }
 
-    this.dialog = false
-  }
+    const resetValidation = () => formRef.value!.resetValidation()
 
-  submit() {
-    this.$emit('submit:form')
-  }
-
-  @Watch('dialog')
-  watchDialog() {
-    this.downInner = false
-  }
-
-  setMouseDown() {
-    this.downInner = true
-  }
-
-  handler() {
-    if (this.downInner === false) {
-      this.dialog = false
+    return {
+      ...toRefs(state),
+      formRef,
+      open,
+      close,
+      dialogAttrs,
+      cardAttrs,
+      resetValidation,
     }
-    this.downInner = false
-  }
-}
+  },
+})
 </script>

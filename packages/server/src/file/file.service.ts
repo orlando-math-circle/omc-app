@@ -1,12 +1,11 @@
 import { EntityRepository, FilterQuery } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import fs from 'fs';
 import { basename, extname, resolve } from 'path';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { ConfigSchema } from '../app.config';
+import { ConfigService } from '../config/config.service';
 import { User } from '../user/user.entity';
 import { File } from './file.entity';
 import { MulterFile } from './interfaces/multer-file.interface';
@@ -22,9 +21,9 @@ export class FileService {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: EntityRepository<File>,
-    private readonly config: ConfigService<ConfigSchema>,
+    private readonly config: ConfigService,
   ) {
-    this.path = resolve(config.get('FILE_DIRECTORY')!);
+    this.path = resolve(config.FILES.UPLOAD_DIRECTORY);
   }
 
   async create(
@@ -44,7 +43,7 @@ export class FileService {
         path: metadata.path.replace(/\\/g, '/'),
         root: metadata.path
           .replace(/\\/g, '/')
-          .replace(this.config.get('FILE_DIRECTORY')!, ''),
+          .replace(this.config.FILES.UPLOAD_DIRECTORY, ''),
         author: userOrId,
       }),
     );

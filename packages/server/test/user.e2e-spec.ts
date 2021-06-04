@@ -1,13 +1,13 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule } from '../src/config/config.module';
 import { Test } from '@nestjs/testing';
 import Joi from 'joi';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
-import { CreateAccountDto } from '../src/account/dtos/create-account.dto';
+import { RegisterAccountDto } from '../src/account/dto/register.dto';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -31,7 +31,7 @@ describe('Users', () => {
 
   let token: string;
 
-  const createAccountDto: CreateAccountDto = {
+  const createAccountDto: RegisterAccountDto = {
     first: 'Jane',
     last: 'Doe',
     grade: Grade.GRADUATED,
@@ -41,7 +41,7 @@ describe('Users', () => {
     dob: new Date(Date.UTC(1995, 0, 1)),
   };
 
-  const secondAccountDto: CreateAccountDto = {
+  const secondAccountDto: RegisterAccountDto = {
     first: 'Jack',
     last: 'Doe',
     gender: Gender.FEMALE,
@@ -58,8 +58,10 @@ describe('Users', () => {
           validationSchema: Joi.object({
             SECRET: Joi.string().default('test-secret'),
             PAYPAL_SANDBOXED: Joi.boolean().default(true),
-            SENDGRID_SANDBOXED: Joi.boolean().default(true),
-            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            EMAIL_SANDBOXED: Joi.boolean().default(true),
+            EMAIL_TEMPLATE_VERIFY: Joi.string().default('VERIFY_TEMPLATE'),
+            EMAIL_TEMPLATE_RESET: Joi.string().default('RESET_TEMPLATE'),
+            UPLOAD_DIRECTORY: Joi.string().default('../../uploads'),
             DEFAULT_EVENT_PICTURE: Joi.string().default(
               '/defaults/neon-math.jpg',
             ),

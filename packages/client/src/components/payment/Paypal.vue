@@ -1,63 +1,87 @@
 <template>
-  <div ref="buttons"></div>
+  <div ref="buttons" />
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { useSnackbar } from '@/composables'
+import { usePayPal } from '@/stores'
+import {
+  defineComponent,
+  PropType,
+  reactive,
+  ref,
+  useContext,
+} from '@nuxtjs/composition-api'
+import { useScriptTag } from '@vueuse/core'
 
 declare const paypal: any
 
-@Component
-export default class PayPal extends Vue {
-  @Prop() readonly event!: number
-  @Prop() readonly users!: number[]
+export default defineComponent({
+  props: {
+    event: {
+      type: Number,
+      required: true,
+    },
+    users: {
+      type: Array as PropType<number[]>,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const buttons = ref<HTMLDivElement>()
 
-  loaded = false
-  completed = false
+    const state = reactive({
+      loaded: false,
+      completed: false,
+    })
 
-  onLoad() {
-    this.loaded = true
-    paypal
-      .Buttons({
-        style: {
-          size: 'responsive',
-        },
-        createOrder: async () => {
-          const order = await this.$accessor.paypal.create({
-            eventId: this.event,
-            users: this.users,
-          })
+    const { $config } = useContext()
+    const paypalStore = usePayPal()
+    const snackbar = useSnackbar()
 
-          return order.id
-        },
-        onApprove: async (data: any, actions: { restart: () => void }) => {
-          const invoices = await this.$accessor.paypal.capture({
-            eventId: this.event,
-            orderId: data.orderID,
-          })
+    const onScriptLoad = () => {
+      state.loaded = true
+      paypal
+        .Buttons({
+          style: {
+            size: 'responsive',
+          },
+          createOrder: async () => {
+            const order = await paypalStore.createOrder(
+              props.event,
+              props.users
+            )
 
-          if (this.$accessor.paypal.isErrored) {
-            console.log(this.$accessor.paypal.error)
+            return order.id
+          },
+          onApprove: async (data: any, actions: { restart: () => void }) => {
+            const invoices = await paypalStore.captureOrder(
+              props.event,
+              data.orderID
+            )
 
-            actions.restart()
-            return
-          }
+            if (paypalStore.error) {
+              snackbar.error(paypalStore.error.message)
 
-          this.completed = true
-          this.$emit('payment:complete', invoices)
-        },
-      })
-      .render(this.$refs.buttons)
-  }
+              actions.restart()
+              return
+            }
 
-  mounted() {
-    const script = document.createElement('script')
-    script.setAttribute(
-      'src',
-      `https://www.paypal.com/sdk/js?client-id=${this.$config.paypalClientId}`
+            state.completed = true
+            emit('payment:complete', invoices)
+          },
+        })
+        .render(buttons.value)
+    }
+
+    useScriptTag(
+      `https://www.paypal.com/sdk/js?client-id=${$config.paypalClientId}`,
+      onScriptLoad
     )
-    script.addEventListener('load', () => this.onLoad())
-    document.head.appendChild(script)
-  }
-}
+
+    return {
+      buttons,
+    }
+  },
+})
 </script>

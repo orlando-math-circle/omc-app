@@ -8,11 +8,14 @@
 @import './elevations.scss';
 
 // Basic Overrides
+$font-size-root: 15px !default;
 // An alternative font that's quite nice is "DM Sans"
 $body-font-family: 'Quicksand', sans-serif;
 $heading-font-family: 'Quicksand', sans-serif;
 $border-radius-root: 6px;
 $color-pack: false;
+$grid-gutter: 15px;
+$container-padding-x: $grid-gutter;
 
 // Light Theme
 $material-light: (

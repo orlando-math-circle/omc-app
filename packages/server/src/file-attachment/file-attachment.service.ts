@@ -1,8 +1,7 @@
 import { EntityRepository, FilterQuery, Populate } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigSchema } from '../app.config';
+import { ConfigService } from '../config/config.service';
 import { FileFieldService } from '../file-fields/file-field.service';
 import { File } from '../file/file.entity';
 import { MulterFile } from '../file/interfaces/multer-file.interface';
@@ -15,7 +14,7 @@ export class FileAttachmentService {
     @InjectRepository(FileAttachment)
     private readonly attachmentRepository: EntityRepository<FileAttachment>,
     private readonly fileFieldService: FileFieldService,
-    private readonly config: ConfigService<ConfigSchema>,
+    private readonly config: ConfigService,
   ) {}
 
   async create(field: string, multerFile: MulterFile, user: User) {
@@ -28,7 +27,7 @@ export class FileAttachmentService {
 
     attachment.file = new File(multerFile, user);
     attachment.file.root = multerFile.path.replace(
-      this.config.get('FILE_DIRECTORY')!,
+      this.config.FILES.UPLOAD_DIRECTORY,
       '',
     );
     attachment.user.populated();

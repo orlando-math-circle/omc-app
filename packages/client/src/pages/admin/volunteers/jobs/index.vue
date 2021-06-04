@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Volunteer Jobs" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Volunteer Jobs" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-create-job :is-static="false" @create:job="onCreateJob">
+          <DialogCreateJob :is-static="false" @create:job="onCreateJob">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -21,52 +21,48 @@
                 </v-list-item-content>
               </v-list-item>
             </template>
-          </dialog-create-job>
+          </DialogCreateJob>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row>
       <v-col>
-        <data-table-jobs :jobs="jobs" />
+        <DataTableJobs :jobs="jobs" />
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { computed, defineComponent, useFetch } from '@nuxtjs/composition-api'
+import { useJobs } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Volunteer Jobs',
+      },
+    ]
+
+    const jobStore = useJobs()
+
+    const jobs = computed(() => jobStore.jobs)
+
+    const onCreateJob = () => jobStore.findAll()
+
+    useFetch(() => jobStore.findAll())
+
+    return { breadcrumbs, onCreateJob, jobs }
+  },
   head: {
     title: 'Jobs',
   },
-  async fetch({ app: { $accessor } }) {
-    await $accessor.volunteers.findAll()
-  },
 })
-export default class AdminJobsPage extends Vue {
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Volunteer Jobs',
-    },
-  ]
-
-  get jobs() {
-    return this.$accessor.volunteers.jobs
-  }
-
-  onCreateJob() {
-    this.refresh()
-  }
-
-  async refresh() {
-    await this.$accessor.volunteers.findAll()
-  }
-}
 </script>

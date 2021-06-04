@@ -1,5 +1,5 @@
 <template>
-  <dialog-form ref="refDialog" @submit:form="onSubmit">
+  <DialogForm ref="dialog" expands @form:submit="onSubmit">
     <template #title>Create Event</template>
 
     <template #activator="{ on, attrs }">
@@ -9,7 +9,7 @@
     </template>
 
     <v-card-text>
-      <alert-error v-if="error" class="mx-4" :error="error" />
+      <AlertError v-if="error" class="mx-4" :error="error" />
 
       <v-list dense>
         <!-- Name -->
@@ -19,15 +19,14 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               v-model="meta.name"
               label="Title"
               hide-details="auto"
               vid="title"
               rules="required"
               outlined
-            >
-            </v-text-field-validated>
+            />
           </v-list-item-content>
         </v-list-item>
 
@@ -42,7 +41,7 @@
           <v-list-item-content>All-day</v-list-item-content>
 
           <v-list-item-action>
-            <v-switch v-model="dates.allday" color="secondary"></v-switch>
+            <v-switch v-model="dates.allday" color="secondary" />
           </v-list-item-action>
         </v-list-item>
 
@@ -53,33 +52,32 @@
           <v-list-item-content>
             <v-row wrap>
               <v-col :cols="dates.allday ? 12 : 8">
-                <v-menu v-model="dates.start.menu" offset-y min-width="290px">
+                <v-menu offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <!-- TODO: Investigate why using VTextFieldValidated
+                    causes the menu to not render properly -->
+                    <VTextFieldValidated
                       :value="format(dates.start.date)"
                       :label="dates.allday ? 'Date' : 'Start Date'"
-                      hide-details="auto"
-                      vid="startdate"
                       :rules="{
                         required: true,
                         startdate: dates.allday
                           ? false
                           : { target: '@enddate' },
                       }"
+                      vid="startdate"
+                      hide-details="auto"
                       outlined
                       v-bind="attrs"
                       v-on="on"
-                    ></v-text-field-validated>
+                    />
                   </template>
 
-                  <v-date-picker
-                    v-model="dates.start.date"
-                    @input="dates.start.menu = false"
-                  ></v-date-picker>
+                  <v-date-picker v-model="dates.start.date" />
                 </v-menu>
               </v-col>
 
-              <v-col v-if="!dates.allday" cols="4">
+              <v-col v-show="!dates.allday" cols="4">
                 <PickerTime
                   v-model="times.start.time"
                   vid="starttime"
@@ -96,30 +94,27 @@
                 />
               </v-col>
 
-              <v-col v-if="!dates.allday" cols="8">
-                <v-menu v-model="dates.end.menu" offset-y min-width="290px">
+              <v-col v-show="!dates.allday" cols="8">
+                <v-menu offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       :value="format(dates.end.date)"
                       :rules="{ required: !dates.allday }"
                       vid="enddate"
                       readonly
                       hide-details="auto"
                       label="End Date"
-                      v-bind="attrs"
                       outlined
+                      v-bind="attrs"
                       v-on="on"
-                    >
-                    </v-text-field-validated>
+                    />
                   </template>
-                  <v-date-picker
-                    v-model="dates.end.date"
-                    @input="dates.end.menu = false"
-                  ></v-date-picker>
+
+                  <v-date-picker v-model="dates.end.date" />
                 </v-menu>
               </v-col>
 
-              <v-col v-if="!dates.allday" cols="4">
+              <v-col v-show="!dates.allday" cols="4">
                 <PickerTime
                   v-model="times.end.time"
                   vid="endtime"
@@ -183,7 +178,7 @@
               </v-col>
 
               <v-col v-if="meta.lateThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.lateOffset"
                   label="Minute Offset"
                   type="number"
@@ -204,7 +199,7 @@
               </v-col>
 
               <v-col v-if="meta.cutoffThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.cutoffOffset"
                   label="Minute Offset"
                   type="number"
@@ -248,7 +243,7 @@
           <v-list-item-content>
             <v-row>
               <v-col cols="12">
-                <v-combobox-validated
+                <VComboboxValidated
                   v-model="meta.locationTitle"
                   rules="required"
                   :items="['Online', 'Zoom', 'In-Person']"
@@ -288,7 +283,7 @@
                   auto-grow
                   hide-details="auto"
                   outlined
-                ></v-textarea>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -305,18 +300,29 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-project
+                <VAutocompleteValidated
                   v-model="project"
+                  :items="projectStore.projects"
+                  :loading="projectStore.isLoading"
                   label="Project (Optional)"
+                  hide-details="auto"
                   item-value="id"
+                  item-text="name"
+                  clearable
                   outlined
+                  debounce
+                  @search="projectStore.findAll()"
                 />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-project v-model="project" />
+                <DialogSelectProject v-model="project" />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
-                <dialog-create-project @create:project="onProjectCreated" />
+                <DialogCreateProject
+                  @create:project="(proj) => (project = proj.id)"
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -333,7 +339,15 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-course
+                <VAutoCompleteValidated
+                  v-model="course"
+                  label="Course"
+                  item-text="name"
+                  item-value="id"
+                  placeholder="Search for a course"
+                  @search="onCourseSearch"
+                />
+                <AutoCompleteCourse
                   v-model="course"
                   item-value="id"
                   :project="project"
@@ -342,11 +356,11 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-course v-model="course" :project="project" />
+                <DialogSelectCourse v-model="course" :project="project" />
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-create-course
+                <DialogCreateCourse
                   :project="project"
                   @create:course="onCourseCreated"
                 />
@@ -364,7 +378,7 @@
           <v-list-item-content>
             <v-row>
               <v-col cols="12">
-                <v-select-validated
+                <VSelectValidated
                   v-model="feeType"
                   :items="feeTypes"
                   :rules="{ required: true, has_course: { course } }"
@@ -376,7 +390,7 @@
 
               <template v-if="feeType !== 'free'">
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.amount"
                     rules="required"
                     label="Event Fee"
@@ -387,7 +401,7 @@
                 </v-col>
 
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.lateAmount"
                     label="Late Fee (Optional)"
                     type="number"
@@ -409,7 +423,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <file-upload
+            <FileUpload
               v-model="files"
               outlined
               label="Picture (Optional)"
@@ -428,7 +442,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               :value="meta.color"
               class="ma-0 pa-0 shrink-append"
               mask="'#XXXXXXXX'"
@@ -445,31 +459,27 @@
                   :close-on-content-click="false"
                 >
                   <template #activator="{ on }">
-                    <div :style="swatch" v-on="on"></div>
+                    <div :style="swatch" v-on="on" />
                   </template>
 
                   <v-card>
                     <v-card-text class="pa-0">
-                      <v-color-picker
-                        v-model="meta.color"
-                        flat
-                      ></v-color-picker>
+                      <v-color-picker v-model="meta.color" flat />
                     </v-card-text>
                   </v-card>
                 </v-menu>
               </template>
-            </v-text-field-validated>
+            </VTextFieldValidated>
           </v-list-item-content>
         </v-list-item>
-
-        <v-divider />
       </v-list>
     </v-card-text>
 
-    <v-card-actions>
+    <template #actions>
       <v-spacer />
 
       <v-btn text @click="dialog.close()">Cancel</v-btn>
+
       <v-btn type="submit" :loading="isLoading" color="primary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
@@ -479,28 +489,35 @@
 
         Create Event
       </v-btn>
-    </v-card-actions>
-  </dialog-form>
+    </template>
+  </DialogForm>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Ref } from 'nuxt-property-decorator'
-import { addDays, format, isBefore, isSameDay, parse, parseISO } from 'date-fns'
+import { addDays, format, isBefore, parse, parseISO } from 'date-fns'
 import { Options } from 'rrule'
 import { Course } from '@server/course/course.entity'
 import { Grade } from '@server/user/enums/grade.enum'
-import { Project } from '@server/project/project.entity'
 import { FeeType } from '@server/event/enums/fee-type.enum'
 import { Gender } from '@server/user/enums/gender.enum'
 import { EventTimeThreshold } from '@server/event/enums/event-time-threshold.enum'
-import RecurrenceDialog from '../dialog/Recurrence.vue'
-import { Uploads } from '../../types/uploads.interface'
-import DialogForm from './Form.vue'
-import { gradeGroups, contiguousGradeRanges, grades } from '~/utils/events'
-import { EventRecurrenceDto } from '~/types/events/event-recurrence.interface'
-import { addTime, isValidDate, roundDate, toDate } from '~/utils/utilities'
-import Calendar from '~/components/Calendar.vue'
-import { genders } from '~/utils/constants'
+import { gradeGroups, contiguousGradeRanges, grades } from '@/utils/events'
+import { genders } from '@/utils/constants'
+import { EventRecurrenceDto } from '@/types/events/event-recurrence.interface'
+import { addTime, isValidDate, roundDate, toDate } from '@/utils/utilities'
+import Calendar from '@/components/Calendar.vue'
+import {
+  defineComponent,
+  ref,
+  reactive,
+  toRefs,
+  computed,
+  onBeforeMount,
+} from '@nuxtjs/composition-api'
+import { useEvents, useFiles, useProjects } from '@/stores'
+import { useSnackbar, useDates, useTemplateRef } from '@/composables'
+import RecurrenceDialog from '@/components/dialog/Recurrence.vue'
+import DialogForm from '@/components/dialog/Form.vue'
 
 export type RRuleOptions = Partial<Options>
 
@@ -509,253 +526,266 @@ export type RepeatingTypes = {
   rrule?: RRuleOptions
 }
 
-@Component
-export default class DialogCreateEvent extends Vue {
-  @Ref('recurrenceDialog') readonly recurrenceDialog!: RecurrenceDialog
-  @Ref('calendar') readonly calendar!: Calendar
-  @Ref('refDialog') readonly dialog!: DialogForm
-  @Prop({ default: new Date().toISOString().substr(0, 10) }) date!: string
-  @Prop({ default: format(roundDate(new Date(), 30), 'HH:mm') }) time!: string
+export type DialogComponent = InstanceType<typeof DialogForm>
 
-  success = false
-  grades = grades
-  colorMenu = false
+const timeThresholds = [
+  { text: 'Never', value: EventTimeThreshold.NEVER },
+  { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
+  { text: 'After Event Starts', value: EventTimeThreshold.AFTER_START },
+  { text: 'Minutes From Start', value: EventTimeThreshold.OFFSET_START },
+  { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
+]
 
-  dates = {
-    allday: false,
-    start: {
-      menu: false,
-      date: '',
+const feeTypes = [
+  { text: 'Free', value: FeeType.FREE },
+  { text: 'Pay Per Event', value: FeeType.EVENT },
+  { text: 'Pay Per Course', value: FeeType.COURSE },
+]
+
+export default defineComponent({
+  props: {
+    date: {
+      type: String,
+      default: () => new Date().toISOString().substring(0, 10),
     },
-    end: {
-      menu: false,
-      date: '',
+    time: {
+      type: String,
+      default: () => format(roundDate(new Date(), 30), 'HH:mm'),
     },
-  }
+  },
+  setup(props, { emit }) {
+    const refs = {
+      recurrenceDialog: ref<InstanceType<typeof RecurrenceDialog>>(),
+      calendar: ref<InstanceType<typeof Calendar>>(),
+      dialog: useTemplateRef<DialogComponent>('dialog'),
+    }
 
-  times = {
-    start: {
-      menu: false,
-      time: '',
-    },
-    end: {
-      menu: false,
-      time: '',
-    },
-    times: [] as string[],
-  }
+    const state = reactive({
+      success: false,
+      colorMenu: false,
+      dates: {
+        allday: false,
+        start: {
+          menu: false,
+          date: '',
+        },
+        end: {
+          menu: false,
+          date: '',
+        },
+      },
+      times: {
+        start: {
+          menu: false,
+          time: '',
+        },
+        end: {
+          menu: false,
+          time: '',
+        },
+        times: [] as string[],
+      },
+      rrule: null as EventRecurrenceDto | null,
+      feeType: FeeType.FREE,
+      fee: {
+        amount: 0,
+        lateAmount: 0,
+      },
+      meta: {
+        name: '',
+        description: '',
+        color: '#000000',
+        location: '',
+        locationTitle: 'Online',
+        cutoffThreshold: EventTimeThreshold.AFTER_END,
+        cutoffOffset: 0,
+        lateThreshold: EventTimeThreshold.AFTER_START,
+        lateOffset: 0,
+        permissions: {
+          grades: [
+            Grade.KINDERGARTEN,
+            Grade.FIRST,
+            Grade.SECOND,
+            Grade.THIRD,
+            Grade.FOURTH,
+            Grade.FIFTH,
+            Grade.SIXTH,
+            Grade.SEVENTH,
+            Grade.EIGHTH,
+            Grade.NINTH,
+            Grade.TENTH,
+            Grade.ELEVENTH,
+            Grade.TWELFTH,
+          ],
+          genders: [Gender.MALE, Gender.FEMALE],
+        },
+      },
+      project: null as number | null,
+      course: null as number | null,
+      files: null as File | null,
+    })
 
-  genders = genders
+    const eventStore = useEvents()
+    const fileStore = useFiles()
+    const snackbar = useSnackbar()
+    const dateUtils = useDates()
+    const projectStore = useProjects()
 
-  rrule = null as EventRecurrenceDto | null
-
-  timeThresholds = [
-    { text: 'Never', value: EventTimeThreshold.NEVER },
-    { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
-    { text: 'After Event Starts', value: EventTimeThreshold.AFTER_START },
-    { text: 'Minutes From Start', value: EventTimeThreshold.OFFSET_START },
-    { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
-  ]
-
-  feeType: FeeType = FeeType.FREE
-  feeTypes = [
-    { text: 'Free', value: FeeType.FREE },
-    { text: 'Pay Per Event', value: FeeType.EVENT },
-    { text: 'Pay Per Course', value: FeeType.COURSE },
-  ]
-
-  fee = {
-    amount: 0,
-    lateAmount: 0,
-  }
-
-  meta = {
-    name: '',
-    description: '',
-    color: '#000000',
-    location: '',
-    locationTitle: 'Online',
-    cutoffThreshold: EventTimeThreshold.AFTER_END,
-    cutoffOffset: 0,
-    lateThreshold: EventTimeThreshold.AFTER_START,
-    lateOffset: 0,
-    permissions: {
-      grades: [
-        Grade.KINDERGARTEN,
-        Grade.FIRST,
-        Grade.SECOND,
-        Grade.THIRD,
-        Grade.FOURTH,
-        Grade.FIFTH,
-        Grade.SIXTH,
-        Grade.SEVENTH,
-        Grade.EIGHTH,
-        Grade.NINTH,
-        Grade.TENTH,
-        Grade.ELEVENTH,
-        Grade.TWELFTH,
-      ],
-      genders: [Gender.MALE, Gender.FEMALE],
-    },
-  }
-
-  project: null | number = null
-  course: null | number = null
-  files: Uploads = null
-
-  get error() {
-    return this.$accessor.events.error || this.$accessor.files.error
-  }
-
-  get isLoading() {
-    return this.$accessor.events.isLoading
-  }
-
-  get gradeGroups() {
-    return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
-  }
-
-  get swatch() {
-    return {
+    const error = computed(() => eventStore.error || fileStore.error)
+    const isLoading = computed(() => eventStore.isLoading)
+    const intGradeGroups = computed(() =>
+      gradeGroups(contiguousGradeRanges(state.meta.permissions.grades))
+    )
+    const swatch = computed(() => ({
       height: '40px',
       width: '40px',
-      backgroundColor: this.meta.color,
+      backgroundColor: state.meta.color,
       cursor: 'pointer',
-      borderRadius: this.colorMenu ? '50%' : '4px',
+      borderRadius: state.colorMenu ? '50%' : '4px',
       transition: 'border-radius 200ms ease-in-out',
+    }))
+
+    onBeforeMount(() => {
+      const now = new Date()
+      state.dates.start.date = props.date
+      state.dates.end.date = props.date
+      state.times.start.time = props.time
+      state.times.end.time = addTime(props.time, 1, 30)
+
+      // If the end time loops around to being before
+      // the starting time, increment the day.
+      if (
+        isBefore(
+          parse(state.times.end.time, 'HH:mm', now),
+          parse(state.times.start.time, 'HH:mm', now)
+        )
+      ) {
+        state.dates.end.date = addDays(parseISO(props.date), 1)
+          .toISOString()
+          .substr(0, 10)
+      }
+
+      const hours = [
+        '12',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+      ]
+      const minutes = ['00', '15', '30', '45']
+      const times: string[] = []
+
+      for (let i = 0; i <= 23; i++) {
+        for (let j = 0; j < minutes.length; j++) {
+          times.push(`${hours[i % 12]}:${minutes[j]}${i < 12 ? 'am' : 'pm'}`)
+        }
+      }
+
+      state.times.times = times
+    })
+
+    const isSameDay = (dateA: string, dateB: string): boolean =>
+      dateUtils.isSameDay(new Date(dateA), new Date(dateB))
+
+    const format = (dateString: string) => {
+      if (dateString === '') return 'Select a Date'
+
+      const [year, month, day] = dateString.split('-')
+      const date = new Date(+year, +month - 1, +day)
+
+      if (!isValidDate(date)) return 'Invalid Date'
+
+      return dateUtils.format(date, 'EEE, LLL d, yyyy')
     }
-  }
 
-  beforeMount() {
-    const now = new Date()
-    this.dates.start.date = this.date
-    this.dates.end.date = this.date
-    this.times.start.time = this.time
-    this.times.end.time = addTime(this.time, 1, 30)
+    const onSubmit = async () => {
+      let file = null
 
-    // If the end time loops around to being before
-    // the starting time, increment the day.
-    if (
-      isBefore(
-        parse(this.times.end.time, 'HH:mm', now),
-        parse(this.times.start.time, 'HH:mm', now)
+      if (state.files) {
+        file = await fileStore.create(state.files!)
+
+        if (fileStore.error) {
+          snackbar.error(fileStore.error.message)
+        }
+      }
+
+      const dto = Object.assign(
+        {
+          rrule: state.rrule || undefined,
+          project: state.project || undefined,
+          course: state.course || undefined,
+          ...state.meta,
+        },
+        state.dates.allday
+          ? { dtend: toDate(state.dates.start.date, '23:59').toISOString() }
+          : {
+              dtend: toDate(
+                state.dates.end.date,
+                state.times.end.time
+              ).toISOString(),
+            },
+        !state.rrule && {
+          dtstart: toDate(
+            state.dates.start.date,
+            state.times.start.time
+          ).toISOString(),
+        },
+        state.feeType !== 'free' && {
+          feeType: state.feeType,
+          fee: {
+            amount: state.fee.amount.toFixed(2),
+            lateAmount: state.fee.lateAmount?.toFixed(2),
+          },
+        },
+        file && { picture: file.root }
       )
-    ) {
-      this.dates.end.date = addDays(parseISO(this.date), 1)
-        .toISOString()
-        .substr(0, 10)
-    }
 
-    const hours = [
-      '12',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      '11',
-    ]
-    const minutes = ['00', '15', '30', '45']
-    const times: string[] = []
+      if (state.dates.allday) {
+        // Incomplete, allday is not accurate
+      }
 
-    for (let i = 0; i <= 23; i++) {
-      for (let j = 0; j < minutes.length; j++) {
-        times.push(`${hours[i % 12]}:${minutes[j]}${i < 12 ? 'am' : 'pm'}`)
+      await eventStore.create(dto)
+
+      if (eventStore.error) {
+        snackbar.error(eventStore.error.message)
+      } else {
+        emit('event:create')
+
+        state.success = true
+        refs.dialog.value!.close(1500)
       }
     }
 
-    this.times.times = times
-  }
-
-  isSameDay(dateA: string, dateB: string) {
-    return isSameDay(new Date(dateA), new Date(dateB))
-  }
-
-  format(dateString: string) {
-    if (dateString === '') return 'Select a Date'
-
-    const [year, month, day] = dateString.split('-')
-    const date = new Date(+year, +month - 1, +day)
-
-    if (!isValidDate(date)) return 'Invalid Date'
-
-    return format(date, 'EEE, LLL d, yyyy')
-  }
-
-  async onSubmit() {
-    // Type asserted as this is not multi-file upload.
-    const url = (await this.$accessor.files.filesToURL(this.files)) as
-      | string
-      | null
-
-    if (this.$accessor.files.error) {
-      console.error(this.$accessor.files.error)
+    const onCourseCreated = (course: Course) => {
+      state.course = course.id
     }
 
-    const dto = Object.assign(
-      {
-        rrule: this.rrule || undefined,
-        project: this.project || undefined,
-        course: this.course || undefined,
-        ...this.meta,
-      },
-      this.dates.allday
-        ? { dtend: toDate(this.dates.start.date, '23:59').toISOString() }
-        : {
-            dtend: toDate(
-              this.dates.end.date,
-              this.times.end.time
-            ).toISOString(),
-          },
-      !this.rrule && {
-        dtstart: toDate(
-          this.dates.start.date,
-          this.times.start.time
-        ).toISOString(),
-      },
-      this.feeType !== 'free' && {
-        feeType: this.feeType,
-        fee: {
-          amount: this.fee.amount.toFixed(2),
-          lateAmount: this.fee.lateAmount?.toFixed(2),
-        },
-      },
-      url && { picture: url }
-    )
-
-    if (this.dates.allday) {
-      // Incomplete, allday is not accurate
+    return {
+      ...refs,
+      ...toRefs(state),
+      grades,
+      genders,
+      timeThresholds,
+      projectStore,
+      error,
+      isLoading,
+      feeTypes,
+      gradeGroups: intGradeGroups,
+      swatch,
+      isSameDay,
+      format,
+      onSubmit,
+      onCourseCreated,
     }
-
-    await this.$accessor.events.create(dto)
-
-    if (this.$accessor.events.error) {
-      console.error(this.$accessor.events.error)
-    } else {
-      this.$emit('event:create')
-
-      this.success = true
-      this.dialog.close(1500)
-    }
-  }
-
-  onProjectSelect(id: number) {
-    this.project = id
-  }
-
-  onProjectCreated(project: Project) {
-    this.project = project.id
-  }
-
-  onCourseCreated(course: Course) {
-    this.course = course.id
-  }
-}
+  },
+})
 </script>
 
 <style lang="scss" scoped>

@@ -2,14 +2,14 @@ import { MikroORM } from '@mikro-orm/core';
 import { UseRequestContext } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { PersonalizationData } from '@sendgrid/helpers/classes/personalization';
 import { add, format, roundToNearestMinutes } from 'date-fns';
+import { ConfigService } from '../config/config.service';
 import { Event } from '../event/event.entity';
 import { ReminderFreq } from '../user/enums/reminder-freq.enum';
 import { User } from '../user/user.entity';
 import { Email } from './email.class';
-import { SENDGRID_REMIND_TEMPLATE } from './email.constants';
 import { EmailService } from './email.service';
+import { Personalization } from './interfaces/mailersend.interface';
 
 type Ranges = {
   [key in ReminderFreq]: { start: Date; end: Date };
@@ -22,6 +22,7 @@ export class EmailScheduler {
 
   constructor(
     private readonly orm: MikroORM,
+    private readonly config: ConfigService,
     private readonly emailService: EmailService,
   ) {}
 
@@ -85,27 +86,26 @@ export class EmailScheduler {
     }
 
     for (const [event, { freq, users }] of map) {
-      const personalizations: PersonalizationData[] = users.map((u) => ({
-        to: u.email!,
-        dynamicTemplateData: {
+      const personalization: Personalization[] = users.map((u) => ({
+        email: u.email!,
+        data: {
           first_name: u.first,
           unsubscribe_link: 'example1',
           manage_link: 'example2',
+          event: {
+            name: event.name,
+            description: event.description,
+            location: event.location,
+            time: format(event.dtstart, 'EEEE, LLLL do, yyyy h:mm aaaa'),
+          },
         },
       }));
 
-      await this.emailService.send(
-        new Email(personalizations, 'Event Reminder', {
-          templateId: SENDGRID_REMIND_TEMPLATE,
-          templateData: {
-            event_title: event.name,
-            event_description: event.description,
-            event_location: event.location,
-            event_time: format(event.dtstart, 'EEEE, LLLL do, yyyy h:mm aaaa'),
-          },
-        }),
-      );
+      const email = new Email()
+        .setTemplate(this.config.MAILERSEND.TEMPLATES.VERIFY)
+        .setTo(personalization);
 
+      this.emailService.send(email);
       event.notified.push(freq);
 
       this.logger.log(

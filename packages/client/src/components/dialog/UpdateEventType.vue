@@ -18,7 +18,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn text @click="dialog = false">Close</v-btn>
         <v-btn text @click="onSubmit">OK</v-btn>
@@ -28,34 +28,50 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { EventUpdateModes } from '~/types/events/event-update-modes.interface'
+import {
+  defineComponent,
+  PropType,
+  reactive,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { EventUpdateModes } from '@/types/events/event-update-modes.interface'
 
-@Component
-export default class DialogUpdateEventType extends Vue {
-  @Prop({ required: true }) readonly changeset!: EventUpdateModes
+export default defineComponent({
+  props: {
+    changeset: {
+      type: Object as PropType<EventUpdateModes>,
+      required: true,
+    },
+  },
 
-  dialog = false
-  type = ''
+  setup(props, { emit }) {
+    const state = reactive({
+      dialog: false,
 
-  onSubmit() {
-    switch (this.type) {
-      case 'single':
-        this.$emit('submit:type', this.type, this.changeset.single)
-        break
-      case 'future':
-        this.$emit('submit:type', this.type, this.changeset.future)
-        break
-      case 'all':
-        this.$emit('submit:type', this.type, this.changeset.all)
-        break
+      type: '',
+    })
+
+    const open = () => {
+      state.dialog = true
     }
 
-    this.dialog = false
-  }
+    const onSubmit = () => {
+      switch (state.type) {
+        case 'single':
+          emit('submit:type', state.type, props.changeset.single)
+          break
+        case 'future':
+          emit('submit:type', state.type, props.changeset.future)
+          break
+        case 'all':
+          emit('submit:type', state.type, props.changeset.all)
+          break
+      }
 
-  open() {
-    this.dialog = true
-  }
-}
+      state.dialog = false
+    }
+
+    return { ...toRefs(state), open, onSubmit }
+  },
+})
 </script>

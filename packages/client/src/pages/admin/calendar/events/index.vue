@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-6">
+  <div>
     <v-row>
       <v-col cols="6" sm="5" md="3">
         <v-select
@@ -16,118 +16,124 @@
       </v-col>
 
       <v-col cols="auto" class="ml-auto">
-        <dialog-create-event
-          :date="calendar.date"
-          @event:create="onEventCreated"
-        >
+        <DialogCreateEvent :date="calendar.date" @event:create="onEventCreated">
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" color="primary" v-on="on">Create Event</v-btn>
           </template>
-        </dialog-create-event>
+        </DialogCreateEvent>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col>
-        <calendar
-          ref="calendar"
+        <Calendar
+          ref="calendarRef"
           v-model="calendar.date"
-          click-redirect-base="/admin/calendar/events"
           :type.sync="calendar.type"
+          click-redirect-base="/admin/calendar/events"
         />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col>
-        <v-data-table-paginated :items="eventsForDate" :headers="headers">
-          <template #[`item.id`]="{ item }">
-            # <link-copy :text="item.id"></link-copy>
-          </template>
+        <!-- TODO: Investigate SSR hydration warning. -->
+        <client-only>
+          <v-data-table-paginated
+            v-model="events"
+            :items="eventsForDate"
+            no-data-text="No Events for Date"
+            :headers="headers"
+          >
+            <template #[`item.id`]="{ item }">
+              # <LinkCopy :text="item.id" />
+            </template>
 
-          <template #[`item.start`]="{ item }">
-            {{ format(item.dtstart, 'EEE, MMM do, yyyy') }}
-          </template>
+            <template #[`item.start`]="{ item }">
+              {{ format(item.dtstart, 'EEE, MMM do, yyyy') }}
+            </template>
 
-          <template #[`item.end`]="{ item }">
-            {{ format(item.dtend, 'EEE, MMM do, yyyy') }}
-          </template>
+            <template #[`item.end`]="{ item }">
+              {{ format(item.dtend, 'EEE, MMM do, yyyy') }}
+            </template>
 
-          <template #[`item.edit`]="{ item }">
-            <v-btn icon :to="`/admin/calendar/events/${item.id}`">
-              <v-icon>mdi-open-in-new</v-icon>
-            </v-btn>
-          </template>
-        </v-data-table-paginated>
+            <template #[`item.edit`]="{ item }">
+              <v-btn icon :to="`/admin/calendar/events/${item.id}`">
+                <v-icon>mdi-open-in-new</v-icon>
+              </v-btn>
+            </template>
+          </v-data-table-paginated>
+        </client-only>
       </v-col>
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
-import { format, isSameDay, parseISO } from 'date-fns'
-import { Component, Ref, Vue } from 'nuxt-property-decorator'
-import { formatDate } from '../../../../utils/utilities'
-import Calendar from '~/components/Calendar.vue'
+import Calendar from '@/components/Calendar.vue'
+import {
+  defineComponent,
+  toRefs,
+  reactive,
+  computed,
+} from '@nuxtjs/composition-api'
+import { useEvents } from '@/stores'
+import { useTemplateRef, useDates } from '@/composables'
 
-@Component({
+type CalendarComponent = InstanceType<typeof Calendar>
+
+export default defineComponent({
   layout: 'admin',
   transition: 'admin',
-})
-export default class CalendarAdminPage extends Vue {
-  @Ref('calendar') readonly cal!: Calendar
+  setup() {
+    const calendarRef = useTemplateRef<CalendarComponent>('calendarRef')
 
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Start', value: 'start' },
-    { text: 'End', value: 'end' },
-    { text: 'Edit', value: 'edit' },
-  ]
+    const headers = [
+      { text: 'Id', value: 'id' },
+      { text: 'Name', value: 'name' },
+      { text: 'Description', value: 'description' },
+      { text: 'Start', value: 'start' },
+      { text: 'End', value: 'end' },
+      { text: 'Edit', value: 'edit' },
+    ]
 
-  calendar = {
-    type: 'simple',
-    types: [
-      { value: 'simple', text: 'Simple' },
-      { value: 'month', text: 'Month' },
-      { value: 'week', text: 'Week' },
-      { value: 'day', text: 'Day' },
-      { value: '4day', text: '4-Day' },
-    ],
-    date: new Date().toISOString().substr(0, 10),
-  }
+    const state = reactive({
+      calendar: {
+        type: 'simple',
+        events: [] as number[],
+        types: [
+          { value: 'simple', text: 'Simple' },
+          { value: 'month', text: 'Month' },
+          { value: 'week', text: 'Week' },
+          { value: 'day', text: 'Day' },
+          { value: '4day', text: '4-Day' },
+        ],
+        date: new Date().toISOString().substr(0, 10),
+      },
+    })
 
-  get dateNative() {
-    return parseISO(this.calendar.date)
-  }
+    const eventStore = useEvents()
+    const dateUtil = useDates()
 
-  get events() {
-    return this.$accessor.events.calendarEvents
-  }
-
-  get eventsForDate() {
-    return this.events.filter((event) =>
-      isSameDay(this.dateNative, parseISO(event.dtstart))
+    const dateNative = computed(() => dateUtil.toDate(state.calendar.date))
+    const events = computed(() => eventStore.calendarEvents)
+    const eventsForDate = computed(() =>
+      events.value.filter((e) =>
+        dateUtil.isSameDay(dateNative.value, dateUtil.toDate(e.dtstart))
+      )
     )
-  }
 
-  get header() {
-    const date = format(this.dateNative, 'EEEE, LLLL do')
+    const onEventCreated = async () => await calendarRef.value.onLoadRange()
 
-    if (!this.eventsForDate.length) {
-      return `Nothing scheduled for ${date}`
+    return {
+      ...toRefs(state),
+      headers,
+      dateNative,
+      events,
+      format: dateUtil.format,
+      eventsForDate,
+      onEventCreated,
     }
-
-    return `Events on ${date}`
-  }
-
-  format(date: Date | string, formatString: string) {
-    return formatDate(date, formatString)
-  }
-
-  async onEventCreated() {
-    await this.cal.refresh()
-  }
-}
+  },
+})
 </script>

@@ -1,17 +1,13 @@
 import {
   CallHandler,
   ExecutionContext,
-  Inject,
   mixin,
   NestInterceptor,
   Type,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CONFIGURATION_SERVICE_TOKEN } from '@nestjs/config/dist/config.constants';
 import { transformException } from '@nestjs/platform-express/multer/multer/multer.utils';
 import multer from 'multer';
 import { extname } from 'path';
-import { ConfigSchema } from '../../app.config';
 import { FileStorage } from '../file.storage';
 
 type MulterInstance = any;
@@ -30,11 +26,9 @@ export function FileInterceptor(
     protected multer: MulterInstance;
     private fileStorage: FileStorage;
 
-    constructor(
-      @Inject(CONFIGURATION_SERVICE_TOKEN) config: ConfigService<ConfigSchema>,
-    ) {
+    constructor() {
       const fileStorage = new FileStorage(
-        config.get('FILE_DIRECTORY')!,
+        process.env.UPLOAD_DIRECTORY as string,
         folder,
       );
 

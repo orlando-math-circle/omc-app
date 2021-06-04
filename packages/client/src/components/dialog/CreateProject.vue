@@ -27,16 +27,16 @@
 
         <v-toolbar-title>Create Project</v-toolbar-title>
 
-        <v-spacer></v-spacer>
+        <v-spacer />
       </v-toolbar>
 
-      <v-form-validated v-slot="{ passes }" @submit:form="onSubmit">
+      <VFormValidated v-slot="{ passes }" @form:submit="onSubmit">
         <v-card-text>
-          <alert-error v-if="error" :error="error" />
+          <AlertError :error="error" />
 
           <v-row>
             <v-col cols="12">
-              <v-text-field-validated
+              <VTextFieldValidated
                 v-model="dto.name"
                 label="Name"
                 rules="required"
@@ -47,7 +47,7 @@
             </v-col>
 
             <v-col cols="12">
-              <v-textarea
+              <VTextareaValidated
                 v-model="dto.description"
                 label="Description"
                 hide-details="auto"
@@ -56,8 +56,8 @@
             </v-col>
 
             <v-col cols="12">
-              <file-upload
-                v-model="files"
+              <FileUpload
+                v-model="file"
                 label="Upload Image (Optional)"
                 endpoint="/file"
                 hide-details="auto"
@@ -86,20 +86,20 @@
                   </v-chip-group>
                 </v-col>
 
-                <v-col cols="auto" class="align-self-center"> </v-col>
+                <v-col cols="auto" class="align-self-center" />
               </v-row>
             </v-col>
           </v-row>
         </v-card-text>
 
         <v-card-actions>
-          <dialog-create-job @create:job="onCreateJob">
+          <DialogCreateJob @create:job="onCreateJob">
             <template #activator="{ on, attrs }">
               <v-btn text v-bind="attrs" v-on="on">Create Job</v-btn>
             </template>
-          </dialog-create-job>
+          </DialogCreateJob>
 
-          <v-spacer></v-spacer>
+          <v-spacer />
 
           <v-btn
             text
@@ -111,70 +111,83 @@
             Create
           </v-btn>
         </v-card-actions>
-      </v-form-validated>
+      </VFormValidated>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
 import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
 import { CreateProjectDto } from '@server/project/dto/create-project.dto'
-import { Nullable } from '~/types/nullable.type'
-import { Uploads } from '~/types/uploads.interface'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { useProjects, useFiles } from '@/stores'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { Nullable } from '@/types/nullable.type'
 
-@Component
-export default class DialogCreateProject extends Vue {
-  dialog = false
-  project: number | null = null
-  jobs: CreateJobDto[] = []
-  files: Uploads = null
-  dto: Nullable<CreateProjectDto> = {
-    name: null,
-    description: null,
-    picture: null,
-  }
+export default defineComponent({
+  setup(_, { emit }) {
+    const state = reactive({
+      dialog: false,
+      project: null as number | null,
+      jobs: [] as CreateJobDto[],
+      file: null as File | string | null,
+      dto: {
+        name: null,
+        description: null,
+        picture: null,
+      } as Nullable<CreateProjectDto>,
+    })
 
-  get projects() {
-    return this.$accessor.projects.projects
-  }
+    const snackbar = useSnackbar()
+    const projectStore = useProjects()
+    const fileStore = useFiles()
 
-  get error() {
-    return this.$accessor.projects.error
-  }
+    const projects = computed(() => projectStore.projects)
+    const isLoading = computed(() => projectStore.isLoading)
+    const error = computed(() => projectStore.error)
 
-  get isLoading() {
-    return this.$accessor.files.isLoading || this.$accessor.projects.isLoading
-  }
+    const onCreateJob = (job: CreateJobDto) => state.jobs.push(job)
 
-  onCreateJob(job: CreateJobDto) {
-    this.jobs.push(job)
-  }
+    const onSubmit = async () => {
+      let picture: string | null
 
-  async onSubmit() {
-    // Type asserted as this is not multi-file upload.
-    const url = (await this.$accessor.files.filesToURL(this.files)) as
-      | string
-      | null
+      if (state.file instanceof File) {
+        const file = await fileStore.create(state.file)
 
-    if (this.$accessor.files.error) {
-      console.error(this.$accessor.files.error)
+        if (fileStore.error) {
+          return snackbar.error(fileStore.error.message)
+        }
+
+        picture = file.root
+      } else if (typeof state.file === 'string') {
+        picture = state.file
+      }
+
+      const project = await projectStore.create({
+        ...state.dto,
+        ...(picture && { picture }),
+        ...(state.jobs.length && { jobs: state.jobs }),
+      })
+
+      if (!projectStore.error) {
+        emit('create:project', project)
+        state.dialog = false
+      }
     }
 
-    const project = await this.$accessor.projects.create(
-      Object.assign(
-        {
-          ...(this.dto as CreateProjectDto),
-        },
-        url && { picture: url },
-        this.jobs.length && { jobs: this.jobs }
-      )
-    )
-
-    if (!this.error) {
-      this.$emit('create:project', project)
-      this.dialog = false
+    return {
+      ...toRefs(state),
+      error,
+      projects,
+      isLoading,
+      onCreateJob,
+      onSubmit,
     }
-  }
-}
+  },
+})
 </script>

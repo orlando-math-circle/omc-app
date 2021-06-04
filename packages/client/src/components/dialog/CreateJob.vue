@@ -1,10 +1,5 @@
 <template>
-  <dialog-form
-    ref="dialogEl"
-    :expands="false"
-    width="440"
-    @submit:form="onSubmit"
-  >
+  <DialogForm ref="dialog" :expands="false" width="440" @form:submit="onSubmit">
     <template #title>Create Job</template>
 
     <template #activator="{ on, attrs }">
@@ -16,7 +11,7 @@
               attrs: { ...attrs, ...tooltip.attrs },
               on: { ...tooltip.on, ...on },
             }"
-          ></slot>
+          />
         </template>
 
         <span>Create Job</span>
@@ -26,17 +21,11 @@
     <v-card-text>
       <v-row>
         <v-col v-if="!isStatic" cols="12">
-          <auto-complete-project
-            v-model="project"
-            label="Project (Optional)"
-            :rules="{ required: !isStatic }"
-            item-value="id"
-            outlined
-          ></auto-complete-project>
+          <AutocompleteProject v-model="project" rules="required" />
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model="dto.name"
             rules="required"
             label="Job Name"
@@ -46,7 +35,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-textarea-validated
+          <VTextareaValidated
             v-model="dto.description"
             label="Description"
             outlined
@@ -55,7 +44,7 @@
         </v-col>
 
         <v-col cols="12">
-          <v-text-field-validated
+          <VTextFieldValidated
             v-model.number="dto.hours"
             type="number"
             label="Volunteer Hours"
@@ -70,7 +59,7 @@
     <v-card-actions>
       <v-spacer />
 
-      <v-btn text @click="dialog.close()">Cancel</v-btn>
+      <v-btn text @click="dialog && dialog.close()">Cancel</v-btn>
       <v-btn text type="submit" :loading="isLoading" color="secondary">
         <v-scroll-x-transition>
           <v-icon v-if="success" class="mr-2" color="success">
@@ -81,49 +70,68 @@
         Create Job
       </v-btn>
     </v-card-actions>
-  </dialog-form>
+  </DialogForm>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue } from 'nuxt-property-decorator'
-import DialogForm from './Form.vue'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  ref,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { useSnackbar } from '@/composables'
+import { useJobs } from '@/stores'
+import DialogForm from '@/components/dialog/Form.vue'
 
-@Component
-export default class DialogCreateJob extends Vue {
-  @Ref('dialogEl') readonly dialog!: DialogForm
-  @Prop({ default: true }) readonly isStatic!: boolean
-
-  success = false
-  project: null | number = null
-
-  dto = {
-    name: '',
-    description: '',
-    hours: 0,
-  }
-
-  get isLoading() {
-    return this.$accessor.volunteers.isLoading
-  }
-
-  async onSubmit() {
-    if (this.isStatic) {
-      this.$emit('create:job', { ...this.dto })
-      this.dialog.close()
-      return
+export default defineComponent({
+  props: {
+    isStatic: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  setup(props, { emit }) {
+    const refs = {
+      dialog: ref<InstanceType<typeof DialogForm>>(),
     }
 
-    await this.$accessor.volunteers.create({
-      ...this.dto,
-      ...{ project: this.project! },
+    const state = reactive({
+      success: false,
+      project: null as number | null,
+      dto: {
+        name: '',
+        description: '',
+        hours: 0,
+      },
     })
 
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack('Error while creating new job :(')
+    const jobStore = useJobs()
+    const snackbar = useSnackbar()
+
+    const onSubmit = async () => {
+      if (props.isStatic) {
+        emit('create:job', { ...state.dto })
+        refs.dialog.value!.close()
+      }
+
+      await jobStore.create({ ...state.dto, ...{ project: state.project! } })
+
+      if (jobStore.error) {
+        snackbar.error(jobStore.error.message)
+      }
+
+      emit('create:job', jobStore.job)
+      refs.dialog.value!.close()
     }
 
-    this.$emit('create:job', this.$accessor.volunteers.job)
-    this.dialog.close()
-  }
-}
+    return {
+      ...refs,
+      ...toRefs(state),
+      isLoading: computed(() => jobStore.isLoading),
+      onSubmit,
+    }
+  },
+})
 </script>

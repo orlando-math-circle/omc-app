@@ -6,7 +6,7 @@ import {
 } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule } from '../src/config/config.module';
 import { Test } from '@nestjs/testing';
 import { addDays, addMonths } from 'date-fns';
 import Joi from 'joi';
@@ -52,8 +52,10 @@ describe('Events', () => {
           validationSchema: Joi.object({
             SECRET: Joi.string().default('test-secret'),
             PAYPAL_SANDBOXED: Joi.boolean().default(true),
-            SENDGRID_SANDBOXED: Joi.boolean().default(true),
-            FILE_DIRECTORY: Joi.string().default('../../uploads'),
+            EMAIL_SANDBOXED: Joi.boolean().default(true),
+            EMAIL_TEMPLATE_VERIFY: Joi.string().default('VERIFY_TEMPLATE'),
+            EMAIL_TEMPLATE_RESET: Joi.string().default('RESET_TEMPLATE'),
+            UPLOAD_DIRECTORY: Joi.string().default('../../uploads'),
             DEFAULT_EVENT_PICTURE: Joi.string().default(
               '/defaults/neon-math.jpg',
             ),

@@ -1,10 +1,12 @@
-import { Context, Plugin } from '@nuxt/types'
+import { defineNuxtPlugin } from '@nuxtjs/composition-api'
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 
+declare module 'vuetify-loader'
+
 Vue.use(Vuetify)
 
-const plugin: Plugin = (ctx: Context) => {
+export default defineNuxtPlugin((ctx) => {
   // Check if the user has a previously set dark theme token.
   const isDark = ctx.$cookies.get('omc-theme-dark')
 
@@ -16,7 +18,8 @@ const plugin: Plugin = (ctx: Context) => {
       dark: !!isDark,
       themes: {
         light: {
-          primary: '#44D9E6',
+          primary: '#0096C7',
+          // primary: '#44D9E6',
           accent: '#1B1E23',
           // primary: '#1B1E23',
           // accent: '#44D9E6',
@@ -31,6 +34,4 @@ const plugin: Plugin = (ctx: Context) => {
 
   ctx.app.vuetify = vuetify
   ctx.$vuetify = vuetify.framework
-}
-
-export default plugin
+})

@@ -10,26 +10,26 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>
 
       <v-col cols="auto" align-self="center">
-        <dialog-confirm @confirm="onDeleteConfirm">
+        <DialogConfirm @confirm="onDeleteConfirm">
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" v-on="on">Delete</v-btn>
           </template>
 
           Are you sure you wish to delete this event registration?
-        </dialog-confirm>
+        </DialogConfirm>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col>
         <v-card>
-          <v-card-title></v-card-title>
+          <v-card-title>Registration Editing Not Yet Implemented</v-card-title>
         </v-card>
       </v-col>
     </v-row>
@@ -37,28 +37,38 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, useRoute, useRouter } from '@nuxtjs/composition-api'
+import { useRegistrations } from '@/stores'
 
-@Component
-export default class RegistrationIdAdminPage extends Vue {
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Registrations',
-      href: '/admin/calendar/registrations',
-    },
-    {
-      text: 'Edit Registration',
-    },
-  ]
+export default defineComponent({
+  layout: 'admin',
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
 
-  async onDeleteConfirm() {
-    await this.$accessor.registrations.delete(this.$route.params.id)
+    const registrationStore = useRegistrations()
 
-    this.$router.push('/admin/calendar/registrations')
-  }
-}
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Registrations',
+        href: '/admin/calendar/registrations',
+      },
+      {
+        text: 'Edit Registration',
+      },
+    ]
+
+    const onDeleteConfirm = async () => {
+      await registrationStore.delete(+route.value.params.id)
+
+      router.push('/admin/calendar/registrations')
+    }
+
+    return { breadcrumbs, onDeleteConfirm }
+  },
+})
 </script>

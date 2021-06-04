@@ -1,6 +1,6 @@
 <template>
   <div>
-    <admin-header title="Edit Job" :breadcrumbs="breadcrumbs">
+    <AdminHeader title="Edit Job" :breadcrumbs="breadcrumbs">
       <v-menu offset-y transition="slide-y-transition">
         <template #activator="{ on, attrs }">
           <v-btn v-bind="attrs" color="primary" v-on="on">
@@ -9,7 +9,7 @@
         </template>
 
         <v-list dense nav>
-          <dialog-confirm @confirm="onDelete">
+          <DialogConfirm @confirm="onDelete">
             <template #activator="{ on, attrs }">
               <v-list-item v-bind="attrs" v-on="on">
                 <v-list-item-icon>
@@ -23,54 +23,54 @@
             </template>
 
             <span>Are you sure you wish to delete this volunteer job?</span>
-          </dialog-confirm>
+          </DialogConfirm>
         </v-list>
       </v-menu>
-    </admin-header>
+    </AdminHeader>
 
     <v-row v-if="job">
       <v-col cols="12">
-        <v-card>
-          <v-card-title>Information</v-card-title>
+        <VFormValidated @form:submit="onSubmit">
+          <v-card>
+            <v-card-title>Information</v-card-title>
 
-          <v-form-validated @submit:form="onSubmit">
             <v-card-text>
               <v-row>
                 <v-col cols="12">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model="job.name"
                     label="Name"
                     rules="required"
                     hide-details="auto"
                     outlined
-                  ></v-text-field-validated>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <v-textarea-validated
+                  <VTextareaValidated
                     v-model="job.description"
                     label="Description (Optional)"
                     rules="required"
                     hide-details="auto"
                     outlined
-                  ></v-textarea-validated>
+                  />
                 </v-col>
 
                 <v-col cols="12">
-                  <v-text-field
+                  <VTextFieldValidated
                     v-model="job.hours"
                     type="tel"
                     outlined
                     hide-details="auto"
                     label="Volunteer Hours"
                     persistent-hint
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </v-card-text>
 
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer />
 
               <v-btn text @click="refresh">Reset</v-btn>
               <v-btn
@@ -82,8 +82,8 @@
                 Save Changes
               </v-btn>
             </v-card-actions>
-          </v-form-validated>
-        </v-card>
+          </v-card>
+        </VFormValidated>
       </v-col>
 
       <!-- Project -->
@@ -100,95 +100,104 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash'
-import { Component, Vue } from 'nuxt-property-decorator'
-import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
 import { UpdateJobDto } from '@server/volunteer-job/dto/update-job.dto'
-import { shallowDiff } from '~/utils/utilities'
+import { shallowDiff } from '@/utils/utilities'
+import {
+  computed,
+  defineComponent,
+  ref,
+  useRoute,
+  useRouter,
+  useFetch,
+} from '@nuxtjs/composition-api'
+import { JobEntity, useJobs } from '@/stores'
+import { useSnackbar } from '@/composables'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const job = ref<JobEntity | null>()
+    const route = useRoute()
+    const router = useRouter()
+    const jobStore = useJobs()
+    const snackbar = useSnackbar()
+
+    const isLoading = computed(() => jobStore.isLoading)
+
+    const changes = computed(() => {
+      if (!job.value) return {}
+
+      const dto: UpdateJobDto = {
+        name: job.value.name,
+        description: job.value.description,
+        hours: job.value.hours,
+      }
+
+      return shallowDiff(jobStore.job!, dto)
+    })
+
+    useFetch(async () => {
+      await jobStore.findOne(+route.value.params.id)
+
+      job.value = cloneDeep(jobStore.job)
+    })
+
+    const breadcrumbs = [
+      {
+        text: 'Dashboard',
+        href: '/admin/',
+      },
+      {
+        text: 'Jobs',
+        href: '/admin/volunteers/jobs',
+      },
+      {
+        text: 'Edit Job',
+      },
+    ]
+
+    /**
+     * Reloads the job
+     */
+    const refresh = async (load = true) => {
+      if (load) {
+        await jobStore.findOne(+route.value.params.id)
+      }
+
+      job.value = cloneDeep(jobStore.job)
+    }
+
+    /**
+     * Deletes the active job.
+     */
+    const onDelete = async () => {
+      await jobStore.delete(job.value!.id)
+
+      if (jobStore.error) {
+        return snackbar.error('Failed to delete job :(')
+      }
+
+      snackbar.success('Job Deleted')
+
+      router.push('/admin/volunteers/jobs')
+    }
+
+    const onSubmit = async () => {
+      await jobStore.update(job.value!.id, changes.value)
+
+      if (jobStore.error) {
+        return snackbar.error(jobStore.error.message)
+      }
+
+      snackbar.success('Job Updated!')
+
+      await refresh(false)
+    }
+
+    return { job, changes, breadcrumbs, isLoading, onDelete, onSubmit, refresh }
+  },
   head: {
     title: 'Edit Job',
   },
-  async asyncData({ app: { $accessor }, route }) {
-    await $accessor.volunteers.findOne(route.params.id)
-
-    return {
-      job: cloneDeep($accessor.volunteers.job),
-    }
-  },
 })
-export default class VolunteerJobAdminPage extends Vue {
-  job: null | VolunteerJob = null
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Jobs',
-      href: '/admin/volunteers/jobs',
-    },
-    {
-      text: 'Job',
-    },
-  ]
-
-  get isLoading() {
-    return this.$accessor.volunteers.isLoading
-  }
-
-  get changes() {
-    if (!this.job) return {}
-
-    const dto: UpdateJobDto = {
-      name: this.job.name,
-      description: this.job.description,
-      hours: this.job.hours,
-    }
-
-    return shallowDiff(this.$accessor.volunteers.job!, dto)
-  }
-
-  /**
-   * Reloads the job
-   */
-  async refresh(load = true) {
-    if (load) {
-      await this.$accessor.volunteers.findOne(this.$route.params.id)
-    }
-
-    this.job = cloneDeep(this.$accessor.volunteers.job)
-  }
-
-  /**
-   * Deletes the active job.
-   */
-  async onDelete() {
-    await this.$accessor.volunteers.delete(this.job!.id)
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack('Failed to delete job :(')
-    }
-
-    this.$snack('Job Deleted')
-
-    this.$router.push('/admin/volunteers/jobs')
-  }
-
-  async onSubmit() {
-    await this.$accessor.volunteers.update({
-      id: this.job!.id,
-      updateJobDto: this.changes,
-    })
-
-    if (this.$accessor.volunteers.isErrored) {
-      return this.$snack(this.$accessor.volunteers.error!.message)
-    }
-
-    this.$snack('Job Updated!')
-    await this.refresh(false)
-  }
-}
 </script>

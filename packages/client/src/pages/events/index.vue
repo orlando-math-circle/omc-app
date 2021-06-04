@@ -3,9 +3,9 @@
     <v-row>
       <v-col cols="5" md="3">
         <v-select
-          v-model="calendar.type"
+          v-model="type"
           class="filled--bright type-selector elevation-2"
-          :items="calendar.types"
+          :items="calendarTypes"
           append-icon="mdi-chevron-down"
           solo
           flat
@@ -16,17 +16,17 @@
       </v-col>
 
       <v-col cols="auto" class="ml-auto">
-        <v-btn @click="resetDate">Today</v-btn>
+        <v-btn @click="onResetDate">Today</v-btn>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col>
-        <calendar
+        <Calendar
           ref="calendar"
-          v-model="calendar.date"
-          :type.sync="calendar.type"
-          :project-filter-ids="projectFilterIds"
+          v-model="date"
+          :type.sync="type"
+          :projects="projectFilterIds"
         />
       </v-col>
     </v-row>
@@ -56,20 +56,19 @@
           No events scheduled
         </div>
 
-        <event-spread
+        <EventSpread
           v-for="event in eventsForDate"
           :key="event.id + '_spread'"
           :event="event"
           class="mb-3"
-        >
-        </event-spread>
+        />
       </v-col>
     </v-row>
 
     <!-- Calendar View Events -->
     <v-row v-if="type">
       <v-col>
-        <h2 class="mb-3">{{ type }}</h2>
+        <h2 class="mb-3">{{ typeDescription }}</h2>
 
         <v-slide-group class="mb-4">
           <v-slide-item
@@ -77,7 +76,7 @@
             :key="event.id + '_block'"
             class="padded-block"
           >
-            <event-block class="mr-4" :event="event"></event-block>
+            <EventBlock class="mr-4" :event="event" />
           </v-slide-item>
         </v-slide-group>
       </v-col>
@@ -86,86 +85,84 @@
 </template>
 
 <script lang="ts">
+import {
+  computed,
+  defineComponent,
+  reactive,
+  ref,
+  toRefs,
+} from '@nuxtjs/composition-api'
 import { format, isSameDay, parseISO } from 'date-fns'
-import { Component, Vue } from 'nuxt-property-decorator'
-import Calendar from '~/components/Calendar.vue'
+import Calendar from '@/components/Calendar.vue'
+import { useProjects, useEvents } from '@/stores'
+import { calendarTypes } from '@/utils/constants'
 
-@Component({
-  head() {
+export default defineComponent({
+  setup() {
+    const refs = {
+      calendar: ref<InstanceType<typeof Calendar>>(),
+    }
+
+    const projectStore = useProjects()
+    const eventStore = useEvents()
+
+    const state = reactive({
+      type: 'simple',
+      date: new Date().toISOString().substr(0, 10),
+      projectFilter: [],
+      projectFilterIds: [] as number[],
+    })
+
+    const nativeDate = computed(() => parseISO(state.date))
+    const header = computed(() => format(nativeDate.value, 'EEEE, LLLL do'))
+    const events = computed(() => eventStore.events)
+    const eventsForDate = computed(() =>
+      eventStore.events.filter((event) =>
+        isSameDay(nativeDate.value, parseISO(event.dtstart))
+      )
+    )
+    const projects = computed(() => projectStore.projects)
+
+    const typeDescription = computed(() => {
+      switch (state.type) {
+        case 'simple':
+        case 'month':
+          return 'Events this month'
+        case 'week':
+          return 'Events this week'
+        case '4-day':
+          return 'Events in the next 4 days'
+      }
+    })
+
+    const onFilterChange = (indices: number[]) => {
+      state.projectFilterIds = indices.map((i) => projects.value[i].id)
+    }
+
+    const onResetDate = () => {
+      state.date = new Date().toISOString().substr(0, 10)
+    }
+
     return {
-      title: 'Events',
+      ...refs,
+      ...toRefs(state),
+      calendarTypes,
+      header,
+      events,
+      eventsForDate,
+      projects,
+      typeDescription,
+      onFilterChange,
+      onResetDate,
     }
   },
-  async fetch({ app: { $accessor } }) {
-    await $accessor.projects.findAll()
+  async asyncData({ $pinia }) {
+    await useProjects($pinia).findAll()
+  },
+  head: {
+    title: 'Events',
   },
 })
-export default class EventsPage extends Vue {
-  $refs!: {
-    calendar: InstanceType<typeof Calendar>
-  }
-
-  calendar = {
-    type: 'simple',
-    types: [
-      { value: 'simple', text: 'Simple' },
-      { value: 'month', text: 'Month' },
-      { value: 'week', text: 'Week' },
-      { value: 'day', text: 'Day' },
-      { value: '4day', text: '4-Day' },
-    ],
-    date: new Date().toISOString().substr(0, 10),
-  }
-
-  projectFilter = []
-  projectFilterIds: number[] = []
-
-  get dateNative() {
-    return parseISO(this.calendar.date)
-  }
-
-  get events() {
-    return this.$accessor.events.calendarEvents
-  }
-
-  get eventsForDate() {
-    return this.events.filter((event) =>
-      isSameDay(this.dateNative, parseISO(event.dtstart))
-    )
-  }
-
-  get header() {
-    return format(this.dateNative, 'EEEE, LLLL do')
-  }
-
-  get projects() {
-    return this.$accessor.projects.projects
-  }
-
-  get type() {
-    switch (this.calendar.type) {
-      case 'simple':
-      case 'month':
-        return 'Events this month'
-      case 'week':
-        return 'Events this week'
-      case '4-day':
-        return 'Events in the next 4 days'
-    }
-  }
-
-  onFilterChange(indices: number[]) {
-    this.projectFilterIds = indices.map((i) => this.projects[i].id)
-  }
-
-  resetDate() {
-    this.calendar.date = new Date().toISOString().substr(0, 10)
-  }
-
-  async onEventCreated() {
-    await this.$refs.calendar.refresh()
-  }
-}
 </script>
 
 <style lang="scss" scoped>

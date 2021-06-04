@@ -8,8 +8,6 @@ import {
 import { endOfDay } from '@shared/time';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigSchema } from '../app.config';
 import {
   addMinutes,
   getMinDate,
@@ -33,6 +31,7 @@ import { EventRecurrence } from './event-recurrence.entity';
 import { Event } from './event.entity';
 import { EventMetadata } from './interfaces/event-metadata.interface';
 import { Schedule } from './schedule.class';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class EventService {
@@ -42,7 +41,7 @@ export class EventService {
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
     private readonly courseService: CourseService,
-    private readonly config: ConfigService<ConfigSchema>,
+    private readonly config: ConfigService,
   ) {}
 
   /**
@@ -94,7 +93,7 @@ export class EventService {
     }
 
     if (!event.picture) {
-      event.picture = this.config.get('DEFAULT_EVENT_PICTURE')!;
+      event.picture = this.config.FILES.DEFAULT_EVENT_PICTURE;
     }
 
     await this.eventRepository.persist(event).flush();
@@ -357,10 +356,6 @@ export class EventService {
       rrule.count === oldSchedule.options.count
     ) {
       rrule.count -= oldRRuleSplit.count();
-    }
-
-    if (id === 21) {
-      console.log(oldRRuleCutoff, oldRRuleSplit);
     }
 
     const schedule = new Schedule(rrule);

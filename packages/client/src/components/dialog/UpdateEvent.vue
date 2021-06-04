@@ -1,5 +1,5 @@
 <template>
-  <dialog-form ref="refDialog" @submit:form="onSubmit">
+  <DialogForm ref="dialogRef" @form:submit="onSubmit">
     <template #title>Edit Event</template>
 
     <template #activator="{ on, attrs }">
@@ -17,7 +17,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               v-model="meta.name"
               label="Title"
               hide-details="auto"
@@ -52,7 +52,7 @@
               <v-col :cols="dates.allday ? 12 : 8">
                 <v-menu v-model="dates.start.menu" offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       :value="format(dates.start.date)"
                       :label="dates.allday ? 'Date' : 'Start Date'"
                       hide-details="auto"
@@ -66,13 +66,13 @@
                       outlined
                       v-bind="attrs"
                       v-on="on"
-                    ></v-text-field-validated>
+                    />
                   </template>
 
                   <v-date-picker
                     v-model="dates.start.date"
                     @input="dates.start.menu = false"
-                  ></v-date-picker>
+                  />
                 </v-menu>
               </v-col>
 
@@ -96,7 +96,7 @@
               <v-col v-if="!dates.allday" cols="8">
                 <v-menu v-model="dates.end.menu" offset-y min-width="290px">
                   <template #activator="{ on, attrs }">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       :value="format(dates.end.date)"
                       :rules="{ required: !dates.allday }"
                       vid="enddate"
@@ -106,13 +106,13 @@
                       v-bind="attrs"
                       outlined
                       v-on="on"
-                    >
-                    </v-text-field-validated>
+                    />
                   </template>
+
                   <v-date-picker
                     v-model="dates.end.date"
                     @input="dates.end.menu = false"
-                  ></v-date-picker>
+                  />
                 </v-menu>
               </v-col>
 
@@ -127,6 +127,8 @@
             </v-row>
           </v-list-item-content>
         </v-list-item>
+
+        <v-divider />
 
         <!-- Permissions -->
         <v-list-item class="pl-2">
@@ -166,7 +168,7 @@
                 />
               </v-col>
 
-              <v-col cols="meta.cutoffThreshold.includes('offset') ? 8 : 12">
+              <v-col :cols="meta.cutoffThreshold.includes('offset') ? 8 : 12">
                 <v-select
                   v-model="meta.lateThreshold"
                   :items="timeThresholds"
@@ -178,7 +180,7 @@
               </v-col>
 
               <v-col v-if="meta.lateThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.lateOffset"
                   label="Minute Offset"
                   type="number"
@@ -199,7 +201,7 @@
               </v-col>
 
               <v-col v-if="meta.cutoffThreshold.includes('offset')" cols="4">
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model.number="meta.cutoffOffset"
                   label="Minute Offset"
                   type="number"
@@ -243,7 +245,7 @@
           <v-list-item-content>
             <v-row>
               <v-col cols="12">
-                <v-combobox-validated
+                <VComboboxValidated
                   v-model="meta.locationTitle"
                   rules="required"
                   :items="['Online', 'Zoom', 'In-Person']"
@@ -283,7 +285,7 @@
                   auto-grow
                   hide-details="auto"
                   outlined
-                ></v-textarea>
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -300,17 +302,29 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-project
+                <VAutocompleteValidated
                   v-model="meta.project"
+                  :items="projectStore.projects"
+                  :loading="projectStore.isLoading"
+                  label="Project (Optional)"
                   item-value="id"
+                  item-text="name"
+                  hide-details="auto"
+                  clearable
+                  debounce
                   outlined
+                  @search="projectStore.findAll()"
                 />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-project v-model="meta.project" />
+                <DialogSelectProject v-model="meta.project" />
               </v-col>
+
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-project @create:project="onProjectCreated" />
+                <DialogSelectProject
+                  @create:project="(project) => (meta.project = project.id)"
+                />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -327,7 +341,7 @@
           <v-list-item-content>
             <v-row>
               <v-col>
-                <auto-complete-course
+                <AutoCompleteCourse
                   v-model="meta.course"
                   :project="meta.project"
                   item-value="id"
@@ -336,7 +350,7 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-select-course
+                <DialogSelectCourse
                   v-model="meta.course"
                   :project="meta.project"
                   item-value="id"
@@ -344,9 +358,9 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <dialog-create-course
+                <DialogCreateCourse
                   :project="meta.project"
-                  @create:course="onCourseCreated"
+                  @create:course="(course) => (meta.course = course.id)"
                 />
               </v-col>
             </v-row>
@@ -364,7 +378,7 @@
           <v-list-item-content>
             <v-row>
               <v-col cols="12">
-                <v-select-validated
+                <VSelectValidated
                   v-model="feeType"
                   :items="feeTypes"
                   :rules="{
@@ -379,9 +393,12 @@
 
               <template v-if="feeType !== 'free'">
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.amount"
+                    data-type="currency"
                     rules="required"
+                    placeholder="0.00"
+                    step="0.50"
                     label="Event Fee"
                     type="number"
                     hide-details="auto"
@@ -390,7 +407,7 @@
                 </v-col>
 
                 <v-col cols="6">
-                  <v-text-field-validated
+                  <VTextFieldValidated
                     v-model.number="fee.lateAmount"
                     label="Late Fee (Optional)"
                     type="number"
@@ -412,8 +429,8 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <file-upload
-              v-model="meta.picture"
+            <FileUpload
+              v-model="upload"
               outlined
               label="Picture (Optional)"
               persistent-hint
@@ -430,7 +447,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-text-field-validated
+            <VTextFieldValidated
               :value="meta.color"
               class="ma-0 pa-0 shrink-append"
               mask="'#XXXXXXXX'"
@@ -447,20 +464,17 @@
                   :close-on-content-click="false"
                 >
                   <template #activator="{ on }">
-                    <div :style="swatch" v-on="on"></div>
+                    <div :style="swatch" v-on="on" />
                   </template>
 
                   <v-card>
                     <v-card-text class="pa-0">
-                      <v-color-picker
-                        v-model="meta.color"
-                        flat
-                      ></v-color-picker>
+                      <v-color-picker v-model="meta.color" flat />
                     </v-card-text>
                   </v-card>
                 </v-menu>
               </template>
-            </v-text-field-validated>
+            </VTextFieldValidated>
           </v-list-item-content>
         </v-list-item>
 
@@ -469,17 +483,21 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <v-slide-x-transition>
-        <v-btn v-show="Object.keys(changeset).length" text @click="onReset">
+        <v-btn
+          v-show="Object.keys(changeset).length"
+          text
+          @click="$emit('event:refresh', $route.params.id)"
+        >
           Reset
         </v-btn>
       </v-slide-x-transition>
 
       <v-btn
         :disabled="!Object.keys(changeset).length"
-        :loading="$accessor.events.isLoading"
+        :loading="isLoading"
         color="primary"
         type="submit"
       >
@@ -487,555 +505,482 @@
       </v-btn>
     </v-card-actions>
 
-    <dialog-update-event-type
-      ref="typeDialog"
+    <DialogUpdateEventType
+      ref="updateTypeRef"
       :changeset="changeset"
       @submit:type="onSubmitType"
     />
-  </dialog-form>
+  </DialogForm>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
-import { Event } from '@server/event/event.entity'
-import { format, isSameDay } from 'date-fns'
-import RRule, { Frequency, Options, RRuleSet, rrulestr } from 'rrule'
+import {
+  computed,
+  defineComponent,
+  PropType,
+  reactive,
+  toRefs,
+  watch,
+  useRoute,
+  nextTick,
+} from '@nuxtjs/composition-api'
+import { useTemplateRef, useDates, useRRule, useSnackbar } from '@/composables'
+import {
+  useFiles,
+  useEvents,
+  useProjects,
+  EventEntity,
+  EventMode,
+} from '@/stores'
 import { FeeType } from '@server/event/enums/fee-type.enum'
 import { EventTimeThreshold } from '@server/event/enums/event-time-threshold.enum'
 import { Grade } from '@server/user/enums/grade.enum'
 import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
 import { UpdateEventDto } from '@server/event/dto/update-event.dto'
-import { Project } from '@server/project/project.entity'
-import { Course } from '@server/course/course.entity'
 import { Gender } from '@server/user/enums/gender.enum'
-import { EventRecurrenceDto } from '@server//event/dto/event-recurrence.dto'
-import { File as FileEntity } from '@server/file/file.entity'
+import { EventRecurrenceDto } from '@server/event/dto/event-recurrence.dto'
 import { CreateEventFeeDto } from '@server/event-fee/dto/create-event-fee.dto'
-import DialogUpdateEventType from './UpdateEventType.vue'
-import DialogForm from './Form.vue'
-import { isValidDate, shallowDiff, toDate } from '~/utils/utilities'
-import { DTOEvent } from '~/store/events'
-import {
-  AddFile,
-  EventUpdateModesAndFile,
-} from '~/types/events/event-update-modes.interface'
-import { RRuleOptions } from '~/types/events/event-recurrence.interface'
-import { genders } from '~/utils/constants'
-import { contiguousGradeRanges, gradeGroups, grades } from '~/utils/events'
-import { DTO } from '~/types/date-to-string.interface'
+import DialogForm from '@/components/dialog/Form.vue'
+import DialogUpdateEventType from '@/components/dialog/UpdateEventType.vue'
+import { isValidDate, shallowDiff, toDate } from '@/utils/utilities'
+import { genders } from '@/utils/constants'
+import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
+import { EntityDTO } from '@server/shared/types/entity-dto'
 
-@Component
-export default class DialogUpdateEvent extends Vue {
-  @Ref('refDialog') readonly dialog!: DialogForm
-  @Ref('typeDialog') readonly typeDialog!: DialogUpdateEventType
-  @Prop() event!: Event
+const timeThresholds = [
+  { text: 'Never', value: EventTimeThreshold.NEVER },
+  { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
+  { text: 'After Event Starts', value: EventTimeThreshold.AFTER_START },
+  { text: 'Minutes From Start', value: EventTimeThreshold.OFFSET_START },
+  { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
+]
 
-  internalData: DTOEvent | null = null
-  grades = grades
-  genders = genders
-  colorMenu = false
-  success = false
+const feeTypes = [
+  { text: 'Free', value: FeeType.FREE },
+  { text: 'Pay Per Event', value: FeeType.EVENT },
+  { text: 'Pay Per Course', value: FeeType.COURSE },
+]
 
-  dates = {
-    allday: false,
-    start: {
-      menu: false,
-      date: '',
+type DialogComponent = InstanceType<typeof DialogForm>
+type DialogTypeComponent = InstanceType<typeof DialogUpdateEventType>
+
+export default defineComponent({
+  props: {
+    event: {
+      type: Object as PropType<EventEntity>,
+      required: true,
     },
-    end: {
-      menu: false,
-      date: '',
-    },
-  }
-
-  times = {
-    start: {
-      menu: false,
-      time: '',
-    },
-    end: {
-      menu: false,
-      time: '',
-    },
-    times: [] as string[],
-  }
-
-  timeThresholds = [
-    { text: 'Never', value: EventTimeThreshold.NEVER },
-    { text: 'After Event Ends', value: EventTimeThreshold.AFTER_END },
-    { text: 'After Event Starts', value: EventTimeThreshold.AFTER_START },
-    { text: 'Minutes From Start', value: EventTimeThreshold.OFFSET_START },
-    { text: 'Minutes From End', value: EventTimeThreshold.OFFSET_END },
-  ]
-
-  fee = {
-    amount: null as number | null,
-    lateAmount: null as number | null,
-  }
-
-  feeType = FeeType.FREE
-  feeTypes = [
-    { text: 'Free', value: FeeType.FREE },
-    { text: 'Pay Per Event', value: FeeType.EVENT },
-    { text: 'Pay Per Course', value: FeeType.COURSE },
-  ]
-
-  meta = {
-    name: '',
-    description: '',
-    location: '',
-    color: '',
-    locationTitle: '',
-    picture: '' as File | string,
-    cutoffThreshold: EventTimeThreshold.AFTER_END,
-    cutoffOffset: 0,
-    lateThreshold: EventTimeThreshold.AFTER_START,
-    lateOffset: 0,
-    project: null as number | null,
-    course: null as number | null,
-    permissions: {
-      grades: [
-        Grade.KINDERGARTEN,
-        Grade.FIRST,
-        Grade.SECOND,
-        Grade.THIRD,
-        Grade.FOURTH,
-        Grade.FIFTH,
-        Grade.SIXTH,
-        Grade.SEVENTH,
-        Grade.EIGHTH,
-        Grade.NINTH,
-        Grade.TENTH,
-        Grade.ELEVENTH,
-        Grade.TWELFTH,
-      ],
-      genders: [Gender.MALE, Gender.FEMALE],
-    },
-  }
-
-  rrule: DTO<EventRecurrenceDto> | null = null
-  rruleOrSet: RRuleSet | RRule | null = null
-  originalRRule: null | DTO<EventRecurrenceDto> = null
-
-  get intEvent(): DTOEvent {
-    return this.internalData!
-  }
-
-  set intEvent(value: DTOEvent) {
-    this.internalData = value
-  }
-
-  get isLoading() {
-    return this.$accessor.events.isLoading
-  }
-
-  get error() {
-    if (this.$accessor.events.isErrored) {
-      return this.$accessor.events.error!
-    } else if (this.$accessor.files.isErrored) {
-      return this.$accessor.files.error!
-    }
-
-    return false
-  }
-
-  get swatch() {
-    return {
-      height: '40px',
-      width: '40px',
-      backgroundColor: this.meta.color,
-      cursor: 'pointer',
-      borderRadius: this.colorMenu ? '50%' : '4px',
-      transition: 'border-radius 200ms ease-in-out',
-    }
-  }
-
-  get gradeGroups() {
-    return gradeGroups(contiguousGradeRanges(this.meta.permissions.grades))
-  }
-
-  get feeDTO(): CreateEventFeeDto {
-    return {
-      amount: (this.fee.amount || 0).toPrecision(2),
-      lateAmount: (this.fee.lateAmount || 0).toPrecision(2),
-    }
-  }
-
-  get eventFeeType() {
-    if (this.event.fee) {
-      return FeeType.EVENT
-    } else if (this.event.course?.fee) {
-      return FeeType.COURSE
-    }
-
-    return FeeType.FREE
-  }
-
-  /**
-   * Determines the meta changes made to an event.
-   */
-  get metaChanges() {
-    const dto: DTO<UpdateEventDto> = {
-      name: this.meta.name,
-      description: this.meta.description || null,
-      color: this.meta.color,
-      picture: this.meta.picture as any, // No ideal way to make it like Files
-      location: this.meta.location || null,
-      locationTitle: this.meta.locationTitle,
-      permissions: this.meta.permissions,
-      cutoffThreshold: this.meta.cutoffThreshold,
-      cutoffOffset: this.meta.cutoffOffset,
-      lateThreshold: this.meta.lateThreshold,
-      lateOffset: this.meta.lateOffset,
-    }
-
-    if (this.dates.allday) {
-      dto.dtstart = toDate(this.dates.start.date, '00:00').toISOString()
-      dto.dtend = toDate(this.dates.start.date, '23:59').toISOString()
-    } else {
-      dto.dtstart = toDate(
-        this.dates.start.date,
-        this.times.start.time
-      ).toISOString()
-      dto.dtend = toDate(this.dates.end.date, this.times.end.time).toISOString()
-    }
-
-    // Project
-    if ((this.meta.project || null) !== (this.event.project?.id || null)) {
-      dto.project = this.meta.project
-    }
-
-    // Course
-    if ((this.meta.course || null) !== (this.event.course?.id || null)) {
-      dto.course = this.meta.course
-    }
-
-    return shallowDiff(this.event, dto)
-  }
-
-  /**
-   * Mastermind that determines the appropriate update actions
-   * based on changes made to the event metadata, dates, or rrule.
-   */
-  get changeset(): EventUpdateModesAndFile {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { dtstart, ...rule } = this.rruleChanges
-    const rruleOptsChanged = Object.keys(rule).length !== 0
-    const changedStart = this.metaChanges.dtstart
-    const meta: AddFile<DTO<UpdateEventDto>> = {
-      ...this.meta,
-      dtend: this.metaChanges.dtend,
-    }
-    const rrule = this.rrule!
-
-    // If the fee type of values have changed, replace the fee.
-    const origFee = this.event.fee || this.event.course?.fee
-    const feeTypeChanged = this.eventFeeType !== this.feeType
-    if (
-      feeTypeChanged ||
-      (origFee &&
-        (origFee.amount !== this.feeDTO.amount ||
-          origFee.lateAmount !== this.feeDTO.lateAmount))
-    ) {
-      meta.fee = this.feeDTO
-      meta.feeType = this.feeType
-    }
-
-    // Changing the date of an event eliminates the "all" option, and
-    // changing the rrule options eliminates "single", so force a future update.
-    if (rruleOptsChanged && changedStart) {
-      return {
-        future: Object.assign({}, meta, { rrule }),
-      }
-    }
-
-    // If the rrule options where changed this re-writes the rrule.
-    // Since the rrule is now different, single-event updates are not allowed.
-    if (rruleOptsChanged) {
-      return {
-        future: Object.assign({}, meta, { rrule }),
-        all: Object.assign({}, meta, {
-          rrule: {
-            ...rrule,
-            dtstart: this.originalRRule?.dtstart || this.event.dtstart,
-          },
-        }),
-      }
-    }
-
-    // Changing just the dtstart of the event eliminates the "all" option.
-    if (changedStart) {
-      return {
-        single: Object.assign({}, meta, {
-          dtstart: this.metaChanges.dtstart,
-        }),
-        future: Object.assign({}, meta, {
-          rrule: { ...rrule, dtstart: changedStart },
-        }),
-      }
-    }
-
-    if (!Object.keys(meta).length) return {}
-
-    return {
-      single: meta,
-      future: meta,
-      all: meta,
-    }
-  }
-
-  isSameDay(dateA: string, dateB: string) {
-    return isSameDay(new Date(dateA), new Date(dateB))
-  }
-
-  /**
-   * @returns The properties in the rrule that have been modified.
-   */
-  get rruleChanges() {
-    if (!this.rrule || !this.originalRRule) return {}
-
-    return shallowDiff(this.originalRRule, this.rrule)
-  }
-
-  /**
-   * If the project is removed then the course should be too.
-   * This could actually be changed with some minor backend tweaks
-   * due to a late refactoring of how payments work.
-   */
-  @Watch('meta.project')
-  onProjectChange(project: number | null) {
-    if (project === null) {
-      this.meta.course = null
-    }
-  }
-
-  /**
-   * Transforms the interpreted event data into the data required
-   * for editing the events or events.
-   */
-  @Watch('event', { immediate: true, deep: true })
-  onEventUpdate(event: DTOEvent) {
-    this.intEvent = Object.assign({}, event)
-    const start = new Date(this.intEvent.dtstart)
-    const end = new Date(this.intEvent.dtend)
-
-    // Copy event date data.
-    this.dates.start.date = format(start, 'yyyy-MM-dd')
-    this.times.start.time = format(start, 'HH:mm')
-    this.dates.end.date = format(end, 'yyyy-MM-dd')
-    this.times.end.time = format(end, 'HH:mm')
-
-    // Copy event metadata
-    this.meta.name = this.intEvent.name
-    this.meta.description = this.intEvent.description || ''
-    this.meta.location = this.intEvent.location || ''
-    this.meta.color = this.intEvent.color || '#000000'
-    this.meta.locationTitle = this.intEvent.locationTitle
-    this.meta.cutoffThreshold = this.intEvent.cutoffThreshold
-    this.meta.cutoffOffset = this.intEvent.cutoffOffset
-    this.meta.lateThreshold = this.intEvent.lateThreshold
-    this.meta.lateOffset = this.intEvent.lateOffset
-    this.meta.permissions.grades = this.intEvent.permissions?.grades || []
-    this.meta.permissions.genders = this.intEvent.permissions?.genders || []
-    this.meta.project = this.intEvent.project?.id || null
-    this.meta.course = this.intEvent.course?.id || null
-    this.meta.picture = this.intEvent.picture
-
-    // Event Fee
-    if (this.intEvent.fee) {
-      const fee = this.intEvent.fee
-
-      this.feeType = FeeType.EVENT
-      this.fee.amount = +fee.amount
-      this.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
-    } else if (this.intEvent.course?.fee) {
-      const fee = this.intEvent.course.fee
-
-      this.feeType = FeeType.COURSE
-      this.fee.amount = +fee.amount
-      this.fee.lateAmount = fee.lateAmount ? +fee.lateAmount : 0
-    } else {
-      this.feeType = FeeType.FREE
-    }
-
-    // Serialize RRule string to object
-    this.rrule = this.getRRuleOptions(this.intEvent)
-    this.originalRRule = Object.assign({}, this.rrule)
-  }
-
-  /**
-   * Hydrates an rrule from a string into its dto options form
-   */
-  getRRuleOptions(event: DTOEvent) {
-    if (!event.recurrence) return null
-
-    let options: Partial<Options>
-
-    const rrule = rrulestr(event.recurrence.rrule)
-
-    if (rrule instanceof RRuleSet) {
-      options = rrule.rrules()[0].origOptions
-    } else {
-      options = rrule.origOptions
-    }
-
-    return (this.cleanRRule(options) as unknown) as DTO<EventRecurrenceDto>
-  }
-
-  /**
-   * Removes undefined properties from the rrule object
-   * and converts any dates into ISO strings.
-   */
-  cleanRRule(object: RRuleOptions) {
-    for (const prop in object) {
-      if (object[prop] === undefined) {
-        delete object[prop]
-      } else if (object[prop] instanceof Date) {
-        object[prop] = object[prop].toISOString()
-      }
-    }
-
-    return (object as unknown) as EventRecurrenceDto
-  }
-
-  /**
-   * Consumes a hydrated RRule and rebuilds the options
-   * structure while removing any superflous properties.
-   *
-   * This is done for diffing purposes.
-   */
-  parseRRule(options: Partial<Options>) {
-    const retval: Partial<Options> = {
-      freq: options.freq,
-      dtstart: options.dtstart,
-    }
-
-    switch (options.freq) {
-      case Frequency.WEEKLY:
-        if (options.byweekday) {
-          retval.byweekday = options.byweekday
-        }
-        break
-      case Frequency.MONTHLY:
-        // Absolute month day.
-        if (options.bymonthday) {
-          retval.bymonthday = options.bymonthday
-          // Relative month weekday.
-        } else if (options.bysetpos) {
-          retval.bysetpos = options.bysetpos
-          retval.byweekday = options.byweekday
-        }
-        break
-    }
-
-    if (options.interval && options.interval !== 1) {
-      retval.interval = options.interval
-    }
-
-    // Sets the terminating condition.
-    if (options.until) {
-      retval.until = options.until
-    } else if (options.count) {
-      retval.count = options.count
-    }
-
-    return retval
-  }
-
-  format(dateString: string) {
-    if (dateString === '') return 'Select a Date'
-
-    const [year, month, day] = dateString.split('-')
-    const date = new Date(+year, +month - 1, +day)
-
-    if (!isValidDate(date)) return 'Invalid Date'
-
-    return format(date, 'EEE, LLL d, yyyy')
-  }
-
-  onProjectCreated(project: Project) {
-    this.meta.project = project.id
-  }
-
-  onCourseCreated(course: Course) {
-    this.meta.course = course.id
-  }
-
-  /**
-   * Resetting causes the event being looked into to be refreshed.
-   * This must be handled by the parent component.
-   */
-  onReset() {
-    this.$emit('event:refresh', this.$route.params.id)
-  }
-
-  /**
-   * The "save changes" button was pushed and the form has no errors.
-   */
-  async onSubmit() {
-    if (this.meta.picture instanceof File) {
-      const file = (await this.$accessor.files.uploadFile(
-        this.meta.picture
-      )) as FileEntity
-
-      if (this.error) {
-        return this.$accessor.snackbar.show({ text: this.error.message })
-      }
-
-      this.meta.picture = file.root
-    }
-
-    // Let the computed properties update.
-    await this.$nextTick()
-
-    const numChangesets = Object.keys(this.changeset).length
-
-    if (numChangesets > 1) {
-      return this.typeDialog.open()
-    }
-
-    if (this.changeset.future) {
-      // If we got here we removed any files.
-      await this.update('future', this.changeset.future as DTO<UpdateEventsDto>)
-    }
-  }
-
-  /**
-   * Callback method for the update event type popup.
-   */
-  async onSubmitType(
-    type: 'single' | 'future' | 'all',
-    changeset: DTO<UpdateEventDto> | DTO<UpdateEventsDto>
-  ) {
-    await this.update(type, changeset)
-  }
-
-  /**
-   * Submits the changes for an event update.
-   */
-  async update(
-    type: 'single' | 'future' | 'all',
-    changeset: DTO<UpdateEventDto> | DTO<UpdateEventsDto>
-  ) {
-    await this.$accessor.events.update({
-      id: this.$route.params.id,
-      dto: changeset,
-      type,
+  },
+  setup(props, { emit }) {
+    const dialog = useTemplateRef<DialogComponent>('dialogRef')
+    const updateTypeRef = useTemplateRef<DialogTypeComponent>('updateTypeRef')
+
+    const snackbar = useSnackbar()
+    const route = useRoute()
+    const eventStore = useEvents()
+    const dateUtils = useDates()
+    const rruleUtils = useRRule()
+    const fileStore = useFiles()
+    const projectStore = useProjects()
+
+    const state = reactive({
+      success: false,
+      colorMenu: false,
+      internalEvent: null as EventEntity | null,
+      dates: {
+        allday: false,
+        start: {
+          menu: false,
+          date: '',
+        },
+        end: {
+          menu: false,
+          date: '',
+        },
+      },
+      times: {
+        start: {
+          menu: false,
+          time: '',
+        },
+        end: {
+          menu: false,
+          time: '',
+        },
+        times: [] as string[],
+      },
+      fee: {
+        amount: null as string | null,
+        lateAmount: null as string | null,
+      },
+      feeType: FeeType.FREE,
+      upload: null as File | string | null,
+      meta: {
+        name: '',
+        description: '',
+        location: '',
+        color: '',
+        locationTitle: '',
+        picture: '',
+        cutoffThreshold: EventTimeThreshold.AFTER_END,
+        cutoffOffset: 0,
+        lateThreshold: EventTimeThreshold.AFTER_START,
+        lateOffset: 0,
+        project: null as number | null,
+        course: null as number | null,
+        permissions: {
+          grades: [
+            Grade.KINDERGARTEN,
+            Grade.FIRST,
+            Grade.SECOND,
+            Grade.THIRD,
+            Grade.FOURTH,
+            Grade.FIFTH,
+            Grade.SIXTH,
+            Grade.SEVENTH,
+            Grade.EIGHTH,
+            Grade.NINTH,
+            Grade.TENTH,
+            Grade.ELEVENTH,
+            Grade.TWELFTH,
+          ],
+          genders: [Gender.MALE, Gender.FEMALE],
+        },
+      },
+      rrule: null as EntityDTO<EventRecurrenceDto> | null,
+      originalRRule: null as null | EntityDTO<EventRecurrenceDto>,
     })
 
-    if (this.error) {
-      this.$accessor.snackbar.show({
-        text: this.error.message,
+    const isLoading = computed(() => eventStore.isLoading)
+
+    const feeDTO = computed(
+      (): CreateEventFeeDto => ({
+        amount: parseFloat(state.fee.amount || '0').toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+        }),
+        lateAmount: parseFloat(state.fee.lateAmount || '0').toLocaleString(
+          'en-US',
+          { minimumFractionDigits: 2 }
+        ),
       })
-    } else {
-      this.$emit('event:update', this.$route.params.id)
-      this.$accessor.snackbar.show({
-        text: 'Event successfully updated',
-      })
-      this.dialog.close()
+    )
+
+    const internalGradeGroups = computed(() =>
+      gradeGroups(contiguousGradeRanges(state.meta.permissions.grades))
+    )
+
+    const eventFeeType = computed(() => {
+      if (props.event.fee) {
+        return FeeType.EVENT
+      } else if (props.event.course?.fee) {
+        return FeeType.COURSE
+      }
+
+      return FeeType.FREE
+    })
+    const swatch = computed(() => ({
+      height: '40px',
+      width: '40px',
+      backgroundColor: state.meta.color,
+      cursor: 'pointer',
+      borderRadius: state.colorMenu ? '50%' : '4px',
+      transition: 'border-radius 200ms ease-in-out',
+    }))
+
+    /**
+     * @returns The properties in the rrule that have been modified.
+     */
+    const rruleChanges = computed(() => {
+      if (!state.rrule || !state.originalRRule) return {}
+
+      return shallowDiff(state.originalRRule, state.rrule)
+    })
+
+    /**
+     * Determines the meta changes made to an event.
+     */
+    const metaChanges = computed(() => {
+      const dto: EntityDTO<UpdateEventDto> = {
+        name: state.meta.name,
+        description: state.meta.description || null,
+        color: state.meta.color,
+        picture: state.meta.picture as any, // No ideal way to make it like Files
+        location: state.meta.location || null,
+        locationTitle: state.meta.locationTitle,
+        permissions: state.meta.permissions,
+        cutoffThreshold: state.meta.cutoffThreshold,
+        cutoffOffset: state.meta.cutoffOffset,
+        lateThreshold: state.meta.lateThreshold,
+        lateOffset: state.meta.lateOffset,
+      }
+
+      if (state.dates.allday) {
+        dto.dtstart = toDate(state.dates.start.date, '00:00').toISOString()
+        dto.dtend = toDate(state.dates.start.date, '23:59').toISOString()
+      } else {
+        dto.dtstart = toDate(
+          state.dates.start.date,
+          state.times.start.time
+        ).toISOString()
+        dto.dtend = toDate(
+          state.dates.end.date,
+          state.times.end.time
+        ).toISOString()
+      }
+
+      // Project
+      if ((state.meta.project || null) !== (props.event.project?.id || null)) {
+        dto.project = state.meta.project
+      }
+
+      // Course
+      if ((state.meta.course || null) !== (props.event.course?.id || null)) {
+        dto.course = state.meta.course
+      }
+
+      return shallowDiff(props.event, dto)
+    })
+
+    /**
+     * Mastermind that determines the appropriate update actions
+     * based on changes made to the event metadata, dates, or rrule.
+     */
+    const changeset = computed(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { dtstart, ...rule } = rruleChanges.value
+      const rruleOptsChanged = Object.keys(rule).length !== 0
+      const changedStart = metaChanges.value.dtstart
+      const meta: EntityDTO<UpdateEventDto> = {
+        ...state.meta,
+        dtend: metaChanges.value.dtend,
+      }
+      const rrule = state.rrule!
+
+      // If the fee type of values have changed, replace the fee.
+      const origFee = props.event.fee || props.event.course?.fee
+      const feeTypeChanged = eventFeeType.value !== state.feeType
+      if (
+        feeTypeChanged ||
+        (origFee &&
+          (origFee.amount !== feeDTO.value.amount ||
+            origFee.lateAmount !== feeDTO.value.lateAmount))
+      ) {
+        meta.fee = feeDTO.value
+        meta.feeType = state.feeType
+      }
+
+      // Changing the date of an event eliminates the "all" option, and
+      // changing the rrule options eliminates "single", so force a future update.
+      if (rruleOptsChanged && changedStart) {
+        return {
+          future: { ...meta, rrule },
+        }
+      }
+
+      // If the rrule options where changed this re-writes the rrule.
+      // Since the rrule is now different, single-event updates are not allowed.
+      if (rruleOptsChanged) {
+        return {
+          future: { ...meta, rrule },
+          all: {
+            ...meta,
+            rrule: {
+              ...rrule,
+              dtstart: state.originalRRule?.dtstart || props.event.dtstart,
+            },
+          },
+        }
+      }
+
+      // Changing just the dtstart of the event eliminates the "all" option.
+      if (changedStart) {
+        return {
+          single: { ...meta, dtstart: metaChanges.value.dtstart },
+          future: { ...meta, rrule: { ...rrule, dtstart: changedStart } },
+        }
+      }
+
+      if (!Object.keys(meta).length) return {}
+
+      return {
+        single: meta,
+        future: meta,
+        all: meta,
+      }
+    })
+
+    /**
+     * If the project is removed then the course should be too.
+     */
+    watch(
+      () => state.meta.project,
+      (id: number | null) => {
+        if (!id) {
+          state.meta.course = null
+        }
+      }
+    )
+
+    /**
+     * Hydrates an rrule from a string into its dto options form
+     */
+    const getRRuleOptions = (event: EventEntity) => {
+      if (!event.recurrence) return null
+
+      return rruleUtils.getDeserialized(event.recurrence.rrule)
     }
-  }
-}
+
+    /**
+     * Transforms the interpreted event data into the data required
+     * for editing the events or events.
+     */
+    watch(
+      () => props.event,
+      (event) => {
+        state.internalEvent = { ...event }
+        const start = new Date(state.internalEvent.dtstart)
+        const end = new Date(state.internalEvent.dtend)
+
+        // Copy event date data.
+        state.dates.start.date = dateUtils.format(start, 'yyyy-MM-dd')
+        state.times.start.time = dateUtils.format(start, 'HH:mm')
+        state.dates.end.date = dateUtils.format(end, 'yyyy-MM-dd')
+        state.times.end.time = dateUtils.format(end, 'HH:mm')
+
+        // Copy event metadata
+        state.meta.name = state.internalEvent.name
+        state.meta.description = state.internalEvent.description || ''
+        state.meta.location = state.internalEvent.location || ''
+        state.meta.color = state.internalEvent.color || '#000000'
+        state.meta.locationTitle = state.internalEvent.locationTitle
+        state.meta.cutoffThreshold = state.internalEvent.cutoffThreshold
+        state.meta.cutoffOffset = state.internalEvent.cutoffOffset
+        state.meta.lateThreshold = state.internalEvent.lateThreshold
+        state.meta.lateOffset = state.internalEvent.lateOffset
+        state.meta.permissions.grades =
+          state.internalEvent.permissions?.grades || []
+        state.meta.permissions.genders =
+          state.internalEvent.permissions?.genders || []
+        state.meta.project = state.internalEvent.project?.id || null
+        state.meta.course = state.internalEvent.course?.id || null
+        state.meta.picture = state.internalEvent.picture
+
+        // Event Fee
+        if (state.internalEvent.fee) {
+          const fee = state.internalEvent.fee
+
+          state.feeType = FeeType.EVENT
+          state.fee.amount = fee.amount
+          state.fee.lateAmount = fee.lateAmount || '0.00'
+        } else if (state.internalEvent.course?.fee) {
+          const fee = state.internalEvent.course.fee
+
+          state.feeType = FeeType.COURSE
+          state.fee.amount = fee.amount
+          state.fee.lateAmount = fee.lateAmount || '0.00'
+        } else {
+          state.feeType = FeeType.FREE
+        }
+
+        // Serialize RRule string to object
+        // TODO: Fix types
+        state.rrule = getRRuleOptions(
+          state.internalEvent as EventEntity
+        ) as EntityDTO<EventRecurrenceDto>
+        state.originalRRule = { ...state.rrule! }
+      },
+      { immediate: true, deep: true }
+    )
+
+    const format = (dateString: string) => {
+      if (dateString === '') return 'Select a Date'
+
+      const [year, month, day] = dateString.split('-')
+      const date = new Date(+year, +month - 1, +day)
+
+      if (!isValidDate(date)) return 'Invalid Date'
+
+      return dateUtils.format(date, 'EEE, LLL d, yyyy')
+    }
+
+    /**
+     * Submits the changes for an event update.
+     */
+    const update = async (
+      type: EventMode,
+      changeset: EntityDTO<UpdateEventDto> | EntityDTO<UpdateEventsDto>
+    ) => {
+      await eventStore.update(+route.value.params.id, changeset, type)
+
+      if (eventStore.error) {
+        snackbar.error(eventStore.error.message)
+      } else {
+        emit('event:update', +route.value.params.id)
+        snackbar.success('Event successfully updated')
+        dialog.value.close()
+      }
+    }
+
+    /**
+     * The "save changes" button was pushed and the form has no errors.
+     */
+    const onSubmit = async () => {
+      if (state.upload instanceof File) {
+        const file = await fileStore.create(state.upload)
+
+        if (fileStore.error) {
+          return snackbar.error(fileStore.error.message)
+        }
+
+        state.meta.picture = file.root
+      } else if (typeof state.upload === 'string') {
+        state.meta.picture = state.upload
+      }
+
+      // Let the computed properties update.
+      // This is not ideal.
+      await nextTick()
+
+      const numChangesets = Object.keys(changeset.value).length
+
+      if (numChangesets > 1) {
+        return updateTypeRef.value.open()
+      }
+
+      if (changeset.value.future) {
+        // If we got here we removed any files.
+        await update('future', changeset.value.future)
+      }
+    }
+
+    /**
+     * Callback method for the update event type popup.
+     */
+    const onSubmitType = async (
+      type: EventMode,
+      changeset: EntityDTO<UpdateEventDto> | EntityDTO<UpdateEventsDto>
+    ) => {
+      await update(type, changeset)
+    }
+
+    return {
+      ...toRefs(state),
+      isLoading,
+      grades,
+      genders,
+      swatch,
+      timeThresholds,
+      feeTypes,
+      format,
+      onSubmitType,
+      onSubmit,
+      changeset,
+      gradeGroups: internalGradeGroups,
+      isSameDay: dateUtils.isSameDay,
+      projectStore,
+    }
+  },
+})
 </script>
 
 <style lang="scss" scoped>

@@ -10,17 +10,17 @@
 
         <v-row>
           <v-col class="pt-0">
-            <breadcrumbs class="pa-0" :items="breadcrumbs" large></breadcrumbs>
+            <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
           </v-col>
         </v-row>
       </v-col>
 
       <v-col cols="auto" align-self="center">
-        <dialog-create-project @create:project="onCreate">
+        <DialogCreateProject @create:project="onRefresh">
           <template #activator="{ on, attrs }">
             <v-btn v-bind="attrs" v-on="on">Create Project</v-btn>
           </template>
-        </dialog-create-project>
+        </DialogCreateProject>
       </v-col>
     </v-row>
 
@@ -28,7 +28,7 @@
       <v-col>
         <v-card>
           <v-card-title>
-            <v-spacer></v-spacer>
+            <v-spacer />
 
             <v-text-field
               v-model="search"
@@ -38,10 +38,10 @@
               single-line
               solo
               hide-details
-            ></v-text-field>
+            />
           </v-card-title>
 
-          <v-data-table-paginated
+          <VDataTablePaginated
             :headers="headers"
             :items="projects"
             :search="search"
@@ -49,7 +49,7 @@
             @refresh="onRefresh"
           >
             <template #[`item.id`]="{ item }">
-              # <link-copy :text="item.id"></link-copy>
+              # <LinkCopy :text="item.id" />
             </template>
 
             <template #[`item.createdAt`]="{ item }">
@@ -65,7 +65,7 @@
                 <v-icon>mdi-open-in-new</v-icon>
               </v-btn>
             </template>
-          </v-data-table-paginated>
+          </VDataTablePaginated>
         </v-card>
       </v-col>
     </v-row>
@@ -73,51 +73,47 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { formatDate } from '~/utils/utilities'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
+import { formatDate } from '@/utils/utilities'
+import { useDebouncedRef } from '@/composables'
+import { useProjects } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const search = useDebouncedRef('')
+
+    const projectStore = useProjects()
+
+    const onRefresh = async () => {
+      await projectStore.findAll({ contains: search.value })
+    }
+
+    return {
+      search,
+      onRefresh,
+      isLoading: computed(() => projectStore.isLoading),
+      projects: computed(() => projectStore.projects),
+      format: formatDate,
+      breadcrumbs: [
+        {
+          text: 'Dashboard',
+          href: '/admin/',
+        },
+        {
+          text: 'Projects',
+        },
+      ],
+      headers: [
+        { text: 'Id', value: 'id' },
+        { text: 'Name', value: 'name' },
+        { text: 'Description', value: 'description' },
+        { text: 'Edit', value: 'edit' },
+      ],
+    }
+  },
   head: {
     title: 'Users',
   },
 })
-export default class ProjectsPage extends Vue {
-  search = ''
-
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Projects',
-    },
-  ]
-
-  headers = [
-    { text: 'Id', value: 'id' },
-    { text: 'Name', value: 'name' },
-    { text: 'Description', value: 'description' },
-    { text: 'Edit', value: 'edit' },
-  ]
-
-  get isLoading() {
-    return this.$accessor.projects.isLoading
-  }
-
-  get projects() {
-    return this.$accessor.projects.projects
-  }
-
-  format(date: string, formatString: string) {
-    return formatDate(date, formatString)
-  }
-
-  async onRefresh(options: any) {
-    await this.$accessor.projects.findAll(options)
-  }
-
-  async onCreate() {}
-}
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog ref="dialog" v-model="dialog" max-width="300px">
+    <v-dialog v-model="dialog" max-width="300px">
       <v-card>
         <template v-if="manual">
           <v-card-title>Set Time</v-card-title>
@@ -48,78 +48,94 @@
       </v-card>
     </v-dialog>
 
-    <v-text-field-validated
+    <VTextFieldValidated
       :value="friendlyTime"
       v-bind="$attrs"
       hide-details="auto"
       @click="dialog = true"
-    ></v-text-field-validated>
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { friendlyTime } from '~/utils/utilities'
+import {
+  computed,
+  defineComponent,
+  reactive,
+  toRefs,
+} from '@nuxtjs/composition-api'
+import { friendlyTime as friendlyTimeUtil } from '~/utils/utilities'
 
 export type Meridiem = 'AM' | 'PM'
 
-@Component
-export default class PickerTime extends Vue {
-  @Prop({ required: true }) value!: string
+export default defineComponent({
+  props: {
+    value: {
+      type: String,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const state = reactive({
+      dialog: false,
+      manual: false,
+      referenceTime: props.value,
+    })
 
-  dialog = false
-  manual = false
-  referenceTime = this.value
+    const friendlyTime = computed(() => friendlyTimeUtil(time.value))
 
-  get friendlyTime(): string {
-    return friendlyTime(this.time)
-  }
+    const time = computed({
+      get() {
+        return props.value
+      },
+      set(value: string) {
+        emit('input', value)
+      },
+    })
 
-  get time() {
-    return this.value
-  }
+    const hours = computed({
+      get() {
+        return +props.value.substring(2, 0)
+      },
+      set(hours: number) {
+        const hourString = hours.toString().padStart(2, '0')
 
-  set time(value: string) {
-    this.$emit('input', value)
-  }
+        emit('input', `${hourString}:${minutes.value}`)
+      },
+    })
 
-  get hours() {
-    return +this.value.substring(2, 0)
-  }
+    const minutes = computed({
+      get() {
+        return +props.value.substring(3, 5)
+      },
+      set(minutes: number) {
+        const minuteString = minutes.toString().padStart(2, '0')
 
-  set hours(hours: number) {
-    const hourString = hours.toString().padStart(2, '0')
+        emit('input', `${hours.value}:${minuteString}`)
+      },
+    })
 
-    this.$emit('input', `${hourString}:${this.minutes}`)
-  }
+    const meridiem = computed({
+      get() {
+        const hourString = props.value.substring(2, 0)
+        const hours = +hourString
 
-  get minutes() {
-    return +this.value.substring(3, 5)
-  }
+        return hours < 12 ? 'AM' : 'PM'
+      },
+      set(value: Meridiem) {
+        const current = meridiem.value
 
-  set minutes(minutes: number) {
-    const minuteString = minutes.toString().padStart(2, '0')
+        if (current === value) return
 
-    this.$emit('input', `${this.hours}:${minuteString}`)
-  }
+        if (value === 'AM') {
+          hours.value -= 12
+        } else {
+          hours.value += 12
+        }
+      },
+    })
 
-  get meridiem() {
-    const hourString = this.value.substring(2, 0)
-    const hours = +hourString
-
-    return hours < 12 ? 'AM' : 'PM'
-  }
-
-  set meridiem(meridiem: Meridiem) {
-    const current = this.meridiem
-
-    if (current === meridiem) return
-
-    if (meridiem === 'AM') {
-      this.hours -= 12
-    } else {
-      this.hours += 12
-    }
-  }
-}
+    return { ...toRefs(state), friendlyTime, time, minutes, hours, meridiem }
+  },
+})
 </script>

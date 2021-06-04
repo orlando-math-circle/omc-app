@@ -1,10 +1,5 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-combobox
       v-model="data"
       :error-messages="errors"
@@ -22,21 +17,35 @@
         <slot :name="slotName" />
       </template>
     </v-combobox>
-  </validation-provider>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Vue } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
+import { useVModel } from '@vueuse/core'
 import { ValidationProvider } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
+  props: {
+    value: {
+      type: null as any,
+      required: true,
+    },
+    rules: {
+      type: [String, Object],
+      default: '',
+    },
+    vid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
+  setup(props) {
+    return { data: useVModel(props) }
+  },
 })
-export default class VComboboxValidated extends Vue {
-  @PropSync('value') data!: string | number | object
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
-}
 </script>

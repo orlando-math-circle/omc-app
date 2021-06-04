@@ -9,30 +9,23 @@
 
             <v-card-subtitle>{{ body }}</v-card-subtitle>
 
-            <v-form-validated
-              v-if="status === 'waiting'"
-              @submit:form="onSubmit"
-            >
+            <VFormValidated v-if="status === 'waiting'" @form:submit="onForgot">
               <v-card-text>
-                <v-text-field-validated
+                <VTextFieldValidated
                   v-model="email"
                   label="Email"
                   name="email"
                   rules="required"
                   outlined
-                ></v-text-field-validated>
+                />
               </v-card-text>
 
               <v-card-actions>
-                <v-btn
-                  block
-                  :loading="$accessor.auth.isLoading"
-                  type="submit"
-                  color="primary"
-                  >Send Reset Link</v-btn
-                >
+                <v-btn block :loading="isLoading" type="submit" color="primary">
+                  Send Reset Link
+                </v-btn>
               </v-card-actions>
-            </v-form-validated>
+            </VFormValidated>
 
             <v-card-text v-else>
               <v-btn to="/" block color="secondary">Home</v-btn>
@@ -40,19 +33,16 @@
           </v-card>
 
           <!-- Token Mode -->
-          <v-card v-else :loading="$accessor.auth.isLoading">
+          <v-card v-else :loading="isLoading">
             <v-card-title>{{ title }}</v-card-title>
 
             <v-card-subtitle>{{ body }}</v-card-subtitle>
 
-            <v-form-validated
-              v-if="status === 'waiting'"
-              @submit:form="submitComplete"
-            >
+            <VFormValidated v-if="status === 'waiting'" @form:submit="onReset">
               <v-card-text>
                 <v-row>
                   <v-col cols="12">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       v-model="newPassword"
                       label="New Password"
                       type="password"
@@ -61,11 +51,11 @@
                       vid="password"
                       outlined
                       hide-details="auto"
-                    ></v-text-field-validated>
+                    />
                   </v-col>
 
                   <v-col cols="12">
-                    <v-text-field-validated
+                    <VTextFieldValidated
                       v-model="conPassword"
                       label="Confirm New Password"
                       type="password"
@@ -73,21 +63,17 @@
                       rules="required|password:@password"
                       outlined
                       hide-details="auto"
-                    ></v-text-field-validated>
+                    />
                   </v-col>
                 </v-row>
               </v-card-text>
 
               <v-card-actions>
-                <v-btn
-                  block
-                  :loading="$accessor.auth.isLoading"
-                  type="submit"
-                  color="primary"
-                  >Change Password</v-btn
-                >
+                <v-btn block :loading="isLoading" type="submit" color="primary">
+                  Change Password
+                </v-btn>
               </v-card-actions>
-            </v-form-validated>
+            </VFormValidated>
 
             <v-card-text v-else>
               <v-btn to="/" block color="secondary">Home</v-btn>
@@ -100,112 +86,125 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import {
+  defineComponent,
+  toRefs,
+  reactive,
+  useRoute,
+  computed,
+  useFetch,
+} from '@nuxtjs/composition-api'
+import { useSnackbar } from '@/composables'
+import { useAuth } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'landing',
-  head: {
-    title: 'Forgot Password?',
-  },
   fetchOnServer: false,
+  setup() {
+    const route = useRoute()
+    const authStore = useAuth()
+    const snackbar = useSnackbar()
+
+    const state = reactive({
+      status: 'waiting' as
+        | 'token:gone'
+        | 'token:complete'
+        | 'request:sent'
+        | 'waiting',
+      email: '',
+      password: '',
+      confirm: '',
+    })
+
+    const token = computed(() => {
+      const value = route.value.query.token
+
+      return typeof value === 'string' ? value : null
+    })
+
+    const { fetchState } = useFetch(async () => {
+      if (!token.value) return
+
+      await authStore.verifyReset(token.value)
+
+      if (authStore.error) {
+        state.status = 'token:gone'
+        snackbar.error(authStore.error.message)
+      } else {
+        state.status = 'waiting'
+      }
+    })
+
+    const title = computed(() => {
+      if (fetchState.pending) {
+        return 'Loading...'
+      }
+
+      switch (state.status) {
+        case 'waiting':
+          return token.value ? 'Set a New Password' : 'Enter Your Email'
+        case 'token:gone':
+          return 'Link Expired'
+        case 'request:sent':
+          return 'On Its Way!'
+        case 'token:complete':
+          return 'Password is Reset'
+      }
+    })
+
+    const body = computed(() => {
+      if (state.status === 'waiting') {
+        return token.value
+          ? 'Enter a new password to use for your account'
+          : 'Enter your email address for the account you wish to reset'
+      } else if (state.status === 'token:gone') {
+        return 'The token is expired and is no longer usable, try sending a new password reset request.'
+      } else if (state.status === 'token:complete') {
+        return 'Your password has been successfully changed.'
+      } else if (state.status === 'request:sent') {
+        return 'Your request has been accepted. Check your email!'
+      }
+    })
+
+    const onForgot = async () => {
+      await authStore.forgotPassword(state.email)
+
+      if (authStore.error) {
+        return snackbar.error(authStore.error.message)
+      }
+
+      snackbar.success('Successfully Sent')
+
+      state.status = 'request:sent'
+    }
+
+    const onReset = async () => {
+      await authStore.resetPassword({
+        token: token.value!,
+        password: state.password,
+      })
+
+      if (authStore.error) {
+        return snackbar.error(authStore.error.message)
+      }
+
+      snackbar.success('Password Changed Successfully')
+
+      state.status = 'token:complete'
+    }
+
+    return {
+      ...toRefs(state),
+      isLoading: computed(() => authStore.isLoading),
+      token,
+      title,
+      body,
+      onForgot,
+      onReset,
+    }
+  },
+  head: {
+    title: 'Forgot Reset',
+  },
 })
-export default class ForgotPasswordPage extends Vue {
-  email = ''
-  status: 'waiting' | 'token:gone' | 'token:complete' | 'request:sent' =
-    'waiting'
-
-  newPassword = ''
-  conPassword = ''
-
-  get token() {
-    const query = this.$route.query.token
-
-    return !Array.isArray(query) && query ? query : null
-  }
-
-  get title() {
-    if (this.$fetchState.pending) {
-      return 'Loading...'
-    }
-
-    switch (this.status) {
-      case 'waiting':
-        return this.token ? 'Set a New Password' : 'Enter Your Email'
-      case 'token:gone':
-        return 'Link Expired'
-      case 'request:sent':
-        return 'On Its Way!'
-      case 'token:complete':
-        return 'Password is Reset'
-    }
-  }
-
-  get body() {
-    if (this.status === 'waiting') {
-      return this.token
-        ? 'Enter a new password to use for your account'
-        : 'Enter your email address for the account you wish to reset'
-    } else if (this.status === 'token:gone') {
-      return 'The token is expired and is no longer usable, try sending a new password reset request.'
-    } else if (this.status === 'token:complete') {
-      return 'Your password has been successfully changed.'
-    } else if (this.status === 'request:sent') {
-      return 'Your request has been accepted. Check your email!'
-    }
-  }
-
-  async fetch() {
-    // If there is no token, this is not the correct mode
-    if (!this.token) return
-
-    await this.$accessor.auth.verifyResetPassword(this.token)
-
-    if (this.$accessor.auth.isErrored) {
-      this.status = 'token:gone'
-      this.$accessor.snackbar.show({
-        text: this.$accessor.auth.error!.message,
-        timeout: 10000,
-      })
-    } else {
-      this.status = 'waiting'
-    }
-  }
-
-  async onSubmit() {
-    await this.$accessor.auth.forgotPassword(this.email)
-
-    if (this.$accessor.auth.isErrored) {
-      return this.$accessor.snackbar.show({
-        text: this.$accessor.auth.error!.message,
-        timeout: 10000,
-      })
-    }
-
-    this.$accessor.snackbar.show({
-      text: 'Successfully Sent',
-    })
-
-    this.status = 'request:sent'
-  }
-
-  async submitComplete() {
-    await this.$accessor.auth.resetPassword({
-      token: this.token!,
-      password: this.newPassword,
-    })
-
-    if (this.$accessor.auth.isErrored) {
-      return this.$accessor.snackbar.show({
-        text: this.$accessor.auth.error!.message,
-        timeout: 10000,
-      })
-    }
-
-    this.$accessor.snackbar.show({
-      text: 'Password Successfully Changed',
-    })
-
-    this.status = 'token:complete'
-  }
-}
 </script>

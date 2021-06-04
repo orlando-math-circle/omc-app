@@ -1,16 +1,22 @@
-import { differenceInYears, parse } from 'date-fns'
+import { differenceInYears, isAfter, parse } from 'date-fns'
 import { isNumber } from 'lodash'
 import { extend, setInteractionMode } from 'vee-validate'
-// eslint-disable-next-line camelcase
 import { email, min_value, max_value } from 'vee-validate/dist/rules'
+
+/**
+ * Plugin: VeeValidate
+ *
+ * This file contains the installed rules that components with
+ * `Validated` in their name can use in the `rules` field.
+ */
 
 /**
  * Reduces the aggressiveness of vee-validate to not throw errors while the user
  * is still filling out the field being validated.
  *
- * @see https://logaretm.github.io/vee-validate/guide/interaction-and-ux.html#interaction-modes
+ * @see https://vee-validate.logaretm.com/v3/guide/interaction-and-ux.html#interaction-modes
  */
-setInteractionMode('lazy')
+setInteractionMode('eager')
 
 extend('min_value', min_value)
 extend('max_value', max_value)
@@ -46,24 +52,28 @@ extend('ext', {
   message: 'This file type is not permitted.',
 })
 
+/**
+ * A date of birth is invalid if it occurs in the future.
+ *
+ * This is split from the other rules to allow for message overrides.
+ */
+extend('positive_age', {
+  validate: (value) => isAfter(new Date(), new Date(value)),
+  message: 'Please enter a valid date of birth.',
+})
+
 extend('min_age', {
   params: ['min'],
-  validate: (value, { min }: any) => {
-    const diff = differenceInYears(new Date(), new Date(value))
-
-    return diff >= min
-  },
-  message: 'Please have a parent or guardian register in your stead.',
+  validate: (value, { min }: any) =>
+    differenceInYears(new Date(), new Date(value)) > min,
+  message: 'Please have a parent or guardian register for you.',
 })
 
 extend('max_age', {
   params: ['max'],
-  validate: (value, { max }: any) => {
-    const diff = differenceInYears(new Date(), new Date(value))
-
-    return diff < max
-  },
-  message: 'Please select a valid birthday.',
+  validate: (value, { max }: any) =>
+    differenceInYears(new Date(), new Date(value)) < max,
+  message: 'Please enter a valid date of birth.',
 })
 
 extend('required', {

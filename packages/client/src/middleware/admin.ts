@@ -1,16 +1,16 @@
-import { Middleware } from '@nuxt/types'
-import { Roles } from '@server/app.roles'
+import { defineNuxtMiddleware } from '@nuxtjs/composition-api'
+import { useAuth } from '@/stores'
 
 /**
  * Admin Access Middleware
  */
-const middleware: Middleware = (ctx) => {
-  if (!ctx.store.state.auth.user?.roles.includes(Roles.ADMIN)) {
-    ctx.error({
+export default defineNuxtMiddleware(({ pinia, error }) => {
+  const authStore = useAuth(pinia)
+
+  if (!authStore.isAdmin) {
+    error({
       statusCode: 403,
       message: 'Insufficient permissions to access the admin interface',
     })
   }
-}
-
-export default middleware
+})

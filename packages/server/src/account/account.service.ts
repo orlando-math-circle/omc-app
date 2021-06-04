@@ -6,87 +6,93 @@ import {
   QueryOrderMap,
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { ConflictException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
-import { ConfigSchema } from '../app.config';
 import { BCRYPT_ROUNDS } from '../app.constants';
 import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
 import { AuthService } from '../auth/auth.service';
+import { ConfigService } from '../config/config.service';
 import { Email } from '../email/email.class';
-import { SENDGRID_VERIFY_TEMPLATE } from '../email/email.constants';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
 import { Account } from './account.entity';
-import { CreateAccountDto } from './dtos/create-account.dto';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { RegisterAccountDto } from './dto/register.dto';
 
 @Injectable()
 export class AccountService {
+  private readonly ADMIN_EMAIL?: string;
+
   constructor(
     @InjectRepository(Account)
     private readonly accountRepository: EntityRepository<Account>,
     private readonly emailService: EmailService,
-    private readonly userService: UserService,
     private readonly authService: AuthService,
-    private readonly config: ConfigService<ConfigSchema>,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    this.ADMIN_EMAIL = config.ADMIN_EMAIL;
+  }
 
   /**
    * Creates an account by cascade-inserting the primary user.
    *
-   * @param createAccountDto properties of the primary user
+   * @param dto Properties of the primary user.
    */
-  async create(createAccountDto: CreateAccountDto) {
-    const existingUser = await this.userService.findOne({
-      email: createAccountDto.email,
-    });
-
-    if (existingUser) {
-      throw new ConflictException();
-    }
-
+  async create(dto: CreateAccountDto | RegisterAccountDto) {
     const account = new Account();
     const user = new User();
     this.accountRepository.persist(user);
 
-    if (createAccountDto.industry) {
-      createAccountDto.industry = classToPlain(createAccountDto.industry);
+    if (dto.industry) {
+      dto.industry = classToPlain(dto.industry);
     }
 
-    user.assign(createAccountDto);
-    user.password = await bcrypt.hash(user.password, BCRYPT_ROUNDS);
+    user.assign(dto);
+    user.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     account.primaryUser = user;
     account.users.add(user);
 
     // Check if there is an admin override.
-    const adminEmail = this.config.get('ADMIN_EMAIL');
-    if (adminEmail && user.email === adminEmail) {
+    if (user.email === this.ADMIN_EMAIL) {
       user.roles = [Roles.ADMIN];
     }
 
     await this.accountRepository.persistAndFlush(account);
     account.users.populated(true);
+    account.primaryUser.populated(true);
 
-    const token = this.authService.signJWT({ email: user.email }, undefined, {
-      expiresIn: '2 days',
-    });
+    return account;
+  }
 
-    this.emailService.send(
-      new Email(user.email!, 'Verify Your Email', {
-        templateId: SENDGRID_VERIFY_TEMPLATE,
-        templateData: {
-          first_name: user.first,
-          verify_link: `${this.config.get(
-            'FRONTEND_URL',
-          )}/verify?token=${token}`,
-        },
-      }),
+  /**
+   * Creates a new account, sends the verification email,
+   * and creates a token for their immediate login.
+   *
+   * @param createAccountDto Properties of the primary user.
+   */
+  public async register(registerAccountDto: RegisterAccountDto) {
+    const account = await this.create(registerAccountDto);
+
+    const token = this.authService.signJWT(
+      { email: account.primaryUser.email },
+      undefined,
+      {
+        expiresIn: '2 days',
+      },
     );
 
-    return this.authService.login(account, user);
+    const email = new Email()
+      .setTemplate(this.config.MAILERSEND.TEMPLATES.VERIFY)
+      .setTo(account.primaryUser.email!, undefined, {
+        first_name: account.primaryUser.first,
+        verify_link: `${this.config.FILES.FRONTEND_URL}/verify?token=${token}`,
+      });
+
+    await this.emailService.send(email);
+
+    return this.authService.login(account, account.primaryUser);
   }
 
   /**

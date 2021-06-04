@@ -23,14 +23,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { defineComponent, ref } from '@nuxtjs/composition-api'
 
-@Component
-export default class DialogLightbox extends Vue {
-  @Prop() readonly image!: string
+export default defineComponent({
+  props: {
+    image: {
+      type: String,
+      required: true,
+    },
+  },
+  setup() {
+    const dialog = ref(false)
 
-  dialog = false
-}
+    return { dialog }
+  },
+})
 </script>
 
 <style lang="scss">

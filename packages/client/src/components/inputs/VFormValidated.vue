@@ -1,23 +1,29 @@
 <template>
-  <validation-observer v-slot="{ valid, passes, passed }" ref="observer">
-    <v-form ref="form" @submit.prevent="passes(submit)">
-      <slot v-bind="{ valid, passes, passed }"></slot>
+  <ValidationObserver v-slot="attrs" ref="observer">
+    <v-form ref="form" @submit.prevent="attrs.passes(submit)">
+      <slot v-bind="attrs" />
     </v-form>
-  </validation-observer>
+  </ValidationObserver>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { defineComponent, ref } from '@nuxtjs/composition-api'
 import { ValidationObserver } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationObserver,
   },
+  setup(_, { emit }) {
+    const observer = ref<InstanceType<typeof ValidationObserver>>()
+
+    const submit = () => emit('form:submit')
+
+    const resetValidation = () => {
+      observer.value!.reset()
+    }
+
+    return { resetValidation, submit, observer }
+  },
 })
-export default class VFormValidated extends Vue {
-  submit() {
-    this.$emit('submit:form')
-  }
-}
 </script>

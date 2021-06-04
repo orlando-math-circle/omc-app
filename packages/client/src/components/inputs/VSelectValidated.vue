@@ -1,14 +1,11 @@
 <template>
-  <validation-provider
-    v-slot="{ errors }"
-    :vid="vid"
-    :name="$attrs.name"
-    :rules="rules"
-  >
+  <ValidationProvider v-slot="{ errors }" :rules="rules" :vid="vid">
     <v-select
       v-model="data"
       :error-messages="errors"
+      :hide-details="hideDetails"
       v-bind="$attrs"
+      outlined
       v-on="$listeners"
     >
       <template
@@ -22,21 +19,42 @@
         <slot :name="slotName" />
       </template>
     </v-select>
-  </validation-provider>
+  </ValidationProvider>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, PropSync } from 'nuxt-property-decorator'
+import { defineComponent } from '@nuxtjs/composition-api'
+import { useVModel } from '@vueuse/core'
 import { ValidationProvider } from 'vee-validate'
 
-@Component({
+export default defineComponent({
   components: {
     ValidationProvider,
   },
+  props: {
+    hideDetails: {
+      type: String,
+      default: 'auto',
+    },
+    rules: {
+      type: [String, Object],
+      default: '',
+    },
+    value: {
+      type: [String, Number, Object, Array],
+      required: false,
+      default: null,
+    },
+    vid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
+  setup(props) {
+    const data = useVModel(props)
+
+    return { data }
+  },
 })
-export default class VTextFieldValidated extends Vue {
-  @PropSync('value') data!: string | number | object
-  @Prop({ default: '' }) rules!: string | object
-  @Prop() vid?: string
-}
 </script>

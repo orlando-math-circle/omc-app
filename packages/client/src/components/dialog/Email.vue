@@ -1,89 +1,162 @@
 <template>
-  <dialog-form ref="dialog" @submit:form="onSubmit">
+  <DialogForm
+    ref="dialog"
+    width="700"
+    @form:submit="onSubmit"
+    @dialog:close="reset"
+  >
     <template #title>Email Users</template>
+
     <template #subtitle>
       Generate an email to the selected users. Note that users without emails
       are safely ignored.
     </template>
 
-    <template #activator="{ on, attrs }">
-      <slot name="activator" v-bind="{ on, attrs }"></slot>
+    <template #activator="activator">
+      <slot name="activator" v-bind="activator" />
     </template>
 
-    <v-card-text>
-      <v-col cols="12">
-        <auto-complete-user v-model="internalUsers" item-value="id" multiple />
-      </v-col>
+    <div class="email-editor">
+      <AutocompleteUser
+        v-model="state.users"
+        label="Email Recipients"
+        multiple
+        return-object
+        :clearable="false"
+        :outlined="false"
+        chips
+        deletable-chips
+        solo
+        flat
+      >
+        <!-- Disabled until implemented -->
+        <!-- <template #append-outer>
+          <v-btn icon> Cc </v-btn>
 
-      <v-col cols="12">
-        <v-text-field-validated
-          v-model="subject"
-          label="Subject"
-          rules="required"
-          hide-details="auto"
-          outlined
-        ></v-text-field-validated>
-      </v-col>
+          <v-btn icon> Bcc </v-btn>
+        </template> -->
 
-      <v-col cols="12">
-        <v-textarea-validated
-          v-model="body"
-          label="Body"
-          rules="required"
-          outlined
-          counter
-        ></v-textarea-validated>
-      </v-col>
-    </v-card-text>
+        <template #item="{ item }">
+          <template v-if="!item.email">
+            <v-list-item-content>
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
+              <v-list-item-subtitle>No Email Address</v-list-item-subtitle>
+            </v-list-item-content>
+          </template>
+
+          <template v-else>
+            <v-list-item-avatar>
+              <v-img :src="item.avatarUrl" />
+            </v-list-item-avatar>
+
+            <v-list-item-content>
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
+              <v-list-item-subtitle>{{ item.email }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </template>
+        </template>
+      </AutocompleteUser>
+
+      <v-divider />
+
+      <VTextFieldValidated
+        v-model="state.subject"
+        label="Subject"
+        rules="required"
+        hide-details="auto"
+        :outlined="false"
+        solo
+        flat
+      />
+
+      <client-only>
+        <Editor v-model="state.html" />
+      </client-only>
+
+      <v-divider />
+    </div>
 
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <v-btn text>Clear</v-btn>
-      <v-btn type="submit" :loading="loading" color="secondary">Send</v-btn>
+      <v-btn type="submit" :loading="state.loading" color="secondary">
+        Send
+      </v-btn>
     </v-card-actions>
-  </dialog-form>
+  </DialogForm>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'nuxt-property-decorator'
 import { CreateEmailDto } from '@server/email/dto/create-email.dto'
-import { DTOUser } from '../../store/users'
-import DialogForm from './Form.vue'
+import {
+  defineComponent,
+  PropType,
+  ref,
+  useContext,
+  watch,
+} from '@nuxtjs/composition-api'
+import DialogForm from '@/components/dialog/Form.vue'
+import { UserEntity } from '@/stores'
+import { useSnackbar, useStateReset } from '@/composables'
 
-@Component
-export default class DialogEmail extends Vue {
-  @Ref('dialog') readonly dialog!: DialogForm
-  @Prop() readonly users!: DTOUser[]
+export default defineComponent({
+  props: {
+    users: {
+      type: Array as PropType<UserEntity[]>,
+      required: true,
+    },
+  },
+  setup(props) {
+    const { $axios } = useContext()
+    const snackbar = useSnackbar()
+    const dialog = ref<InstanceType<typeof DialogForm>>()
 
-  subject = ''
-  body = ''
-  loading = false
-  internalUsers: number[] = []
+    const { state, reset } = useStateReset({
+      subject: '',
+      html: '',
+      loading: false,
+      users: [] as UserEntity[],
+    })
 
-  @Watch('users', { immediate: true })
-  onUsersChange(users: DTOUser[]) {
-    this.internalUsers = users.map((u) => u.id)
-  }
+    watch(
+      () => props.users,
+      (users: UserEntity[]) => {
+        state.users = [...users]
+      },
+      { immediate: true }
+    )
 
-  async onSubmit() {
-    try {
-      this.loading = true
+    const htmlToText = (html: string) => {
+      const divEl = document.createElement('div')
 
-      const dto: CreateEmailDto = {
-        userIds: this.internalUsers,
-        subject: this.subject,
-        body: this.body,
-      }
+      divEl.innerHTML = html
 
-      await this.$axios.$post('/email', dto)
-    } catch (error) {
-      this.$snack('An error occured attempting to email')
-    } finally {
-      this.loading = false
-      this.$snack('Email Successfully Sent')
-      this.dialog.close()
+      return divEl.textContent || divEl.innerText || ''
     }
-  }
-}
+
+    const onSubmit = async () => {
+      try {
+        state.loading = true
+
+        const dto: CreateEmailDto = {
+          emails: state.users.map((u) => u.email!),
+          subject: state.subject,
+          html: state.html,
+          text: htmlToText(state.html),
+        }
+
+        await $axios.$post('/email', dto)
+        snackbar.success('Email Successfully Sent')
+        dialog.value!.close()
+      } catch (error) {
+        snackbar.error('An error occured attempting to email')
+      } finally {
+        state.loading = false
+      }
+    }
+
+    return { dialog, reset, state, onSubmit }
+  },
+})
 </script>

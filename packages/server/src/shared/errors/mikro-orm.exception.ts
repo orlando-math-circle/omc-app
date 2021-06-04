@@ -21,11 +21,15 @@ export class MikroORMConstraintExceptionFilter implements ExceptionFilter {
   catch(exception: ServerException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const message = exception.code
-      ? this.getMessage(exception.code)
-      : exception.message;
 
-    response.status(400).json({ statusCode: 400, message });
+    if (exception.code) {
+      const message = this.getMessage(exception.code);
+      const statusCode = this.getStatusCode(exception.code);
+
+      return response.status(statusCode).json({ statusCode, message });
+    }
+
+    response.status(400).json({ statusCode: 400, message: exception.message });
   }
 
   private getMessage(code: string) {
@@ -38,6 +42,15 @@ export class MikroORMConstraintExceptionFilter implements ExceptionFilter {
         return 'SQL unique constraint violation';
       default:
         return 'SQL constraint violation';
+    }
+  }
+
+  private getStatusCode(code: string) {
+    switch (code) {
+      case '23505':
+        return 409;
+      default:
+        return 400;
     }
   }
 }

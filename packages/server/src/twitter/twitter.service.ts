@@ -1,7 +1,7 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import FormData from 'form-data';
-import { ConfigSchema } from '../app.config';
+import { lastValueFrom } from 'rxjs';
+import { ConfigService } from '../config/config.service';
 
 const OMC_HANDLE = 'orlandomathcir';
 
@@ -11,7 +11,7 @@ export class TwitterService {
   private token?: string;
 
   constructor(
-    private readonly config: ConfigService<ConfigSchema>,
+    private readonly config: ConfigService,
     private readonly http: HttpService,
   ) {}
 
@@ -20,33 +20,33 @@ export class TwitterService {
       await this.getToken();
     }
 
-    const resp = await this.http
-      .get(
+    const resp = await lastValueFrom(
+      this.http.get(
         `https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=${OMC_HANDLE}&count=${count}`,
         { headers: { Authorization: `Bearer ${this.token}` } },
-      )
-      .toPromise();
+      ),
+    );
 
     return resp.data;
   }
 
   private async getToken() {
-    const key = this.config.get('TWITTER_KEY');
-    const secret = this.config.get('TWITTER_SECRET');
+    const key = this.config.TWITTER.KEY;
+    const secret = this.config.TWITTER.SECRET;
     const token = Buffer.from(`${key}:${secret}`, 'utf-8').toString('base64');
 
     const data = new FormData();
     data.append('grant_type', 'client_credentials');
 
     try {
-      const resp = await this.http
-        .post('https://api.twitter.com/oauth2/token', data, {
+      const resp = await lastValueFrom(
+        this.http.post('https://api.twitter.com/oauth2/token', data, {
           headers: {
             Authorization: `Basic ${token}`,
             ...data.getHeaders(),
           },
-        })
-        .toPromise();
+        }),
+      );
       this.token = resp.data.access_token;
     } catch (error) {
       this.logger.error(error);

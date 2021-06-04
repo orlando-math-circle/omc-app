@@ -11,11 +11,7 @@
 
           <v-row>
             <v-col class="pt-0">
-              <breadcrumbs
-                class="pa-0"
-                :items="breadcrumbs"
-                large
-              ></breadcrumbs>
+              <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
             </v-col>
           </v-row>
         </v-col>
@@ -43,11 +39,15 @@
 
           <v-row>
             <v-col class="pt-0">
-              <breadcrumbs
-                class="pa-0"
-                :items="breadcrumbs"
-                large
-              ></breadcrumbs>
+              <Breadcrumbs class="pa-0" :items="breadcrumbs" large />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col>
+              <v-card>
+                <v-card-title>Page Incomplete</v-card-title>
+              </v-card>
             </v-col>
           </v-row>
         </v-col>
@@ -57,35 +57,43 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import {
+  defineComponent,
+  useFetch,
+  useRoute,
+  computed,
+} from '@nuxtjs/composition-api'
+import { useCourses } from '@/stores'
 
-@Component({
+export default defineComponent({
   layout: 'admin',
+  setup() {
+    const route = useRoute()
+    const courseStore = useCourses()
+
+    useFetch(async () => {
+      await courseStore.findOne(+route.value.params.id)
+    })
+
+    return {
+      course: computed(() => courseStore.course),
+      breadcrumbs: [
+        {
+          text: 'Dashboard',
+          href: '/admin/',
+        },
+        {
+          text: 'Courses',
+          href: '/admin/calendar/courses',
+        },
+        {
+          text: 'Edit Course',
+        },
+      ],
+    }
+  },
   head: {
     title: 'Edit Course',
   },
 })
-export default class AdminEditCoursePage extends Vue {
-  breadcrumbs = [
-    {
-      text: 'Dashboard',
-      href: '/admin/',
-    },
-    {
-      text: 'Courses',
-      href: '/admin/calendar/courses',
-    },
-    {
-      text: 'Edit Course',
-    },
-  ]
-
-  get course() {
-    return this.$accessor.courses.course
-  }
-
-  async fetch() {
-    await this.$accessor.courses.findOne(this.$route.params.id)
-  }
-}
 </script>
