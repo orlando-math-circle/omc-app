@@ -2193,7 +2193,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mikro-orm/knex@npm:4.5.5, @mikro-orm/knex@npm:^4.5.5":
+"@mikro-orm/knex@npm:4.5.6":
+  version: 4.5.6
+  resolution: "@mikro-orm/knex@npm:4.5.6"
+  dependencies:
+    fs-extra: 9.1.0
+    knex: 0.21.19
+    sqlstring: 2.3.2
+  peerDependencies:
+    "@mikro-orm/core": ^4.0.0
+    "@mikro-orm/entity-generator": ^4.0.0
+    "@mikro-orm/migrations": ^4.0.0
+    mssql: ^7.0.0
+    mysql: ^2.18.1
+    mysql2: ^2.1.0
+    pg: ^8.0.3
+    sqlite3: ^5.0.0
+  peerDependenciesMeta:
+    "@mikro-orm/entity-generator":
+      optional: true
+    "@mikro-orm/migrations":
+      optional: true
+    mssql:
+      optional: true
+    mysql:
+      optional: true
+    mysql2:
+      optional: true
+    pg:
+      optional: true
+    sqlite3:
+      optional: true
+  checksum: 622a9ce82f2c4c4325a02cd59ad805d070cc05786934c8d5d61c153f028d2a32b4cdb7fa61ba687b98c014211a7136bb1a58ff4ee8f952704067310e840603d6
+  languageName: node
+  linkType: hard
+
+"@mikro-orm/knex@npm:^4.5.5":
   version: 4.5.5
   resolution: "@mikro-orm/knex@npm:4.5.5"
   dependencies:
@@ -3165,7 +3200,7 @@ __metadata:
   dependencies:
     "@mikro-orm/cli": 4.5.5
     "@mikro-orm/core": 4.5.5
-    "@mikro-orm/knex": 4.5.5
+    "@mikro-orm/knex": 4.5.6
     "@mikro-orm/migrations": 4.5.5
     "@mikro-orm/nestjs": 4.2.0
     "@mikro-orm/postgresql": 4.5.5
