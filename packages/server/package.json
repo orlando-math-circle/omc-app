@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@mikro-orm/cli": "4.5.5",
-    "@mikro-orm/core": "4.5.5",
+    "@mikro-orm/core": "4.5.6",
     "@mikro-orm/knex": "4.5.5",
     "@mikro-orm/migrations": "4.5.5",
     "@mikro-orm/nestjs": "4.2.0",
