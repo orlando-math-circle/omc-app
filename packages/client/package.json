@@ -46,7 +46,7 @@
     "fibers": "5.0.0",
     "prettier": "2.3.1",
     "sass": "1.32.13",
-    "sass-loader": "10.2.0",
+    "sass-loader": "12.1.0",
     "vuetify": "2.5.4"
   },
   "prettier": {
