@@ -3116,7 +3116,7 @@ __metadata:
     "@vueuse/core": 4.11.2
     animate.css: 4.1.1
     apexcharts: 3.26.3
-    cookie-universal-nuxt: 2.1.4
+    cookie-universal-nuxt: 2.1.5
     cropperjs: 1.5.11
     date-fns: 2.22.1
     deepmerge: 4.2.2
@@ -7846,23 +7846,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cookie-universal-nuxt@npm:2.1.4":
-  version: 2.1.4
-  resolution: "cookie-universal-nuxt@npm:2.1.4"
+"cookie-universal-nuxt@npm:2.1.5":
+  version: 2.1.5
+  resolution: "cookie-universal-nuxt@npm:2.1.5"
   dependencies:
     "@types/cookie": ^0.3.3
-    cookie-universal: ^2.1.4
-  checksum: 5c2952672356c46a228d2742533050fbaa972b91088eb5788d36d750d3c4186deddce272cc4b877933768ddaefd644408ead034a2ce6e15ae5f7a6702a1fd2f7
+    cookie-universal: ^2.1.5
+  checksum: 42d2e43cff124031c77f0b1f37c3231196fa90ccb0fc14daca5d58ffa45223b406b8174db336ef42fe2953907343414aaa87f0186f8091167e33e56f4f8dc989
   languageName: node
   linkType: hard
 
-"cookie-universal@npm:^2.1.4":
-  version: 2.1.4
-  resolution: "cookie-universal@npm:2.1.4"
+"cookie-universal@npm:^2.1.5":
+  version: 2.1.5
+  resolution: "cookie-universal@npm:2.1.5"
   dependencies:
     "@types/cookie": ^0.3.3
     cookie: ^0.4.0
-  checksum: 8333b3dcffee1daf5b19fff617863486ce873a713ed4e7edb05aab1ec468c52179e0ab92fca16240104852f8832b244590996c07e6d9354a6cf54a3a4001063c
+  checksum: 754b6873df47adb41956eded2927ec30f84bb878afb4295ade61070d1ba9db9c7b23f008d36884b4352273c919c50413355c8c1c226a5fc9b028846229795fc2
   languageName: node
   linkType: hard
 

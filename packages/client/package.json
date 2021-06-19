@@ -19,7 +19,7 @@
     "@vueuse/core": "4.11.2",
     "animate.css": "4.1.1",
     "apexcharts": "3.26.3",
-    "cookie-universal-nuxt": "2.1.4",
+    "cookie-universal-nuxt": "2.1.5",
     "cropperjs": "1.5.11",
     "date-fns": "2.22.1",
     "lodash": "4.17.21",
