@@ -3113,7 +3113,7 @@ __metadata:
     "@types/dropzone": 5.7.3
     "@types/lodash": 4.14.170
     "@vue/runtime-dom": 3.0.11
-    "@vueuse/core": 4.11.2
+    "@vueuse/core": 5.0.3
     animate.css: 4.1.1
     apexcharts: 3.26.3
     cookie-universal-nuxt: 2.1.4
@@ -5116,13 +5116,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/core@npm:4.11.2":
-  version: 4.11.2
-  resolution: "@vueuse/core@npm:4.11.2"
+"@vueuse/core@npm:5.0.3":
+  version: 5.0.3
+  resolution: "@vueuse/core@npm:5.0.3"
   dependencies:
-    "@vueuse/shared": 4.11.2
+    "@vueuse/shared": 5.0.3
     vue-demi: "*"
-  checksum: 2a7a619f9b637946e745f8d5dfc150b8396eccfab935067c7011d88d0f0b2fca6dc24aa72fc53c84d9b4f182ee6730068a9060c2febb4188a7bc5143b881fe7c
+  checksum: 0d5e8883a0b0420ea5fe4a4e1fa7db862dddc21aaec6675fa5086ef7314abd36695eb1861652ee2dc57ae55579d815e99b0bfab10f303a983d54226763751930
   languageName: node
   linkType: hard
 
@@ -5161,6 +5161,15 @@ __metadata:
   dependencies:
     vue-demi: "*"
   checksum: 0630fec07d55928c0eed918ac023b150423c626f12d441a30f6a22456e9a9b713e906ab6d6c53cad1c7f7528d1cc9bb1892086bd55bb1a1547caf69c8dfa94a3
+  languageName: node
+  linkType: hard
+
+"@vueuse/shared@npm:5.0.3":
+  version: 5.0.3
+  resolution: "@vueuse/shared@npm:5.0.3"
+  dependencies:
+    vue-demi: "*"
+  checksum: 67a6299351001ffe0ec6937f1550e874e46f1fcff24422424c6000de77cb04ab45f853d5d76494c3799f22572d347f85d80e4caec901d672aa29b257ff3858c8
   languageName: node
   linkType: hard
 
