@@ -3221,7 +3221,7 @@ __metadata:
     rrule: 2.6.8
     rxjs: 7.1.0
     supertest: 6.1.3
-    systeminformation: 5.7.4
+    systeminformation: 5.7.7
     ts-jest: 27.0.3
     ts-node: 10.0.0
     typescript: 4.2.4
@@ -20187,12 +20187,12 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"systeminformation@npm:5.7.4":
-  version: 5.7.4
-  resolution: "systeminformation@npm:5.7.4"
+"systeminformation@npm:5.7.7":
+  version: 5.7.7
+  resolution: "systeminformation@npm:5.7.7"
   bin:
     systeminformation: lib/cli.js
-  checksum: 49d53b80d2d8f0d35ca8c559ce49f13be1f92666136bc63dc24e3377eb56191ef8cf6403b109a380c94d342f3c8cb25b787117620d74fe14f9c0f04fb26afc1f
+  checksum: 3acf624d2ebe6f941ccfeb718f96ffb3bbcb45ea7d0aa98554c937b89d50c347e57b67d9f67b31ad5d0bbfa1eaadb995da59467f63180f1b70b6f8b82d375035
   languageName: node
   linkType: hard
 
