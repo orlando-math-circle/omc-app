@@ -25,6 +25,7 @@ export interface ConfigSchema extends Record<string, any> {
   EMAIL_KEY: string;
   EMAIL_TEMPLATE_VERIFY: string;
   EMAIL_TEMPLATE_RESET: string;
+  EMAIL_TEMPLATE_REMIND: string;
   UPLOAD_DIRECTORY: string;
   FORM_SUBDIRECTORY: string;
   SERVE_STATIC: boolean;
@@ -59,6 +60,7 @@ export const configSchema = Joi.object<ConfigSchema>({
   }),
   EMAIL_TEMPLATE_VERIFY: Joi.string().default('0p7kx4xo6249yjre'),
   EMAIL_TEMPLATE_RESET: Joi.string().default('x2p0347m2k4zdrn7'),
+  EMAIL_TEMPLATE_REMIND: Joi.string().default(''),
   UPLOAD_DIRECTORY: Joi.string().default('../../../uploads'),
   FORM_SUBDIRECTORY: Joi.string().default('form'),
   SERVE_STATIC: Joi.boolean().default(true),
