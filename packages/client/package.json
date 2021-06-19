@@ -27,7 +27,7 @@
     "nuxt-dropzone": "1.0.4",
     "pinia": "0.5.2",
     "rrule": "2.6.8",
-    "vee-validate": "3.4.8",
+    "vee-validate": "3.4.10",
     "vue-apexcharts": "1.6.1",
     "vuetify-loader": "1.7.2"
   },
