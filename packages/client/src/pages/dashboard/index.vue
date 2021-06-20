@@ -208,6 +208,8 @@ import {
   reactive,
   ref,
   toRefs,
+  onMounted,
+  useRoute,
 } from '@nuxtjs/composition-api'
 import { User } from '@server/user/user.entity'
 import { useAuth, useUsers } from '@/stores'
@@ -222,6 +224,8 @@ export default defineComponent({
   transition: 'slide-left',
   setup() {
     const form = ref<FormComponent>()
+
+    const route = useRoute()
     const snackbar = useSnackbar()
     const userStore = useUsers()
     const authStore = useAuth()
@@ -234,6 +238,35 @@ export default defineComponent({
     })
 
     const user = computed(() => authStore.user!)
+
+    onMounted(async () => {
+      const token = route.value.query['change-email']
+
+      if (typeof token !== 'string') return
+
+      await authStore.verifyEmailChange(token)
+
+      if (authStore.error) {
+        if (authStore.error.status === 410) {
+          snackbar.success('Email already changed & validated')
+        } else {
+          snackbar.error('Error verifying your email')
+        }
+      } else {
+        await authStore.getMyUser()
+
+        setSettings({
+          first: user.value.first,
+          last: user.value.last,
+          dob: user.value.dob,
+          email: user.value.email,
+          grade: user.value.grade,
+          gender: user.value.gender,
+        })
+
+        snackbar.success('Email successfully changed')
+      }
+    })
 
     const {
       state: settings,
@@ -290,9 +323,13 @@ export default defineComponent({
     }
 
     const onChangeSettings = async () => {
-      await userStore.update(user.value.id, {
-        ...settings,
-      })
+      const { email, ...other } = settings
+
+      if (email) {
+        await authStore.requestEmailChange({ email })
+      }
+
+      await userStore.update(user.value.id, other, true)
 
       if (userStore.error) {
         snackbar.error(userStore.error.message)
@@ -310,7 +347,11 @@ export default defineComponent({
 
         form.value?.resetValidation()
 
-        snackbar.success('Updated Successfully')
+        if (email) {
+          snackbar.success('Check your inbox to verify your new email')
+        } else {
+          snackbar.success('Updated Successfully')
+        }
       }
     }
 

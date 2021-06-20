@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { Acc } from './decorators/account.decorator';
 import { AccountAuth, UserAuth } from './decorators/auth.decorator';
 import { Usr } from './decorators/user.decorator';
+import { ChangeEmailDto } from './dtos/change-email.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
@@ -48,6 +49,24 @@ export class AuthController {
   @Post('/verify/reset')
   async verifyResetToken(@Body() { token }: VerifyTokenDto) {
     await this.authService.getValidResetTokenUser(token);
+  }
+
+  @UserAuth()
+  @Post('/verify/email-change')
+  private async verifyEmailChange(
+    @Usr() user: User,
+    @Body() { token }: VerifyTokenDto,
+  ) {
+    return this.authService.verifyEmailChange(user, token);
+  }
+
+  @UserAuth()
+  @Post('/email/change')
+  private async requestEmailChange(
+    @Usr() user: User,
+    @Body() { email }: ChangeEmailDto,
+  ) {
+    return this.authService.requestEmailChange(user, email);
   }
 
   @UserAuth()

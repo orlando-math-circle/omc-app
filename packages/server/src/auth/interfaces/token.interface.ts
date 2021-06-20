@@ -24,3 +24,11 @@ export interface VerifyPayload extends Token {
 export interface ResetPayload extends Token {
   uid: number;
 }
+
+/**
+ * Change of email token payload.
+ */
+export interface ChangeEmailPayload extends Token {
+  uid: number;
+  email: string;
+}

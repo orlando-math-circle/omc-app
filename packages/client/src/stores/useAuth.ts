@@ -9,6 +9,7 @@ import { useCookies } from '@/composables'
 import { ResetPasswordDto } from '@server/auth/dtos/reset-password.dto'
 import { StateStatus, StateError } from '@/types/state.interface'
 import { EntityDTO } from '@server/shared/types/entity-dto'
+import { ChangeEmailDto } from '@server/auth/dtos/change-email.dto'
 
 export type UserEntity = EntityDTO<User>
 export type AccountEntity = EntityDTO<Account>
@@ -124,6 +125,9 @@ export const useAuth = defineStore({
     async changePassword(changePasswordDto: ChangePasswordDto) {
       await this.$nuxt.$axios.$post('/password/change', changePasswordDto)
     },
+    async requestEmailChange(changeEmailDto: ChangeEmailDto) {
+      await this.$nuxt.$axios.$post('/email/change', changeEmailDto)
+    },
     async verifyEmailResend() {
       await this.$nuxt.$axios.$post('/verify/resend')
     },
@@ -132,6 +136,9 @@ export const useAuth = defineStore({
     },
     async verifyReset(token: string) {
       await this.$nuxt.$axios.$post('/verify/reset', { token })
+    },
+    async verifyEmailChange(token: string) {
+      await this.$nuxt.$axios.$post('/verify/email-change', { token })
     },
   },
 })

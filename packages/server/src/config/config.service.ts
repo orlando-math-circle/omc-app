@@ -50,6 +50,7 @@ export class ConfigService {
       TEMPLATES: {
         VERIFY: this.internalConfig.EMAIL_TEMPLATE_VERIFY,
         RESET: this.internalConfig.EMAIL_TEMPLATE_RESET,
+        CHANGE_EMAIL: this.internalConfig.EMAIL_TEMPLATE_CHANGE_EMAIL,
       },
     };
   }

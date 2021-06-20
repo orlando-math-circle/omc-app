@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import {
   BadRequestException,
+  ConflictException,
   forwardRef,
   GoneException,
   Inject,
@@ -23,6 +24,7 @@ import { UserService } from '../user/user.service';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import {
   AuthPayload,
+  ChangeEmailPayload,
   ResetPayload,
   Token,
   VerifyPayload,
@@ -239,6 +241,63 @@ export class AuthService {
           verify_link: `${this.config.FILES.FRONTEND_URL}/verify?token=${token}`,
         }),
     );
+  }
+
+  /**
+   * Requests a change of email for a user.
+   *
+   * @param user User.
+   * @param email New email.
+   */
+  public async requestEmailChange(user: User, email: string) {
+    if (user.email === email) {
+      throw new BadRequestException();
+    }
+
+    const existingUser = await this.userService.findOne({ email });
+
+    // If the email is taken, abort.
+    if (existingUser) {
+      throw new ConflictException();
+    }
+
+    const token = this.signJWT({ uid: user.id, email }, undefined, {
+      expiresIn: '2 days',
+    });
+
+    this.emailService.send(
+      new Email()
+        .setTemplate(this.config.MAILERSEND.TEMPLATES.CHANGE_EMAIL)
+        .setTo(email, undefined, {
+          first_name: user.first,
+          verify_link: `${this.config.FILES.FRONTEND_URL}/dashboard?change-email=${token}`,
+        }),
+    );
+  }
+
+  /**
+   * Changes a user's email from a valid change of email token.
+   *
+   * @param user User.
+   * @param token Change of email token.
+   */
+  public verifyEmailChange(user: User, token: string) {
+    const payload = this.verifyJWT<ChangeEmailPayload>(token);
+
+    if (!payload || user.id !== payload.uid) {
+      throw new BadRequestException('Malformed token');
+    }
+
+    if (user.email === payload.email) {
+      throw new GoneException('Email already verified');
+    }
+
+    user.email = payload.email;
+
+    return this.userService.update(user.id, {
+      email: payload.email,
+      emailVerified: true,
+    });
   }
 
   /**
