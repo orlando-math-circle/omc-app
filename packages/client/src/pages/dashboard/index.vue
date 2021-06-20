@@ -325,7 +325,7 @@ export default defineComponent({
     const onChangeSettings = async () => {
       const { email, ...other } = settings
 
-      if (email) {
+      if (email && email !== user.value.email) {
         await authStore.requestEmailChange({ email })
       }
 
@@ -347,7 +347,7 @@ export default defineComponent({
 
         form.value?.resetValidation()
 
-        if (email) {
+        if (email && email !== user.value.email) {
           snackbar.success('Check your inbox to verify your new email')
         } else {
           snackbar.success('Updated Successfully')
