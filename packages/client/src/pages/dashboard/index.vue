@@ -14,7 +14,11 @@
 
     <!-- Personal User Settings -->
     <v-card class="mb-4">
-      <VFormValidated v-slot="{ dirty, reset }" @form:submit="onChangeSettings">
+      <VFormValidated
+        ref="form"
+        v-slot="{ dirty }"
+        @form:submit="onChangeSettings"
+      >
         <v-card-title>Personal Info</v-card-title>
 
         <v-card-subtitle>Modify your user information.</v-card-subtitle>
@@ -88,7 +92,6 @@
                 v-model="settings.grade"
                 :items="grades"
                 label="Grade"
-                rules="required"
                 outlined
                 clearble
               />
@@ -98,7 +101,7 @@
 
         <v-card-actions>
           <v-slide-x-transition>
-            <v-btn v-if="dirty" text @click="onResetSettings(reset)">
+            <v-btn v-if="dirty" text @click="onResetSettings">
               Reset Changes
             </v-btn>
           </v-slide-x-transition>
@@ -188,8 +191,8 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-btn :loading="isLoading" color="primary" type="submit"
-            >Change Password
+          <v-btn :loading="isLoading" color="primary" type="submit">
+            Change Password
           </v-btn>
         </v-card-actions>
       </VFormValidated>
@@ -203,17 +206,22 @@ import {
   computed,
   defineComponent,
   reactive,
+  ref,
   toRefs,
 } from '@nuxtjs/composition-api'
 import { User } from '@server/user/user.entity'
 import { useAuth, useUsers } from '@/stores'
 import { useSnackbar, useStateReset } from '@/composables'
+import VFormValidated from '@/components/inputs/VFormValidated.vue'
 import { genders, reminders } from '@/utils/constants'
 import { grades } from '@/utils/events'
+
+type FormComponent = InstanceType<typeof VFormValidated>
 
 export default defineComponent({
   transition: 'slide-left',
   setup() {
+    const form = ref<FormComponent>()
     const snackbar = useSnackbar()
     const userStore = useUsers()
     const authStore = useAuth()
@@ -227,7 +235,11 @@ export default defineComponent({
 
     const user = computed(() => authStore.user!)
 
-    const { state: settings, reset: resetSettings } = useStateReset({
+    const {
+      state: settings,
+      set: setSettings,
+      reset: resetSettings,
+    } = useStateReset({
       first: user.value.first,
       last: user.value.last,
       dob: user.value.dob,
@@ -272,9 +284,9 @@ export default defineComponent({
       }
     }
 
-    const onResetSettings = (cb: Function) => {
+    const onResetSettings = () => {
       resetSettings()
-      cb()
+      form.value?.resetValidation()
     }
 
     const onChangeSettings = async () => {
@@ -285,6 +297,19 @@ export default defineComponent({
       if (userStore.error) {
         snackbar.error(userStore.error.message)
       } else {
+        await authStore.getMyUser()
+
+        setSettings({
+          first: user.value.first,
+          last: user.value.last,
+          dob: user.value.dob,
+          email: user.value.email,
+          grade: user.value.grade,
+          gender: user.value.gender,
+        })
+
+        form.value?.resetValidation()
+
         snackbar.success('Updated Successfully')
       }
     }
@@ -294,6 +319,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      form,
       user,
       settings,
       genders,
