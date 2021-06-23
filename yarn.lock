@@ -3142,7 +3142,7 @@ __metadata:
     "@nuxtjs/pwa": 3.3.5
     "@tiptap/extension-underline": 2.0.0-beta.15
     "@tiptap/starter-kit": 2.0.0-beta.80
-    "@tiptap/vue-2": 2.0.0-beta.38
+    "@tiptap/vue-2": 2.0.0-beta.39
     "@types/dropzone": 5.7.3
     "@types/lodash": 4.14.170
     "@vue/runtime-dom": 3.1.1
@@ -3417,16 +3417,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-bubble-menu@npm:^2.0.0-beta.23":
-  version: 2.0.0-beta.23
-  resolution: "@tiptap/extension-bubble-menu@npm:2.0.0-beta.23"
+"@tiptap/extension-bubble-menu@npm:^2.0.0-beta.24":
+  version: 2.0.0-beta.24
+  resolution: "@tiptap/extension-bubble-menu@npm:2.0.0-beta.24"
   dependencies:
     prosemirror-state: ^1.3.4
-    prosemirror-view: ^1.18.7
+    prosemirror-view: ^1.18.8
     tippy.js: ^6.3.1
   peerDependencies:
     "@tiptap/core": ^2.0.0-beta.1
-  checksum: 161aa393e5d3ab52c6d7abea43796634f6a386815b4a964172758fb9714140db63a5413bc79644c0fae21b29fc062b2ebc8e91b338ffc26261b03e198c6f6abf
+  checksum: d55af3e32c30a8319415f9f24e4eb69d4521b632aa1e1b4a5dbf1e8250a97f5a3e90920591b2c0e197dcebfca73f815eaef3191d1aa329808ddee93b8c121d68
   languageName: node
   linkType: hard
 
@@ -3482,16 +3482,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-floating-menu@npm:^2.0.0-beta.17":
-  version: 2.0.0-beta.17
-  resolution: "@tiptap/extension-floating-menu@npm:2.0.0-beta.17"
+"@tiptap/extension-floating-menu@npm:^2.0.0-beta.18":
+  version: 2.0.0-beta.18
+  resolution: "@tiptap/extension-floating-menu@npm:2.0.0-beta.18"
   dependencies:
     prosemirror-state: ^1.3.4
-    prosemirror-view: ^1.18.7
+    prosemirror-view: ^1.18.8
     tippy.js: ^6.3.1
   peerDependencies:
     "@tiptap/core": ^2.0.0-beta.1
-  checksum: a03deda2dfd1efc68c20650ad511affc41842a678c9be327d5cb511c01fe4387cb83eee5e3b7744206cf0e01b63fb4db05fd439f206027d1c71e0148826a079d
+  checksum: 669e77aba917622a3dd8bca5163190fc85b910422f73f5c9ceb03fb802de6bfbd0ceaebd1403bb7b4169374932a3f3848502f41a33bd2e6830d797957c354516
   languageName: node
   linkType: hard
 
@@ -3642,17 +3642,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/vue-2@npm:2.0.0-beta.38":
-  version: 2.0.0-beta.38
-  resolution: "@tiptap/vue-2@npm:2.0.0-beta.38"
+"@tiptap/vue-2@npm:2.0.0-beta.39":
+  version: 2.0.0-beta.39
+  resolution: "@tiptap/vue-2@npm:2.0.0-beta.39"
   dependencies:
-    "@tiptap/extension-bubble-menu": ^2.0.0-beta.23
-    "@tiptap/extension-floating-menu": ^2.0.0-beta.17
-    prosemirror-view: ^1.18.7
+    "@tiptap/extension-bubble-menu": ^2.0.0-beta.24
+    "@tiptap/extension-floating-menu": ^2.0.0-beta.18
+    prosemirror-view: ^1.18.8
   peerDependencies:
     "@tiptap/core": ^2.0.0-beta.1
     vue: ^2.6.12
-  checksum: 9982fb09a58b24161742c11f44464591734a2a79a0fd2e3119a123b210077d1b13fd4edfef73831927fd3a69a80271111e0e2ffa080f62e979a57b892c28b996
+  checksum: d198085f6463f31a7a5cdc97cabd7d4811d088bb1ba5729c3f36c1b21ed6fee9964c4248c44e8d67f2be825612b44ef7d258f61b16f71abc8fda825bdddf62ca
   languageName: node
   linkType: hard
 
@@ -17815,6 +17815,17 @@ fsevents@^1.2.7:
     prosemirror-state: ^1.0.0
     prosemirror-transform: ^1.1.0
   checksum: d4b565879f783196b3f62dd144d24973ba1995d90a6cb70a938cb3258f3323d695deea5986e2ba730265d7b7700a73b4c6193d54b96ae6bad062dd6cce658ce8
+  languageName: node
+  linkType: hard
+
+"prosemirror-view@npm:^1.18.8":
+  version: 1.18.8
+  resolution: "prosemirror-view@npm:1.18.8"
+  dependencies:
+    prosemirror-model: ^1.1.0
+    prosemirror-state: ^1.0.0
+    prosemirror-transform: ^1.1.0
+  checksum: 3f09fa09bfddf4de2be4cdc1ca1a711e0ff73bc8fcf28db613d1d12ba6e084cc49db458479a7b4eacadb1ba21a9ad22dcda9586b45ad6cf9bf0deba0fdb0c439
   languageName: node
   linkType: hard
 
