@@ -3141,7 +3141,7 @@ __metadata:
     "@nuxtjs/eslint-config-typescript": 6.0.1
     "@nuxtjs/pwa": 3.3.5
     "@tiptap/extension-underline": 2.0.0-beta.15
-    "@tiptap/starter-kit": 2.0.0-beta.80
+    "@tiptap/starter-kit": 2.0.0-beta.81
     "@tiptap/vue-2": 2.0.0-beta.38
     "@types/dropzone": 5.7.3
     "@types/lodash": 4.14.170
@@ -3373,9 +3373,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/core@npm:^2.0.0-beta.84":
-  version: 2.0.0-beta.84
-  resolution: "@tiptap/core@npm:2.0.0-beta.84"
+"@tiptap/core@npm:^2.0.0-beta.85":
+  version: 2.0.0-beta.85
+  resolution: "@tiptap/core@npm:2.0.0-beta.85"
   dependencies:
     "@types/prosemirror-commands": ^1.0.4
     "@types/prosemirror-inputrules": ^1.0.4
@@ -3392,8 +3392,8 @@ __metadata:
     prosemirror-schema-list: ^1.1.4
     prosemirror-state: ^1.3.4
     prosemirror-transform: ^1.3.2
-    prosemirror-view: ^1.18.7
-  checksum: f1598d75e5323038efd51a4ec77d22c2db9548dd8323f338b96e47197036da012937c28dadc31c5bc2a2474b5f82f3bcd1449584bde18c74b2e24c9865462073
+    prosemirror-view: ^1.18.8
+  checksum: 8257719d189891c2fab59f9fc25322e205489d2247413f3fae03c0d251bde9a3a976051cb9dd40fb7d7364f56a33ab90fd9e9b42ea3c4f2611a5dbe81f45f100
   languageName: node
   linkType: hard
 
@@ -3615,11 +3615,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/starter-kit@npm:2.0.0-beta.80":
-  version: 2.0.0-beta.80
-  resolution: "@tiptap/starter-kit@npm:2.0.0-beta.80"
+"@tiptap/starter-kit@npm:2.0.0-beta.81":
+  version: 2.0.0-beta.81
+  resolution: "@tiptap/starter-kit@npm:2.0.0-beta.81"
   dependencies:
-    "@tiptap/core": ^2.0.0-beta.84
+    "@tiptap/core": ^2.0.0-beta.85
     "@tiptap/extension-blockquote": ^2.0.0-beta.14
     "@tiptap/extension-bold": ^2.0.0-beta.14
     "@tiptap/extension-bullet-list": ^2.0.0-beta.14
@@ -3638,7 +3638,7 @@ __metadata:
     "@tiptap/extension-paragraph": ^2.0.0-beta.15
     "@tiptap/extension-strike": ^2.0.0-beta.16
     "@tiptap/extension-text": ^2.0.0-beta.12
-  checksum: 6d1fb0a3bb06a766e127d4b5b9cf4365349bd0f4561298a6111022fb06f7d5799b6202f959c877045b76f6dbcc032e3a1f8208baf5bb16ab677c6487ae8b8ff0
+  checksum: d1aba2ac3af75544945ce75f1f89dfe40598510c880b7086096a45ce47eef3fff5cf0f92249e42fb71d9c6fb0132a0d41990ee995d897b5d00dd2456a1e5db96
   languageName: node
   linkType: hard
 
@@ -17815,6 +17815,17 @@ fsevents@^1.2.7:
     prosemirror-state: ^1.0.0
     prosemirror-transform: ^1.1.0
   checksum: d4b565879f783196b3f62dd144d24973ba1995d90a6cb70a938cb3258f3323d695deea5986e2ba730265d7b7700a73b4c6193d54b96ae6bad062dd6cce658ce8
+  languageName: node
+  linkType: hard
+
+"prosemirror-view@npm:^1.18.8":
+  version: 1.18.8
+  resolution: "prosemirror-view@npm:1.18.8"
+  dependencies:
+    prosemirror-model: ^1.1.0
+    prosemirror-state: ^1.0.0
+    prosemirror-transform: ^1.1.0
+  checksum: 3f09fa09bfddf4de2be4cdc1ca1a711e0ff73bc8fcf28db613d1d12ba6e084cc49db458479a7b4eacadb1ba21a9ad22dcda9586b45ad6cf9bf0deba0fdb0c439
   languageName: node
   linkType: hard
 
