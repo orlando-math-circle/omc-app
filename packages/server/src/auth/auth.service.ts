@@ -7,6 +7,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import bcrypt from 'bcrypt';
@@ -34,6 +35,8 @@ export type AuthRequest = Request & { usr?: User; account: Account };
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
@@ -372,14 +375,16 @@ export class AuthService {
       `${user.password}${this.config.SECRET}`,
     );
 
-    this.emailService.send(
-      new Email()
-        .setTemplate(this.config.MAILERSEND.TEMPLATES.RESET)
-        .setTo(email, undefined, {
-          first_name: user.first,
-          reset_link: `${this.config.FILES.FRONTEND_URL}/forgot?token=${token}`,
-        }),
-    );
+    this.emailService
+      .send(
+        new Email()
+          .setTemplate(this.config.MAILERSEND.TEMPLATES.RESET)
+          .setTo(email, undefined, {
+            first_name: user.first,
+            reset_link: `${this.config.FILES.FRONTEND_URL}/forgot?token=${token}`,
+          }),
+      )
+      .catch((e) => this.logger.error(e.message, undefined, 'EmailService'));
   }
 
   /**

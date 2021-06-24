@@ -1,4 +1,4 @@
-import { HttpService, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpService, Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '../config/config.service';
 import { Email } from './email.class';
@@ -21,16 +21,25 @@ export class ProductionEmailService extends EmailService {
    * @param email Email class.
    */
   public async send(email: Email) {
-    const resp = this.http.post(
-      'https://api.mailersend.com/v1/email',
-      email.toRequest(),
-      {
-        headers: {
-          Authorization: `Bearer ${this.config.MAILERSEND.KEY}`,
+    try {
+      const resp = this.http.post(
+        'https://api.mailersend.com/v1/email',
+        email.toRequest(),
+        {
+          headers: {
+            Authorization: `Bearer ${this.config.MAILERSEND.KEY}`,
+          },
         },
-      },
-    );
+      );
 
-    return (await firstValueFrom(resp))?.data;
+      return (await firstValueFrom(resp))?.data;
+    } catch (error) {
+      const status = error.response?.status || 500;
+      const message = error.response?.data || {
+        message: 'Unexpected MailerSend error',
+      };
+
+      throw new HttpException(message, status);
+    }
   }
 }

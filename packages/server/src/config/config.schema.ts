@@ -59,7 +59,7 @@ export const configSchema = Joi.object<ConfigSchema>({
     otherwise: Joi.string(),
   }),
   EMAIL_TEMPLATE_VERIFY: Joi.string().default('0p7kx4xo6249yjre'),
-  EMAIL_TEMPLATE_RESET: Joi.string().default('x2p0347m2k4zdrn7'),
+  EMAIL_TEMPLATE_RESET: Joi.string().default('z3m5jgr1eo4dpyo6'),
   EMAIL_TEMPLATE_REMIND: Joi.string().default(''),
   EMAIL_TEMPLATE_CHANGE_EMAIL: Joi.string().default('pr9084zjeegw63dn'),
   UPLOAD_DIRECTORY: Joi.string().default('../../../uploads'),
