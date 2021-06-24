@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "5.13.6",
-    "@nuxtjs/composition-api": "0.24.4",
+    "@nuxtjs/composition-api": "0.24.5",
     "@nuxtjs/pwa": "3.3.5",
     "@tiptap/extension-underline": "2.0.0-beta.15",
-    "@tiptap/starter-kit": "2.0.0-beta.80",
-    "@tiptap/vue-2": "2.0.0-beta.38",
+    "@tiptap/starter-kit": "2.0.0-beta.81",
+    "@tiptap/vue-2": "2.0.0-beta.39",
     "@types/dropzone": "5.7.3",
     "@vueuse/core": "5.0.3",
     "animate.css": "4.1.1",
@@ -37,7 +37,7 @@
     "@nuxt/typescript-build": "2.1.0",
     "@nuxtjs/eslint-config-typescript": "6.0.1",
     "@types/lodash": "4.14.170",
-    "@vue/runtime-dom": "3.1.1",
+    "@vue/runtime-dom": "3.1.2",
     "deepmerge": "4.2.2",
     "eslint": "7.29.0",
     "eslint-config-prettier": "8.3.0",
@@ -47,7 +47,7 @@
     "prettier": "2.3.1",
     "sass": "1.32.13",
     "sass-loader": "10.2.0",
-    "vuetify": "2.5.4"
+    "vuetify": "2.5.5"
   },
   "prettier": {
     "semi": false,
