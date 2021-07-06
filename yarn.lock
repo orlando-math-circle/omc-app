@@ -3166,7 +3166,7 @@ __metadata:
     rrule: 2.6.8
     sass: 1.32.13
     sass-loader: 10.2.0
-    vee-validate: 3.4.10
+    vee-validate: 4.4.5
     vue-apexcharts: 1.6.1
     vuetify: 2.5.5
     vuetify-loader: 1.7.2
@@ -21657,12 +21657,12 @@ typescript@4.2.3:
   languageName: node
   linkType: hard
 
-"vee-validate@npm:3.4.10":
-  version: 3.4.10
-  resolution: "vee-validate@npm:3.4.10"
+"vee-validate@npm:4.4.5":
+  version: 4.4.5
+  resolution: "vee-validate@npm:4.4.5"
   peerDependencies:
-    vue: ^2.5.18
-  checksum: 25bc82d74660fd930fa95d6aafe72cddf972571331b1652ddb08b8646e55e2fa695bc837d8fb0106e8ec650077ab354483440243ce551b440326cc0c42b87463
+    vue: ^3.0.0
+  checksum: d7044a8c512ce0a6d2e871068001c0464a7b9fc0b5a4c090c9679669a7522ee27c5c7a0f38afd5fd2e8c2ea8dcc73a3d50689be5573f8139ea37b645bad9e3e2
   languageName: node
   linkType: hard
 
