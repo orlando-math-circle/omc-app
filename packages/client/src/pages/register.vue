@@ -16,9 +16,13 @@
             <NuxtLink class="pl-2" to="/login">Log in</NuxtLink>
           </span>
 
-          <AlertError :error="error" class="mt-3" />
+          <AlertError
+            v-if="error && error.status !== 409"
+            :error="error"
+            class="mt-3"
+          />
 
-          <VFormValidated @form:submit="onSubmit">
+          <VFormValidated ref="form" @form:submit="onSubmit">
             <v-row>
               <v-col cols="6">
                 <VTextFieldValidated
@@ -69,6 +73,7 @@
                 <VTextFieldValidated
                   v-model="email"
                   name="Email"
+                  vid="email"
                   rules="required|email"
                   autocomplete="email"
                   label="Email"
@@ -165,9 +170,11 @@ import {
   defineComponent,
   onBeforeUnmount,
   reactive,
+  ref,
   toRefs,
   useRouter,
 } from '@nuxtjs/composition-api'
+import VFormValidated from '@/components/inputs/VFormValidated.vue'
 import { Gender } from '@server/user/enums/gender.enum'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
 import { useAuth } from '@/stores'
@@ -178,6 +185,8 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const authStore = useAuth()
+
+    const form = ref<InstanceType<typeof VFormValidated>>()
 
     const state = reactive({
       password: '',
@@ -216,13 +225,21 @@ export default defineComponent({
       })
 
       if (authStore.error) {
-        window.scroll({ top: 0, behavior: 'smooth' })
+        // Conflict - Email already registered
+        if (authStore.error.status === 409) {
+          form.value?.observer?.setErrors({
+            email: 'An account with this email already exists.',
+          })
+        } else {
+          window.scroll({ top: 0, behavior: 'smooth' })
+        }
       } else {
         router.push('/home')
       }
     }
 
     return {
+      form,
       ...toRefs(state),
       error: authStore.error,
       genders,
