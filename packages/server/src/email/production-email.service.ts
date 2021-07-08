@@ -39,7 +39,11 @@ export class ProductionEmailService extends EmailService {
         message: 'Unexpected MailerSend error',
       };
 
-      throw new HttpException(message, status);
+      const exception = new HttpException(message, status);
+
+      this.logger.error(exception.message);
+
+      throw exception;
     }
   }
 }
