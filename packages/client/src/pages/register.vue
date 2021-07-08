@@ -163,6 +163,7 @@
 <script lang="ts">
 import {
   defineComponent,
+  onBeforeUnmount,
   reactive,
   toRefs,
   useRouter,
@@ -194,6 +195,13 @@ export default defineComponent({
         jobTitle: '',
       },
     })
+
+    /**
+     * The `Login` and `Register` pages don't fetch anything
+     * which would clear the auth store error, so they can
+     * cross-pollute each other with errors.
+     */
+    onBeforeUnmount(() => (authStore.error = null))
 
     const onSubmit = async () => {
       await authStore.register({

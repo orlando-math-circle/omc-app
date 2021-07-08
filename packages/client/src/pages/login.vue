@@ -83,6 +83,7 @@
 <script lang="ts">
 import {
   defineComponent,
+  onBeforeUnmount,
   reactive,
   toRefs,
   useRouter,
@@ -102,6 +103,13 @@ export default defineComponent({
       showPassword: false,
       remember: true,
     })
+
+    /**
+     * The `Login` and `Register` pages don't fetch anything
+     * which would clear the auth store error, so they can
+     * cross-pollute each other with errors.
+     */
+    onBeforeUnmount(() => (authStore.error = null))
 
     const onLogin = async () => {
       await authStore.login(state.email, state.password, state.remember)
