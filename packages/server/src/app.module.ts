@@ -20,6 +20,7 @@ import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
 import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
 import { ConfigModule } from './config/config.module';
 import { configSchema } from './config/config.schema';
+import { MembershipModule } from './membership/membership.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { configSchema } from './config/config.schema';
     SystemModule,
     VolunteerJobModule,
     VolunteerWorkModule,
+    MembershipModule,
   ],
 })
 export class AppModule {}

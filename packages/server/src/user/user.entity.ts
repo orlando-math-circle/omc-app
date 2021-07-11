@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryKey,
   Property,
+  OneToOne,
 } from '@mikro-orm/core';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
@@ -20,6 +21,7 @@ import { IndustryDto } from './dtos/industry.dto';
 import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';
+import { Membership } from '@server/membership/membership.entity';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -152,4 +154,7 @@ export class User extends BaseEntity<User, 'id'> {
 
   @OneToMany(() => FileAttachment, (a) => a.user, { orphanRemoval: true })
   attachments = new Collection<FileAttachment>(this);
+
+  @OneToOne({ nullable: true })
+  membership?: Membership;
 }
