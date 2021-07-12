@@ -2999,22 +2999,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nuxtjs/composition-api@npm:0.24.5":
-  version: 0.24.5
-  resolution: "@nuxtjs/composition-api@npm:0.24.5"
+"@nuxtjs/composition-api@npm:0.24.7":
+  version: 0.24.7
+  resolution: "@nuxtjs/composition-api@npm:0.24.7"
   dependencies:
-    "@vue/composition-api": 1.0.0-rc.12
+    "@vue/composition-api": 1.0.0-rc.14
     defu: ^5.0.0
     estree-walker: ^2.0.2
     fs-extra: ^9.1.0
     magic-string: ^0.25.7
-    ufo: ^0.7.5
+    ufo: ^0.7.7
     upath: ^2.0.1
   peerDependencies:
     "@nuxt/vue-app": ^2.15
     nuxt: ^2.15
     vue: ^2
-  checksum: e5080487ab812049ff6fb8c4df80a990ea16aad52b153183c35160d51cb5e80ee4a6d752968d441e65d3986202d65217a1a44e95bbfadd82581b310f765c7f0e
+  checksum: 8231df5354993a9768993fbf67ed0e90981b092b354d6ff08b789eedd6a41908527fb739daa6f21c9ad6c6e44fa292fad6e6d180fa3e371251b93c6c57b98f5f
   languageName: node
   linkType: hard
 
@@ -3137,7 +3137,7 @@ __metadata:
     "@nuxt/types": 2.15.7
     "@nuxt/typescript-build": 2.1.0
     "@nuxtjs/axios": 5.13.6
-    "@nuxtjs/composition-api": 0.24.5
+    "@nuxtjs/composition-api": 0.24.7
     "@nuxtjs/eslint-config-typescript": 6.0.1
     "@nuxtjs/pwa": 3.3.5
     "@tiptap/extension-underline": 2.0.0-beta.15
@@ -5163,14 +5163,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vue/composition-api@npm:1.0.0-rc.12":
-  version: 1.0.0-rc.12
-  resolution: "@vue/composition-api@npm:1.0.0-rc.12"
+"@vue/composition-api@npm:1.0.0-rc.14":
+  version: 1.0.0-rc.14
+  resolution: "@vue/composition-api@npm:1.0.0-rc.14"
   dependencies:
-    tslib: ^2.2.0
+    tslib: ^2.3.0
   peerDependencies:
     vue: ">= 2.5 < 3"
-  checksum: d8876020cb821630f0f128a2b9fb4b5e285474e61982cbebf65a35767ee942cb613592e3dc12e956dea7ad46443c8469536daa8dd51f18300b5b67ffc5951776
+  checksum: 00ce1f128825cd794defaaff12e38390bfcf90b0361cbcb3db537d00b41bdccf08564c83d5f13051991de113008e5c5168295ddec60e08c035139b01f08d19ee
   languageName: node
   linkType: hard
 
@@ -20963,6 +20963,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"tslib@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "tslib@npm:2.3.0"
+  checksum: 7b4fc9feff0f704743c3760f5d8d708f6417fac6458159e63df3a6b1100f0736e3b99edb9fe370f274ad15160a1f49ff05cb49402534c818ff552c48e38c3e6e
+  languageName: node
+  linkType: hard
+
 "tslib@npm:~2.1.0":
   version: 2.1.0
   resolution: "tslib@npm:2.1.0"
@@ -21135,10 +21142,17 @@ typescript@4.2.3:
   languageName: node
   linkType: hard
 
-"ufo@npm:^0.7.2, ufo@npm:^0.7.4, ufo@npm:^0.7.5":
+"ufo@npm:^0.7.2, ufo@npm:^0.7.4":
   version: 0.7.5
   resolution: "ufo@npm:0.7.5"
   checksum: 40b32a94934df4c3f9f7ab50a05660ded4f399012877b0e1bd622dd55e1422a1729fd8cb34ea62a1185d0c12a7b93b7880105e24280bc3f0120cd3e3a10b41d0
+  languageName: node
+  linkType: hard
+
+"ufo@npm:^0.7.7":
+  version: 0.7.7
+  resolution: "ufo@npm:0.7.7"
+  checksum: 379f80679b2e09137e83b5f84c616422bff1f487003d6f5825fff1ce7ccab3dfacb075407f092ca74df35fbf7deca418d9a1946e02cbb3ee8787940737a355b9
   languageName: node
   linkType: hard
 
