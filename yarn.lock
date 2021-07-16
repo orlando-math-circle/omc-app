@@ -3145,7 +3145,7 @@ __metadata:
     "@tiptap/vue-2": 2.0.0-beta.39
     "@types/dropzone": 5.7.3
     "@types/lodash": 4.14.170
-    "@vue/runtime-dom": 3.1.2
+    "@vue/runtime-dom": 3.1.5
     "@vueuse/core": 5.0.3
     animate.css: 4.1.1
     apexcharts: 3.27.1
@@ -5185,33 +5185,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vue/reactivity@npm:3.1.2":
-  version: 3.1.2
-  resolution: "@vue/reactivity@npm:3.1.2"
+"@vue/reactivity@npm:3.1.5":
+  version: 3.1.5
+  resolution: "@vue/reactivity@npm:3.1.5"
   dependencies:
-    "@vue/shared": 3.1.2
-  checksum: b09b35f7d02b4da3877205f0df2bdd9e59d8e2ae64948156d01f9ea5eb0a3382f14a8ff954b66a8b33ff8048deab5dcecdcccf9a3720c070e82a92d1a99ed6b3
+    "@vue/shared": 3.1.5
+  checksum: 045103ae77f32b02e0d3d0b3b2503388e0282f07d1bdabff5a2dc01db05d0ff8b259069c17c060124658933146e47e6c7c8155e4923f1c0cf045e1e29e29c592
   languageName: node
   linkType: hard
 
-"@vue/runtime-core@npm:3.1.2":
-  version: 3.1.2
-  resolution: "@vue/runtime-core@npm:3.1.2"
+"@vue/runtime-core@npm:3.1.5":
+  version: 3.1.5
+  resolution: "@vue/runtime-core@npm:3.1.5"
   dependencies:
-    "@vue/reactivity": 3.1.2
-    "@vue/shared": 3.1.2
-  checksum: 90c6b852632ca79fe5ae3f9730862404756a9356bf8cd23965ae13c58df8674703c871d9004b59caf2637b27565c612be904dc99bc6990390bdf274ccbde8e63
+    "@vue/reactivity": 3.1.5
+    "@vue/shared": 3.1.5
+  checksum: e2f1a76593a2cb817d7196b00044fd5abd3bfc28adda6c9421ed40681fd4319f0780e46c9782bd9522a82b5cb411f9501196b797399f42f07925660a6e2375af
   languageName: node
   linkType: hard
 
-"@vue/runtime-dom@npm:3.1.2":
-  version: 3.1.2
-  resolution: "@vue/runtime-dom@npm:3.1.2"
+"@vue/runtime-dom@npm:3.1.5":
+  version: 3.1.5
+  resolution: "@vue/runtime-dom@npm:3.1.5"
   dependencies:
-    "@vue/runtime-core": 3.1.2
-    "@vue/shared": 3.1.2
+    "@vue/runtime-core": 3.1.5
+    "@vue/shared": 3.1.5
     csstype: ^2.6.8
-  checksum: be06ccefcc0f361a4714235ef5963d5678b5a76c659386699718a924d03cc34342d466a9ed58b27506ce8fdb461e1b38515f18519c809fc8ade6cc80526e0167
+  checksum: 12bf7be3d86ace561a4c294375643e624a7ccb58bf6827e8ae94eb48cc96a3e96172f35e278a8ad576b5fc8bc0abc65022df4056279a81892d52fc264a7dc000
   languageName: node
   linkType: hard
 
@@ -5222,10 +5222,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vue/shared@npm:3.1.2":
-  version: 3.1.2
-  resolution: "@vue/shared@npm:3.1.2"
-  checksum: 20f24c4dea0a25a35c4caa06748f8de1e545d780d5ed49565ecad9d5e73297e1a28f757b5a3aed54b3861a8e19f4c33e438c80218bbd82664f04d0dbd81d1905
+"@vue/shared@npm:3.1.5":
+  version: 3.1.5
+  resolution: "@vue/shared@npm:3.1.5"
+  checksum: 1f4395e246942486a50f0f9ba3955d81012753104d015b3be62797ed723aa39b62453ba6c50ae189fcab64945a53354e5f255613b3bb7c1a0f5261374d5e11f4
   languageName: node
   linkType: hard
 
