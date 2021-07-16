@@ -36,17 +36,6 @@ export class CreateInvoiceDto {
   @Matches(/^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$/)
   readonly net!: string;
 
-  @IsOptional()
-  @IsNumber()
-  readonly event?: number | Event;
-
-  @IsOptional()
-  @IsNumber()
-  readonly course?: number | Course;
-
-  @IsNumber()
-  readonly fee!: number | EventFee;
-
   @IsNumber()
   readonly user!: number | User;
 }

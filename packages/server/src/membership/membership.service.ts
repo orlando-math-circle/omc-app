@@ -1,12 +1,20 @@
 import { EntityRepository, FilterQuery, QueryOrderMap } from '@mikro-orm/core';
 import { Account } from '../account/account.entity';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Populate, PopulateFail } from '../app.utils';
 import { Membership } from './membership.entity';
+import { PurchaseUnitRequest } from '@server/paypal/interfaces/orders/purchase-unit.interface';
+import { Grade } from '@server/user/enums/grade.enum';
 
 @Injectable()
 export class MembershipService {
+  paypalService: any;
   constructor(
     @InjectRepository(Membership)
     private readonly membershipRepository: EntityRepository<Membership>,
@@ -74,16 +82,6 @@ export class MembershipService {
       orderBy,
     });
   }
-
-  /**
-   * Updates a membership and replaces the specified data, if found,
-   * or throws a 404 Not Found exception.
-   *
-   *
-   * @param id Membership ID.
-   * @param updateMembershipDto UpdateMembershipDto of properties to modify.
-   */
-
   /**
    * Deletes a membership, if found, or throws a 404 Not Found Exception.
    *
@@ -99,12 +97,7 @@ export class MembershipService {
   //   if (!account.primaryUser.emailVerified) {
   //     throw new ForbiddenException('Please validate your email');
   //   }
-
-  //   // find exising membership invoice for time period
-
-  //   // cant calculate fee here
-
-  //   // check check grade to get price
+  //   // check grade to get price
   //   // calculate membership end date
   //   // get for which users
   //   // send invoice
@@ -113,7 +106,7 @@ export class MembershipService {
 
   //   for (const id of users) {
   //     const user = account.users.getItems().find((u) => u.id === id);
-  //     let fee: string;
+  //     let fee: string | undefined;
   //     if (!user) {
   //       // Could also be looked at as a forbidden error.
   //       throw new NotFoundException();
@@ -133,18 +126,22 @@ export class MembershipService {
   //         `User ${id} is not assigned a grade level`,
   //       );
   //     }
-  //     if (!user.fee) {
-  //       throw new BadRequestException('user has no fee');
+  //     if (user.membership) {
+  //       if (user.membership.invoices) {
+  //         throw new BadRequestException('Invoice already exists');
+  //       }
+  //       // if today is not after expiration date
+  //       //if (user.membership.expirationDate) {
+  //       //   throw new BadRequestException('Invoice already exists');
+  //       // }
+  //       throw new BadRequestException('user is already a member');
   //     }
 
-  //     if (user.fee.invoices.length) {
-  //       throw new BadRequestException('Invoice already exists');
-  //     }
   //     if (user.feeWaived) {
   //       throw new BadRequestException(`Payment not required for user ${id}`);
   //     }
 
-  //     if (user.member) {
+  //     if (user.membership) {
   //       throw new BadRequestException(`User ${id} is already a member`);
   //     }
 
@@ -152,7 +149,7 @@ export class MembershipService {
   //       reference_id: id.toString(),
   //       amount: {
   //         currency_code: 'USD',
-  //         value: fee.amount,
+  //         value: fee as string,
   //       },
   //     });
   //   }
@@ -160,7 +157,7 @@ export class MembershipService {
   //   return this.paypalService.createOrder(purchaseUnits);
   // }
 
-  // public async captureOrder(orderId: string, eventId: number) {
+  // public async captureOrder(orderId: string, membershipId: number) {
   //   const [order, event] = await Promise.all([
   //     this.paypalService.getOrder(orderId),
   //     this.eventService.findOneOrFail(eventId, ['fee', 'course.events']),

@@ -203,6 +203,7 @@ export class PayPalService {
         return this.retryRequest(config);
       }
 
+      console.log(error);
       throw new HttpException(
         error?.response?.data,
         error?.response?.status || 500,

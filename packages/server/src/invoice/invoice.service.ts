@@ -3,11 +3,15 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { Populate, PopulateFail } from '../app.utils';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { Invoice } from './invoice.entity';
+import { EventFee } from '@server/event-fee/event-fee.entity';
+import { Account } from '../account/account.entity';
 
 export class InvoiceService {
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: EntityRepository<Invoice>,
+    @InjectRepository(EventFee)
+    private readonly feeRepository: EntityRepository<EventFee>,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto) {
@@ -16,6 +20,28 @@ export class InvoiceService {
     await this.invoiceRepository.persist(invoice).flush();
 
     return invoice;
+  }
+
+  async findByCourse(id: number, account: Account) {
+    const fee = await this.feeRepository.findOneOrFail({
+      course: { id },
+      invoices: {
+        user: { id: { $in: account.users.getIdentifiers() as number[] } },
+      },
+    });
+
+    return fee.invoices;
+  }
+
+  async findByEvent(id: number, account: Account) {
+    const fee = await this.feeRepository.findOneOrFail({
+      event: { id },
+      invoices: {
+        user: { id: { $in: account.users.getIdentifiers() as number[] } },
+      },
+    });
+
+    return fee.invoices;
   }
 
   async batchCreate(createInvoiceDtos: CreateInvoiceDto[]) {

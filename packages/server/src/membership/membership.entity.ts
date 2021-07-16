@@ -3,16 +3,13 @@ import {
   Entity,
   PrimaryKey,
   Property,
-  Unique,
+  OneToOne,
   Collection,
   OneToMany,
-  OneToOne,
 } from '@mikro-orm/core';
 import { User } from '../user/user.entity';
-import { Invoice } from '@server/invoice/invoice.entity';
 
 @Entity()
-//@Unique({ properties: ['user'] })
 export class Membership extends BaseEntity<Membership, 'id'> {
   @PrimaryKey()
   id!: number;
