@@ -2,11 +2,10 @@ import {
   BaseEntity,
   Collection,
   Entity,
-  OneToMany,
+  ManyToMany,
   OneToOne,
   PrimaryKey,
   Property,
-  ManyToMany,
 } from '@mikro-orm/core';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Course } from '../course/course.entity';
@@ -40,8 +39,6 @@ export class EventFee extends BaseEntity<EventFee, 'id'> {
   @ManyToMany({
     entity: () => Invoice,
     owner: true,
-    nullable: true,
-    eager: true,
   })
   invoices = new Collection<Invoice>(this);
 

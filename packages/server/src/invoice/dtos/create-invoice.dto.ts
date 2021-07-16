@@ -1,15 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Matches,
-} from 'class-validator';
-import { Course } from '../../course/course.entity';
-import { EventFee } from '../../event-fee/event-fee.entity';
-import { Event } from '../../event/event.entity';
+import { IsDate, IsEnum, IsNumber, IsString, Matches } from 'class-validator';
 import { User } from '../../user/user.entity';
 import { InvoiceStatus } from '../enums/invoice-status.enum';
 

@@ -44,12 +44,12 @@ export class InvoiceService {
     return fee.invoices;
   }
 
-  async batchCreate(createInvoiceDtos: CreateInvoiceDto[]) {
+  batchCreate(createInvoiceDtos: CreateInvoiceDto[]): Invoice[] {
     const invoices = createInvoiceDtos.map((dto) =>
       this.invoiceRepository.create(dto),
     );
 
-    await this.invoiceRepository.persist(invoices).flush();
+    this.invoiceRepository.persist(invoices);
 
     return invoices;
   }

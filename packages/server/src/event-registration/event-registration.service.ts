@@ -1,4 +1,9 @@
-import { EntityRepository, FilterQuery, FindOptions } from '@mikro-orm/core';
+import {
+  EntityManager,
+  EntityRepository,
+  FilterQuery,
+  FindOptions,
+} from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   BadRequestException,
@@ -29,6 +34,7 @@ export class EventRegistrationService {
     private readonly paypalService: PayPalService,
     private readonly eventService: EventService,
     private readonly userService: UserService,
+    private readonly em: EntityManager,
     private readonly ac: AccessService,
   ) {}
 
@@ -73,8 +79,6 @@ export class EventRegistrationService {
         invoices: { user: { id: { $in: userIds } } },
       },
     });
-
-    console.log(event.fee?.invoices.toJSON());
 
     const registrations: EventRegistration[] = [];
     const users = account.users.getItems();
@@ -378,7 +382,17 @@ export class EventRegistrationService {
       });
     }
 
-    return this.invoiceService.batchCreate(createInvoiceDtos);
+    const invoices = this.invoiceService.batchCreate(createInvoiceDtos);
+
+    if (event.course?.fee) {
+      event.course.fee.invoices.add(...invoices);
+    } else if (event.fee) {
+      event.fee.invoices.add(...invoices);
+    }
+
+    await this.em.flush();
+
+    return invoices;
   }
 
   findOne(
