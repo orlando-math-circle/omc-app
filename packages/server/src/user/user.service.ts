@@ -12,6 +12,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Roles } from '@server/app.roles';
 import bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
 import { eachWeekOfInterval, format, sub } from 'date-fns';
@@ -128,6 +129,14 @@ export class UserService {
 
     if ('password' in dto) {
       dto.password = await bcrypt.hash(dto.password!, BCRYPT_ROUNDS);
+    }
+
+    if (typeof dto.volunteer === 'boolean') {
+      if (dto.volunteer && !user.roles.includes(Roles.VOLUNTEER)) {
+        user.roles.push(Roles.VOLUNTEER);
+      } else if (!dto.volunteer && user.roles.includes(Roles.VOLUNTEER)) {
+        user.roles.filter((role) => role !== Roles.VOLUNTEER);
+      }
     }
 
     user.assign(dto);
