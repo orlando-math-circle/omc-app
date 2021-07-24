@@ -77,5 +77,5 @@ export class UpdateUserDto {
   
   @IsOptional()
   @IsBoolean()
-  volunteer = true;
+  readonly volunteer?: boolean;
 }
