@@ -1,0 +1,9 @@
+{
+  "title": "OMC Docs",
+  "url": "https://orlando-math-circle.github.io/omc-app",
+  "github": {
+    "repo": "orlando-math-circle/omc-app",
+    "branch": "main",
+    "dir": "packages/docs/src"
+  }
+}

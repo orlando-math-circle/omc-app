@@ -1,0 +1,2 @@
+export const CONFIGURATION_TOKEN = Symbol('CONFIGURATION');
+export const CONFIG_SERVICE_TOKEN = Symbol('CONFIG_SERVICE');

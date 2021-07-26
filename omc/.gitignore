@@ -1,0 +1,39 @@
+# Compiled code
+dist/
+.nuxt/
+temp/
+
+# Service Worker
+sw.*
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Node Modules
+node_modules/
+
+# dotenv Environment Variables
+*.env
+
+# Personal VSCode workplace settings
+.vscode/
+
+# Optional eslint cache
+.eslintcache
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# https://yarnpkg.com/advanced/qa#which-files-should-be-gitignored
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+tsconfig.tsbuildinfo
