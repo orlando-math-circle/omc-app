@@ -20,6 +20,7 @@ import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
 import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
 import { ConfigModule } from './config/config.module';
 import { configSchema } from './config/config.schema';
+import { AuditLogModule } from './audit-log/audit-log.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { configSchema } from './config/config.schema';
     MikroOrmModule.forRoot(MikroORMConfig),
     EmailModule,
     AuthModule,
+    AuditLogModule,
     AccountModule,
     UserModule,
     EventModule,

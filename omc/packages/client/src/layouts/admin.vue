@@ -40,6 +40,16 @@
           </v-list-item-content>
         </v-list-item>
 
+        <v-list-item nuxt to="/admin/logs" active-class="primary--text">
+          <v-list-item-icon>
+            <v-icon>mdi-history</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Activity Records</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
         <v-list-group prepend-icon="mdi-calendar-month">
           <template #activator>
             <v-list-item-title>Calendar</v-list-item-title>

@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Roles } from '@server/app.roles';
+import { AuditLogService } from '@server/audit-log/audit-log.service';
 import { Event } from '@server/event/event.entity';
 import { Account } from '../account/account.entity';
 import { Populate } from '../app.utils';
@@ -32,6 +33,7 @@ export class EventRegistrationService {
     private readonly eventService: EventService,
     private readonly userService: UserService,
     private readonly ac: AccessService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   /**
@@ -105,12 +107,21 @@ export class EventRegistrationService {
         }
       }
 
+      this.auditLogService.create({
+        userId: user.id,
+        message: "Registered to event " + event.name + ".",
+      });
+
       registrations.push(this.registrationRepository.create({ user, event }));
     }
 
     await this.registrationRepository.persist(registrations).flush();
 
     return registrations;
+  }
+
+  public async createAuditLogEntry() {
+
   }
 
   /**
@@ -171,8 +182,14 @@ export class EventRegistrationService {
       if (eventRegistrationId) {
         for (const reg of event.registrations) {
           if (reg.id === eventRegistrationId) {
+            this.auditLogService.create({
+              userId: reg.user.id,
+              message: "Unregistered from event " + event.name + " as a volunteer.",
+            });
+
             reg.user = user;
             reg.isSwap = false;
+
             this.registrationRepository.persist(reg).flush();
           }
         }
@@ -187,6 +204,11 @@ export class EventRegistrationService {
           }),
         );
       }
+
+      this.auditLogService.create({
+        userId: user.id,
+        message: "Registered to event " + event.name + " as a volunteer.",
+      });
     }
       
     await this.registrationRepository.persist(registrations).flush();
@@ -497,6 +519,10 @@ export class EventRegistrationService {
       );
     }
 
+    this.auditLogService.create({
+      userId: user.id,
+      message: "Unregistered from event " + registration.event.name + ".",
+    });
     return this.registrationRepository.remove(registration).flush();
   }
 }

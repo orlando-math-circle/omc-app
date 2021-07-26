@@ -1,4 +1,5 @@
 export * from './useAttachments'
+export * from './useAuditLogs'
 export * from './useAuth'
 export * from './useCourses'
 export * from './useEvents'
@@ -12,3 +13,4 @@ export * from './useSnackbar'
 export * from './useTwitter'
 export * from './useUsers'
 export * from './useWork'
+
