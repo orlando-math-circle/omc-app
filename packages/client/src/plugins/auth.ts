@@ -19,38 +19,55 @@ import { COOKIE_COMPLETE, COOKIE_JWT } from '@/utils/constants'
  * during hydration and needs to be set using the token found in the store.
  */
 
-export default defineNuxtPlugin(async ({ $cookies, $axios, $pinia }) => {
-  const authStore = useAuth($pinia)
+export default defineNuxtPlugin(
+  async ({ $cookies, $axios, $pinia, $rollbar }) => {
+    const authStore = useAuth($pinia)
 
-  // 1. Check for token in order to fetch the user on the server.
-  if (process.server) {
-    const token = $cookies.get<string | undefined>(COOKIE_JWT)
-    const complete = $cookies.get<boolean | undefined>(COOKIE_COMPLETE) || false
+    // 1. Check for token in order to fetch the user on the server.
+    if (process.server) {
+      const token = $cookies.get<string | undefined>(COOKIE_JWT)
+      const complete =
+        $cookies.get<boolean | undefined>(COOKIE_COMPLETE) || false
 
-    // 2a. No token means the user isn't logged in.
-    if (!token) return
+      // 2a. No token means the user isn't logged in.
+      if (!token) return
 
-    // 2b. Otherwise, we set the axios token on the server.
-    $axios.setToken(token, 'Bearer')
+      // 2b. Otherwise, we set the axios token on the server.
+      $axios.setToken(token, 'Bearer')
 
-    // 3. Fetch the user or account based on the token type.
-    if (complete) {
-      await authStore.getMyUser()
-    } else {
-      await authStore.getMyAccount()
+      // 3. Fetch the user or account based on the token type.
+      if (complete) {
+        await authStore.getMyUser()
+      } else {
+        await authStore.getMyAccount()
+      }
+
+      // 4. Store credentials if successful.
+      if (!authStore.error) {
+        $rollbar?.configure({
+          payload: {
+            person: {
+              ...authStore.user,
+            },
+          },
+        })
+        authStore.token = token
+        authStore.complete = complete
+      } else if (authStore.error.status === 401) {
+        authStore.logout()
+      }
     }
 
-    // 4. Store credentials if successful.
-    if (!authStore.error) {
-      authStore.token = token
-      authStore.complete = complete
-    } else if (authStore.error.status === 401) {
-      authStore.logout()
+    // 5. Set the token after the client renders.
+    if (process.client && authStore.token) {
+      $rollbar?.configure({
+        payload: {
+          person: {
+            ...authStore.user,
+          },
+        },
+      })
+      $axios.setToken(authStore.token, 'Bearer')
     }
   }
-
-  // 5. Set the token after the client renders.
-  if (process.client && authStore.token) {
-    $axios.setToken(authStore.token, 'Bearer')
-  }
-})
+)

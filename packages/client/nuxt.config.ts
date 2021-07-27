@@ -49,9 +49,11 @@ const config: NuxtConfig = {
     paypalClientId: process.env.PAYPAL_CLIENT_ID || 'sb',
     staticBase: process.env.STATIC_BASE || 'http://localhost:3000',
     avatarBase: process.env.AVATAR_BASE || '/defaults/avatars',
+    rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN || null,
   },
   loading: { color: '#44d9e6' },
   plugins: [
+    '~/plugins/rollup',
     '~/plugins/error',
     '~/plugins/pinia',
     '~/plugins/auth',
