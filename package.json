@@ -5,6 +5,7 @@
   "author": "John Gilbert",
   "private": true,
   "scripts": {
+    "postinstall": "husky install",
     "client": "yarn workspace @omc/client",
     "server": "yarn workspace @omc/server",
     "shared": "yarn workspace @omc/shared",
