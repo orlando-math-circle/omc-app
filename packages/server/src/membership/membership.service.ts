@@ -11,13 +11,20 @@ import { Populate, PopulateFail } from '../app.utils';
 import { Membership } from './membership.entity';
 import { PurchaseUnitRequest } from '@server/paypal/interfaces/orders/purchase-unit.interface';
 import { Grade } from '@server/user/enums/grade.enum';
+import { PayPalService } from '@server/paypal/paypal.service';
+import { CreateInvoiceDto } from '@server/invoice/dtos/create-invoice.dto';
+import { InvoiceStatus } from '@server/invoice/enums/invoice-status.enum';
+import { InvoiceService } from '@server/invoice/invoice.service';
+import { UserService } from '@server/user/user.service';
 
 @Injectable()
 export class MembershipService {
-  paypalService: any;
   constructor(
     @InjectRepository(Membership)
     private readonly membershipRepository: EntityRepository<Membership>,
+    private readonly paypalService: PayPalService,
+    private readonly invoiceService: InvoiceService,
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -36,7 +43,9 @@ export class MembershipService {
         throw new BadRequestException(`User ${userId} not found on account`);
       }
 
-      memberships.push(this.membershipRepository.create({ user }));
+      memberships.push(
+        this.membershipRepository.create({ user, startDate: new Date() }),
+      );
     }
     await this.membershipRepository.persist(memberships).flush();
     return memberships;
@@ -93,121 +102,96 @@ export class MembershipService {
     return this.membershipRepository.remove(membership).flush();
   }
 
-  // public async createOrder(account: Account, users: number[]) {
-  //   if (!account.primaryUser.emailVerified) {
-  //     throw new ForbiddenException('Please validate your email');
-  //   }
-  //   // check grade to get price
-  //   // calculate membership end date
-  //   // get for which users
-  //   // send invoice
+  public async createOrder(account: Account, users: number[]) {
+    if (!account.primaryUser.emailVerified) {
+      throw new ForbiddenException('Please validate your email');
+    }
+    // check grade to get price
+    // calculate membership end date
+    // get for which users
+    // send invoice
 
-  //   const purchaseUnits: PurchaseUnitRequest[] = [];
+    const purchaseUnits: PurchaseUnitRequest[] = [];
 
-  //   for (const id of users) {
-  //     const user = account.users.getItems().find((u) => u.id === id);
-  //     let fee: string | undefined;
-  //     if (!user) {
-  //       // Could also be looked at as a forbidden error.
-  //       throw new NotFoundException();
-  //     }
-  //     if (user.grade) {
-  //       if ([Grade.SIXTH, Grade.SEVENTH, Grade.EIGHTH].includes(user.grade))
-  //         fee = '0.00';
-  //       else if (
-  //         [Grade.NINTH, Grade.TENTH, Grade.ELEVENTH, Grade.TWELFTH].includes(
-  //           user.grade,
-  //         )
-  //       )
-  //         fee = '0.00';
-  //     } else {
-  //       // throw internal error
-  //       throw new BadRequestException(
-  //         `User ${id} is not assigned a grade level`,
-  //       );
-  //     }
-  //     if (user.membership) {
-  //       if (user.membership.invoices) {
-  //         throw new BadRequestException('Invoice already exists');
-  //       }
-  //       // if today is not after expiration date
-  //       //if (user.membership.expirationDate) {
-  //       //   throw new BadRequestException('Invoice already exists');
-  //       // }
-  //       throw new BadRequestException('user is already a member');
-  //     }
+    for (const id of users) {
+      const user = account.users.getItems().find((u) => u.id === id);
+      let fee: string | undefined;
+      if (!user) {
+        // Could also be looked at as a forbidden error.
+        throw new NotFoundException();
+      }
+      if (user.grade) {
+        if ([Grade.SIXTH, Grade.SEVENTH, Grade.EIGHTH].includes(user.grade))
+          fee = '0.00';
+        else if (
+          [Grade.NINTH, Grade.TENTH, Grade.ELEVENTH, Grade.TWELFTH].includes(
+            user.grade,
+          )
+        )
+          fee = '0.00';
+      } else {
+        // throw internal error
+        throw new BadRequestException(
+          `User ${id} is not assigned a grade level`,
+        );
+      }
+      if (user.membership?.invoices) {
+        throw new BadRequestException('Invoice already exists');
+        // if today is not after expiration date
+        //if (user.membership.expirationDate) {
+        //   throw new BadRequestException('Invoice already exists');
+        // }
+        throw new BadRequestException('user is already a member');
+      }
 
-  //     if (user.feeWaived) {
-  //       throw new BadRequestException(`Payment not required for user ${id}`);
-  //     }
+      if (user.feeWaived) {
+        throw new BadRequestException(`Payment not required for user ${id}`);
+      }
 
-  //     if (user.membership) {
-  //       throw new BadRequestException(`User ${id} is already a member`);
-  //     }
+      if (user.membership) {
+        throw new BadRequestException(`User ${id} is already a member`);
+      }
 
-  //     purchaseUnits.push({
-  //       reference_id: id.toString(),
-  //       amount: {
-  //         currency_code: 'USD',
-  //         value: fee as string,
-  //       },
-  //     });
-  //   }
+      purchaseUnits.push({
+        reference_id: id.toString(),
+        amount: {
+          currency_code: 'USD',
+          value: fee as string,
+        },
+      });
+    }
 
-  //   return this.paypalService.createOrder(purchaseUnits);
-  // }
+    return this.paypalService.createOrder(purchaseUnits);
+  }
 
-  // public async captureOrder(orderId: string, membershipId: number) {
-  //   const [order, event] = await Promise.all([
-  //     this.paypalService.getOrder(orderId),
-  //     this.eventService.findOneOrFail(eventId, ['fee', 'course.events']),
-  //   ]);
+  public async captureOrder(orderId: string, userId: number) {
+    const [order] = await Promise.all([
+      this.paypalService.getOrder(orderId),
+      this.userService.findOneOrFail(userId, ['fee']),
+    ]);
+    // get fee, is this fee per user or total?
+    let cost = ['0.00', '0.00'];
+    // validate capture for each user.
+    this.paypalService.validateCapture(order, 'APPROVED', cost);
 
-  //   const fee = event.fee || event.course?.fee;
+    // WARNING: If this completes but subsequent code fails, money is taken but no registration.
+    const capturedOrder = await this.paypalService.captureOrder(orderId);
+    const createInvoiceDtos: CreateInvoiceDto[] = [];
 
-  //   if (!fee) {
-  //     throw new BadRequestException('Event has no fee');
-  //   }
+    for (const purchase_unit of capturedOrder.purchase_units) {
+      const capture = purchase_unit.payments.captures![0];
 
-  //   let isLate = false;
+      createInvoiceDtos.push({
+        status: InvoiceStatus.COMPLETED,
+        id: capture.id,
+        amount: capture.seller_receivable_breakdown.paypal_fee.value,
+        gross: capture.seller_receivable_breakdown.gross_amount.value,
+        net: capture.seller_receivable_breakdown.net_amount.value,
+        purchasedAt: new Date(capture.create_time),
+        user: +purchase_unit.reference_id!,
+      });
+    }
 
-  //   if (fee.lateAmount && parseFloat(fee.lateAmount) !== 0) {
-  //     if (event.course) {
-  //       isLate = event.course.isLate;
-  //     } else {
-  //       isLate = event.isLate;
-  //     }
-  //   }
-
-  //   const cost = isLate && fee.lateAmount ? fee.lateAmount : fee.amount;
-
-  //   this.paypalService.validateCapture(order, 'APPROVED', cost);
-
-  //   // WARNING: If this completes but subsequent code fails, money is taken but no registration.
-  //   const capturedOrder = await this.paypalService.captureOrder(orderId);
-  //   const createInvoiceDtos: CreateInvoiceDto[] = [];
-
-  //   for (const purchase_unit of capturedOrder.purchase_units) {
-  //     const capture = purchase_unit.payments.captures![0];
-
-  //     createInvoiceDtos.push(
-  //       Object.assign(
-  //         {
-  //           status: InvoiceStatus.COMPLETED,
-  //           id: capture.id,
-  //           amount: capture.seller_receivable_breakdown.paypal_fee.value,
-  //           gross: capture.seller_receivable_breakdown.gross_amount.value,
-  //           net: capture.seller_receivable_breakdown.net_amount.value,
-  //           purchasedAt: new Date(capture.create_time),
-  //           fee,
-  //           user: +purchase_unit.reference_id!,
-  //         },
-  //         event.fee && { event },
-  //         event.course?.fee && { course: event.course },
-  //       ),
-  //     );
-  //   }
-
-  //   return this.invoiceService.batchCreate(createInvoiceDtos);
-  // }
+    return this.invoiceService.batchCreate(createInvoiceDtos);
+  }
 }

@@ -6,8 +6,10 @@ import {
   OneToOne,
   Collection,
   OneToMany,
+  ManyToMany,
 } from '@mikro-orm/core';
 import { User } from '../user/user.entity';
+import { Invoice } from '@server/invoice/invoice.entity';
 
 @Entity()
 export class Membership extends BaseEntity<Membership, 'id'> {
@@ -22,4 +24,13 @@ export class Membership extends BaseEntity<Membership, 'id'> {
 
   @Property({ nullable: true })
   expitationDate?: Date;
+
+  @Property()
+  fee!: string;
+
+  @ManyToMany({
+    entity: () => Invoice,
+    owner: true,
+  })
+  invoices = new Collection<Invoice>(this);
 }
