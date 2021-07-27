@@ -107,10 +107,10 @@ export class EventRegistrationService {
         }
       }
 
-      this.auditLogService.create({
-        userId: user.id,
-        message: "Registered to event " + event.name + ".",
-      });
+      // await this.auditLogService.create({
+      //   userId: user.id,
+      //   message: "Registered to event " + event.name + ".",
+      // });
 
       registrations.push(this.registrationRepository.create({ user, event }));
     }
@@ -182,10 +182,10 @@ export class EventRegistrationService {
       if (eventRegistrationId) {
         for (const reg of event.registrations) {
           if (reg.id === eventRegistrationId) {
-            this.auditLogService.create({
-              userId: reg.user.id,
-              message: "Unregistered from event " + event.name + " as a volunteer.",
-            });
+            // await this.auditLogService.create({
+            //   userId: reg.user.id,
+            //   message: "Unregistered from event " + event.name + " as a volunteer.",
+            // });
 
             reg.user = user;
             reg.isSwap = false;
@@ -205,10 +205,10 @@ export class EventRegistrationService {
         );
       }
 
-      this.auditLogService.create({
-        userId: user.id,
-        message: "Registered to event " + event.name + " as a volunteer.",
-      });
+      // await this.auditLogService.create({
+      //   userId: user.id,
+      //   message: "Registered to event " + event.name + " as a volunteer.",
+      // });
     }
       
     await this.registrationRepository.persist(registrations).flush();
@@ -519,10 +519,6 @@ export class EventRegistrationService {
       );
     }
 
-    this.auditLogService.create({
-      userId: user.id,
-      message: "Unregistered from event " + registration.event.name + ".",
-    });
     return this.registrationRepository.remove(registration).flush();
   }
 }

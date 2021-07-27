@@ -46,9 +46,9 @@
               </template>
 
               <v-list nav dense>
-                <v-list-item>
+                <v-list-item @click="onDelete">
                   <v-list-item-icon>
-                    <v-icon>mdi-trash</v-icon>
+                    <v-icon>mdi-delete-circle</v-icon>
                   </v-list-item-icon>
 
                   <v-list-item-content>
@@ -86,26 +86,10 @@
             <template #[`item.id`]="{ item }">
               # <LinkCopy :text="item.id" />
             </template>
-
-            <template>
-              <div class="ml-2">
-                  <span>No Email</span>
-                </div>
-            </template>
-
-            <template>
-              <v-btn icon @click="deleteDialog && deleteDialog.open(status)">
-                <v-icon>mdi-delete-circle</v-icon>
-              </v-btn>
-            </template>
           </v-data-table-paginated>
         </v-card>
       </v-col>
     </v-row>
-
-    <DialogConfirm ref="deleteDialog" @confirm="onDelete">
-      This will delete the entry from the audit log.
-    </DialogConfirm>
   </div>
 </template>
 
@@ -140,7 +124,7 @@ export default defineComponent({
     const auditLogStore = useAuditLogs()
 
     const state = reactive({
-      selected: [],
+      selected: [] as number[],
       selection: null as number | null,
       options: null,
       filters: {
@@ -153,16 +137,9 @@ export default defineComponent({
 
     const headers = [
       { text: 'ID', value: 'id' },
-      { text: 'Name', value: 'name' },
-      { text: 'Record', value: 'record' },
-      {
-        text: 'Edit',
-        value: 'edit',
-        sortable: false,
-        filterable: false,
-      },
+      { text: 'Message', value: 'message' },
     ]
-
+        
     const findAll = async () => {
       await auditLogStore.findAll()
     }

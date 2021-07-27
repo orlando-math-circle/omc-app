@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
+import { Usr } from "@server/auth/decorators/user.decorator";
+import { User } from "@server/user/user.entity";
 import { AuditLogService } from "./audit-log.service";
 import { AuditLogDto } from "./dto/audit-log.dto";
 
@@ -8,8 +10,8 @@ export class AuditLogController {
   constructor(private readonly auditLogService: AuditLogService) {}
 
   @Post()
-  create(@Body() dto: AuditLogDto) {
-    return this.auditLogService.create(dto);
+  create(@Body() dto: AuditLogDto, @Usr() user: User) {
+    return this.auditLogService.create(dto, user);
   }
 
   @Get(':id')

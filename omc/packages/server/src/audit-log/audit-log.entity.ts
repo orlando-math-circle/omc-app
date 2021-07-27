@@ -10,5 +10,5 @@ export class AuditLog extends BaseEntity<AuditLog, 'id'> {
     user!: User;
 
     @Property()
-    readonly message!: string;
+    message!: string;
 }

@@ -1,6 +1,7 @@
 import { EntityRepository, FilterQuery, FindOptions } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { Injectable } from "@nestjs/common";
+import { User } from "@server/user/user.entity";
 import { AuditLog } from "./audit-log.entity";
 import { AuditLogDto } from "./dto/audit-log.dto";
 
@@ -17,9 +18,10 @@ export class AuditLogService {
    *
    * @param dto Properties of the primary user.
    */
-  async create({userId, message}: AuditLogDto) {
+  async create({userId, message}: AuditLogDto, user: User) {
     const auditEntry = this.auditLogRepository.create({
-        user: userId,
+        userId: userId,
+        user: user,
         message: message
     });
     
@@ -39,7 +41,7 @@ export class AuditLogService {
   }
 
   public async delete(id: number) {
-    const attendance = await this.auditLogRepository.findOneOrFail(id);
-    return this.auditLogRepository.remove(attendance).flush();
+    const audit = await this.auditLogRepository.findOneOrFail(id);
+    return this.auditLogRepository.remove(audit).flush();
   }
 }
