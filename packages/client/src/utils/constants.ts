@@ -58,6 +58,7 @@ export const genders = Object.freeze([
 ])
 
 export const roles = Object.freeze([
+  { text: 'User', value: Roles.DEFAULT },
   { text: 'Administrator', value: Roles.ADMIN },
   { text: 'Volunteer', value: Roles.VOLUNTEER },
 ])
@@ -88,6 +89,8 @@ export const education = Object.freeze({
   ],
 })
 
+export const EducationItems = Object.freeze(Object.values(education).flat())
+
 export const reminders = Object.freeze([
   { text: 'Week Before', value: ReminderFreq.WEEK },
   { text: 'Day Before', value: ReminderFreq.DAY },
@@ -104,3 +107,5 @@ export const COOKIE_JWT = 'omc-token'
 export const COOKIE_COMPLETE = 'omc-complete'
 export const COOKIE_NAME = 'omc_token'
 export const COOKIE_CALENDAR_TYPE = 'omc_calendar_type'
+
+export { Gender, Grade, Roles, ReminderFreq }

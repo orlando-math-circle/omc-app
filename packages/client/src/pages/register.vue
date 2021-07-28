@@ -27,8 +27,8 @@
               <v-col cols="6">
                 <VTextFieldValidated
                   v-model="first"
-                  label="First Name"
                   rules="required"
+                  label="First Name"
                   outlined
                 />
               </v-col>
@@ -36,8 +36,8 @@
               <v-col cols="6">
                 <VTextFieldValidated
                   v-model="last"
-                  label="Last Name"
                   rules="required"
+                  label="Last Name"
                   outlined
                 />
               </v-col>

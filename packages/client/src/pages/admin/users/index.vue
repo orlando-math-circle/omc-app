@@ -3,7 +3,7 @@
     <AdminHeader title="Users" :breadcrumbs="breadcrumbs">
       <v-row>
         <v-col cols="auto" align-self="center">
-          <DialogCreateAccount>
+          <DialogCreateAccount @create:account="onAccountCreate">
             <template #activator="{ on, attrs }">
               <v-btn color="primary" v-bind="attrs" v-on="on">
                 Create Account
@@ -275,6 +275,8 @@ export default defineComponent({
       })
     }
 
+    const onAccountCreate = () => findAll()
+
     useFetch(async () => await findAll())
     watch(search, async () => await findAll())
 
@@ -290,6 +292,7 @@ export default defineComponent({
       users: computed(() => userStore.users),
       isLoading: computed(() => userStore.isLoading),
       findAll,
+      onAccountCreate,
     }
   },
   head: {
