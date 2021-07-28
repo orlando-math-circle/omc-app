@@ -12,7 +12,13 @@ import { UserService } from '@server/user/user.service';
 import { EventService } from '@server/event/event.service';
 import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity';
 import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum';
-import { FilterQuery } from '@mikro-orm/core';
+import {
+  FilterQuery,
+  FindOptions,
+  Populate,
+  QueryOrderMap,
+} from '@mikro-orm/core';
+import { PopulateFail } from '@server/app.utils';
 
 @Injectable()
 export class AttendanceService {
@@ -22,7 +28,6 @@ export class AttendanceService {
     private readonly em: EntityManager,
     private readonly userService: UserService,
     private readonly eventService: EventService,
-    private readonly volunteerWorkRepository: EntityRepository<VolunteerWork>,
   ) {}
 
   public async create({ userId, eventId, ...data }: MarkAttendanceDto) {
@@ -40,6 +45,26 @@ export class AttendanceService {
       'attendances',
     ]);
 
+    // Prevent duplicate attendances from being added to the db
+    for (let i = 0; i < user.attendances.length; i++) {
+      if (
+        user.attendances[i].event.id === event.id &&
+        user.attendances[i].attended
+      ) {
+        throw new BadRequestException(
+          'Attendance for this event has already been marked.',
+        );
+      }
+      if (
+        user.attendances[i].event.id === event.id &&
+        !user.attendances[i].attended
+      ) {
+        throw new BadRequestException(
+          'Attendance for this event has already been marked.',
+        );
+      }
+    }
+
     // Check for user, registration, and permissions
 
     if (event.isEnded) {
@@ -49,22 +74,14 @@ export class AttendanceService {
         throw new ForbiddenException();
       }
 
-      console.log(user.volunteerHours);
-
-      console.log(user.registrations);
-
-      // console.log(event);
-
       // If volunteering, pick out the event from user registrations
       // There's probably a better way of doing this
       for (let i = 0; i < user.registrations.length; i++) {
         console.log(i + ': ' + user.registrations[i].volunteering);
         if (
-          event.id == user.registrations[i].event.id &&
+          event.id === user.registrations[i].event.id &&
           user.registrations[i].volunteering
         ) {
-          console.log(i + 'is the index of event id that matches');
-
           const work = new VolunteerWork();
           work.hours = data.hours;
           work.status = VolunteerWorkStatus.PENDING;
@@ -86,15 +103,29 @@ export class AttendanceService {
     return attendance;
   }
 
-  public findAll(limit = 20, offset = 0) {
-    return this.attendanceRepository.findAndCount(
-      {},
-      { limit, offset, populate: ['user'] },
-    );
+  public async findAll(
+    where: FilterQuery<Attendance>,
+    options?: FindOptions<Attendance>,
+  ) {
+    return this.attendanceRepository.findAndCount(where, options);
   }
 
-  public findOne(id: number) {
-    return this.attendanceRepository.findOneOrFail(id);
+  findOne(where: FilterQuery<Attendance>, populate?: Populate<Attendance>) {
+    return this.attendanceRepository.findOne(where, populate);
+  }
+
+  /**
+   * Retrieves an individual user or throws an exception.
+   *
+   * @param where Primary key or query condition.
+   * @param populate Population boolean, string, string array, or query.
+   */
+  async findOneOrFail(
+    where: FilterQuery<Attendance>,
+    populate?: PopulateFail<Attendance>,
+    orderBy?: QueryOrderMap,
+  ) {
+    return this.attendanceRepository.findOneOrFail(where, populate, orderBy);
   }
 
   public async update(id: number, updateAttendanceDto: UpdateAttendanceDto) {
