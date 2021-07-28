@@ -3,6 +3,9 @@ import { format, parse } from 'date-fns'
 import { isArray, isEqual, isObject, transform } from 'lodash'
 import { StateError } from '../types/state-error.interface'
 
+export const isNumber = (value: any): value is number =>
+  typeof value === 'number'
+
 /**
  * Find difference between two objects.
  * Source: https://davidwells.io/snippets/get-difference-between-two-objects-javascript
