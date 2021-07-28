@@ -11,6 +11,7 @@ import {
 import { AttendanceService } from './attendance.service';
 import { MarkAttendanceDto } from './dtos/mark-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
+import { FindAllAttendancesDto } from './dtos/find-all-attendances.dto';
 
 @Controller('attendance')
 export class AttendanceController {
@@ -27,11 +28,15 @@ export class AttendanceController {
   }
 
   @Get()
-  private findAll(
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
-  ) {
-    return this.attendanceService.findAll(limit, offset);
+  private findAll(@Query() { limit, offset }: FindAllAttendancesDto) {
+    return this.attendanceService.findAll(
+      {},
+      {
+        populate: ['user', 'event'],
+        limit,
+        offset,
+      },
+    );
   }
 
   @Patch(':id')
