@@ -58,7 +58,7 @@ import {
   watch,
 } from '@nuxtjs/composition-api'
 import { monthSelections } from '~/utils/constants'
-import { isValidDate } from '~/utils/utilities'
+import { isValidDate, isNumber } from '~/utils/utilities'
 import { daysInMonth } from '~/utils/time'
 import { useStateReset } from '~/composables/useStateReset'
 
@@ -92,8 +92,12 @@ export default defineComponent({
     })
 
     const date = computed(() => {
-      // If the fields are empty then there is no internal date.
-      if (!state.fields.year || !state.fields.month || !state.fields.date) {
+      // Until the birthday is fully entered, don't return anything
+      if (
+        !isNumber(state.fields.year) ||
+        !isNumber(state.fields.month) ||
+        !isNumber(state.fields.date)
+      ) {
         return ''
       }
 
