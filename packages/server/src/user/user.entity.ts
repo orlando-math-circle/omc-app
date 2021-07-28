@@ -20,6 +20,7 @@ import { IndustryDto } from './dtos/industry.dto';
 import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';
+import { Attendance } from '@server/attendance/attendance.entity';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -152,4 +153,10 @@ export class User extends BaseEntity<User, 'id'> {
 
   @OneToMany(() => FileAttachment, (a) => a.user, { orphanRemoval: true })
   attachments = new Collection<FileAttachment>(this);
+
+  @OneToMany(() => Attendance, (h) => h.user, {
+    eager: false,
+    orphanRemoval: true,
+  })
+  attendances = new Collection<Attendance>(this);
 }
