@@ -113,29 +113,31 @@
 
         <v-expand-transition>
           <v-col v-show="isIndustry">
-            <v-col cols="12">
-              <VTextFieldValidated
-                v-model="industry.profession"
-                label="Profession (Optional)"
-                outlined
-              />
-            </v-col>
+            <v-row>
+              <v-col cols="12">
+                <VTextFieldValidated
+                  v-model="industry.profession"
+                  label="Profession (Optional)"
+                  outlined
+                />
+              </v-col>
 
-            <v-col cols="12">
-              <VTextFieldValidated
-                v-model="industry.jobTitle"
-                label="Job Title (Optional)"
-                outlined
-              />
-            </v-col>
+              <v-col cols="12">
+                <VTextFieldValidated
+                  v-model="industry.jobTitle"
+                  label="Job Title (Optional)"
+                  outlined
+                />
+              </v-col>
 
-            <v-col cols="12">
-              <VTextFieldValidated
-                v-model="industry.company"
-                label="Company or Workplace (Optional)"
-                outlined
-              />
-            </v-col>
+              <v-col cols="12">
+                <VTextFieldValidated
+                  v-model="industry.company"
+                  label="Company or Workplace (Optional)"
+                  outlined
+                />
+              </v-col>
+            </v-row>
           </v-col>
         </v-expand-transition>
 
