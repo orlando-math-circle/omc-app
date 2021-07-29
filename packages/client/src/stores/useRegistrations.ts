@@ -3,6 +3,7 @@ import { CreateRegistrationDto } from '@server/event-registration/dtos/create-re
 import { CreateVolunteerRegistrationDto } from '@server/event-registration/dtos/create-volunteer-registration.dto'
 import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
 import { EventRegistration } from '@server/event-registration/event-registration.entity'
+import { UpdateOwnEventRegistrationDto } from '@server/event-registration/dtos/update-event-registration.dto'
 import { EntityDTO } from '@server/shared/types/entity-dto'
 import { StateStatus, StateError } from '@/types/state.interface'
 
@@ -32,11 +33,16 @@ export const useRegistrations = defineStore({
         data
       )
     },
+    async swap(id: number) {
+      await this.$nuxt.$axios.$post(`/registration/swap/${id}`)
+    },
     async findOne(id: number) {
       this.registration = await this.$nuxt.$axios.$get('/registration/' + id)
     },
-    async findAll() {
-      const resp = await this.$nuxt.$axios.$get('/registration')
+    async findAll(params?: { volunteering?: boolean; coverable?: boolean }) {
+      const resp = await this.$nuxt.$axios.$get('/registration', {
+        params,
+      })
 
       this.registrations = resp[0]
       this.total = resp[1]
@@ -44,6 +50,15 @@ export const useRegistrations = defineStore({
     async findStatuses(eventId: number) {
       this.statuses = await this.$nuxt.$axios.$get(
         '/registration/status/' + eventId
+      )
+    },
+    async update(
+      id: number,
+      updateOwnEventRegistrationDto: UpdateOwnEventRegistrationDto
+    ) {
+      await this.$nuxt.$axios.$patch(
+        `/registration/${id}`,
+        updateOwnEventRegistrationDto
       )
     },
     async delete(id: number) {

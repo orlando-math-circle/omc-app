@@ -28,6 +28,8 @@ export const isNumber = (fn: any): fn is number => typeof fn === 'number';
 
 export const isString = (fn: any): fn is string => typeof fn === 'string';
 
+export const isBoolean = (fn: any): fn is boolean => typeof fn === 'boolean';
+
 /**
  * Determines if two single-dimension arrays of primities are equal.
  */
