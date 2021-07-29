@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2018",
+    "moduleResolution": "Node",
+    "declaration": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["packages/shared/src/*"],
+      "@server/*": ["packages/server/src/*"],
+      "@client/*": ["packages/client/src/*"],
+      "~/*": ["packages/client/src/*"],
+      "@/*": ["packages/client/src/*"]
+    }
+  },
+  "exclude": ["**/node_modules", "**/dist"]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@omc/monorepo",
+  "version": "1.0.0",
+  "description": "Orlando Math Circle event calendar app",
+  "author": "John Gilbert",
+  "private": true,
+  "scripts": {
+    "postinstall": "husky install",
+    "client": "yarn workspace @omc/client",
+    "server": "yarn workspace @omc/server",
+    "shared": "yarn workspace @omc/shared",
+    "docs": "yarn workspace @omc/docs"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "12.1.4",
+    "@commitlint/config-conventional": "12.1.4",
+    "husky": "6.0.0"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  }
+}

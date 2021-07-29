@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  push:
+    paths:
+      - packages/server/**
+      - yarn.lock
+  pull_request:
+    paths:
+      - packages/server/**
+      - yarn.lock
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ matrix.node-version }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Init docker
+        run: docker-compose up -d
+
+      - name: Yarn Install
+        run: yarn
+
+      - name: Test
+        run: yarn server test:e2e
+        env:
+          PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+          PAYPAL_SECRET_KEY: ${{ secrets.PAYPAL_SECRET_KEY }}
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          directory: packages/server/coverage

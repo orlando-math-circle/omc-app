@@ -1,0 +1,14 @@
+{
+  "extends": ["config:base", "docker:disable"],
+  "semanticCommits": true,
+  "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{controls}}}",
+  "packageRules": [
+    {
+      "packagePatterns": ["*"],
+      "minor": {
+        "groupName": "all non-major dependencies",
+        "groupSlug": "all-minor-patch"
+      }
+    }
+  ]
+}
