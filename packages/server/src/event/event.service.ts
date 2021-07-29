@@ -721,7 +721,6 @@ export class EventService {
               lateAmount: reference.fee.lateAmount,
             })
           : undefined,
-        author: reference.author,
         course: reference.course,
         project: reference.project,
         recurrence: recurrence,
