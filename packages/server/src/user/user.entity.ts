@@ -1,6 +1,7 @@
 import { VolunteerWork } from './../volunteer-work/volunteer-work.entity';
 import {
   BaseEntity,
+  Cascade,
   Collection,
   Entity,
   Enum,
