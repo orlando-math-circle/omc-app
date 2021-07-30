@@ -46,9 +46,11 @@ export const useEvents = defineStore({
       })
     },
     async findAllRegistered(params: FindAllRegisteredEventsDto) {
-      this.events = await this.$nuxt.$axios.$get('/event/registered', {
+      const [events] = await this.$nuxt.$axios.$get('/event/registered', {
         params,
       })
+
+      this.events = events
     },
     async update(
       id: number,
