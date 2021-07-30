@@ -12,9 +12,9 @@ import { AttendanceService } from './attendance.service';
 import { MarkAttendanceDto } from './dtos/mark-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { FindAllAttendancesDto } from './dtos/find-all-attendances.dto';
-import { Usr } from '@server/auth/decorators/user.decorator';
-import { User } from '@server/user/user.entity';
-import { UserAuth } from '@server/auth/decorators/auth.decorator';
+import { Usr } from '../auth/decorators/user.decorator';
+import { User } from '../user/user.entity';
+import { UserAuth } from '../auth/decorators/auth.decorator';
 
 @Controller('attendance')
 export class AttendanceController {

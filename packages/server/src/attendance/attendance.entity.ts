@@ -6,10 +6,10 @@ import {
   Property,
   Unique,
 } from '@mikro-orm/core';
-import { User } from '@server/user/user.entity';
-import { Event } from '@server/event/event.entity';
-import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity';
-import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity';
+import { User } from '../user/user.entity';
+import { Event } from '../event/event.entity';
+import { VolunteerJob } from '../volunteer-job/volunteer-job.entity';
+import { VolunteerWork } from '../volunteer-work/volunteer-work.entity';
 
 @Entity()
 @Unique({ properties: ['event', 'user'] })

@@ -8,18 +8,18 @@ import {
 import { MarkAttendanceDto } from './dtos/mark-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { Attendance } from './attendance.entity';
-import { UserService } from '@server/user/user.service';
-import { EventService } from '@server/event/event.service';
-import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity';
-import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum';
+import { UserService } from '../user/user.service';
+import { EventService } from '../event/event.service';
+import { VolunteerWork } from '../volunteer-work/volunteer-work.entity';
+import { VolunteerWorkStatus } from '../volunteer-work/enums/work-status.enum';
 import {
   FilterQuery,
   FindOptions,
   Populate,
   QueryOrderMap,
 } from '@mikro-orm/core';
-import { PopulateFail } from '@server/app.utils';
-import { User } from '@server/user/user.entity';
+import { PopulateFail } from '../app.utils';
+import { User } from '../user/user.entity';
 import { AttendanceStatus } from './dtos/attendance-status.dto';
 
 @Injectable()
