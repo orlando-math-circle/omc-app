@@ -5258,7 +5258,7 @@ __metadata:
   version: 1.0.0-rc.11
   resolution: "@vue/composition-api@npm:1.0.0-rc.11"
   dependencies:
-    tslib: ^2.2.0
+    tslib: ^2.3.0
   peerDependencies:
     vue: ">= 2.5 < 3"
   checksum: 59c96174e6037d96e7c82eb59a3e8e9fde3614b168b17a28b92abc3441860afac19b15fcb0a4968ad1a3da486292d8d2943d1c7a3056e3780a59cb91771be7a5
