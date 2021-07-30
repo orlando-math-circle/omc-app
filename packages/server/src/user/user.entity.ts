@@ -20,7 +20,7 @@ import { IndustryDto } from './dtos/industry.dto';
 import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';
-import { Attendance } from '@server/attendance/attendance.entity';
+import { Attendance } from '../attendance/attendance.entity';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
