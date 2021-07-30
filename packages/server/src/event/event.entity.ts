@@ -108,9 +108,6 @@ export class Event extends BaseEntity<Event, 'id'> {
   @ManyToOne(() => Project, { nullable: true, eager: true })
   project?: Project;
 
-  @ManyToOne(() => User)
-  author!: User;
-
   /**
    * @returns If the event has started.
    */

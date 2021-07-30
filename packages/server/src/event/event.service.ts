@@ -32,6 +32,8 @@ import { Event } from './event.entity';
 import { EventMetadata } from './interfaces/event-metadata.interface';
 import { Schedule } from './schedule.class';
 import { ConfigService } from '../config/config.service';
+import { FindAllRegisteredEventsDto } from './dto/find-all-registered-events.dto';
+import { isBoolean } from '../app.utils';
 
 @Injectable()
 export class EventService {
@@ -48,15 +50,13 @@ export class EventService {
    * Creates a single event or a recurring event stream.
    *
    * @param createEventDto CreateEventDto
-   * @param author User author
    */
-  async create(createEventDto: CreateEventDto, author: User) {
+  async create(createEventDto: CreateEventDto) {
     const { dtstart, dtend, rrule, feeType, fee, ...meta } = createEventDto;
 
     const event = this.eventRepository.create({
       dtstart: rrule?.dtstart || dtstart,
       dtend: dtend || endOfDay((rrule?.dtstart || dtstart)!),
-      author,
       ...meta,
     });
 
@@ -117,6 +117,27 @@ export class EventService {
   }
 
   /**
+   * Finds all upcoming events a user is registered to attend or volunteer for.
+   *
+   * @param {FindAllRegisteredEventsDto} findAllRegisteredEventsDto Query parameters.
+   * @param {User} user User to find registrations for.
+   */
+  async findAllRegistered(
+    { limit, offset, volunteering }: FindAllRegisteredEventsDto,
+    user: User,
+  ) {
+    return this.eventRepository.findAndCount(
+      {
+        registrations: {
+          user: user.id,
+          ...(isBoolean(volunteering) ? { volunteering } : {}),
+        },
+      },
+      { limit, offset, orderBy: { dtstart: 'ASC' } },
+    );
+  }
+
+  /**
    * Retrieves all events within a date range inclusively. This method
    * will hydrate any events that do not yet exist in this range for
    * a recurrence rule.
@@ -135,7 +156,7 @@ export class EventService {
           },
           projects && { project: { id: projects } },
         ),
-        ['course', 'fee', 'project', 'author'],
+        ['course', 'fee', 'project'],
       ),
       this.recurrenceRepository.find(
         Object.assign(
@@ -150,7 +171,7 @@ export class EventService {
 
     await this.recurrenceRepository.populate(
       recurrences,
-      ['events.course', 'events.fee', 'events.project', 'events.author'],
+      ['events.course', 'events.fee', 'events.project', 'events'],
       {
         events: {
           dtstart: { $lte: end },
@@ -171,7 +192,6 @@ export class EventService {
           'course',
           'fee',
           'project',
-          'author',
         ]);
       } else {
         reference = recurrence.events[0];
@@ -721,7 +741,6 @@ export class EventService {
               lateAmount: reference.fee.lateAmount,
             })
           : undefined,
-        author: reference.author,
         course: reference.course,
         project: reference.project,
         recurrence: recurrence,
