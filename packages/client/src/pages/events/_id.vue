@@ -886,6 +886,7 @@ export default defineComponent({
       await attendanceStore.findStatuses(+route.value.params.id)
 
       snackbar.success('Attendance removed!')
+    }
 
     const onCancel = async (status: EntityDTO<EventRegistrationStatus>) => {
       if (!status.registration) return
