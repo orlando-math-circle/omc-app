@@ -156,6 +156,11 @@ export default defineComponent({
           to: '/events',
         },
         {
+          icon: 'mdi-hand-heart',
+          title: 'Volunteers',
+          to: '/volunteers',
+        },
+        {
           icon: 'mdi-account-circle',
           title: 'Account',
           to: '/dashboard',
