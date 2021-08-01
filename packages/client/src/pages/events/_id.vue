@@ -118,10 +118,20 @@
 
                   <v-list-item-subtitle
                     v-if="
-                      status.registration && status.registration.volunteering
+                      status.registration &&
+                      status.registration.volunteering &&
+                      !status.registration.isCoverable
                     "
                   >
                     Volunteering
+                  </v-list-item-subtitle>
+
+                  <v-list-item-subtitle
+                    v-else-if="
+                      status.registration && status.registration.isCoverable
+                    "
+                  >
+                    Pending Volunteer Swap
                   </v-list-item-subtitle>
 
                   <v-list-item-subtitle v-else-if="!status.eligible">
@@ -135,14 +145,56 @@
                   <v-list-item-subtitle v-else>Eligible</v-list-item-subtitle>
                 </v-list-item-content>
 
-                <v-list-item-action v-if="!isClosed">
-                  <v-btn
-                    text
-                    @click="cancelDialog && cancelDialog.open(status)"
-                  >
-                    Cancel
-                  </v-btn>
-                </v-list-item-action>
+                <v-menu offset-y transition="slide-y-transition">
+                  <template #activator="{ on, attrs }">
+                    <v-btn color="primary" v-bind="attrs" v-on="on">
+                      Manage
+                      <v-icon>mdi-chevron-down</v-icon>
+                    </v-btn>
+                  </template>
+
+                  <v-list dense nav>
+                    <v-list-item
+                      v-if="
+                        status.registration && status.registration.volunteering
+                      "
+                      @click="handleSwapDialog(status)"
+                    >
+                      <v-list-item-icon>
+                        <v-icon>mdi-swap-horizontal</v-icon>
+                      </v-list-item-icon>
+
+                      <v-list-item-content>
+                        <v-list-item-title
+                          v-if="
+                            status.registration &&
+                            status.registration.isCoverable
+                          "
+                          >Cancel Swap</v-list-item-title
+                        >
+                        <v-list-item-title
+                          v-else-if="
+                            status.registration &&
+                            !status.registration.isCoverable
+                          "
+                          >Request Swap</v-list-item-title
+                        >
+                      </v-list-item-content>
+                    </v-list-item>
+
+                    <v-list-item
+                      @click="cancelDialog && cancelDialog.open(status)"
+                    >
+                      <v-list-item-icon>
+                        <v-icon>mdi-minus-circle-outline</v-icon>
+                      </v-list-item-icon>
+
+                      <v-list-item-content>
+                        <v-list-item-title>Cancel</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
               </v-list-item>
             </v-list>
           </v-card-text>
@@ -311,9 +363,9 @@
                             <span v-if="status.paid">• Paid</span>
                           </v-list-item-subtitle>
 
-                          <v-list-item-subtitle v-else
-                            >Eligible</v-list-item-subtitle
-                          >
+                          <v-list-item-subtitle v-else>
+                            Eligible
+                          </v-list-item-subtitle>
                         </v-list-item-content>
 
                         <v-list-item-action v-if="status.eligible">
@@ -380,6 +432,7 @@
       </v-stepper>
     </v-col>
 
+    <!-- Volunteering Process -->
     <v-col v-if="unregisteredVolunteers.length && !isClosed" cols="12">
       <v-card>
         <v-card-title>Volunteering</v-card-title>
@@ -428,13 +481,47 @@
               </v-select>
             </v-col>
 
-            <v-col cols="12">
+            <v-col v-if="!volunteerJob && swappableVolunteers.length" cols="12">
+              <VSelectValidated
+                v-model="swap"
+                :items="swappableVolunteers"
+                label="Cover another shift"
+                item-value="id"
+                clearable
+              >
+                <template #selection="{ item, attrs }">
+                  <v-chip v-bind="attrs">
+                    <v-avatar left>
+                      <v-img :src="item.user.avatarUrl" />
+                    </v-avatar>
+
+                    <span>{{ item.user.name }}</span>
+                  </v-chip>
+                </template>
+
+                <template #item="{ item }">
+                  <v-list-item-avatar>
+                    <v-img :src="item.user.avatarUrl" />
+                  </v-list-item-avatar>
+
+                  <v-list-item-content>
+                    <v-list-item-title>{{ item.user.name }}</v-list-item-title>
+                    <v-list-item-subtitle>{{
+                      item.user.email || 'No email'
+                    }}</v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </VSelectValidated>
+            </v-col>
+
+            <v-col v-if="!swap" cols="12">
               <v-select
                 v-model="volunteerJob"
                 :items="jobs"
                 label="Job (Optional)"
                 outlined
                 hide-details="auto"
+                clearable
               />
             </v-col>
           </v-row>
@@ -455,7 +542,12 @@
     </v-col>
 
     <DialogConfirm ref="cancelDialog" @confirm="onCancel">
-      You may re-register at any time for no charge.
+      You may register again at any time.
+    </DialogConfirm>
+
+    <DialogConfirm ref="swapDialog" @confirm="onSwapToggle">
+      This action will mark your volunteering registration as needing covered,
+      allowing the shift to be swapped to another volunteer.
     </DialogConfirm>
 
     <DialogConfirm ref="cancelAttendanceDialog" @confirm="onAttendanceCancel">
@@ -467,7 +559,6 @@
 <script lang="ts">
 import { User } from '@server/user/user.entity'
 import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
-import { EventRegistration } from '@server/event-registration/event-registration.entity'
 import { Roles } from '@server/app.roles'
 import { Gender } from '@server/user/enums/gender.enum'
 import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
@@ -494,6 +585,7 @@ import {
 import { useSnackbar, useStateReset } from '@/composables'
 import { AttendanceStatus } from '@server/attendance/dtos/attendance-status.dto'
 import { Attendance } from '@server/attendance/attendance.entity'
+import { EntityDTO } from '@server/shared/types/entity-dto'
 
 enum RegisterStep {
   SELECTION = 1,
@@ -505,6 +597,7 @@ export default defineComponent({
   setup() {
     const cancelDialog = ref<InstanceType<typeof DialogConfirm>>()
     const cancelAttendanceDialog = ref<InstanceType<typeof DialogConfirm>>()
+    const swapDialog = ref<InstanceType<typeof DialogConfirm>>()
 
     const { $config } = useContext()
     const route = useRoute()
@@ -519,6 +612,8 @@ export default defineComponent({
       selections: [] as number[],
       volunteer: null as number | null,
       volunteerJob: null as number | null,
+      swap: null as number | null,
+      isUserCancel: true,
       step: RegisterStep.SELECTION,
     })
 
@@ -588,7 +683,7 @@ export default defineComponent({
     })
 
     const usersRequiringPayment = computed(() => {
-      const retval: User[] = []
+      const retval: EntityDTO<User>[] = []
 
       for (const status of selectedStatuses.value) {
         if (status.paid || status.user.feeWaived) continue
@@ -650,6 +745,9 @@ export default defineComponent({
 
     const attendedUsers = computed(() =>
       attendanceStatuses.value.filter((s) => s.attended !== false)
+
+    const swappableVolunteers = computed(() =>
+      registrationStore.registrations.filter((r) => r.isCoverable)
     )
 
     const isClosed = computed(
@@ -682,15 +780,22 @@ export default defineComponent({
     }
 
     const onVolunteer = async () => {
-      await registrationStore.create(
-        {
-          eventId: +route.value.params.id,
-          users: [
-            { userId: state.volunteer!, job: state.volunteerJob || undefined },
-          ],
-        },
-        true
-      )
+      if (state.swap) {
+        await registrationStore.swap(state.swap)
+      } else {
+        await registrationStore.create(
+          {
+            eventId: +route.value.params.id,
+            users: [
+              {
+                userId: state.volunteer!,
+                job: state.volunteerJob || undefined,
+              },
+            ],
+          },
+          true
+        )
+      }
 
       if (registrationStore.error) {
         return snackbar.error(registrationStore.error.message)
@@ -698,7 +803,10 @@ export default defineComponent({
 
       await registrationStore.findStatuses(+route.value.params.id)
       snackbar.success('Registration Complete')
+
       state.volunteer = null
+      state.swap = null
+      state.volunteerJob = null
     }
 
     const { state: attendance, reset: resetAttendanceState } = useStateReset({
@@ -752,13 +860,17 @@ export default defineComponent({
       ])
     }
 
-    const onCancel = async (status: EventRegistrationStatus) => {
-      await registrationStore.delete(
-        (status.registration as EventRegistration).id
-      )
+    const onSwapToggle = async (status: EntityDTO<EventRegistrationStatus>) => {
+      if (!status.registration) return
+
+      await registrationStore.update(status.registration.id, {
+        isCoverable: !status.registration.isCoverable,
+      })
 
       if (registrationStore.error) {
         snackbar.error(registrationStore.error.message)
+      } else {
+        snackbar.success('Registration Updated')
       }
 
       await registrationStore.findStatuses(+route.value.params.id)
@@ -773,12 +885,36 @@ export default defineComponent({
       await attendanceStore.findStatuses(+route.value.params.id)
 
       snackbar.success('Attendance removed!')
+
+    const onCancel = async (status: EntityDTO<EventRegistrationStatus>) => {
+      if (!status.registration) return
+
+      await registrationStore.delete(status.registration.id)
+
+      if (registrationStore.error) {
+        snackbar.error(registrationStore.error.message)
+      }
+
+      await registrationStore.findStatuses(+route.value.params.id)
+    }
+
+    const handleSwapDialog = (status: EntityDTO<EventRegistrationStatus>) => {
+      if (!status.registration) return
+
+      // If the status is already set to coverable, skip the dialog.
+      if (status.registration?.isCoverable) {
+        return onSwapToggle(status)
+      }
+
+      swapDialog.value?.open(status)
+
     }
 
     return {
       ...toRefs(state),
       cancelDialog,
       cancelAttendanceDialog,
+      swapDialog,
       event,
       date,
       times,
@@ -798,7 +934,10 @@ export default defineComponent({
       unregisteredUsers,
       unregisteredVolunteers,
       attendedUsers,
+      swappableVolunteers,
+      handleSwapDialog,
       onPaymentComplete,
+      onSwapToggle,
       onCancel,
       onAttendanceCancel,
       onRegister,
@@ -816,6 +955,7 @@ export default defineComponent({
       eventStore.findOne(+route.params.id),
       registrationStore.findStatuses(+route.params.id),
       attendanceStore.findStatuses(+route.params.id),
+      registrationStore.findAll({ coverable: true }),
     ])
   },
   head: {

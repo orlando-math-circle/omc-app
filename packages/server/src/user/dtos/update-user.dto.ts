@@ -74,7 +74,7 @@ export class UpdateUserDto {
   @Type(() => IndustryDto)
   @ValidateNested()
   industry?: IndustryDto;
-  
+
   @IsOptional()
   @IsBoolean()
   readonly volunteer?: boolean;
