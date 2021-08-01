@@ -128,6 +128,22 @@ export class User extends BaseEntity<User, 'id'> {
     return `${process.env.STATIC_BASE}${this.avatar}`;
   }
 
+  @Property({ persist: false, nullable: true })
+  get membershipFee() {
+    if (this.grade) {
+      if ([Grade.SIXTH, Grade.SEVENTH, Grade.EIGHTH].includes(this.grade))
+        return '25.00';
+      else if (
+        [Grade.NINTH, Grade.TENTH, Grade.ELEVENTH, Grade.TWELFTH].includes(
+          this.grade,
+        )
+      )
+        return '50.00';
+    } else {
+      return null;
+    }
+  }
+
   /**
    * Relationships
    */

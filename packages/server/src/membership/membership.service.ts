@@ -10,7 +10,6 @@ import {
 import { Populate, PopulateFail } from '../app.utils';
 import { Membership } from './membership.entity';
 import { PurchaseUnitRequest } from '@server/paypal/interfaces/orders/purchase-unit.interface';
-import { Grade } from '@server/user/enums/grade.enum';
 import { PayPalService } from '@server/paypal/paypal.service';
 import { CreateInvoiceDto } from '@server/invoice/dtos/create-invoice.dto';
 import { InvoiceStatus } from '@server/invoice/enums/invoice-status.enum';
@@ -43,9 +42,7 @@ export class MembershipService {
         throw new BadRequestException(`User ${userId} not found on account`);
       }
 
-      memberships.push(
-        this.membershipRepository.create({ user, startDate: new Date() }),
-      );
+      memberships.push(this.membershipRepository.create({ user }));
     }
     await this.membershipRepository.persist(memberships).flush();
     return memberships;
@@ -71,26 +68,13 @@ export class MembershipService {
    * Retrieves all memberships given the specified query and pagination.
    * This method supports proxied MikroORM lookup features.
    *
-   * @param where Query for selecting the entities.
    * @param limit Optional total number of entities to retrieve.
    * @param offset Optional number of entities to skip.
-   * @param populate Boolean or query for populating the entity.
-   * @param orderBy Query for ordering by entity properties.
    */
-  findAll(
-    where: FilterQuery<Membership>,
-    limit?: number,
-    offset?: number,
-    orderBy?: QueryOrderMap,
-    populate?: Populate<Membership>,
-  ) {
-    return this.membershipRepository.findAndCount(where, {
-      populate,
-      limit,
-      offset,
-      orderBy,
-    });
+  async findAll(limit: number, offset: number) {
+    return this.membershipRepository.findAndCount({}, { limit, offset });
   }
+
   /**
    * Deletes a membership, if found, or throws a 404 Not Found Exception.
    *
@@ -106,7 +90,6 @@ export class MembershipService {
     if (!account.primaryUser.emailVerified) {
       throw new ForbiddenException('Please validate your email');
     }
-    // check grade to get price
     // calculate membership end date
     // get for which users
     // send invoice
@@ -120,35 +103,23 @@ export class MembershipService {
         // Could also be looked at as a forbidden error.
         throw new NotFoundException();
       }
-      if (user.grade) {
-        if ([Grade.SIXTH, Grade.SEVENTH, Grade.EIGHTH].includes(user.grade))
-          fee = '0.00';
-        else if (
-          [Grade.NINTH, Grade.TENTH, Grade.ELEVENTH, Grade.TWELFTH].includes(
-            user.grade,
-          )
-        )
-          fee = '0.00';
-      } else {
-        // throw internal error
+      if (!user.grade) {
         throw new BadRequestException(
           `User ${id} is not assigned a grade level`,
         );
       }
+      if (user.membershipFee) {
+        fee = user.membershipFee;
+      } else {
+        throw new BadRequestException('No membership fee');
+      }
       if (user.membership?.invoices) {
         throw new BadRequestException('Invoice already exists');
-        // if today is not after expiration date
-        //if (user.membership.expirationDate) {
-        //   throw new BadRequestException('Invoice already exists');
-        // }
-        throw new BadRequestException('user is already a member');
       }
-
       if (user.feeWaived) {
         throw new BadRequestException(`Payment not required for user ${id}`);
       }
-
-      if (user.membership) {
+      if (user.membership?.active) {
         throw new BadRequestException(`User ${id} is already a member`);
       }
 
@@ -164,13 +135,11 @@ export class MembershipService {
     return this.paypalService.createOrder(purchaseUnits);
   }
 
-  public async captureOrder(orderId: string, userId: number) {
-    const [order] = await Promise.all([
-      this.paypalService.getOrder(orderId),
-      this.userService.findOneOrFail(userId, ['fee']),
-    ]);
+  //  must remove userID
+  public async captureOrder(orderId: string) {
+    const [order] = await Promise.all([this.paypalService.getOrder(orderId)]);
     // get fee, is this fee per user or total?
-    let cost = ['0.00', '0.00'];
+    let cost = ['25.00', '50.00'];
     // validate capture for each user.
     this.paypalService.validateCapture(order, 'APPROVED', cost);
 

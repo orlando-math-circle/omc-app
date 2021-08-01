@@ -25,12 +25,17 @@ export class Membership extends BaseEntity<Membership, 'id'> {
   @Property({ nullable: true })
   expitationDate?: Date;
 
-  @Property()
-  fee!: string;
+  @Property({ persist: false, nullable: true })
+  get active() {
+    if (!this.expitationDate) return null;
+    const now = new Date();
+    return this.expitationDate > now ? true : false;
+  }
 
   @ManyToMany({
     entity: () => Invoice,
     owner: true,
+    nullable: true,
   })
   invoices = new Collection<Invoice>(this);
 }

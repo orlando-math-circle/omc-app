@@ -1,10 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Account } from '../account/account.entity';
 import { MembershipService } from './membership.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { Acc } from '@server/auth/decorators/account.decorator';
-import { FindUserWithInvoiceDto } from './dto/find-user-with-invoice.dto';
+import { InvoiceDto } from './dto/invoice.dto';
 
 @Controller('/membership')
 export class MembershipController {
@@ -28,14 +36,19 @@ export class MembershipController {
   }
 
   @UserAuth()
-  @Post('/order/create/:id')
+  @Post('/order/create/')
   createOrder(@Acc() account: Account, @Body() { users }: CreateMembershipDto) {
     return this.membershipService.createOrder(account, users);
   }
 
   @UserAuth()
-  @Post('/order/capture/:userId/:invoiceId')
-  captureOrder(@Param() { userId, invoiceId }: FindUserWithInvoiceDto) {
-    return this.membershipService.captureOrder(invoiceId, userId);
+  @Post('/order/capture/:invoiceId')
+  captureOrder(@Param() { invoiceId }: InvoiceDto) {
+    return this.membershipService.captureOrder(invoiceId);
+  }
+
+  @Get()
+  findAll(@Query('limit') limit: number, @Query('offset') offset: number) {
+    return this.membershipService.findAll(limit, offset);
   }
 }
