@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export class FindAllRegistrationsDto {
   @IsOptional()
@@ -11,4 +11,14 @@ export class FindAllRegistrationsDto {
   @Type(() => Number)
   @IsNumber()
   readonly offset?: number;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  readonly volunteering?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  readonly coverable?: boolean;
 }
