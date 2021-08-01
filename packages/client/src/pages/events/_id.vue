@@ -202,6 +202,115 @@
       </v-col>
     </v-expand-transition>
 
+    <!-- Attendance Process (volunteer and regular) -->
+    <v-col v-if="isClosed && registeredUsers.length">
+      <v-card>
+        <v-card-title>Attendance</v-card-title>
+        <v-card-subtitle> Mark attendance to the event. </v-card-subtitle>
+        <v-list rounded>
+          <v-col v-for="status in registeredUsers" :key="status.user.id">
+            <v-list-item>
+              <v-list-item-avatar>
+                <v-img :src="status.user.avatarUrl" />
+              </v-list-item-avatar>
+
+              <v-list-item-content>
+                <v-list-item-title>{{ status.user.name }}</v-list-item-title>
+
+                <v-list-item-subtitle
+                  v-if="status.registration && status.registration.volunteering"
+                >
+                  Volunteering
+                </v-list-item-subtitle>
+
+                <v-list-item-subtitle v-else-if="!status.eligible">
+                  Not Eligible
+                </v-list-item-subtitle>
+
+                <v-list-item-subtitle v-else-if="status.user.grade">
+                  Eligible • {{ grade(status.user) }}
+                </v-list-item-subtitle>
+
+                <v-list-item-subtitle v-else>Eligible</v-list-item-subtitle>
+              </v-list-item-content>
+
+              <VFormValidated
+                v-if="
+                  status.registration &&
+                  status.registration.volunteering &&
+                  !attendedUsers.length
+                "
+                ref="attendanceVolunteerForm"
+                @form:submit="onSubmitVolunteerAttendance(status.user.id)"
+              >
+                <v-card-actions>
+                  <v-list-item>
+                    <v-col cols="12">
+                      <VTextFieldValidated
+                        v-model.number="attendance.hours"
+                        rules="required"
+                        label="Hours"
+                        hint="Hours of work completed"
+                        outlined
+                        hide-details="auto"
+                      />
+                    </v-col>
+                  </v-list-item>
+                  <v-spacer />
+                  <v-list-item>
+                    <v-col cols="12">
+                      <v-select
+                        v-model="attendance.job"
+                        :items="jobs"
+                        label="Job (Optional)"
+                        outlined
+                        hide-details="auto"
+                      />
+                    </v-col>
+                  </v-list-item>
+                  <v-btn type="submit" color="primary">
+                    Submit Volunteer Attendance
+                  </v-btn>
+                </v-card-actions>
+              </VFormValidated>
+
+              <VFormValidated
+                v-if="
+                  status.registration &&
+                  !status.registration.volunteering &&
+                  !attendedUsers.length
+                "
+                ref="attendanceForm"
+                @form:submit="onSubmitAttendance(status.user.id)"
+              >
+                <v-card-actions>
+                  <v-spacer />
+
+                  <v-btn type="submit" color="primary">
+                    Submit Attendance
+                  </v-btn>
+                </v-card-actions>
+              </VFormValidated>
+
+              <v-list-item-action v-if="attendedUsers.length">
+                <v-btn
+                  v-for="startus in attendedUsers"
+                  :key="startus.attendance.id"
+                  text
+                  @click="
+                    cancelAttendanceDialog &&
+                      cancelAttendanceDialog.open(startus)
+                  "
+                >
+                  Remove Attendance
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+          </v-col>
+        </v-list>
+      </v-card>
+    </v-col>
+
     <!-- Registration Process -->
     <v-col v-if="unregisteredUsers.length" cols="12">
       <v-card v-if="isClosed">
@@ -440,6 +549,10 @@
       This action will mark your volunteering registration as needing covered,
       allowing the shift to be swapped to another volunteer.
     </DialogConfirm>
+
+    <DialogConfirm ref="cancelAttendanceDialog" @confirm="onAttendanceCancel">
+      Are you sure you want to delete your attendance?
+    </DialogConfirm>
   </v-row>
 </template>
 
@@ -455,6 +568,7 @@ import {
   useAuth,
   usePayPal,
   UserEntity,
+  useAttendance,
 } from '@/stores'
 import DialogConfirm from '@/components/dialog/Confirm.vue'
 import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
@@ -468,7 +582,9 @@ import {
   useContext,
   useRoute,
 } from '@nuxtjs/composition-api'
-import { useSnackbar } from '@/composables'
+import { useSnackbar, useStateReset } from '@/composables'
+import { AttendanceStatus } from '@server/attendance/dtos/attendance-status.dto'
+import { Attendance } from '@server/attendance/attendance.entity'
 import { EntityDTO } from '@server/shared/types/entity-dto'
 
 enum RegisterStep {
@@ -480,6 +596,7 @@ enum RegisterStep {
 export default defineComponent({
   setup() {
     const cancelDialog = ref<InstanceType<typeof DialogConfirm>>()
+    const cancelAttendanceDialog = ref<InstanceType<typeof DialogConfirm>>()
     const swapDialog = ref<InstanceType<typeof DialogConfirm>>()
 
     const { $config } = useContext()
@@ -489,6 +606,7 @@ export default defineComponent({
     const payPalStore = usePayPal()
     const registrationStore = useRegistrations()
     const snackbar = useSnackbar()
+    const attendanceStore = useAttendance()
 
     const state = reactive({
       selections: [] as number[],
@@ -534,6 +652,8 @@ export default defineComponent({
     const unregisteredVolunteers = computed(() =>
       volunteerUsers.value.filter((u) => u.registration === false)
     )
+
+    const attendanceStatuses = computed(() => attendanceStore.statuses)
 
     const fee = computed(() => {
       if (event.value.course?.fee) {
@@ -623,6 +743,9 @@ export default defineComponent({
       statuses.value.filter((s) => s.registration === false)
     )
 
+    const attendedUsers = computed(() =>
+      attendanceStatuses.value.filter((s) => s.attended !== false)
+
     const swappableVolunteers = computed(() =>
       registrationStore.registrations.filter((r) => r.isCoverable)
     )
@@ -686,6 +809,50 @@ export default defineComponent({
       state.volunteerJob = null
     }
 
+    const { state: attendance, reset: resetAttendanceState } = useStateReset({
+      hours: 0,
+      job: undefined,
+    })
+
+    const onSubmitVolunteerAttendance = async (id: number) => {
+      await attendanceStore.create({
+        ...attendance,
+        attended: true,
+        userId: id,
+        eventId: +route.value.params.id,
+        hours: attendance.hours,
+        jobId: attendance.job,
+        workId: 1,
+      })
+
+      if (attendanceStore.error) {
+        return snackbar.error(attendanceStore.error.message)
+      }
+      await attendanceStore.findStatuses(+route.value.params.id)
+
+      snackbar.success('Attendance submitted!')
+      resetAttendanceState()
+    }
+
+    const onSubmitAttendance = async (id: number) => {
+      await attendanceStore.create({
+        attended: true,
+        userId: id,
+        eventId: +route.value.params.id,
+        hours: 0,
+        jobId: 0,
+        workId: 0,
+      })
+
+      if (attendanceStore.error) {
+        return snackbar.error(attendanceStore.error.message)
+      }
+      await attendanceStore.findStatuses(+route.value.params.id)
+
+      snackbar.success('Attendance submitted!')
+      resetAttendanceState()
+    }
+
     const onPaymentComplete = async () => {
       await Promise.all([
         registrationStore.findStatuses(+route.value.params.id),
@@ -709,6 +876,16 @@ export default defineComponent({
       await registrationStore.findStatuses(+route.value.params.id)
     }
 
+    const onAttendanceCancel = async (status: AttendanceStatus) => {
+      await attendanceStore.delete((status.attendance as Attendance).id)
+
+      if (attendanceStore.error) {
+        snackbar.error(attendanceStore.error.message)
+      }
+      await attendanceStore.findStatuses(+route.value.params.id)
+
+      snackbar.success('Attendance removed!')
+
     const onCancel = async (status: EntityDTO<EventRegistrationStatus>) => {
       if (!status.registration) return
 
@@ -730,11 +907,13 @@ export default defineComponent({
       }
 
       swapDialog.value?.open(status)
+
     }
 
     return {
       ...toRefs(state),
       cancelDialog,
+      cancelAttendanceDialog,
       swapDialog,
       event,
       date,
@@ -744,6 +923,7 @@ export default defineComponent({
       isLate,
       jobs,
       checkoutCost,
+      attendance,
       perms,
       isClosed,
       isVerified: computed(() => authStore.isVerified),
@@ -753,22 +933,28 @@ export default defineComponent({
       registeredUsers,
       unregisteredUsers,
       unregisteredVolunteers,
+      attendedUsers,
       swappableVolunteers,
       handleSwapDialog,
       onPaymentComplete,
       onSwapToggle,
       onCancel,
+      onAttendanceCancel,
       onRegister,
       onVolunteer,
+      onSubmitAttendance,
+      onSubmitVolunteerAttendance,
     }
   },
   async asyncData({ pinia, route }) {
     const eventStore = useEvents(pinia)
     const registrationStore = useRegistrations(pinia)
+    const attendanceStore = useAttendance(pinia)
 
     await Promise.all([
       eventStore.findOne(+route.params.id),
       registrationStore.findStatuses(+route.params.id),
+      attendanceStore.findStatuses(+route.params.id),
       registrationStore.findAll({ coverable: true }),
     ])
   },

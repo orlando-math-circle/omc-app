@@ -1,5 +1,6 @@
 export * from './useAccount'
 export * from './useAttachments'
+export * from './useAttendance'
 export * from './useAuth'
 export * from './useCourses'
 export * from './useEvents'
