@@ -745,7 +745,8 @@ export default defineComponent({
 
     const attendedUsers = computed(() =>
       attendanceStatuses.value.filter((s) => s.attended !== false)
-
+    )
+    
     const swappableVolunteers = computed(() =>
       registrationStore.registrations.filter((r) => r.isCoverable)
     )
