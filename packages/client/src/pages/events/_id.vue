@@ -85,6 +85,16 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
+
+          <v-list-item v-if="event.points" class="pl-0">
+              <v-list-item-avatar class="icon--bg rounded">
+                <v-icon color="primary">mdi-star-four-points-outline</v-icon>
+              </v-list-item-avatar>
+
+              <v-list-item-content>
+                <v-list-item-title>{{event.points}}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
         </v-card-text>
 
         <template v-if="event.description && event.description.length">

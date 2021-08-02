@@ -29,6 +29,11 @@
                 {{ grades[user.grade].text }}
               </span>
             </v-list-item-subtitle>
+            <v-list-item-subtitle>
+              <span>
+                <v-icon x-small>mdi-star-four-points-outline</v-icon> {{user.points}}
+              </span>
+            </v-list-item-subtitle>
           </v-list-item-content>
 
           <v-list-item-action>
