@@ -146,8 +146,12 @@ export class User extends BaseEntity<User, 'id'> {
 
   @Property({ persist: false })
   get activeMember() {
-    if (!this.membership) return false;
-    return this.membership.active;
+    if (!this.memberships) return false;
+
+    for (const membership of this.memberships)
+      if (membership.active) return true;
+
+    return false;
   }
 
   /**
@@ -177,6 +181,6 @@ export class User extends BaseEntity<User, 'id'> {
   @OneToMany(() => FileAttachment, (a) => a.user, { orphanRemoval: true })
   attachments = new Collection<FileAttachment>(this);
 
-  @OneToOne({ nullable: true })
-  membership?: Membership;
+  @OneToMany(() => Membership, (m) => m.user, { nullable: true })
+  memberships = new Collection<Membership>(this);
 }

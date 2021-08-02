@@ -7,6 +7,7 @@ import {
   Collection,
   OneToMany,
   ManyToMany,
+  ManyToOne,
 } from '@mikro-orm/core';
 import { User } from '../user/user.entity';
 import { Invoice } from '@server/invoice/invoice.entity';
@@ -16,7 +17,7 @@ export class Membership extends BaseEntity<Membership, 'id'> {
   @PrimaryKey()
   id!: number;
 
-  @OneToOne(() => User, (user) => user.membership)
+  @ManyToOne(() => User)
   user!: User;
 
   @Property()

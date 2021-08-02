@@ -7,14 +7,13 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { Populate, PopulateFail } from '../app.utils';
+import { PopulateFail } from '../app.utils';
 import { Membership } from './membership.entity';
 import { PurchaseUnitRequest } from '@server/paypal/interfaces/orders/purchase-unit.interface';
 import { PayPalService } from '@server/paypal/paypal.service';
 import { CreateInvoiceDto } from '@server/invoice/dtos/create-invoice.dto';
 import { InvoiceStatus } from '@server/invoice/enums/invoice-status.enum';
 import { InvoiceService } from '@server/invoice/invoice.service';
-import { UserService } from '@server/user/user.service';
 
 @Injectable()
 export class MembershipService {
@@ -23,7 +22,6 @@ export class MembershipService {
     private readonly membershipRepository: EntityRepository<Membership>,
     private readonly paypalService: PayPalService,
     private readonly invoiceService: InvoiceService,
-    private readonly userService: UserService,
   ) {}
 
   /**
@@ -113,13 +111,13 @@ export class MembershipService {
       } else {
         throw new BadRequestException('No membership fee');
       }
-      if (user.membership?.invoices) {
-        throw new BadRequestException('Invoice already exists');
-      }
+      // if (user.memberships?.invoices) {
+      //   throw new BadRequestException('Invoice already exists');
+      // }
       if (user.feeWaived) {
         throw new BadRequestException(`Payment not required for user ${id}`);
       }
-      if (user.membership?.active) {
+      if (user.activeMember) {
         throw new BadRequestException(`User ${id} is already a member`);
       }
 

@@ -10,7 +10,9 @@
       <DialogUpdateUser ref="editDialog" @user:update="onUpdateUser" />
 
       <v-card-title>Account Management</v-card-title>
-      <v-card-subtitle>Add or manage child users on the account.</v-card-subtitle>
+      <v-card-subtitle
+        >Add or manage child users on the account.</v-card-subtitle
+      >
 
       <v-card-text>
         <v-list rounded>
@@ -27,6 +29,10 @@
                 <span v-if="typeof user.grade === 'number'">
                   <v-icon x-small>mdi-circle-medium</v-icon>
                   {{ grades[user.grade].text }}
+                </span>
+                <span v-if="user.activeMember">
+                  <v-icon x-small>mdi-circle-medium</v-icon>
+                  Member
                 </span>
               </v-list-item-subtitle>
             </v-list-item-content>
@@ -78,43 +84,50 @@
       </v-card-actions>
     </v-card>
 
-    <v-col cols="12">
+    <v-col v-if="unregisteredMembers.length" cols="12">
       <v-stepper v-model="step">
         <v-stepper-items>
           <v-stepper-content class="pa-0" step="1">
             <v-card>
               <v-card-title>Membership</v-card-title>
 
-              <v-card-subtitle>Select the account users you wish to register for a membership.</v-card-subtitle>
+              <v-card-subtitle
+                >Select the account users you wish to register for a
+                membership.</v-card-subtitle
+              >
 
               <v-card-text>
                 <v-list rounded>
-                  <v-list-item-group v-model="selections" multiple active-class="primary--text">
-                    <v-list-item v-for="member in unregisteredMembers" :key="member.id">
-                      <template #default="{active}">
+                  <v-list-item-group
+                    v-model="selections"
+                    multiple
+                    active-class="primary--text"
+                  >
+                    <v-list-item
+                      v-for="member in unregisteredMembers"
+                      :key="member.id"
+                      :disabled="member.activeMember"
+                    >
+                      <template #default="{ active }">
                         <v-list-item-avatar>
                           <v-img :src="member.avatarUrl" />
                         </v-list-item-avatar>
 
                         <v-list-item-content>
                           <v-list-item-title>
-                            {{
-                            member.name
-                            }}
+                            {{ member.name }}
                           </v-list-item-title>
-
-                          <!-- <v-list-item-subtitle v-if="!member.eligible">Not Eligible</v-list-item-subtitle> -->
 
                           <v-list-item-subtitle v-if="member.grade">
                             <span>Eligible</span>
-                            <span>• {{ grade(member.grade) }}</span>
-                            <!-- <span v-if="member.paid">• Paid</span> -->
+                            <span>• {{ grade(member) }}</span>
                           </v-list-item-subtitle>
-
-                          <!-- <v-list-item-subtitle v-else>Eligible</v-list-item-subtitle> -->
+                          <v-list-item-subtitle v-else
+                            >Eligible</v-list-item-subtitle
+                          >
                         </v-list-item-content>
 
-                        <v-list-item-action>
+                        <v-list-item-action v-if="!member.activeMember">
                           <v-checkbox :input-value="active" />
                         </v-list-item-action>
                       </template>
@@ -124,15 +137,18 @@
               </v-card-text>
 
               <v-card-actions>
-                <v-btn v-if="!isVerified" disabled rounded block>Email Verification Required</v-btn>
+                <v-btn v-if="!isVerified" disabled rounded block
+                  >Email Verification Required</v-btn
+                >
 
                 <v-btn
-                  v-else-if="!users.length"
+                  v-else-if="!selections.length"
                   rounded
                   block
                   disabled
                   @click="onRegister"
-                >Select Users</v-btn>
+                  >Select Users</v-btn
+                >
 
                 <v-btn
                   v-else-if="checkoutCost === 0"
@@ -140,9 +156,12 @@
                   block
                   color="primary"
                   @click="onRegister"
-                >Complete Registration</v-btn>
+                  >Complete Registration</v-btn
+                >
 
-                <v-btn v-else rounded block color="primary" @click="step++">Continue to Payment</v-btn>
+                <v-btn v-else rounded block color="primary" @click="step++"
+                  >Continue to Payment</v-btn
+                >
               </v-card-actions>
             </v-card>
           </v-stepper-content>
@@ -152,7 +171,10 @@
               <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
               <v-card-text>
-                <PaymentMemberPaypal :users="selectedUsers" @payment:complete="onPaymentComplete" />
+                <PaymentMemberPaypal
+                  :users="selectedUsers"
+                  @payment:complete="onPaymentComplete"
+                />
               </v-card-text>
 
               <v-card-actions>
@@ -225,14 +247,6 @@ export default defineComponent({
       return feeNum
     })
 
-    // get list of all memberships?
-    const memberships = computed(() => membershipStore.memberships)
-
-    // get memberships of selected users
-    const selectedMemberships = computed(() =>
-      state.selections.map((s) => memberships.value[s])
-    )
-
     const selectedUsers = computed(() =>
       state.selections.map((s) => users.value[s].id)
     )
@@ -245,8 +259,7 @@ export default defineComponent({
         return snackbar.error(membershipStore.error.message)
       }
 
-      // find memberships?
-      await membershipStore.findMemberships()
+      await authStore.getMyAccount()
 
       state.selections = []
       snackbar.success('Registration Complete')
@@ -273,7 +286,11 @@ export default defineComponent({
     const users = computed(() => authStore.accountUsers)
 
     const unregisteredMembers = computed(() =>
-      users.value.filter((u: any) => u.membership === null)
+      users.value.filter((u: any) => !u.activeMember)
+    )
+
+    const registeredMembers = computed(() =>
+      users.value.filter((u: any) => u.activeMember)
     )
     const editDialog = ref<InstanceType<typeof DialogUpdateUser>>()
     const deleteDialog = ref<InstanceType<typeof DialogConfirm>>()
@@ -310,6 +327,7 @@ export default defineComponent({
       isPayPalLoading: computed(() => payPalStore.isLoading),
       isVerified: computed(() => authStore.isVerified),
       unregisteredMembers,
+      registeredMembers,
       usersRequiringPayment,
       primary: computed(() => authStore.primaryUser!),
       onDeleteConfirm,
