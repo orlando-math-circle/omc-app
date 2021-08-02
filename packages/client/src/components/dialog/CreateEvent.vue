@@ -130,6 +130,12 @@
 
         <!-- Permissions -->
         <v-list-item class="pl-2">
+          <v-list-item-content>Members Only</v-list-item-content>
+          <v-list-item-action>
+            <v-switch v-model="meta.permissions.membershipStatus" color="secondary" />
+          </v-list-item-action>
+        </v-list-item>
+        <v-list-item class="pl-2">
           <v-list-item-avatar class="mr-2">
             <v-icon>mdi-key-chain-variant</v-icon>
           </v-list-item-avatar>
@@ -618,6 +624,7 @@ export default defineComponent({
             Grade.TWELFTH,
           ],
           genders: [Gender.MALE, Gender.FEMALE],
+          membershipStatus:false
         },
       },
       project: null as number | null,

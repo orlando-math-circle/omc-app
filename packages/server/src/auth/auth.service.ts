@@ -45,7 +45,9 @@ export class AuthService {
   ) {}
 
   async validateLogin(email: string, password: string) {
-    const user = await this.userService.findOne({ email }, ['account.users']);
+    const user = await this.userService.findOne({ email }, [
+      'account.users.membership',
+    ]);
 
     if (user?.password && (await bcrypt.compare(password, user.password))) {
       return user;
@@ -125,8 +127,8 @@ export class AuthService {
       req.usr =
         (await this.userService.findOne(payload.uid, [
           'account',
-          'account.primaryUser',
-          'account.users',
+          'account.primaryUser.membership',
+          'account.users.membership',
         ])) || undefined;
 
       if (!req.usr) throw new UnauthorizedException('User missing');

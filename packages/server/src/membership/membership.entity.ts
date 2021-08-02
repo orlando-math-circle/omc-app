@@ -19,17 +19,17 @@ export class Membership extends BaseEntity<Membership, 'id'> {
   @OneToOne(() => User, (user) => user.membership)
   user!: User;
 
-  @Property({ nullable: true })
-  startDate?: Date;
+  @Property()
+  startDate: Date = new Date();
 
-  @Property({ nullable: true })
-  expitationDate?: Date;
+  @Property()
+  expirationDate: Date = expirationDate(new Date());
 
-  @Property({ persist: false, nullable: true })
+  @Property({ persist: false })
   get active() {
-    if (!this.expitationDate) return null;
+    if (!this.expirationDate) return typeof this.expirationDate;
     const now = new Date();
-    return this.expitationDate > now ? true : false;
+    return this.expirationDate > now ? true : false;
   }
 
   @ManyToMany({
@@ -38,4 +38,12 @@ export class Membership extends BaseEntity<Membership, 'id'> {
     nullable: true,
   })
   invoices = new Collection<Invoice>(this);
+}
+
+function expirationDate(date: Date): Date {
+  date.setMonth(0); // january
+  date.setDate(1); // first
+  date.setFullYear(date.getFullYear() + 1); // next Year
+
+  return date;
 }

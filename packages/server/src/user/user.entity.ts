@@ -144,6 +144,12 @@ export class User extends BaseEntity<User, 'id'> {
     }
   }
 
+  @Property({ persist: false })
+  get activeMember() {
+    if (!this.membership) return false;
+    return this.membership.active;
+  }
+
   /**
    * Relationships
    */
