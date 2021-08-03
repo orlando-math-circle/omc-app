@@ -35,7 +35,7 @@ export class AttendanceController {
     return this.attendanceService.findAll(
       {},
       {
-        //populate: ['user'],
+        populate: ['user', 'event'],
         limit,
         offset,
       },
