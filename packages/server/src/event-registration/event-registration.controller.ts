@@ -4,10 +4,12 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { Account } from '../account/account.entity';
+import { isBoolean } from '../app.utils';
 import { Acc } from '../auth/decorators/account.decorator';
 import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
@@ -17,6 +19,7 @@ import { CreateRegistrationDto } from './dtos/create-registration.dto';
 import { CreateVolunteerRegistrationDto } from './dtos/create-volunteer-registration.dto';
 import { FindAllRegistrationsDto } from './dtos/find-all-registrations.dto';
 import { FindEventWithInvoiceDto } from './dtos/find-event-with-invoice.dto';
+import { UpdateOwnEventRegistrationDto } from './dtos/update-event-registration.dto';
 import { EventRegistrationService } from './event-registration.service';
 
 @Controller('/registration')
@@ -44,28 +47,17 @@ export class EventRegistrationController {
 
   @UserAuth('event-registration', 'read:any')
   @Get()
-  findAll(@Query() { limit, offset }: FindAllRegistrationsDto) {
+  findAll(
+    @Query()
+    { limit, offset, volunteering, coverable }: FindAllRegistrationsDto,
+  ) {
     return this.registrationService.findAll(
       {
-        volunteering: false,
+        ...(isBoolean(volunteering) ? { volunteering } : {}),
+        ...(isBoolean(coverable) ? { isCoverable: coverable } : {}),
       },
       {
-        populate: ['event', 'user'],
-        limit,
-        offset,
-      },
-    );
-  }
-
-  @UserAuth('volunteer-registration', 'read:any')
-  @Get('/volunteering')
-  findAllVolunteering(@Query() { limit, offset }: FindAllRegistrationsDto) {
-    return this.registrationService.findAll(
-      {
-        volunteering: true,
-      },
-      {
-        populate: ['event', 'user', 'job', 'work'],
+        populate: true,
         limit,
         offset,
       },
@@ -92,6 +84,26 @@ export class EventRegistrationController {
   @Post('/order/capture/:eventId/:invoiceId')
   captureOrder(@Param() { eventId, invoiceId }: FindEventWithInvoiceDto) {
     return this.registrationService.captureOrder(invoiceId, eventId);
+  }
+
+  @Post('/swap/:id')
+  @UserAuth('event-registration', 'create:own')
+  swap(@Param('id') id: number, @Usr() user: User) {
+    return this.registrationService.swap(id, user);
+  }
+
+  @UserAuth('event-registration', 'update:own')
+  @Patch(':id')
+  update(
+    @Param('id') id: number,
+    @Body() updateOwnEventRegistrationDto: UpdateOwnEventRegistrationDto,
+    @Usr() user: User,
+  ) {
+    return this.registrationService.update(
+      id,
+      updateOwnEventRegistrationDto,
+      user,
+    );
   }
 
   @UserAuth('event-registration', 'delete:own')

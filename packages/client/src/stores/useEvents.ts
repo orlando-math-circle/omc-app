@@ -4,7 +4,6 @@ import { Event } from '@server/event/event.entity'
 import { CreateEventDto } from '@server/event/dto/create-event.dto'
 import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
 import { UpdateEventDto } from '@server/event/dto/update-event.dto'
-import { FindAllRegisteredEventsDto } from '@server/event/dto/find-all-registered-events.dto'
 import { toLocalISO } from '@/utils/utilities'
 import { EntityDTO } from '@server/shared/types/entity-dto'
 import { StateStatus, StateError } from '@/types/state.interface'
@@ -43,11 +42,6 @@ export const useEvents = defineStore({
     async findAll(findAllEventsDto?: FindAllEventsDto) {
       this.events = await this.$nuxt.$axios.$get('/event', {
         params: findAllEventsDto,
-      })
-    },
-    async findAllRegistered(params: FindAllRegisteredEventsDto) {
-      this.events = await this.$nuxt.$axios.$get('/event/registered', {
-        params,
       })
     },
     async update(

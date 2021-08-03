@@ -163,12 +163,12 @@ export class AccountService {
   /**
    * Deletes an account and removes all connected users, permanently.
    *
-   * @param {number} id Id of the account to remove.
+   * @param id id of the account to remove
    */
   async delete(id: number) {
     // Relations must be loaded for them to be cascade-removed.
     const account = await this.accountRepository.findOneOrFail(id, true);
 
-    await this.accountRepository.remove(account).flush();
+    await this.accountRepository.removeAndFlush(account);
   }
 }
