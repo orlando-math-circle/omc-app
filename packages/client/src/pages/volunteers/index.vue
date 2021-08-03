@@ -2,8 +2,7 @@
   <div v-if="!isVolunteer">
     <h1 class="text-center mb-10">Register to Volunteer!</h1>
     <p>Please read the following forms carefully before digitally signing.</p>
-
-    <!-- v-if="!user.roles.volunteer" -->
+    
     <VFormValidated
       ref="volunteerRegistrationForm"
       @form:submit="onVolunteerRegistration(user)"
@@ -260,14 +259,19 @@ export default defineComponent({
     }
 
     const onVolunteerRegistration = async (user: UserEntity) => {
-      if (!user.roles.includes(Roles.VOLUNTEER)) {
-        await userStore.update(user.id, { volunteer: true }, true)
-        if (userStore.error) {
-          snackbar.error(userStore.error.message)
-        }
-        snackbar.success('You have registered as a volunteer!')
-        location.reload()
-      } else snackbar.error('You are already registered as a volunteer!')
+      if (state.checkbox && state.checkbox1 && state.checkbox2) {
+        if (!user.roles.includes(Roles.VOLUNTEER)) {
+          await userStore.update(user.id, { volunteer: true }, true)
+          if (userStore.error) {
+            snackbar.error(userStore.error.message)
+          }
+          snackbar.success('You have registered as a volunteer!')
+          authStore.getMyUser()
+        } else snackbar.error('You are already registered as a volunteer!')
+      } else
+        snackbar.error(
+          'Please read each form carefully and agree to the terms.'
+        )
     }
 
     return {
