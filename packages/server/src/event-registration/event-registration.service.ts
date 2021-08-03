@@ -6,6 +6,8 @@ import {
   HttpException,
   NotFoundException,
 } from '@nestjs/common';
+import { AuditLogService } from '@server/audit-log/audit-log.service';
+import { AuditType } from '@server/audit-log/enums/audit-type.enum';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
 import { Populate } from '../app.utils';
@@ -31,6 +33,7 @@ export class EventRegistrationService {
     private readonly paypalService: PayPalService,
     private readonly eventService: EventService,
     private readonly userService: UserService,
+    private readonly auditLogService: AuditLogService,
     private readonly ac: AccessService,
   ) {}
 

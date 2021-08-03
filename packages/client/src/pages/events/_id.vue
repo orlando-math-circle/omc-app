@@ -746,7 +746,7 @@ export default defineComponent({
     const attendedUsers = computed(() =>
       attendanceStatuses.value.filter((s) => s.attended !== false)
     )
-    
+
     const swappableVolunteers = computed(() =>
       registrationStore.registrations.filter((r) => r.isCoverable)
     )
@@ -895,6 +895,8 @@ export default defineComponent({
 
       if (registrationStore.error) {
         snackbar.error(registrationStore.error.message)
+      } else {
+        snackbar.success('Registration Updated')
       }
 
       await registrationStore.findStatuses(+route.value.params.id)
@@ -909,7 +911,6 @@ export default defineComponent({
       }
 
       swapDialog.value?.open(status)
-
     }
 
     return {
@@ -956,7 +957,6 @@ export default defineComponent({
     await Promise.all([
       eventStore.findOne(+route.params.id),
       registrationStore.findStatuses(+route.params.id),
-      attendanceStore.findStatuses(+route.params.id),
       registrationStore.findAll({ coverable: true }),
     ])
   },

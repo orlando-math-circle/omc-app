@@ -142,16 +142,10 @@ export class User extends BaseEntity<User, 'id'> {
   })
   registrations = new Collection<EventRegistration>(this);
 
-  @OneToMany(() => VolunteerWork, (w) => w.user, {
-    eager: true,
-    orphanRemoval: true,
-  })
+  @OneToMany(() => VolunteerWork, (w) => w.user, { eager: true })
   work = new Collection<VolunteerWork>(this);
 
-  @OneToMany(() => Invoice, (i) => i.user, {
-    eager: false,
-    orphanRemoval: true,
-  })
+  @OneToMany(() => Invoice, (i) => i.user, { eager: false })
   invoices = new Collection<Invoice>(this);
 
   @OneToMany(() => File, (f) => f.author, { orphanRemoval: true })

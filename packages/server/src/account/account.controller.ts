@@ -3,9 +3,9 @@ import { Acc } from '../auth/decorators/account.decorator';
 import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
 import { Account } from './account.entity';
 import { AccountService } from './account.service';
-import { CreateAccountDto } from './dto/create-account.dto';
-import { FindOneAccountDto } from './dto/find-one-account.dto';
 import { RegisterAccountDto } from './dto/register.dto';
+import { FindOneAccountDto } from './dto/find-one-account.dto';
+import { CreateAccountDto } from './dto/create-account.dto';
 
 @Controller('account')
 export class AccountController {
@@ -42,7 +42,7 @@ export class AccountController {
 
   @UserAuth('account', 'delete:any')
   @Delete(':id')
-  delete(@Param('id') id: number) {
+  delete(@Param() { id }: FindOneAccountDto) {
     return this.accountService.delete(id);
   }
 }
