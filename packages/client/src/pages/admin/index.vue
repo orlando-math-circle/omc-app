@@ -2,7 +2,7 @@
   <v-row>
     <v-col cols="12" md="4">
       <ChartCard
-        title="New Users"
+        title="Users"
         subtitle="Users added this month"
         icon="mdi-account-plus-outline"
         :options="userChartOptions"
@@ -21,26 +21,18 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  ref,
-  useContext,
-  useFetch,
-} from '@nuxtjs/composition-api'
+import { computed, defineComponent, useFetch } from '@nuxtjs/composition-api'
+import { useUsers } from '@/stores'
 
 export default defineComponent({
   layout: 'admin',
   setup() {
-    const { $axios } = useContext()
-    const state = ref({
-      statistics: {
-        users: null as any,
-      },
-    })
+    const userStore = useUsers()
+
+    const userStatistics = computed(() => userStore.statistics)
 
     const userChartSeries = computed(() => {
-      if (!state.value.statistics.users) {
+      if (!userStatistics.value.length) {
         return [
           {
             name: 'Missing',
@@ -53,7 +45,7 @@ export default defineComponent({
       return [
         {
           name: 'New Users',
-          data: Object.values(state.value.statistics.users.month),
+          data: userStatistics.value.map((stat) => stat.count),
         },
       ]
     })
@@ -65,6 +57,7 @@ export default defineComponent({
         sparkline: {
           enabled: true,
         },
+        tooltip: {},
       },
       stroke: {
         curve: 'smooth',
@@ -81,11 +74,11 @@ export default defineComponent({
         },
       },
       colors: ['#8c9eff'],
-      labels: state.value.statistics.users?.labels,
+      labels: userStatistics.value.map((stat) => stat.label),
     }))
 
     useFetch(async () => {
-      state.value.statistics.users = await $axios.$get('/user/statistics')
+      await userStore.getStatistics()
     })
 
     return {
