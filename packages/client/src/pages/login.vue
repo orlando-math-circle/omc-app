@@ -16,6 +16,10 @@
               <span v-if="error.status === 401">
                 Email or password incorrect
               </span>
+
+              <span v-else>
+                An unexpected error occurred. Please try again later.
+              </span>
             </v-alert>
           </v-expand-transition>
 
@@ -82,7 +86,9 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
+  onBeforeUnmount,
   reactive,
   toRefs,
   useRouter,
@@ -103,6 +109,13 @@ export default defineComponent({
       remember: true,
     })
 
+    /**
+     * The `Login` and `Register` pages don't fetch anything
+     * which would clear the auth store error, so they can
+     * cross-pollute each other with errors.
+     */
+    onBeforeUnmount(() => (authStore.error = null))
+
     const onLogin = async () => {
       await authStore.login(state.email, state.password, state.remember)
 
@@ -111,10 +124,13 @@ export default defineComponent({
       router.push(authStore.complete ? '/' : '/switcher')
     }
 
+    const error = computed(() => authStore.error)
+    const isLoading = computed(() => authStore.isLoading)
+
     return {
       ...toRefs(state),
-      error: authStore.error,
-      isLoading: authStore.isLoading,
+      error,
+      isLoading,
       onLogin,
     }
   },

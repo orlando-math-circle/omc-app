@@ -3,7 +3,7 @@
     <AdminHeader title="Users" :breadcrumbs="breadcrumbs">
       <v-row>
         <v-col cols="auto" align-self="center">
-          <DialogCreateAccount>
+          <DialogCreateAccount @create:account="onAccountCreate">
             <template #activator="{ on, attrs }">
               <v-btn color="primary" v-bind="attrs" v-on="on">
                 Create Account
@@ -78,7 +78,7 @@
                   <template #activator="{ on, attrs }">
                     <v-list-item v-bind="attrs" v-on="on">
                       <v-list-item-icon>
-                        <v-icon>mdi-email</v-icon>
+                        <v-icon>mdi-email-edit-outline</v-icon>
                       </v-list-item-icon>
 
                       <v-list-item-content>
@@ -88,15 +88,23 @@
                   </template>
                 </DialogEmail>
 
-                <v-list-item>
-                  <v-list-item-icon>
-                    <v-icon>mdi-trash</v-icon>
-                  </v-list-item-icon>
+                <DialogConfirm @confirm="onDeleteConfirm">
+                  <template #activator="{ on, attrs }">
+                    <v-list-item v-bind="attrs" v-on="on">
+                      <v-list-item-icon>
+                        <v-icon>mdi-trash-can-outline</v-icon>
+                      </v-list-item-icon>
 
-                  <v-list-item-content>
-                    <v-list-item-title>Delete</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>Delete</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </template>
+
+                  Are you sure you want to delete these users? Any associated
+                  child users will be deleted as well. This action is not
+                  reversible.
+                </DialogConfirm>
               </v-list>
             </v-menu>
 
@@ -199,8 +207,8 @@ import {
   watch,
 } from '@nuxtjs/composition-api'
 import { Roles } from '@server/app.roles'
-import { useDebouncedRef } from '@/composables'
-import { useUsers } from '@/stores'
+import { useDebouncedRef, useSnackbar } from '@/composables'
+import { UserEntity, useUsers } from '@/stores'
 import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
 
 const breadcrumbs = [
@@ -223,9 +231,10 @@ export default defineComponent({
   transition: 'admin',
   setup() {
     const userStore = useUsers()
+    const snackbar = useSnackbar()
 
     const state = reactive({
-      selected: [],
+      selected: [] as UserEntity[],
       options: null,
       filters: {
         panel: false,
@@ -267,6 +276,20 @@ export default defineComponent({
       }
     }
 
+    const onDeleteConfirm = async () => {
+      await Promise.all(
+        state.selected.map((selected) => userStore.delete(selected.id))
+      )
+
+      if (userStore.error) {
+        snackbar.error(userStore.error.message)
+      } else {
+        snackbar.success(`User${state.selected.length > 1 ? 's' : ''} deleted`)
+      }
+
+      await findAll()
+    }
+
     const findAll = async () => {
       await userStore.findAll({
         ...(state.filters.grades.length && { grade: state.filters.grades }),
@@ -274,6 +297,8 @@ export default defineComponent({
         ...(search.value?.length && { contains: search.value }),
       })
     }
+
+    const onAccountCreate = () => findAll()
 
     useFetch(async () => await findAll())
     watch(search, async () => await findAll())
@@ -290,6 +315,8 @@ export default defineComponent({
       users: computed(() => userStore.users),
       isLoading: computed(() => userStore.isLoading),
       findAll,
+      onAccountCreate,
+      onDeleteConfirm,
     }
   },
   head: {

@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import MikroORMConfig from '../mikro-orm.config';
 import { AccountModule } from './account/account.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { AuthModule } from './auth/auth.module';
 import { CourseModule } from './course/course.module';
 import { EmailModule } from './email/email.module';
@@ -33,6 +34,7 @@ import { MembershipModule } from './membership/membership.module';
     EmailModule,
     AuthModule,
     AccountModule,
+    AttendanceModule,
     UserModule,
     EventModule,
     EventRegistrationModule,

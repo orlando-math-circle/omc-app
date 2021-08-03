@@ -96,7 +96,7 @@
           >
             Thank you for registering! Please click the link in the verification
             email to confirm your account so you may register to events.
-            <a @click="resend">Resend the verification email</a>.<br /><br />
+            <a @click="onResend">Resend the verification email</a>.<br /><br />
             In the meantime you may
             <nuxt-link to="/account/settings"
               >add users to your account</nuxt-link
@@ -156,6 +156,11 @@ export default defineComponent({
           to: '/events',
         },
         {
+          icon: 'mdi-hand-heart',
+          title: 'Volunteers',
+          to: '/volunteers',
+        },
+        {
           icon: 'mdi-account-circle',
           title: 'Account',
           to: '/dashboard',
@@ -185,7 +190,6 @@ export default defineComponent({
       user: computed(() => authStore.user!),
       isAdmin: computed(() => authStore.isAdmin),
       isDark,
-      resend: () => console.log('Testt'),
       onLogout,
       onResend,
     }

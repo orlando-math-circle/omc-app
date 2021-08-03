@@ -22,6 +22,7 @@ import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';
 import { Membership } from '@server/membership/membership.entity';
+import { Attendance } from '../attendance/attendance.entity';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -169,10 +170,16 @@ export class User extends BaseEntity<User, 'id'> {
   })
   registrations = new Collection<EventRegistration>(this);
 
-  @OneToMany(() => VolunteerWork, (w) => w.user, { eager: true })
+  @OneToMany(() => VolunteerWork, (w) => w.user, {
+    eager: true,
+    orphanRemoval: true,
+  })
   work = new Collection<VolunteerWork>(this);
 
-  @OneToMany(() => Invoice, (i) => i.user, { eager: false })
+  @OneToMany(() => Invoice, (i) => i.user, {
+    eager: false,
+    orphanRemoval: true,
+  })
   invoices = new Collection<Invoice>(this);
 
   @OneToMany(() => File, (f) => f.author, { orphanRemoval: true })
@@ -183,4 +190,10 @@ export class User extends BaseEntity<User, 'id'> {
 
   @OneToMany(() => Membership, (m) => m.user, { nullable: true })
   memberships = new Collection<Membership>(this);
+
+  @OneToMany(() => Attendance, (h) => h.user, {
+    eager: false,
+    orphanRemoval: true,
+  })
+  attendances = new Collection<Attendance>(this);
 }

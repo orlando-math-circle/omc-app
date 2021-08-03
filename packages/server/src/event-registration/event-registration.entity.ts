@@ -20,6 +20,9 @@ export class EventRegistration extends BaseEntity<EventRegistration, 'id'> {
   @Property()
   volunteering: boolean = false;
 
+  @Property()
+  isCoverable: boolean = false;
+
   @ManyToOne(() => Event, { eager: false })
   event!: Event;
 

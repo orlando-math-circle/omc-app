@@ -43,7 +43,7 @@
                 <v-row>
                   <v-col cols="12">
                     <VTextFieldValidated
-                      v-model="newPassword"
+                      v-model="password"
                       label="New Password"
                       type="password"
                       rules="required"
@@ -56,7 +56,7 @@
 
                   <v-col cols="12">
                     <VTextFieldValidated
-                      v-model="conPassword"
+                      v-model="confirm"
                       label="Confirm New Password"
                       type="password"
                       autocomplete="new-password"

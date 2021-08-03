@@ -140,7 +140,7 @@
 
     <!-- Password Changing Card -->
     <v-card v-if="isPrimaryUser" class="mb-4">
-      <VFormValidated @form:submit="onChangePassword">
+      <VFormValidated ref="passwordForm" @form:submit="onChangePassword">
         <v-card-title>Change Password</v-card-title>
 
         <v-card-subtitle>Change the password on the account.</v-card-subtitle>
@@ -224,6 +224,7 @@ export default defineComponent({
   transition: 'slide-left',
   setup() {
     const form = ref<FormComponent>()
+    const passwordForm = ref<FormComponent>()
 
     const route = useRoute()
     const snackbar = useSnackbar()
@@ -302,6 +303,8 @@ export default defineComponent({
       state.curPassword = ''
       state.newPassword = ''
 
+      passwordForm.value?.resetValidation()
+
       snackbar.success('Successfully Updated')
     }
 
@@ -325,7 +328,7 @@ export default defineComponent({
     const onChangeSettings = async () => {
       const { email, ...other } = settings
 
-      if (email) {
+      if (email && email !== user.value.email) {
         await authStore.requestEmailChange({ email })
       }
 
@@ -347,7 +350,7 @@ export default defineComponent({
 
         form.value?.resetValidation()
 
-        if (email) {
+        if (email && email !== user.value.email) {
           snackbar.success('Check your inbox to verify your new email')
         } else {
           snackbar.success('Updated Successfully')
@@ -361,6 +364,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       form,
+      passwordForm,
       user,
       settings,
       genders,
