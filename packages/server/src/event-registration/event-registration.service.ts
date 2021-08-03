@@ -414,6 +414,17 @@ export class EventRegistrationService {
     }
 
     // TODO: Add audit log.
+    await this.auditLogService.create({
+      userId: user.id,
+      changes: [{
+        new_value: user.id,
+        old_value: registration.user.id,
+      }],
+      user: user,
+      type: AuditType.VOLUNTEER_SWAP,
+      target_id: registration.event.name,
+    }, user);
+
     registration.assign({ user, isCoverable: false });
 
     await this.registrationRepository.flush();
