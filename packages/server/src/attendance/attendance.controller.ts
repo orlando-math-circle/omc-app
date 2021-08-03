@@ -12,6 +12,9 @@ import { AttendanceService } from './attendance.service';
 import { MarkAttendanceDto } from './dtos/mark-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { FindAllAttendancesDto } from './dtos/find-all-attendances.dto';
+import { Usr } from '../auth/decorators/user.decorator';
+import { User } from '../user/user.entity';
+import { UserAuth } from '../auth/decorators/auth.decorator';
 
 @Controller('attendance')
 export class AttendanceController {
@@ -32,11 +35,17 @@ export class AttendanceController {
     return this.attendanceService.findAll(
       {},
       {
-        populate: ['user', 'event'],
+        //populate: ['user'],
         limit,
         offset,
       },
     );
+  }
+
+  @UserAuth()
+  @Get('/status/:eventId')
+  getStatus(@Param('eventId') eventId: number, @Usr() user: User) {
+    return this.attendanceService.getAttendanceStatus(eventId, user);
   }
 
   @Patch(':id')

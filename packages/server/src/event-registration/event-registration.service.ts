@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Account } from '../account/account.entity';
+import { Roles } from '../app.roles';
 import { Populate } from '../app.utils';
 import { AccessService } from '../auth/access.service';
 import { EventService } from '../event/event.service';
@@ -19,6 +20,7 @@ import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { VolunteerUserJobDto } from './dtos/create-volunteer-registration.dto';
 import { EventRegistrationStatus } from './dtos/event-registration-status.dto';
+import { UpdateOwnEventRegistrationDto } from './dtos/update-event-registration.dto';
 import { EventRegistration } from './event-registration.entity';
 
 export class EventRegistrationService {
@@ -239,8 +241,8 @@ export class EventRegistrationService {
   /**
    * Creates a new PayPal order for an event and the provides user(s)
    *
-   * @param eventId ID of the event to create the fee order.
-   * @param users Users for registration to generate orders.
+   * @param {number} eventId ID of the event to create the fee order.
+   * @param {Number[]} users Users for registration to generate orders.
    */
   public async createOrder(eventId: number, account: Account, users: number[]) {
     if (!account.primaryUser.emailVerified) {
@@ -329,8 +331,8 @@ export class EventRegistrationService {
    * Consumes a PayPal order with the capture intent for the specified
    * event and the specified users.
    *
-   * @param orderId ID of the PayPal generated order.
-   * @param eventId ID of the event to map registrations to.
+   * @param {string} orderId Id of the PayPal generated order.
+   * @param {number} eventId Id of the event to map registrations to.
    */
   public async captureOrder(orderId: string, eventId: number) {
     const [order, event] = await Promise.all([
@@ -386,6 +388,36 @@ export class EventRegistrationService {
     return this.invoiceService.batchCreate(createInvoiceDtos);
   }
 
+  /**
+   * Claims, or covers, the volunteer registration of another user.
+   *
+   * @param {number} id Id of the event registration.
+   * @param {User} user User claiming the registration.
+   */
+  async swap(id: number, user: User) {
+    if (!user.emailVerified) {
+      throw new ForbiddenException('Email validation required');
+    }
+
+    const registration = await this.registrationRepository.findOneOrFail(
+      { id, volunteering: true, isCoverable: true },
+      ['user', 'event.course'],
+    );
+
+    if (registration.event.isClosed) {
+      throw new BadRequestException('Event registrations are closed');
+    } else if (registration.event.course?.isClosed) {
+      throw new BadRequestException('Course registrations are closed');
+    }
+
+    // TODO: Add audit log.
+    registration.assign({ user, isCoverable: false });
+
+    await this.registrationRepository.flush();
+
+    return registration;
+  }
+
   findOne(
     where: FilterQuery<EventRegistration>,
     populate?: Populate<EventRegistration>,
@@ -400,6 +432,37 @@ export class EventRegistrationService {
     return this.registrationRepository.findOne(where, populate);
   }
 
+  /**
+   * Updates a user's own registration.
+   *
+   * @param {number} id Id of the registration.
+   * @param {User} user User updating the registration.
+   */
+  async update(
+    id: number,
+    updateOwnEventRegistrationDto: UpdateOwnEventRegistrationDto,
+    user: User,
+  ) {
+    const registration = await this.registrationRepository.findOneOrFail({
+      id,
+      user,
+    });
+
+    registration.assign(updateOwnEventRegistrationDto);
+
+    await this.registrationRepository.flush();
+
+    return registration;
+  }
+
+  /**
+   * Deletes an event registration.
+   *
+   * This leaves any invoices intact.
+   *
+   * @param {number} id Id of the event registration.
+   * @param {User} user User deleting the registration.
+   */
   async delete(id: number, user: User) {
     const deleteAny = this.ac.can(user, 'delete:any', 'event-registration');
 

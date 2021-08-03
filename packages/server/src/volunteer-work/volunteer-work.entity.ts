@@ -1,5 +1,6 @@
 import {
   BaseEntity,
+  Cascade,
   Entity,
   Enum,
   ManyToOne,
@@ -34,7 +35,7 @@ export class VolunteerWork extends BaseEntity<VolunteerWork, 'id'> {
    * Relationship
    */
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { cascade: [Cascade.ALL] })
   user!: User;
 
   @ManyToOne(() => Project, { nullable: true })

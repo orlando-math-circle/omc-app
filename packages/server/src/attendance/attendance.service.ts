@@ -1,4 +1,4 @@
-import { EntityManager, EntityRepository } from '@mikro-orm/knex';
+import { EntityRepository } from '@mikro-orm/knex';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   BadRequestException,
@@ -8,24 +8,25 @@ import {
 import { MarkAttendanceDto } from './dtos/mark-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { Attendance } from './attendance.entity';
-import { UserService } from '@server/user/user.service';
-import { EventService } from '@server/event/event.service';
-import { VolunteerWork } from '@server/volunteer-work/volunteer-work.entity';
-import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum';
+import { UserService } from '../user/user.service';
+import { EventService } from '../event/event.service';
+import { VolunteerWork } from '../volunteer-work/volunteer-work.entity';
+import { VolunteerWorkStatus } from '../volunteer-work/enums/work-status.enum';
 import {
   FilterQuery,
   FindOptions,
   Populate,
   QueryOrderMap,
 } from '@mikro-orm/core';
-import { PopulateFail } from '@server/app.utils';
+import { PopulateFail } from '../app.utils';
+import { User } from '../user/user.entity';
+import { AttendanceStatus } from './dtos/attendance-status.dto';
 
 @Injectable()
 export class AttendanceService {
   constructor(
     @InjectRepository(Attendance)
     private readonly attendanceRepository: EntityRepository<Attendance>,
-    private readonly em: EntityManager,
     private readonly userService: UserService,
     private readonly eventService: EventService,
   ) {}
@@ -40,24 +41,15 @@ export class AttendanceService {
     const event = await this.eventService.findOneOrFail(eventId);
 
     const user = await this.userService.findOneOrFail(userId, [
-      'work',
       'registrations',
       'attendances',
     ]);
 
     // Prevent duplicate attendances from being added to the db
-    for (let i = 0; i < user.attendances.length; i++) {
+    for (const attendance of user.attendances) {
       if (
-        user.attendances[i].event.id === event.id &&
-        user.attendances[i].attended
-      ) {
-        throw new BadRequestException(
-          'Attendance for this event has already been marked.',
-        );
-      }
-      if (
-        user.attendances[i].event.id === event.id &&
-        !user.attendances[i].attended
+        (attendance.event.id === event.id && attendance.attended) ||
+        !attendance.attended
       ) {
         throw new BadRequestException(
           'Attendance for this event has already been marked.',
@@ -74,14 +66,10 @@ export class AttendanceService {
         throw new ForbiddenException();
       }
 
-      // If volunteering, pick out the event from user registrations
+      // If volunteering, pick out the event from user registrations and make a Work order
       // There's probably a better way of doing this
-      for (let i = 0; i < user.registrations.length; i++) {
-        console.log(i + ': ' + user.registrations[i].volunteering);
-        if (
-          event.id === user.registrations[i].event.id &&
-          user.registrations[i].volunteering
-        ) {
+      for (const registration of user.registrations) {
+        if (registration.event.id === event.id && registration.volunteering) {
           const work = new VolunteerWork();
           work.hours = data.hours;
           work.status = VolunteerWorkStatus.PENDING;
@@ -126,6 +114,27 @@ export class AttendanceService {
     orderBy?: QueryOrderMap,
   ) {
     return this.attendanceRepository.findOneOrFail(where, populate, orderBy);
+  }
+
+  public async getAttendanceStatus(eventId: number, user: User) {
+    const retval: AttendanceStatus[] = [];
+
+    // Populate attendances for access
+    const userAttend = await this.userService.findOneOrFail(user.id, [
+      'attendances',
+    ]);
+
+    // Find attendance that matches the event
+    for (const attendanceItem of userAttend.attendances) {
+      if (attendanceItem.event.id === eventId) {
+        retval.push({
+          attended: attendanceItem.attended,
+          attendance: attendanceItem,
+        });
+      }
+    }
+
+    return retval;
   }
 
   public async update(id: number, updateAttendanceDto: UpdateAttendanceDto) {

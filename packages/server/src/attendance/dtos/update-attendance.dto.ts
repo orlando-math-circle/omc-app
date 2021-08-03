@@ -3,19 +3,19 @@ import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 export class UpdateAttendanceDto {
   @IsOptional()
   @IsBoolean()
-  attended!: boolean;
+  attended?: boolean;
 
   @IsOptional()
   @IsNumber()
-  userId!: number;
+  userId?: number;
 
   @IsOptional()
   @IsNumber()
-  hours!: number;
+  hours?: number;
 
   @IsOptional()
   @IsNumber()
-  eventId!: number;
+  eventId?: number;
 
   @IsOptional()
   @IsNumber()

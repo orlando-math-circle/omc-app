@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsEnum,
   IsOptional,
@@ -48,4 +49,8 @@ export class UpdateOwnUserDto {
   @Type(() => IndustryDto)
   @ValidateNested()
   industry?: IndustryDto;
+  
+  @IsOptional()
+  @IsBoolean()
+  volunteer = true;
 }
