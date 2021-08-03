@@ -1,0 +1,19 @@
+version: "3.4"
+
+services:
+  # PostgreSQL Service
+  database:
+    image: postgres:12
+    container_name: PostgreSQL
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 5432:5432
+    volumes:
+      - postgre:/var/lib/postgresql/data
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+volumes:
+  postgre:
+    driver: local

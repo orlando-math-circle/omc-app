@@ -1,0 +1,12 @@
+{
+  "name": "@omc/shared",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "luxon": "1.27.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all"
+  }
+}
