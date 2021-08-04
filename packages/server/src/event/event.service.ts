@@ -5,25 +5,28 @@ import {
   QueryOrder,
   QueryOrderMap,
 } from '@mikro-orm/core';
-import { endOfDay } from '@shared/time';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { endOfDay } from '@shared/time';
 import {
   addMinutes,
   getMinDate,
   getMinutesDiff,
   isAfterDay,
   isBeforeDay,
+  isBoolean,
   isSameDay,
   PopulateFail,
   subDays,
 } from '../app.utils';
+import { ConfigService } from '../config/config.service';
 import { CourseService } from '../course/course.service';
 import { CreateEventFeeDto } from '../event-fee/dto/create-event-fee.dto';
 import { EventFee } from '../event-fee/event-fee.entity';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { FindAllEventsDto } from './dto/find-all-events.dto';
+import { FindAllRegisteredEventsDto } from './dto/find-all-registered-events.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventsDto } from './dto/update-events.dto';
 import { FeeType } from './enums/fee-type.enum';
@@ -31,7 +34,6 @@ import { EventRecurrence } from './event-recurrence.entity';
 import { Event } from './event.entity';
 import { EventMetadata } from './interfaces/event-metadata.interface';
 import { Schedule } from './schedule.class';
-import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class EventService {
@@ -114,6 +116,27 @@ export class EventService {
     orderBy?: QueryOrderMap,
   ) {
     return this.eventRepository.findOneOrFail(where, populate, orderBy);
+  }
+
+  /**
+   * Finds all upcoming events a user is registered to attend or volunteer for.
+   *
+   * @param {FindAllRegisteredEventsDto} findAllRegisteredEventsDto Query parameters.
+   * @param {User} user User to find registrations for.
+   */
+  async findAllRegistered(
+    { limit, offset, volunteering }: FindAllRegisteredEventsDto,
+    user: User,
+  ) {
+    return this.eventRepository.findAndCount(
+      {
+        registrations: {
+          user: user.id,
+          ...(isBoolean(volunteering) ? { volunteering } : {}),
+        },
+      },
+      { limit, offset, orderBy: { dtstart: 'ASC' } },
+    );
   }
 
   /**

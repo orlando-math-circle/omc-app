@@ -2,15 +2,16 @@
   <div v-if="!isVolunteer">
     <h1 class="text-center mb-10">Register to Volunteer!</h1>
     <p>Please read the following forms carefully before digitally signing.</p>
-    
+
     <VFormValidated
       ref="volunteerRegistrationForm"
       @form:submit="onVolunteerRegistration(user)"
     >
       <v-row class="mb-10">
         <h3 class="mb-5">Photo Release and Liability Waiver</h3>
+
         <object
-          data="http://localhost:3000/defaults/OMC_Photo_release_and_Liability_WaiverOnline_Policy.pdf"
+          data="/OMC_Photo_release_and_Liability_WaiverOnline_Policy.pdf"
           type="application/pdf"
           width="100%"
           height="480"
@@ -33,7 +34,7 @@
       <v-row class="mb-10">
         <h3 class="mb-5">Code of Conduct</h3>
         <object
-          data="http://localhost:3000/defaults/Volunteers_-_Code_of_Conduct.pdf"
+          data="/Volunteers_-_Code_of_Conduct.pdf"
           type="application/pdf"
           width="100%"
           height="480"
@@ -55,7 +56,7 @@
       <v-row class="mb-10">
         <h3 class="mb-5">Volunteer SOP</h3>
         <object
-          data="http://localhost:3000/defaults/OMC_IC_Volunteer_SOP.pdf"
+          data="/OMC_IC_Volunteer_SOP.pdf"
           type="application/pdf"
           width="100%"
           height="480"
@@ -203,12 +204,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, toRefs } from '@nuxtjs/composition-api'
-import {
-  useAuth,
-  useUsers,
-  useEvents,
-  UserEntity,
-} from '@/stores'
+import { useAuth, useUsers, useEvents, UserEntity } from '@/stores'
 import { useDates, useStateReset, useSnackbar } from '@/composables'
 import { Roles } from '@server/app.roles'
 
@@ -299,7 +295,7 @@ export default defineComponent({
     await Promise.all([
       userStore.findAll({ role: Roles.VOLUNTEER }),
       eventStore.findAll({ start: now, end: dateUtils.addDays(now, 60) }),
-      eventStore.findAllRegistered({ volunteering: true })
+      eventStore.findAllRegistered({ volunteering: true }),
     ])
   },
   head: {

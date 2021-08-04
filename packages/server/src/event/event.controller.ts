@@ -14,6 +14,7 @@ import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { FindAllEventsDto } from './dto/find-all-events.dto';
+import { FindAllRegisteredEventsDto } from './dto/find-all-registered-events.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventsDto } from './dto/update-events.dto';
 import { EventService } from './event.service';
@@ -34,6 +35,18 @@ export class EventController {
   @Get()
   findAll(@Query() findAllEventsDto: FindAllEventsDto) {
     return this.eventService.findAll(findAllEventsDto);
+  }
+
+  @Get('/registered')
+  @UserAuth('event', 'read:any')
+  findAllRegistered(
+    @Query() findAllRegisteredEventsDto: FindAllRegisteredEventsDto,
+    @Usr() user: User,
+  ) {
+    return this.eventService.findAllRegistered(
+      findAllRegisteredEventsDto,
+      user,
+    );
   }
 
   @Get(':id')

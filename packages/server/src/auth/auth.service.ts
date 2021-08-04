@@ -132,6 +132,7 @@ export class AuthService {
           'account',
           'account.primaryUser.memberships',
           'account.users.memberships',
+          'account.users.attendances.event',
         ])) || undefined;
 
       if (!req.usr) throw new UnauthorizedException('User missing');
@@ -140,8 +141,8 @@ export class AuthService {
       req.account = req.usr.account;
     } else if (payload.aid) {
       req.account = await this.accountService.findOne(payload.aid, [
-        'primaryUser',
-        'users',
+        'primaryUser.attendances.event',
+        'users.attendances.event',
       ]);
 
       if (!req.account) throw new UnauthorizedException('Account missing');

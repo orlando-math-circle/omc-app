@@ -30,9 +30,17 @@
                   <v-icon x-small>mdi-circle-medium</v-icon>
                   {{ grades[user.grade].text }}
                 </span>
+
                 <span v-if="user.activeMember">
                   <v-icon x-small>mdi-circle-medium</v-icon>
                   Member
+                </span>
+              </v-list-item-subtitle>
+
+              <v-list-item-subtitle>
+                <span>
+                  <v-icon x-small>mdi-star-four-points-outline</v-icon>
+                  {{ user.points }} Points
                 </span>
               </v-list-item-subtitle>
             </v-list-item-content>
@@ -84,109 +92,111 @@
       </v-card-actions>
     </v-card>
 
-    <v-col v-if="unregisteredMembers.length" cols="12">
-      <v-stepper v-model="step">
-        <v-stepper-items>
-          <v-stepper-content class="pa-0" step="1">
-            <v-card>
-              <v-card-title>Membership</v-card-title>
+    <v-row v-if="unregisteredMembers.length" class="mt-3">
+      <v-col cols="12">
+        <v-stepper v-model="step">
+          <v-stepper-items>
+            <v-stepper-content class="pa-0" step="1">
+              <v-card>
+                <v-card-title>Membership</v-card-title>
 
-              <v-card-subtitle
-                >Select the account users you wish to register for a
-                membership.</v-card-subtitle
-              >
+                <v-card-subtitle
+                  >Select the account users you wish to register for a
+                  membership.</v-card-subtitle
+                >
 
-              <v-card-text>
-                <v-list rounded>
-                  <v-list-item-group
-                    v-model="selections"
-                    multiple
-                    active-class="primary--text"
-                  >
-                    <v-list-item
-                      v-for="member in unregisteredMembers"
-                      :key="member.id"
-                      :disabled="member.activeMember"
+                <v-card-text>
+                  <v-list rounded>
+                    <v-list-item-group
+                      v-model="selections"
+                      multiple
+                      active-class="primary--text"
                     >
-                      <template #default="{ active }">
-                        <v-list-item-avatar>
-                          <v-img :src="member.avatarUrl" />
-                        </v-list-item-avatar>
+                      <v-list-item
+                        v-for="member in unregisteredMembers"
+                        :key="member.id"
+                        :disabled="member.activeMember"
+                      >
+                        <template #default="{ active }">
+                          <v-list-item-avatar>
+                            <v-img :src="member.avatarUrl" />
+                          </v-list-item-avatar>
 
-                        <v-list-item-content>
-                          <v-list-item-title>
-                            {{ member.name }}
-                          </v-list-item-title>
+                          <v-list-item-content>
+                            <v-list-item-title>
+                              {{ member.name }}
+                            </v-list-item-title>
 
-                          <v-list-item-subtitle v-if="member.grade">
-                            <span>Eligible</span>
-                            <span>• {{ grade(member) }}</span>
-                          </v-list-item-subtitle>
-                          <v-list-item-subtitle v-else
-                            >Eligible</v-list-item-subtitle
-                          >
-                        </v-list-item-content>
+                            <v-list-item-subtitle v-if="member.grade">
+                              <span>Eligible</span>
+                              <span>• {{ grade(member) }}</span>
+                            </v-list-item-subtitle>
+                            <v-list-item-subtitle v-else
+                              >Eligible</v-list-item-subtitle
+                            >
+                          </v-list-item-content>
 
-                        <v-list-item-action v-if="!member.activeMember">
-                          <v-checkbox :input-value="active" />
-                        </v-list-item-action>
-                      </template>
-                    </v-list-item>
-                  </v-list-item-group>
-                </v-list>
-              </v-card-text>
+                          <v-list-item-action v-if="!member.activeMember">
+                            <v-checkbox :input-value="active" />
+                          </v-list-item-action>
+                        </template>
+                      </v-list-item>
+                    </v-list-item-group>
+                  </v-list>
+                </v-card-text>
 
-              <v-card-actions>
-                <v-btn v-if="!isVerified" disabled rounded block
-                  >Email Verification Required</v-btn
-                >
+                <v-card-actions>
+                  <v-btn v-if="!isVerified" disabled rounded block
+                    >Email Verification Required</v-btn
+                  >
 
-                <v-btn
-                  v-else-if="!selections.length"
-                  rounded
-                  block
-                  disabled
-                  @click="onRegister"
-                  >Select Users</v-btn
-                >
+                  <v-btn
+                    v-else-if="!selections.length"
+                    rounded
+                    block
+                    disabled
+                    @click="onRegister"
+                    >Select Users</v-btn
+                  >
 
-                <v-btn
-                  v-else-if="checkoutCost === 0"
-                  rounded
-                  block
-                  color="primary"
-                  @click="onRegister"
-                  >Complete Registration</v-btn
-                >
+                  <v-btn
+                    v-else-if="checkoutCost === 0"
+                    rounded
+                    block
+                    color="primary"
+                    @click="onRegister"
+                    >Complete Registration</v-btn
+                  >
 
-                <v-btn v-else rounded block color="primary" @click="step++"
-                  >Continue to Payment</v-btn
-                >
-              </v-card-actions>
-            </v-card>
-          </v-stepper-content>
+                  <v-btn v-else rounded block color="primary" @click="step++"
+                    >Continue to Payment</v-btn
+                  >
+                </v-card-actions>
+              </v-card>
+            </v-stepper-content>
 
-          <v-stepper-content class="pa-0" step="2">
-            <v-card :loading="isPayPalLoading">
-              <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
+            <v-stepper-content class="pa-0" step="2">
+              <v-card :loading="isPayPalLoading">
+                <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
-              <v-card-text>
-                <PaymentMemberPaypal
-                  :users="selectedUsers"
-                  @payment:complete="onPaymentComplete"
-                />
-              </v-card-text>
+                <v-card-text>
+                  <PaymentMemberPaypal
+                    :users="selectedUsers"
+                    @payment:complete="onPaymentComplete"
+                  />
+                </v-card-text>
 
-              <v-card-actions>
-                <v-spacer />
-                <v-btn text @click="step--">Go Back</v-btn>
-                <v-btn color="primary" @click="step++">Continue</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-stepper-content>
-        </v-stepper-items>
-      </v-stepper>
-    </v-col>
+                <v-card-actions>
+                  <v-spacer />
+                  <v-btn text @click="step--">Go Back</v-btn>
+                  <v-btn color="primary" @click="step++">Continue</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-stepper-content>
+          </v-stepper-items>
+        </v-stepper>
+      </v-col>
+    </v-row>
   </div>
 </template>
 

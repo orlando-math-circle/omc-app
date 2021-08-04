@@ -45,6 +45,8 @@ export default defineComponent({
           createOrder: async () => {
             const order = await paypalStore.createOrder(props.users)
 
+            console.log(order)
+
             return order.id
           },
           onApprove: async (data: any, actions: { restart: () => void }) => {
