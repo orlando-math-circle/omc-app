@@ -85,6 +85,16 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
+
+          <v-list-item v-if="event.points" class="pl-0">
+            <v-list-item-avatar class="icon--bg rounded">
+              <v-icon color="primary">mdi-star-four-points-outline</v-icon>
+            </v-list-item-avatar>
+
+            <v-list-item-content>
+              <v-list-item-title>{{ event.points }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-card-text>
 
         <template v-if="event.description && event.description.length">
@@ -746,7 +756,7 @@ export default defineComponent({
     const attendedUsers = computed(() =>
       attendanceStatuses.value.filter((s) => s.attended !== false)
     )
-    
+
     const swappableVolunteers = computed(() =>
       registrationStore.registrations.filter((r) => r.isCoverable)
     )
@@ -854,6 +864,47 @@ export default defineComponent({
       resetAttendanceState()
     }
 
+    const { state: attendance, reset: resetAttendanceState } = useStateReset({
+      hours: 0,
+      job: undefined,
+    })
+
+    const onSubmitVolunteerAttendance = async (id: number) => {
+      await attendanceStore.create({
+        ...attendance,
+        attended: true,
+        userId: id,
+        eventId: +route.value.params.id,
+        hours: attendance.hours,
+        jobId: 1,
+        workId: 1,
+      })
+
+      if (attendanceStore.error) {
+        return snackbar.error(attendanceStore.error.message)
+      }
+
+      snackbar.success('Attendance submitted!')
+      resetAttendanceState()
+    }
+
+    const onSubmitAttendance = async (id: number) => {
+      await attendanceStore.create({
+        attended: true,
+        userId: id,
+        eventId: +route.value.params.id,
+        hours: 0,
+        jobId: 0,
+        workId: 0,
+      })
+
+      if (attendanceStore.error) {
+        return snackbar.error(attendanceStore.error.message)
+      }
+
+      snackbar.success('Attendance submitted!')
+    }
+
     const onPaymentComplete = async () => {
       await Promise.all([
         registrationStore.findStatuses(+route.value.params.id),
@@ -895,6 +946,8 @@ export default defineComponent({
 
       if (registrationStore.error) {
         snackbar.error(registrationStore.error.message)
+      } else {
+        snackbar.success('Registration Updated')
       }
 
       await registrationStore.findStatuses(+route.value.params.id)
@@ -909,7 +962,6 @@ export default defineComponent({
       }
 
       swapDialog.value?.open(status)
-
     }
 
     return {
@@ -956,7 +1008,6 @@ export default defineComponent({
     await Promise.all([
       eventStore.findOne(+route.params.id),
       registrationStore.findStatuses(+route.params.id),
-      attendanceStore.findStatuses(+route.params.id),
       registrationStore.findAll({ coverable: true }),
     ])
   },

@@ -35,6 +35,9 @@ export class EventRecurrence extends BaseEntity<EventRecurrence, 'id'> {
   @Property()
   dtstart!: Date;
 
+  @Property()
+  points?: number = 0;
+
   @Property({ nullable: true })
   dtend?: Date;
 

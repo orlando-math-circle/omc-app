@@ -111,7 +111,18 @@ export class User extends BaseEntity<User, 'id'> {
     return this.work
       .getItems()
       .map((w) => w.hours)
-      .reduce((a, b) => a + b, 0);
+      .reduce((prev, cur) => prev + cur, 0);
+  }
+
+  @Property({ persist: false })
+  get points() {
+    if (!this.attendances.isInitialized()) return null;
+
+    return this.attendances
+      .getItems()
+      .filter((a) => a.event.isInitialized() && a.attended == true)
+      .map((a) => (a?.event.points as number) || 0)
+      .reduce((prev, cur) => prev + cur, 0);
   }
 
   @Property({ persist: false })
@@ -170,16 +181,10 @@ export class User extends BaseEntity<User, 'id'> {
   })
   registrations = new Collection<EventRegistration>(this);
 
-  @OneToMany(() => VolunteerWork, (w) => w.user, {
-    eager: true,
-    orphanRemoval: true,
-  })
+  @OneToMany(() => VolunteerWork, (w) => w.user, { eager: true })
   work = new Collection<VolunteerWork>(this);
 
-  @OneToMany(() => Invoice, (i) => i.user, {
-    eager: false,
-    orphanRemoval: true,
-  })
+  @OneToMany(() => Invoice, (i) => i.user, { eager: false })
   invoices = new Collection<Invoice>(this);
 
   @OneToMany(() => File, (f) => f.author, { orphanRemoval: true })

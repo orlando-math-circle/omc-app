@@ -2,8 +2,7 @@
   <div v-if="!isVolunteer">
     <h1 class="text-center mb-10">Register to Volunteer!</h1>
     <p>Please read the following forms carefully before digitally signing.</p>
-
-    <!-- v-if="!user.roles.volunteer" -->
+    
     <VFormValidated
       ref="volunteerRegistrationForm"
       @form:submit="onVolunteerRegistration(user)"
@@ -128,7 +127,6 @@
             >Top {{ leaderboardMax }} OMC volunteers by cumulative
             hours</v-card-subtitle
           >
-
           <v-card-text>
             <v-list
               v-for="(volunteer, index) in volunteersByHour"
@@ -173,7 +171,7 @@
 
     <v-row>
       <v-col>
-        <h2 class="mb-3">Your upcoming events</h2>
+        <h2 class="mb-3">Your events</h2>
 
         <div v-if="!events.length" class="subheader">
           No volunteer events scheduled
@@ -209,47 +207,27 @@ import {
   useAuth,
   useUsers,
   useEvents,
-  useRegistrations,
   UserEntity,
 } from '@/stores'
 import { useDates, useStateReset, useSnackbar } from '@/composables'
 import { Roles } from '@server/app.roles'
+
 export default defineComponent({
   setup() {
     const authStore = useAuth()
     const userStore = useUsers()
     const eventStore = useEvents()
-    const registrationStore = useRegistrations()
     const snackbar = useSnackbar()
-    // const dateUtils = useDates()
-    // const now = new Date()
+
     const user = computed(() => authStore.user!)
     const events = computed(() => eventStore.events)
-    // const registrations = computed(() => registrationStore.registrations)
     const volunteers = computed(() => userStore.users)
+
     const volunteersByHour = computed(() =>
       userStore.users
-        .sort((a, b) => b.volunteerHours - a.volunteerHours)
+        .sort((a, b) => (b.volunteerHours || 0) - (a.volunteerHours || 0))
         .slice(0, leaderboardMax)
     )
-    // const getVolunteers = async () => {
-    //   await userStore.findAll({ role: Roles.VOLUNTEER })
-    // }
-    // const getEvents = async () => {
-    //   await eventStore.findAll({ start: now, end: dateUtils.addDays(now, 90) })
-    // }
-    // const getEvents = async () => {
-    //   await eventStore.findAllRegistered({ volunteering: true })
-    // }
-    // useFetch(async () => await getVolunteers())
-    // useFetch(async () => await getEvents())
-    // also does not work
-    // const volunteerEvents = computed(() =>
-    //     eventStore.events.filter((u) =>
-    //       registrationStore.registrations.find((a) => a.event.id === u.id)
-    //     )
-    // )
-    // hard coded for the time being
 
     const { state, reset } = useStateReset({
       checkbox: false,
@@ -258,10 +236,12 @@ export default defineComponent({
     })
 
     const leaderboardMax = 5
+
     const colors = []
     const start = [234, 128, 177]
     const end = [178, 188, 213]
     const difference = [start[0] - end[0], start[1] - end[1], start[2] - end[2]]
+
     for (let i = 0; i < leaderboardMax; i++) {
       colors[i] = [
         start[0] - (i / (leaderboardMax - 1)) * difference[0],
@@ -269,23 +249,29 @@ export default defineComponent({
         start[2] - (i / (leaderboardMax - 1)) * difference[2],
       ]
     }
+
     const placement = (n: number) => {
       return (
         n +
         1 +
-        (['st', 'nd', 'rd'][((n + 1) / 10) % 10 ^ 1 && (n + 1) % 10] || 'th')
+        ([, 'st', 'nd', 'rd'][((n + 1) / 10) % 10 ^ 1 && (n + 1) % 10] || 'th')
       )
     }
 
     const onVolunteerRegistration = async (user: UserEntity) => {
-      if (!user.roles.includes(Roles.VOLUNTEER)) {
-        await userStore.update(user.id, { volunteer: true }, true)
-        if (userStore.error) {
-          snackbar.error(userStore.error.message)
-        }
-        snackbar.success('You have registered as a volunteer!')
-        location.reload()
-      } else snackbar.error('You are already registered as a volunteer!')
+      if (state.checkbox && state.checkbox1 && state.checkbox2) {
+        if (!user.roles.includes(Roles.VOLUNTEER)) {
+          await userStore.update(user.id, { volunteer: true }, true)
+          if (userStore.error) {
+            snackbar.error(userStore.error.message)
+          }
+          snackbar.success('You have registered as a volunteer!')
+          authStore.getMyUser()
+        } else snackbar.error('You are already registered as a volunteer!')
+      } else
+        snackbar.error(
+          'Please read each form carefully and agree to the terms.'
+        )
     }
 
     return {
@@ -293,7 +279,6 @@ export default defineComponent({
       isVolunteer: computed(() => authStore.isVolunteer),
       isAdmin: computed(() => authStore.isAdmin),
       events,
-      // volunteerEvents,
       volunteers,
       volunteersByHour,
       colors,
@@ -310,10 +295,11 @@ export default defineComponent({
     const eventStore = useEvents($pinia)
     const dateUtils = useDates()
     const now = new Date()
+
     await Promise.all([
       userStore.findAll({ role: Roles.VOLUNTEER }),
       eventStore.findAll({ start: now, end: dateUtils.addDays(now, 60) }),
-      // eventStore.findAllRegistered({ volunteering: true })
+      eventStore.findAllRegistered({ volunteering: true })
     ])
   },
   head: {

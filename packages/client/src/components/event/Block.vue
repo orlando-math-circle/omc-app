@@ -20,6 +20,12 @@
 
             {{ date.time }}
           </v-col>
+
+          <v-col v-if="event.points">
+            <v-icon color="secondary">mdi-star-four-points-outline</v-icon>
+
+            {{ event.points }}
+          </v-col>
         </v-row>
       </v-card-text>
 

@@ -65,6 +65,9 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property()
   lateOffset: number = 0;
 
+  @Property({ nullable: true })
+  points?: number = 0;
+
   @Property({ default: [] })
   notified!: ReminderFreq[];
 
@@ -107,6 +110,9 @@ export class Event extends BaseEntity<Event, 'id'> {
 
   @ManyToOne(() => Project, { nullable: true, eager: true })
   project?: Project;
+
+  @ManyToOne(() => User)
+  author!: User;
 
   /**
    * @returns If the event has started.

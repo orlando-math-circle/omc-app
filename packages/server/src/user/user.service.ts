@@ -2,7 +2,6 @@ import {
   EntityRepository,
   FilterQuery,
   FindOptions,
-  QueryOrder,
   QueryOrderMap,
 } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -15,10 +14,10 @@ import {
 import { Roles } from '@server/app.roles';
 import bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
-import { eachWeekOfInterval, format, sub } from 'date-fns';
+import { eachWeekOfInterval, endOfWeek, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
 import { BCRYPT_ROUNDS } from '../app.constants';
-import { isBetweenInclusive, Populate, PopulateFail } from '../app.utils';
+import { Populate, PopulateFail } from '../app.utils';
 import { ConfigService } from '../config/config.service';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
@@ -27,6 +26,7 @@ import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { MonthlyUserStatistic } from './interfaces/monthly-user-statistic.interface';
 import { User } from './user.entity';
 
 @Injectable()
@@ -192,33 +192,35 @@ export class UserService {
     return this.userRepository.findOneOrFail(where, ['attachments'], populate);
   }
 
+  /**
+   * Returns for each week of the past month how many users have
+   * registered for that week.
+   */
   async getUserStatistics() {
-    const retval: Record<string, number> = {};
     const now = new Date();
     const monthAgo = sub(now, { months: 1 });
     const weeks = eachWeekOfInterval({ start: monthAgo, end: now });
-    const labels = weeks.map(
-      (week) => 'Week of ' + format(week, 'EEE, MMM qo, yyyy'),
+
+    const month: MonthlyUserStatistic[] = weeks.map((week) => ({
+      label: format(week, 'EEE, MMM qo, yyyy'),
+      startOfWeek: week,
+      endOfWeek: endOfWeek(week),
+      count: 0,
+    }));
+
+    await Promise.all(
+      month.map(async (week) => {
+        const userCount = await this.userRepository.count({
+          createdAt: {
+            $gte: week.startOfWeek,
+            $lt: week.endOfWeek,
+          },
+        });
+
+        week.count = userCount;
+      }),
     );
 
-    const [users, count] = await this.userRepository.findAndCount(
-      {
-        createdAt: { $gte: weeks[0] },
-      },
-      { orderBy: { createdAt: QueryOrder.ASC } },
-    );
-
-    // This could be more efficient, but not impacting anything.
-    for (let i = 0; i < weeks.length; i++) {
-      retval[weeks[i].toISOString()] = 0;
-
-      for (let j = 0; j < users.length; j++) {
-        if (isBetweenInclusive(weeks[i], weeks[i + 1], users[j].createdAt)) {
-          retval[weeks[i].toISOString()] += 1;
-        }
-      }
-    }
-
-    return { month: retval, count, labels };
+    return month;
   }
 }

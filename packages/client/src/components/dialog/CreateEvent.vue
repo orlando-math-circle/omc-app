@@ -295,6 +295,25 @@
           </v-list-item-content>
         </v-list-item>
 
+        <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
+            <v-icon>mdi-star-four-points-outline</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-row>
+              <v-col>
+                <v-text-field
+                  v-model="meta.points"
+                  label="Points (Optional)"
+                  type="number"
+                  outlined
+                />
+              </v-col>
+            </v-row>
+          </v-list-item-content>
+        </v-list-item>
+
         <v-divider />
 
         <!-- Project Management -->

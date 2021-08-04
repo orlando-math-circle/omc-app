@@ -26,16 +26,10 @@ export class MikroORMConstraintExceptionFilter implements ExceptionFilter {
       const message = this.getMessage(exception.code);
       const statusCode = this.getStatusCode(exception.code);
 
-      return response
-        .status(statusCode)
-        .json({ statusCode, message, exception });
+      return response.status(statusCode).json({ statusCode, message });
     }
 
-    response.status(400).json({
-      statusCode: 400,
-      message: exception.message,
-      exception,
-    });
+    response.status(400).json({ statusCode: 400, message: exception.message });
   }
 
   private getMessage(code: string) {
@@ -43,7 +37,7 @@ export class MikroORMConstraintExceptionFilter implements ExceptionFilter {
       case '23502':
         return 'SQL not null constraint violation';
       case '23503':
-        return 'SQL foreign key constraint violation';
+        return 'SQL Foreign Key Constraint Violation';
       case '23505':
         return 'SQL unique constraint violation';
       default:

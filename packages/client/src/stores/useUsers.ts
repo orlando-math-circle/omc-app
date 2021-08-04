@@ -5,6 +5,10 @@ import { UpdateOwnUserDto } from '@server/user/dtos/update-own-user.dto'
 import { UpdateUserDto } from '@server/user/dtos/update-user.dto'
 import { UserEntity } from '@/stores'
 import { StateStatus, StateError } from '@/types/state.interface'
+import { MonthlyUserStatistic as Statistic } from '@server/user/interfaces/monthly-user-statistic.interface'
+import { EntityDTO } from '@server/shared/types/entity-dto'
+
+export type MonthlyUserStatistic = EntityDTO<Statistic>
 
 export const useUsers = defineStore({
   id: 'user',
@@ -13,6 +17,7 @@ export const useUsers = defineStore({
     error: null as StateError | null,
     user: null as UserEntity | null,
     users: [] as UserEntity[],
+    statistics: [] as MonthlyUserStatistic[],
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',
@@ -34,6 +39,9 @@ export const useUsers = defineStore({
       }
 
       return resp
+    },
+    async getStatistics() {
+      this.statistics = await this.$nuxt.$axios.$get('/user/statistics')
     },
     async update(
       id: number,

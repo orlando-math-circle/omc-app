@@ -22,6 +22,7 @@ import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
 import { ConfigModule } from './config/config.module';
 import { configSchema } from './config/config.schema';
 import { MembershipModule } from './membership/membership.module';
+import { AuditLogModule } from './audit-log/audit-log.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MembershipModule } from './membership/membership.module';
     MikroOrmModule.forRoot(MikroORMConfig),
     EmailModule,
     AuthModule,
+    AuditLogModule,
     AccountModule,
     AttendanceModule,
     UserModule,
@@ -49,6 +51,7 @@ import { MembershipModule } from './membership/membership.module';
     VolunteerJobModule,
     VolunteerWorkModule,
     MembershipModule,
+    AttendanceModule,
   ],
 })
 export class AppModule {}
