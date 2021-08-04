@@ -2,7 +2,7 @@ import {
   BaseEntity,
   Collection,
   Entity,
-  OneToMany,
+  ManyToMany,
   OneToOne,
   PrimaryKey,
   Property,
@@ -36,7 +36,10 @@ export class EventFee extends BaseEntity<EventFee, 'id'> {
   @OneToOne(() => Course, (c) => c.fee, { nullable: true })
   course?: Course;
 
-  @OneToMany(() => Invoice, (i) => i.fee)
+  @ManyToMany({
+    entity: () => Invoice,
+    owner: true,
+  })
   invoices = new Collection<Invoice>(this);
 
   get cost() {

@@ -92,8 +92,9 @@ export class PayPalService {
   public validateCapture(
     order: OrderDetails,
     status: OrderDetails['status'],
-    value: string,
+    value: string | string[],
   ) {
+    if (typeof value === 'string') value = [value];
     if (order.intent !== 'CAPTURE') {
       throw new BadRequestException('Order intent mismatch');
     }
@@ -103,7 +104,7 @@ export class PayPalService {
     }
 
     for (const purchase_unit of order.purchase_units) {
-      if (purchase_unit.amount!.value !== value) {
+      if (!value.includes(purchase_unit.amount!.value)) {
         throw new BadRequestException('Order cost mismatch');
       }
     }
@@ -203,6 +204,7 @@ export class PayPalService {
         return this.retryRequest(config);
       }
 
+      console.log(error);
       throw new HttpException(
         error?.response?.data,
         error?.response?.status || 500,

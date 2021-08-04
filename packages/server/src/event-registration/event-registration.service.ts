@@ -1,4 +1,9 @@
-import { EntityRepository, FilterQuery, FindOptions } from '@mikro-orm/core';
+import {
+  EntityManager,
+  EntityRepository,
+  FilterQuery,
+  FindOptions,
+} from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   BadRequestException,
@@ -33,6 +38,7 @@ export class EventRegistrationService {
     private readonly paypalService: PayPalService,
     private readonly eventService: EventService,
     private readonly userService: UserService,
+    private readonly em: EntityManager,
     private readonly auditLogService: AuditLogService,
     private readonly ac: AccessService,
   ) {}
@@ -75,7 +81,7 @@ export class EventRegistrationService {
     // Find any invoices for the provided users.
     await this.eventService.populate(event, ['fee.invoices'], {
       fee: {
-        invoices: { user: userIds },
+        invoices: { user: { id: { $in: userIds } } },
       },
     });
 
@@ -370,25 +376,28 @@ export class EventRegistrationService {
     for (const purchase_unit of capturedOrder.purchase_units) {
       const capture = purchase_unit.payments.captures![0];
 
-      createInvoiceDtos.push(
-        Object.assign(
-          {
-            status: InvoiceStatus.COMPLETED,
-            id: capture.id,
-            amount: capture.seller_receivable_breakdown.paypal_fee.value,
-            gross: capture.seller_receivable_breakdown.gross_amount.value,
-            net: capture.seller_receivable_breakdown.net_amount.value,
-            purchasedAt: new Date(capture.create_time),
-            fee,
-            user: +purchase_unit.reference_id!,
-          },
-          event.fee && { event },
-          event.course?.fee && { course: event.course },
-        ),
-      );
+      createInvoiceDtos.push({
+        status: InvoiceStatus.COMPLETED,
+        id: capture.id,
+        amount: capture.seller_receivable_breakdown.paypal_fee.value,
+        gross: capture.seller_receivable_breakdown.gross_amount.value,
+        net: capture.seller_receivable_breakdown.net_amount.value,
+        purchasedAt: new Date(capture.create_time),
+        user: +purchase_unit.reference_id!,
+      });
     }
 
-    return this.invoiceService.batchCreate(createInvoiceDtos);
+    const invoices = this.invoiceService.batchCreate(createInvoiceDtos);
+
+    if (event.course?.fee) {
+      event.course.fee.invoices.add(...invoices);
+    } else if (event.fee) {
+      event.fee.invoices.add(...invoices);
+    }
+
+    await this.em.flush();
+
+    return invoices;
   }
 
   /**

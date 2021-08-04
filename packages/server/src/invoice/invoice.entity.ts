@@ -32,15 +32,6 @@ export class Invoice extends BaseEntity<Invoice, 'id'> {
   @Property()
   net!: string;
 
-  @ManyToOne(() => EventFee)
-  fee!: EventFee;
-
-  @ManyToOne(() => Event, { nullable: true })
-  event?: Event;
-
-  @ManyToOne(() => Course, { nullable: true })
-  course?: Course;
-
   @ManyToOne(() => User, { eager: true })
   user!: User;
 }
