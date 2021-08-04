@@ -19,6 +19,7 @@ import { TwitterModule } from './twitter/twitter.module';
 import { UserModule } from './user/user.module';
 import { VolunteerJobModule } from './volunteer-job/volunteer-job.module';
 import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { ConfigModule } from './config/config.module';
 import { configSchema } from './config/config.schema';
 import { AuditLogModule } from './audit-log/audit-log.module';
@@ -49,6 +50,7 @@ import { AuditLogModule } from './audit-log/audit-log.module';
     SystemModule,
     VolunteerJobModule,
     VolunteerWorkModule,
+    AttendanceModule,
   ],
 })
 export class AppModule {}

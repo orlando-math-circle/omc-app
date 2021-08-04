@@ -85,6 +85,16 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
+
+          <v-list-item v-if="event.points" class="pl-0">
+            <v-list-item-avatar class="icon--bg rounded">
+              <v-icon color="primary">mdi-star-four-points-outline</v-icon>
+            </v-list-item-avatar>
+
+            <v-list-item-content>
+              <v-list-item-title>{{ event.points }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-card-text>
 
         <template v-if="event.description && event.description.length">
@@ -852,6 +862,47 @@ export default defineComponent({
 
       snackbar.success('Attendance submitted!')
       resetAttendanceState()
+    }
+
+    const { state: attendance, reset: resetAttendanceState } = useStateReset({
+      hours: 0,
+      job: undefined,
+    })
+
+    const onSubmitVolunteerAttendance = async (id: number) => {
+      await attendanceStore.create({
+        ...attendance,
+        attended: true,
+        userId: id,
+        eventId: +route.value.params.id,
+        hours: attendance.hours,
+        jobId: 1,
+        workId: 1,
+      })
+
+      if (attendanceStore.error) {
+        return snackbar.error(attendanceStore.error.message)
+      }
+
+      snackbar.success('Attendance submitted!')
+      resetAttendanceState()
+    }
+
+    const onSubmitAttendance = async (id: number) => {
+      await attendanceStore.create({
+        attended: true,
+        userId: id,
+        eventId: +route.value.params.id,
+        hours: 0,
+        jobId: 0,
+        workId: 0,
+      })
+
+      if (attendanceStore.error) {
+        return snackbar.error(attendanceStore.error.message)
+      }
+
+      snackbar.success('Attendance submitted!')
     }
 
     const onPaymentComplete = async () => {

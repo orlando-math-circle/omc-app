@@ -89,4 +89,8 @@ export class CreateEventDto {
   @IsOptional()
   @Type(() => Number)
   project?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  points?: number;
 }

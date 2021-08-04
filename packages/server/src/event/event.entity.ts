@@ -65,6 +65,9 @@ export class Event extends BaseEntity<Event, 'id'> {
   @Property()
   lateOffset: number = 0;
 
+  @Property({ nullable: true })
+  points?: number = 0;
+
   @Property({ default: [] })
   notified!: ReminderFreq[];
 
