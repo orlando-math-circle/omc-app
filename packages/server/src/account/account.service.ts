@@ -51,17 +51,39 @@ export class AccountService {
 
     user.assign(dto);
     user.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+
     account.primaryUser = user;
     account.users.add(user);
 
-    // Check if there is an admin override.
-    if (user.email === this.ADMIN_EMAIL) {
-      user.roles = [Roles.ADMIN];
-    }
+    await this.accountRepository.persist(account).flush();
 
-    await this.accountRepository.persistAndFlush(account);
     account.users.populated(true);
     account.primaryUser.populated(true);
+
+    // Check if there is an admin override.
+    if (user.email === this.ADMIN_EMAIL) {
+      user.roles.push(Roles.ADMIN);
+    }
+
+    // Send a verification email if the admin didn't pre-verify them.
+    if (!user.emailVerified) {
+      const token = this.authService.signJWT(
+        { email: account.primaryUser.email! },
+        undefined,
+        {
+          expiresIn: '2 days',
+        },
+      );
+
+      const email = new Email()
+        .setTemplate(this.config.MAILERSEND.TEMPLATES.VERIFY)
+        .setTo(account.primaryUser.email!, undefined, {
+          first_name: account.primaryUser.first,
+          verify_link: `${this.config.FILES.FRONTEND_URL}/verify?token=${token}`,
+        });
+
+      await this.emailService.send(email);
+    }
 
     return account;
   }
@@ -74,23 +96,6 @@ export class AccountService {
    */
   public async register(registerAccountDto: RegisterAccountDto) {
     const account = await this.create(registerAccountDto);
-
-    const token = this.authService.signJWT(
-      { email: account.primaryUser.email },
-      undefined,
-      {
-        expiresIn: '2 days',
-      },
-    );
-
-    const email = new Email()
-      .setTemplate(this.config.MAILERSEND.TEMPLATES.VERIFY)
-      .setTo(account.primaryUser.email!, undefined, {
-        first_name: account.primaryUser.first,
-        verify_link: `${this.config.FILES.FRONTEND_URL}/verify?token=${token}`,
-      });
-
-    await this.emailService.send(email);
 
     return this.authService.login(account, account.primaryUser);
   }
