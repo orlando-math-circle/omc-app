@@ -4,7 +4,7 @@ import { PERMISSION_METADATA } from '../../app.constants';
 import { AccessGuard } from '../guards/access-control.guard';
 import { AccountGuard } from '../guards/account.guard';
 import { UserGuard } from '../guards/user.guard';
-import { Permission } from '../interfaces/grant.interface';
+import { Permission, UserAuthFlags } from '../interfaces/grant.interface';
 
 /**
  * Controller decorator requiring at least a
@@ -27,6 +27,7 @@ export function UserAuth(): MethodDecorator;
 export function UserAuth(
   resource: string,
   permission: Permission,
+  flags?: UserAuthFlags,
 ): MethodDecorator;
 
 /**
@@ -36,11 +37,13 @@ export function UserAuth(
 export function UserAuth(
   resource: string,
   permissions: Permission[],
+  flags?: UserAuthFlags,
 ): MethodDecorator;
 
 export function UserAuth(
   resource?: string,
   permissions?: Permission | Permission[],
+  flags?: UserAuthFlags,
 ): MethodDecorator {
   if (!resource) return applyDecorators(UseGuards(UserGuard));
 
@@ -48,6 +51,7 @@ export function UserAuth(
     SetMetadata(PERMISSION_METADATA, {
       resource,
       permissions: Array.isArray(permissions) ? permissions : [permissions],
+      flags,
     }),
     UseGuards(AuthGuard('jwt'), AccessGuard),
   );
