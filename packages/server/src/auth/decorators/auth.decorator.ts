@@ -51,7 +51,7 @@ export function UserAuth(
     SetMetadata(PERMISSION_METADATA, {
       resource,
       permissions: Array.isArray(permissions) ? permissions : [permissions],
-      flags,
+      flags: flags || {},
     }),
     UseGuards(AuthGuard('jwt'), AccessGuard),
   );
