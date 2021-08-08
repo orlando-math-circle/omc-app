@@ -14,7 +14,6 @@ import {
 import { AuditLogService } from '@server/audit-log/audit-log.service';
 import { AuditType } from '@server/audit-log/enums/audit-type.enum';
 import { Account } from '../account/account.entity';
-import { Roles } from '../app.roles';
 import { Populate } from '../app.utils';
 import { AccessService } from '../auth/access.service';
 import { EventService } from '../event/event.service';
@@ -70,12 +69,8 @@ export class EventRegistrationService {
       'fee',
     ]);
 
-    if (event.isClosed) {
-      throw new BadRequestException('Event registrations are closed');
-    }
-
-    if (event.course?.isClosed) {
-      throw new BadRequestException('Course registrations are closed');
+    if (event.isClosed || event.course?.isClosed) {
+      throw new ForbiddenException();
     }
 
     // Find any invoices for the provided users.
@@ -251,9 +246,13 @@ export class EventRegistrationService {
    * Creates a new PayPal order for an event and the provides user(s)
    *
    * @param {number} eventId ID of the event to create the fee order.
-   * @param {Number[]} users Users for registration to generate orders.
+   * @param {Number[]} userIds Users for registration to generate orders.
    */
-  public async createOrder(eventId: number, account: Account, users: number[]) {
+  public async createOrder(
+    eventId: number,
+    account: Account,
+    userIds: number[],
+  ) {
     if (!account.primaryUser.emailVerified) {
       throw new ForbiddenException('Please validate your email');
     }
@@ -277,16 +276,16 @@ export class EventRegistrationService {
       ['fee.invoices', 'course.fee.invoices', 'registrations'],
       {
         fee: {
-          invoices: { user: users },
+          invoices: { user: userIds },
         },
         course: {
           fee: {
             invoices: {
-              user: users,
+              user: userIds,
             },
           },
         },
-        registrations: { user: { $in: users } },
+        registrations: { user: { $in: userIds } },
       },
     );
 
@@ -312,7 +311,7 @@ export class EventRegistrationService {
 
     const purchaseUnits: PurchaseUnitRequest[] = [];
 
-    for (const id of users) {
+    for (const id of userIds) {
       const user = account.users.getItems().find((u) => u.id === id);
 
       if (!user) {
@@ -423,16 +422,21 @@ export class EventRegistrationService {
     }
 
     // TODO: Add audit log.
-    await this.auditLogService.create({
-      userId: user.id,
-      changes: [{
-        new_value: user.id,
-        old_value: registration.user.id,
-      }],
-      user: user,
-      type: AuditType.VOLUNTEER_SWAP,
-      target_id: registration.event.name,
-    }, user);
+    await this.auditLogService.create(
+      {
+        userId: user.id,
+        changes: [
+          {
+            new_value: user.id,
+            old_value: registration.user.id,
+          },
+        ],
+        user: user,
+        type: AuditType.VOLUNTEER_SWAP,
+        target_id: registration.event.name,
+      },
+      user,
+    );
 
     registration.assign({ user, isCoverable: false });
 

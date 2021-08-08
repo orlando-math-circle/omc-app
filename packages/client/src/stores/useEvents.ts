@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { FindAllEventsDto } from '@server/event/dto/find-all-events.dto'
 import { Event } from '@server/event/event.entity'
+import { FindAllRegisteredEventsDto } from '@server/event/dto/find-all-registered-events.dto'
 import { CreateEventDto } from '@server/event/dto/create-event.dto'
 import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
 import { UpdateEventDto } from '@server/event/dto/update-event.dto'
@@ -60,6 +61,16 @@ export const useEvents = defineStore({
     },
     async delete(id: number, mode: EventMode) {
       await this.$nuxt.$axios.$delete(`/event/${id}/${mode}`)
+    },
+    createOrder(eventId: number, userIds: number[]) {
+      return this.$nuxt.$axios.$post(`/registration/order/create/${eventId}`, {
+        userIds,
+      })
+    },
+    captureOrder(eventId: number, orderId: number) {
+      return this.$nuxt.$axios.$post(
+        `/registration/order/capture/${eventId}/${orderId}`
+      )
     },
   },
 })

@@ -30,6 +30,9 @@ ac.grant(Roles.DEFAULT)
   .readOwn('file')
   .readAny('volunteer-job')
   .readAny('volunteer-work')
+  .createOwn('membership')
+  .updateOwn('membership')
+  .readOwn('membership')
   .grant(Roles.VOLUNTEER)
   .extend(Roles.DEFAULT)
   .createOwn('volunteer-registration')
@@ -77,6 +80,10 @@ ac.grant(Roles.DEFAULT)
   .createAny('volunteer-job')
   .updateAny('volunteer-job')
   .deleteAny('volunteer-job')
-  .createAny('email');
+  .createAny('email')
+  .createAny('membership')
+  .readAny('membership')
+  .updateAny('membership')
+  .deleteAny('membership');
 
 export default ac;

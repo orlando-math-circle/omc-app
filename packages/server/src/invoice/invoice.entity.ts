@@ -3,12 +3,12 @@ import {
   Entity,
   Enum,
   ManyToOne,
+  OneToOne,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import { Course } from '../course/course.entity';
-import { EventFee } from '../event-fee/event-fee.entity';
-import { Event } from '../event/event.entity';
+import { EventRegistration } from '../event-registration/event-registration.entity';
+import { Membership } from '../membership/membership.entity';
 import { User } from '../user/user.entity';
 import { InvoiceStatus } from './enums/invoice-status.enum';
 
@@ -31,6 +31,12 @@ export class Invoice extends BaseEntity<Invoice, 'id'> {
 
   @Property()
   net!: string;
+
+  @OneToOne(() => Membership, (m) => m.invoice, { nullable: true })
+  membership?: Membership;
+
+  @OneToOne(() => EventRegistration, (e) => e.invoice, { nullable: true })
+  registration?: EventRegistration;
 
   @ManyToOne(() => User, { eager: true })
   user!: User;

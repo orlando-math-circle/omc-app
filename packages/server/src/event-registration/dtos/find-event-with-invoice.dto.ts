@@ -7,5 +7,5 @@ export class FindEventWithInvoiceDto {
   readonly eventId!: number;
 
   @IsString()
-  readonly invoiceId!: string;
+  readonly orderId!: string;
 }

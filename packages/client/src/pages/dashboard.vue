@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@nuxtjs/composition-api'
-import { useAuth, useAttachments } from '@/stores'
+import { useAuth, useAttachments, useMembership } from '@/stores'
 
 export default defineComponent({
   setup() {
@@ -66,6 +66,7 @@ export default defineComponent({
   },
   async asyncData({ pinia }) {
     await Promise.all([
+      useMembership(pinia).findAll({ account: true, active: true }),
       useAuth(pinia).getMyAccount(),
       useAttachments(pinia).findAll('REDUCED_LUNCH_FIELD', true),
     ])

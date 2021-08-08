@@ -12,16 +12,46 @@ import { Account } from '../account/account.entity';
 import { MembershipService } from './membership.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { Acc } from '@server/auth/decorators/account.decorator';
-import { InvoiceDto } from './dto/invoice.dto';
+import { isBoolean } from 'lodash';
 
 @Controller('/membership')
 export class MembershipController {
   constructor(private readonly membershipService: MembershipService) {}
 
-  @UserAuth()
   @Post()
-  create(@Body() { users }: CreateMembershipDto, @Acc() account: Account) {
-    return this.membershipService.create(users, account);
+  @UserAuth('membership', 'create:any')
+  create(@Body() { userIds }: CreateMembershipDto) {
+    return this.membershipService.create(userIds);
+  }
+
+  @Get('/statuses')
+  @UserAuth()
+  getMembershipStatuses(@Acc() account: Account) {
+    return this.membershipService.getMembershipStatuses(account);
+  }
+
+  @Get()
+  @UserAuth()
+  findAll(
+    @Acc() account: Account,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+    @Query('account') byAccount?: boolean,
+    @Query('active') active?: boolean,
+  ) {
+    return this.membershipService.findAll(
+      {
+        ...(isBoolean(byAccount) && byAccount
+          ? {
+              user: { id: { $in: account.users.getIdentifiers() as number[] } },
+            }
+          : {}),
+        ...(isBoolean(active) && active
+          ? { expiresOn: { $gt: new Date() } }
+          : {}),
+      },
+      { limit, offset, populate: ['user'] },
+    );
   }
 
   @Get(':id')
@@ -35,20 +65,18 @@ export class MembershipController {
     return this.membershipService.delete(id);
   }
 
-  @UserAuth()
   @Post('/order/create/')
-  createOrder(@Acc() account: Account, @Body() { users }: CreateMembershipDto) {
-    return this.membershipService.createOrder(account, users);
+  @UserAuth('membership', 'create:own', { verified: true })
+  createOrder(
+    @Acc() account: Account,
+    @Body() { userIds }: CreateMembershipDto,
+  ) {
+    return this.membershipService.createOrder(account, userIds);
   }
 
-  @UserAuth()
-  @Post('/order/capture/:invoiceId')
-  captureOrder(@Param() { invoiceId }: InvoiceDto) {
-    return this.membershipService.captureOrder(invoiceId);
-  }
-
-  @Get()
-  findAll(@Query('limit') limit: number, @Query('offset') offset: number) {
-    return this.membershipService.findAll(limit, offset);
+  @UserAuth('membership', 'create:own', { verified: true })
+  @Post('/order/capture/:orderId')
+  captureOrder(@Param('orderId') orderId: string) {
+    return this.membershipService.captureOrder(orderId);
   }
 }
