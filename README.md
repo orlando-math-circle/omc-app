@@ -4,7 +4,7 @@
 
 <p align="center">
   <img src="https://forthebadge.com/images/badges/made-with-typescript.svg?sanitize=true" height="28px" />
-  <img src="https://img.shields.io/codecov/c/github/duckies/omc-app?style=for-the-badge&token=BECI5FX2MP" height="28px" />
+  <img src="https://img.shields.io/codecov/c/github/orlando-math-circle/omc-app?style=for-the-badge&token=BECI5FX2MP" height="28px" />
   <img src="https://forthebadge.com/images/badges/powered-by-black-magic.svg?sanitize=true" height="28px" />
 </p>
 
