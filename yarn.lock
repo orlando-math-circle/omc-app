@@ -3213,7 +3213,7 @@ __metadata:
     "@nestjs/schematics": 7.3.1
     "@nestjs/testing": 7.6.18
     "@types/bcrypt": 5.0.0
-    "@types/cache-manager": 3.4.0
+    "@types/cache-manager": 3.4.2
     "@types/express": 4.17.12
     "@types/jest": 26.0.23
     "@types/jsonwebtoken": 8.5.2
@@ -3798,10 +3798,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cache-manager@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@types/cache-manager@npm:3.4.0"
-  checksum: 11a5d923d246e5956e23ccf6e02126c4abf1c1e57e057cd5fa758941e54eb764c504137d4623bc0a972e68edfc37f241bfd0b316f176e1211fbc2c36846e097e
+"@types/cache-manager@npm:3.4.2":
+  version: 3.4.2
+  resolution: "@types/cache-manager@npm:3.4.2"
+  checksum: 8e2e809a70e57ad9bdb943f9922cdb7916dbb90164f6a9607f0903058b00a4a1f131bb2f8bb985cf94cc01226e17b8c676973c166ae5e9c0c3efeb60319b6208
   languageName: node
   linkType: hard
 
