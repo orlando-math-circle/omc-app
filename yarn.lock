@@ -3143,7 +3143,7 @@ __metadata:
     "@tiptap/extension-underline": 2.0.0-beta.15
     "@tiptap/starter-kit": 2.0.0-beta.81
     "@tiptap/vue-2": 2.0.0-beta.39
-    "@types/dropzone": 5.7.3
+    "@types/dropzone": 5.7.4
     "@types/lodash": 4.14.170
     "@vue/runtime-dom": 3.1.2
     "@vueuse/core": 5.0.3
@@ -3868,12 +3868,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dropzone@npm:5.7.3":
-  version: 5.7.3
-  resolution: "@types/dropzone@npm:5.7.3"
+"@types/dropzone@npm:5.7.4":
+  version: 5.7.4
+  resolution: "@types/dropzone@npm:5.7.4"
   dependencies:
     "@types/jquery": "*"
-  checksum: 1db33d39dceb3f0f8fa7c5e65600e1bf051999ca4c67ac43dd1513c71425157679fc443cf0b8032f10da76003d6e4dfb65ae6710e9f2f373b047e33507359194
+  checksum: 1cd7f1cc00dd5efcc00002357225450d6e149e8f1b52c9d57abc8acf91dc2d626d91d3734dd05dbf22c62f762e91e71a0cc53835d297688deec6ffd25fe222f0
   languageName: node
   linkType: hard
 
