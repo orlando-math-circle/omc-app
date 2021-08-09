@@ -46,10 +46,6 @@ jobs:
           PAYPAL_SECRET_KEY: ${{ secrets.PAYPAL_SECRET_KEY }}
 
       - name: Codecov
-<<<<<<< HEAD
         uses: codecov/codecov-action@v2
-=======
-        uses: codecov/codecov-action@v1
->>>>>>> bf5666ef84358da77af94661b3cc4f7d7c71397b
         with:
           directory: packages/server/coverage
