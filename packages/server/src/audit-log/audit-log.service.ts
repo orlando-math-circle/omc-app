@@ -1,11 +1,11 @@
-import { EntityRepository, FilterQuery, FindOptions } from "@mikro-orm/core";
-import { InjectRepository } from "@mikro-orm/nestjs";
-import { Injectable } from "@nestjs/common";
-import { User } from "@server/user/user.entity";
-import { UserService } from "@server/user/user.service";
-import { AuditLog } from "./audit-log.entity";
-import { AuditLogDto } from "./dto/audit-log.dto";
-import { AuditType } from "./enums/audit-type.enum";
+import { EntityRepository, FilterQuery, FindOptions } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { Injectable } from '@nestjs/common';
+import { User } from '@server/user/user.entity';
+import { UserService } from '@server/user/user.service';
+import { AuditLog } from './audit-log.entity';
+import { AuditLogDto } from './dto/audit-log.dto';
+import { AuditType } from './enums/audit-type.enum';
 
 @Injectable()
 export class AuditLogService {
@@ -20,22 +20,32 @@ export class AuditLogService {
    *
    * @param dto Properties of the primary user.
    */
-  async create({userId, changes, type, target_id}: AuditLogDto, user: User) {
+  async create({ userId, changes, type, target_id }: AuditLogDto, user: User) {
     var message: string | undefined;
 
     if (type === AuditType.VOLUNTEER_SWAP) {
-      const coverUser = await this.userService.findOneOrFail(changes[0].new_value);
-      const swapUser = await this.userService.findOneOrFail(changes[0].old_value);
-      message = coverUser.name + " swapped volunteer shifts with " + swapUser.name + " for event " + target_id + ".";
+      const coverUser = await this.userService.findOneOrFail(
+        changes[0].new_value,
+      );
+      const swapUser = await this.userService.findOneOrFail(
+        changes[0].old_value,
+      );
+      message =
+        coverUser.name +
+        ' swapped volunteer shifts with ' +
+        swapUser.name +
+        ' for event ' +
+        target_id +
+        '.';
     }
 
     const auditEntry = this.auditLogRepository.create({
-        userId: userId,
-        user: user,
-        createdAt: new Date().toLocaleString(),
-        message: message,
+      userId: userId,
+      user: user,
+      createdAt: new Date().toLocaleString(),
+      message: message,
     });
-    
+
     this.auditLogRepository.persist(auditEntry);
     return auditEntry;
   }
@@ -46,10 +56,7 @@ export class AuditLogService {
   }
 
   public findAll(limit: number, offset: number) {
-    return this.auditLogRepository.findAndCount(
-      {},
-      { limit, offset},
-    );
+    return this.auditLogRepository.findAndCount({}, { limit, offset });
   }
 
   public findOne(id: number) {

@@ -1,25 +1,25 @@
 import { Type } from 'class-transformer';
-import { ManyToOne } from "@mikro-orm/core";
-import { User } from "@server/user/user.entity";
-import { IsDate, IsNumber, IsOptional, IsString } from "class-validator";
+import { ManyToOne } from '@mikro-orm/core';
+import { User } from '@server/user/user.entity';
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 import { AuditChange } from '../interfaces/audit-change.interface';
 import { AuditType } from '../enums/audit-type.enum';
 
 export class AuditLogDto {
-    @IsNumber()
-    userId!: number;
+  @IsNumber()
+  userId!: number;
 
-    @IsOptional()
-    @IsDate()
-    @Type(() => Date)
-    createdAt?: Date;
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  createdAt?: Date;
 
-    changes!: AuditChange[];
+  changes!: AuditChange[];
 
-    user!: User;
+  user!: User;
 
-    type!: AuditType;
+  type!: AuditType;
 
-    @IsString()
-    target_id!: string;
+  @IsString()
+  target_id!: string;
 }

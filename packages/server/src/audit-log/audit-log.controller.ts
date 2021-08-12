@@ -1,9 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
-import { Usr } from "@server/auth/decorators/user.decorator";
-import { User } from "@server/user/user.entity";
-import { AuditLogService } from "./audit-log.service";
-import { AuditLogDto } from "./dto/audit-log.dto";
-
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { Usr } from '@server/auth/decorators/user.decorator';
+import { User } from '@server/user/user.entity';
+import { AuditLogService } from './audit-log.service';
+import { AuditLogDto } from './dto/audit-log.dto';
 
 @Controller('/auditLog')
 export class AuditLogController {
@@ -20,10 +27,7 @@ export class AuditLogController {
   }
 
   @Get()
-  findAll(
-    @Query('limit') limit: number,
-    @Query('offset') offset: number,
-  ) {
+  findAll(@Query('limit') limit: number, @Query('offset') offset: number) {
     return this.auditLogService.findAll(limit, offset);
   }
 

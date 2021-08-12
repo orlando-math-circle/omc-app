@@ -101,7 +101,10 @@ export class User extends BaseEntity<User, 'id'> {
   }
 
   /**
-   * Obtains the cumulative volunteer hours if the work relation is loaded.
+   * The summation of volunteer hours for a user.
+   *
+   * If the user's work orders are not initialized,
+   * this will return null.
    */
   @Property({ persist: false })
   get volunteerHours() {
