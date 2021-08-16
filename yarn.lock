@@ -3161,7 +3161,7 @@ __metadata:
     lodash: 4.17.21
     nuxt: 2.15.7
     nuxt-dropzone: 1.0.4
-    pinia: 0.5.2
+    pinia: 0.5.4
     prettier: 2.3.1
     rrule: 2.6.8
     sass: 1.32.13
@@ -16394,10 +16394,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"pinia@npm:0.5.2":
-  version: 0.5.2
-  resolution: "pinia@npm:0.5.2"
-  checksum: 0dee102deff4be6b13f618748281c23918ecbe3c5b09b61ca0199ba7e11ecb93b8264227bc7a14d18a993fbbf67db3f9460ccfa26826fcd6a0c696ea98055c9e
+"pinia@npm:0.5.4":
+  version: 0.5.4
+  resolution: "pinia@npm:0.5.4"
+  checksum: 358036e885562182423ebd1055445dd56dc74742a912f20f0278754bc28ef4b9e972c8152d7ca8bf0cb70ad3c6985f51bd7d149c961b98b8c3a971f012fc3cb5
   languageName: node
   linkType: hard
 
