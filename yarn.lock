@@ -2105,14 +2105,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mikro-orm/cli@npm:4.5.6":
-  version: 4.5.6
-  resolution: "@mikro-orm/cli@npm:4.5.6"
+"@mikro-orm/cli@npm:4.5.9":
+  version: 4.5.9
+  resolution: "@mikro-orm/cli@npm:4.5.9"
   dependencies:
-    "@mikro-orm/core": ^4.5.6
-    "@mikro-orm/entity-generator": ^4.5.6
-    "@mikro-orm/knex": ^4.5.6
-    "@mikro-orm/migrations": ^4.5.6
+    "@mikro-orm/core": ^4.5.9
+    "@mikro-orm/entity-generator": ^4.5.9
+    "@mikro-orm/knex": ^4.5.9
+    "@mikro-orm/migrations": ^4.5.9
     ansi-colors: 4.1.1
     cli-table3: 0.6.0
     fs-extra: 9.1.0
@@ -2138,11 +2138,11 @@ __metadata:
       optional: true
   bin:
     mikro-orm: cli.js
-  checksum: 26cdce05a8ab1e3025c3bc91ac0aa224eef60dd8b334cea31d36646c4f7dbd04a38f4d4f5c251746c96c8eb5ff4f39da11807bf0423bd20bb87025fb1630b365
+  checksum: f2430387cfe6672af35bc7e5460d6013ff3f05cb50a5c0d6988224a306c195e5648bf4f9a4a7b006addf9f262e9f29c74890d13869552e8cd83874e0aaf0ca1d
   languageName: node
   linkType: hard
 
-"@mikro-orm/core@npm:4.5.6, @mikro-orm/core@npm:^4.5.6":
+"@mikro-orm/core@npm:4.5.6":
   version: 4.5.6
   resolution: "@mikro-orm/core@npm:4.5.6"
   dependencies:
@@ -2181,15 +2181,54 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mikro-orm/entity-generator@npm:^4.5.6":
-  version: 4.5.6
-  resolution: "@mikro-orm/entity-generator@npm:4.5.6"
+"@mikro-orm/core@npm:^4.5.9":
+  version: 4.5.9
+  resolution: "@mikro-orm/core@npm:4.5.9"
   dependencies:
-    "@mikro-orm/knex": ^4.5.6
+    ansi-colors: 4.1.1
+    clone: 2.1.2
+    dotenv: 8.2.0
+    escaya: 0.0.61
+    fs-extra: 9.1.0
+    globby: 11.0.3
+    reflect-metadata: 0.1.13
+    strip-json-comments: 3.1.1
+  peerDependencies:
+    "@mikro-orm/entity-generator": ^4.0.0
+    "@mikro-orm/mariadb": ^4.0.0
+    "@mikro-orm/migrations": ^4.0.0
+    "@mikro-orm/mongodb": ^4.0.0
+    "@mikro-orm/mysql": ^4.0.0
+    "@mikro-orm/postgresql": ^4.0.0
+    "@mikro-orm/sqlite": ^4.0.0
+  peerDependenciesMeta:
+    "@mikro-orm/entity-generator":
+      optional: true
+    "@mikro-orm/mariadb":
+      optional: true
+    "@mikro-orm/migrations":
+      optional: true
+    "@mikro-orm/mongodb":
+      optional: true
+    "@mikro-orm/mysql":
+      optional: true
+    "@mikro-orm/postgresql":
+      optional: true
+    "@mikro-orm/sqlite":
+      optional: true
+  checksum: 4c12f6f257608690504cb6c77e520f59860614f379991039642903268862904e86554e426dda6a5626c2188103b974b96ba3cd542a5f6ec18fa600a47e7aa3bd
+  languageName: node
+  linkType: hard
+
+"@mikro-orm/entity-generator@npm:^4.5.9":
+  version: 4.5.9
+  resolution: "@mikro-orm/entity-generator@npm:4.5.9"
+  dependencies:
+    "@mikro-orm/knex": ^4.5.9
     fs-extra: 9.1.0
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
-  checksum: 50db541ae42ffabe28edb7a443ffeab8f4fca10bd3d53950fca20362cd9db19806db066d6e91f0070ca9350b66b0443fa4404fce3e8ccd74f7f426b2ed39f7a2
+  checksum: 0c4a54f0f97b6539eb1cf5d00a1edf0cf92d7b9661bab79df382d475219b2f50103232daceb1456c672de60cd9b004294db1fd4901ec83d8966d48f78fd29aed
   languageName: node
   linkType: hard
 
@@ -2228,7 +2267,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mikro-orm/migrations@npm:4.5.6, @mikro-orm/migrations@npm:^4.5.6":
+"@mikro-orm/knex@npm:^4.5.9":
+  version: 4.5.9
+  resolution: "@mikro-orm/knex@npm:4.5.9"
+  dependencies:
+    fs-extra: 9.1.0
+    knex: 0.21.19
+    sqlstring: 2.3.2
+  peerDependencies:
+    "@mikro-orm/core": ^4.0.0
+    "@mikro-orm/entity-generator": ^4.0.0
+    "@mikro-orm/migrations": ^4.0.0
+    mssql: ^7.0.0
+    mysql: ^2.18.1
+    mysql2: ^2.1.0
+    pg: ^8.0.3
+    sqlite3: ^5.0.0
+  peerDependenciesMeta:
+    "@mikro-orm/entity-generator":
+      optional: true
+    "@mikro-orm/migrations":
+      optional: true
+    mssql:
+      optional: true
+    mysql:
+      optional: true
+    mysql2:
+      optional: true
+    pg:
+      optional: true
+    sqlite3:
+      optional: true
+  checksum: dfcbc3c4868a3f7278627ddf0e4d2a94b42d67d8c94dd63af048bd3a3d87aab793e4048de4b07b0caac05c95e28ef39e55ac5197b4671a648dc7cba9bd1d2d19
+  languageName: node
+  linkType: hard
+
+"@mikro-orm/migrations@npm:4.5.6":
   version: 4.5.6
   resolution: "@mikro-orm/migrations@npm:4.5.6"
   dependencies:
@@ -2240,6 +2314,21 @@ __metadata:
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
   checksum: 65134861878a45153ee42b9c2b6980af903841e829c147ca3443e0a9079e57b98ac87af4d2de93a0fa5c2ccde98668618e418d27d9b988c2c50ff2695c77809f
+  languageName: node
+  linkType: hard
+
+"@mikro-orm/migrations@npm:^4.5.9":
+  version: 4.5.9
+  resolution: "@mikro-orm/migrations@npm:4.5.9"
+  dependencies:
+    "@mikro-orm/knex": ^4.5.9
+    "@types/umzug": 2.3.0
+    fs-extra: 9.1.0
+    knex: 0.21.19
+    umzug: 2.3.0
+  peerDependencies:
+    "@mikro-orm/core": ^4.0.0
+  checksum: 4356e68d61bcf55c5f06118634c612e5b4fedcc41c5537d94f325a62a0b58e9eaeece553eeefce15ec00f884fafd81ac2d44aa27d73e08a2dbfba1c3b3296997
   languageName: node
   linkType: hard
 
@@ -3196,7 +3285,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/server@workspace:packages/server"
   dependencies:
-    "@mikro-orm/cli": 4.5.6
+    "@mikro-orm/cli": 4.5.9
     "@mikro-orm/core": 4.5.6
     "@mikro-orm/knex": 4.5.6
     "@mikro-orm/migrations": 4.5.6
