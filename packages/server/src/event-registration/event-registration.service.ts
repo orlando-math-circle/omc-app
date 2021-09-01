@@ -11,9 +11,10 @@ import {
   HttpException,
   NotFoundException,
 } from '@nestjs/common';
-import { AuditLogService } from '@server/audit-log/audit-log.service';
-import { AuditType } from '@server/audit-log/enums/audit-type.enum';
 import { Account } from '../account/account.entity';
+import { ActivityRecord } from '../activity-record/activity-record.entity';
+import { ActivityRecordChangeKey } from '../activity-record/enums/activity-record-change-key.enum';
+import { ActivityRecordEvent } from '../activity-record/enums/activity-record-event.enum';
 import { Populate } from '../app.utils';
 import { AccessService } from '../auth/access.service';
 import { EventService } from '../event/event.service';
@@ -38,7 +39,6 @@ export class EventRegistrationService {
     private readonly eventService: EventService,
     private readonly userService: UserService,
     private readonly em: EntityManager,
-    private readonly auditLogService: AuditLogService,
     private readonly ac: AccessService,
   ) {}
 
@@ -421,22 +421,18 @@ export class EventRegistrationService {
       throw new BadRequestException('Course registrations are closed');
     }
 
-    // TODO: Add audit log.
-    await this.auditLogService.create(
-      {
-        userId: user.id,
-        changes: [
-          {
-            new_value: user.id,
-            old_value: registration.user.id,
-          },
-        ],
-        user: user,
-        type: AuditType.VOLUNTEER_SWAP,
-        target_id: registration.event.name,
-      },
+    const auditLog = new ActivityRecord(
+      ActivityRecordEvent.VOLUNTEER_SWAP_COMPLETE,
       user,
+      registration,
+      {
+        key: ActivityRecordChangeKey.OWNER,
+        newValue: user.id,
+        oldValue: registration.user.id,
+      },
     );
+
+    this.registrationRepository.persist(auditLog);
 
     registration.assign({ user, isCoverable: false });
 

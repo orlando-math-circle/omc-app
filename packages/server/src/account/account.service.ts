@@ -12,6 +12,8 @@ import { classToPlain } from 'class-transformer';
 import { BCRYPT_ROUNDS } from '../app.constants';
 import { Roles } from '../app.roles';
 import { isNumber } from '../app.utils';
+import { ActivityRecordService } from '../activity-record/activity-record.service';
+import { ActivityRecordEvent } from '../activity-record/enums/activity-record-event.enum';
 import { AuthService } from '../auth/auth.service';
 import { ConfigService } from '../config/config.service';
 import { Email } from '../email/email.class';
@@ -28,6 +30,7 @@ export class AccountService {
   constructor(
     @InjectRepository(Account)
     private readonly accountRepository: EntityRepository<Account>,
+    private readonly auditLogService: ActivityRecordService,
     private readonly emailService: EmailService,
     private readonly authService: AuthService,
     private readonly config: ConfigService,
@@ -83,6 +86,12 @@ export class AccountService {
         });
 
       await this.emailService.send(email);
+
+      await this.auditLogService.create({
+        type: ActivityRecordEvent.EMAIL_ACCOUNT_CREATE,
+        userId: undefined,
+        targetId: account.primaryUser.id.toString(),
+      });
     }
 
     return account;

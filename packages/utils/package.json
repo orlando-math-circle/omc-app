@@ -1,20 +1,12 @@
 {
-  "name": "@omc/shared",
+  "name": "@omc/utils",
   "version": "1.0.0",
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "tsc -p tsconfig.json -W",
-    "build": "tsc -p tsconfig.json",
-    "start": "dist/index.js"
-  },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "all"
-  },
-  "dependencies": {
-    "luxon": "2.0.2"
+    "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
     "typescript": "4.3.5"

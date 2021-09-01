@@ -23,9 +23,9 @@
     "cropperjs": "1.5.12",
     "date-fns": "2.23.0",
     "lodash": "4.17.21",
-    "nuxt": "2.15.7",
+    "nuxt": "2.15.8",
     "nuxt-dropzone": "1.0.4",
-    "pinia": "0.5.3",
+    "pinia": "0.5.4",
     "rrule": "2.6.8",
     "vee-validate": "3.4.11",
     "vue-apexcharts": "1.6.2",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@nuxt/postcss8": "1.1.3",
-    "@nuxt/types": "2.15.7",
+    "@nuxt/types": "2.15.8",
     "@nuxt/typescript-build": "2.1.0",
     "@nuxtjs/eslint-config-typescript": "6.0.1",
     "@types/lodash": "4.14.172",
@@ -47,6 +47,7 @@
     "prettier": "2.3.2",
     "sass": "1.32.13",
     "sass-loader": "10.2.0",
+    "unplugin-vue2-script-setup": "0.5.5",
     "vuetify": "2.5.8"
   },
   "prettier": {

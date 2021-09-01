@@ -9,7 +9,8 @@
     "client": "yarn workspace @omc/client",
     "server": "yarn workspace @omc/server",
     "shared": "yarn workspace @omc/shared",
-    "docs": "yarn workspace @omc/docs"
+    "docs": "yarn workspace @omc/docs",
+    "utils": "yarn workspace @omc/utils"
   },
   "workspaces": [
     "packages/*"
