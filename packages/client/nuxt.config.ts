@@ -82,6 +82,7 @@ const config: NuxtConfig = {
     '@server': resolve(__dirname, '../server/src'),
     '@shared': resolve(__dirname, '../shared/src'),
   },
+  css: ['~/assets/styles/global.scss'],
   build: {
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
