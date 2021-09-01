@@ -62,7 +62,7 @@
           <template v-if="isAdmin">
             <v-divider />
 
-            <v-list-item v-if="isAdmin" link to="/admin">
+            <v-list-item link to="/admin">
               <v-list-item-icon>
                 <v-icon>mdi-view-dashboard-outline</v-icon>
               </v-list-item-icon>

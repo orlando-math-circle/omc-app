@@ -74,7 +74,7 @@
               <v-list-item-title>Registrations</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-          
+
           <v-list-item link to="/admin/calendar/attendance">
             <v-list-item-icon>
               <v-icon>mdi-circle-medium</v-icon>
@@ -288,6 +288,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+@import '~/assets/styles/global.scss';
+
 .appbar {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
 }
