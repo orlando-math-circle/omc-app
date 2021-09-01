@@ -65,8 +65,10 @@ const config: NuxtConfig = {
   ],
   components: ['~/components', '~/components/inputs'],
   buildModules: [
-    '@nuxt/typescript-build',
+    ['@nuxt/typescript-build', { typeCheck: false }],
     '@nuxtjs/composition-api/module',
+    'unplugin-vue2-script-setup/nuxt',
+    // ['unplugin-auto-import/nuxt', { imports: ['@nuxtjs/composition-api'] }],
     '@nuxt/postcss8',
     'pinia/nuxt',
   ],
@@ -76,19 +78,11 @@ const config: NuxtConfig = {
     browserBaseURL: process.env.AXIOS_BROWSER_BASE_URL || undefined,
     proxyHeaders: false,
   },
-  typescript: {
-    typeCheck: false,
-  },
-  cli: {
-    bannerColor: 'magenta',
-    badgeMessages: ['Orlando Math Circle'],
-  },
   alias: {
     '@server': resolve(__dirname, '../server/src'),
     '@shared': resolve(__dirname, '../shared/src'),
   },
   build: {
-    parallel: true,
     transpile: ['vuetify/lib', 'vee-validate/dist/rules'],
     plugins: [new VuetifyLoaderPlugin()],
     loaders: {

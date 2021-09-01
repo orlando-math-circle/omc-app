@@ -229,7 +229,11 @@ export default defineComponent({
       })
 
       if (accountStore.error) {
-        snackbar.error(accountStore.error.message)
+        if (accountStore.error.status === 409) {
+          snackbar.error('A user with that email already exists')
+        } else {
+          snackbar.error(accountStore.error.message)
+        }
       } else {
         snackbar.success('Account Created')
         emit('create:account')

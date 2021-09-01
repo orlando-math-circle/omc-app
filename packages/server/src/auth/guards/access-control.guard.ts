@@ -20,6 +20,14 @@ export class AccessGuard {
     return req.usr.roles;
   }
 
+  getUserVerified(ctx: ExecutionContext) {
+    const req = ctx.switchToHttp().getRequest();
+
+    if (!req.usr) throw new UnauthorizedException();
+
+    return req.usr.emailVerified;
+  }
+
   canActivate(ctx: ExecutionContext) {
     const grant = this.reflector.get<TransformedGrant>(
       PERMISSION_METADATA,
@@ -38,9 +46,13 @@ export class AccessGuard {
       action: permission,
     }));
 
-    const hasPermission = grants.every(
+    let hasPermission = grants.every(
       (grant) => this.ac.permission(grant).granted,
     );
+
+    if (grant.flags.verified) {
+      hasPermission &&= this.getUserVerified(ctx);
+    }
 
     return hasPermission;
   }

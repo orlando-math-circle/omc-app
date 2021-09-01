@@ -1,63 +1,11 @@
 <template>
   <div>
-    <AdminHeader title="Activity" :breadcrumbs="breadcrumbs">
-      <v-row>
-        <v-col cols="auto" align-self="center">
-          <v-btn @click="filters.panel = !filters.panel">
-            Filters <v-icon>mdi-filter-variant</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </AdminHeader>
+    <AdminHeader title="Activity" :breadcrumbs="breadcrumbs" />
 
     <v-row>
       <v-col>
         <v-card>
-          <v-toolbar v-if="filters.panel" flat class="pa-3">
-            <v-row>
-              <v-col>
-                <v-select
-                  v-model="filters.names"
-                  :items="names"
-                  label="Names"
-                  outlined
-                  multiple
-                  hide-details="auto"
-                  clearable
-                  @change="findAll()"
-                >
-                </v-select>
-              </v-col>
-            </v-row>
-          </v-toolbar>
-
           <v-card-title>
-            <v-menu offset-y>
-              <template #activator="{ on, attrs }">
-                <v-btn
-                  :disabled="!selected.length"
-                  v-bind="attrs"
-                  color="primary"
-                  v-on="on"
-                >
-                  Actions
-                  <v-icon>mdi-chevron-down</v-icon>
-                </v-btn>
-              </template>
-
-              <v-list nav dense>
-                <v-list-item @click="onDelete">
-                  <v-list-item-icon>
-                    <v-icon>mdi-delete-circle</v-icon>
-                  </v-list-item-icon>
-
-                  <v-list-item-content>
-                    <v-list-item-title>Delete</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-
             <v-spacer />
 
             <v-text-field
@@ -77,14 +25,20 @@
           </v-card-title>
 
           <v-data-table-paginated
-            v-model="selected"
             :headers="headers"
-            :items="logs"
+            :items="records"
             :loading="isLoading"
-            show-select
           >
             <template #[`item.id`]="{ item }">
               # <LinkCopy :text="item.id" />
+            </template>
+
+            <template #[`item.description`]="{ item }">
+              <RecordDescription :record="item" />
+            </template>
+
+            <template #[`item.createdAt`]="{ item }">
+              {{ format(item.createdAt, "EEE, MMM do, yyyy 'at' h:mmaaa") }}
             </template>
           </v-data-table-paginated>
         </v-card>
@@ -94,16 +48,14 @@
 </template>
 
 <script lang="ts">
+import { useDates, useDebouncedRef } from '@/composables'
+import { useActivityRecords } from '@/stores'
 import {
   computed,
   defineComponent,
-  reactive,
   useFetch,
-  toRefs,
   watch,
 } from '@nuxtjs/composition-api'
-import { useUsers, useAuditLogs, useSnackbar } from '@/stores'
-import { useDebouncedRef } from '@/composables'
 
 const breadcrumbs = [
   {
@@ -119,55 +71,33 @@ export default defineComponent({
   layout: 'admin',
   transition: 'admin',
   setup() {
-    const userStore = useUsers()
-    const snackbar = useSnackbar()
-    const auditLogStore = useAuditLogs()
-
-    const state = reactive({
-      selected: [] as number[],
-      selection: null as number | null,
-      options: null,
-      filters: {
-        panel: false,
-        names: [],
-      },
-    })
+    const activityStore = useActivityRecords()
+    const dates = useDates()
 
     const search = useDebouncedRef<string | null>('')
+    const isLoading = computed(() => activityStore.isLoading)
+    const records = computed(() => activityStore.records)
 
     const headers = [
-      { text: 'ID', value: 'id' },
-      { text: 'Message', value: 'message' },
+      { text: 'Id', value: 'id' },
+      { text: 'Description', value: 'description' },
       { text: 'Date', value: 'createdAt' },
     ]
-        
-    const findAll = async () => {
-      await auditLogStore.findAll()
-    }
 
-    const onDelete = async () => {
-      await auditLogStore.delete(state.selection)
-
-      if (auditLogStore.error) {
-        snackbar.error('Unable to delete audit record')
-      }
-
-      snackbar.success('Audit record successfully deleted')
-    }
+    const findAll = async () => await activityStore.findAll()
 
     useFetch(async () => await findAll())
-    watch(search, async () => await findAll())
+    // TODO: Search does nothing currently.
+    watch(search, findAll)
 
     return {
-      ...toRefs(state),
       search,
+      records,
       headers,
+      isLoading,
       breadcrumbs,
-      users: computed(() => userStore.users),
-      logs: computed(() => auditLogStore.auditLogs.reverse()),
-      isLoading: computed(() => auditLogStore.isLoading),
       findAll,
-      onDelete,
+      format: dates.format,
     }
   },
   head: {

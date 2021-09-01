@@ -11,7 +11,8 @@
       "@nuxtjs/axios",
       "cookie-universal-nuxt",
       "vuetify",
-      "pinia/nuxt/types"
+      "pinia/nuxt/types",
+      "unplugin-vue2-script-setup/types"
     ]
   },
   "include": ["src/**/*", "types/**/*"]

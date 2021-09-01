@@ -75,15 +75,15 @@ export class EventRegistrationController {
   createOrder(
     @Param('id') id: number,
     @Acc() account: Account,
-    @Body() { users }: CreateOrderDto,
+    @Body() { userIds }: CreateOrderDto,
   ) {
-    return this.registrationService.createOrder(id, account, users);
+    return this.registrationService.createOrder(id, account, userIds);
   }
 
   @UserAuth('event-registration', 'create:own')
-  @Post('/order/capture/:eventId/:invoiceId')
-  captureOrder(@Param() { eventId, invoiceId }: FindEventWithInvoiceDto) {
-    return this.registrationService.captureOrder(invoiceId, eventId);
+  @Post('/order/capture/:eventId/:orderId')
+  captureOrder(@Param() { orderId, eventId }: FindEventWithInvoiceDto) {
+    return this.registrationService.captureOrder(orderId, eventId);
   }
 
   @Post('/swap/:id')

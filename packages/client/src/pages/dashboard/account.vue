@@ -26,13 +26,18 @@
 
               <v-list-item-subtitle>
                 <span>{{ gender(user) }}</span>
+
                 <span v-if="typeof user.grade === 'number'">
-                  <v-icon x-small>mdi-circle-medium</v-icon>
+                  <v-icon small>mdi-circle-medium</v-icon>
                   {{ grades[user.grade].text }}
                 </span>
 
-                <span v-if="user.activeMember">
-                  <v-icon x-small>mdi-circle-medium</v-icon>
+                <span
+                  v-if="
+                    statuses.find((s) => s.user.id === user.id && s.isMember)
+                  "
+                >
+                  <v-icon small>mdi-circle-medium</v-icon>
                   Member
                 </span>
               </v-list-item-subtitle>
@@ -86,13 +91,16 @@
       <v-card-actions>
         <DialogCreateUser>
           <template #activator="{ on, attrs }">
-            <v-btn block rounded v-bind="attrs" v-on="on">Add User</v-btn>
+            <v-btn block rounded color="secondary" v-bind="attrs" v-on="on">
+              Add User
+            </v-btn>
           </template>
         </DialogCreateUser>
       </v-card-actions>
     </v-card>
 
-    <v-row v-if="unregisteredMembers.length" class="mt-3">
+    <!-- Membership Signup -->
+    <v-row v-if="nonMemberStatuses.length" class="mt-3">
       <v-col cols="12">
         <v-stepper v-model="step">
           <v-stepper-items>
@@ -100,43 +108,53 @@
               <v-card>
                 <v-card-title>Membership</v-card-title>
 
-                <v-card-subtitle
-                  >Select the account users you wish to register for a
-                  membership.</v-card-subtitle
-                >
+                <v-card-subtitle>
+                  Select the account users you wish to register for a
+                  membership.
+                </v-card-subtitle>
 
                 <v-card-text>
                   <v-list rounded>
                     <v-list-item-group
-                      v-model="selections"
+                      v-model="selectedUserIndices"
                       multiple
                       active-class="primary--text"
                     >
                       <v-list-item
-                        v-for="member in unregisteredMembers"
-                        :key="member.id"
-                        :disabled="member.activeMember"
+                        v-for="status in nonMemberStatuses"
+                        :key="status.user.id"
+                        :disabled="status.user.feeWaived || !status.fee"
                       >
                         <template #default="{ active }">
                           <v-list-item-avatar>
-                            <v-img :src="member.avatarUrl" />
+                            <v-img :src="status.user.avatarUrl" />
                           </v-list-item-avatar>
 
                           <v-list-item-content>
                             <v-list-item-title>
-                              {{ member.name }}
+                              {{ status.user.name }}
                             </v-list-item-title>
 
-                            <v-list-item-subtitle v-if="member.grade">
-                              <span>Eligible</span>
-                              <span>• {{ grade(member) }}</span>
+                            <v-list-item-subtitle v-if="status.user.feeWaived">
+                              Membership Fee Waived
                             </v-list-item-subtitle>
-                            <v-list-item-subtitle v-else
-                              >Eligible</v-list-item-subtitle
-                            >
+
+                            <v-list-item-subtitle v-else-if="!status.fee">
+                              <span v-if="!status.user.grade">
+                                Ineligible • User Grade Missing
+                              </span>
+
+                              <span v-else>Ineligible</span>
+                            </v-list-item-subtitle>
+
+                            <v-list-item-subtitle v-else>
+                              Eligible • ${{ status.fee }}
+                            </v-list-item-subtitle>
                           </v-list-item-content>
 
-                          <v-list-item-action v-if="!member.activeMember">
+                          <v-list-item-action
+                            v-if="!status.user.feeWaived && status.fee"
+                          >
                             <v-checkbox :input-value="active" />
                           </v-list-item-action>
                         </template>
@@ -146,50 +164,43 @@
                 </v-card-text>
 
                 <v-card-actions>
-                  <v-btn v-if="!isVerified" disabled rounded block
-                    >Email Verification Required</v-btn
-                  >
+                  <v-btn v-if="!isVerified" disabled rounded block>
+                    Email Verification Required
+                  </v-btn>
 
+                  <!-- Unlike event registrations, if there is no checkout cost
+                  the user is likely fee-waived or can't become a member -->
                   <v-btn
-                    v-else-if="!selections.length"
+                    v-else-if="
+                      !selectedUserIndices.length || checkoutCost === 0
+                    "
                     rounded
                     block
                     disabled
-                    @click="onRegister"
-                    >Select Users</v-btn
                   >
+                    Select Users
+                  </v-btn>
 
-                  <v-btn
-                    v-else-if="checkoutCost === 0"
-                    rounded
-                    block
-                    color="primary"
-                    @click="onRegister"
-                    >Complete Registration</v-btn
-                  >
-
-                  <v-btn v-else rounded block color="primary" @click="step++"
-                    >Continue to Payment</v-btn
-                  >
+                  <v-btn v-else rounded block color="primary" @click="step++">
+                    Continue to Payment
+                  </v-btn>
                 </v-card-actions>
               </v-card>
             </v-stepper-content>
 
             <v-stepper-content class="pa-0" step="2">
-              <v-card :loading="isPayPalLoading">
+              <v-card :loading="isLoading">
                 <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
                 <v-card-text>
-                  <PaymentMemberPaypal
-                    :users="selectedUsers"
+                  <PaymentMembership
+                    :user-ids="selectedUserIds"
                     @payment:complete="onPaymentComplete"
                   />
                 </v-card-text>
 
                 <v-card-actions>
-                  <v-spacer />
-                  <v-btn text @click="step--">Go Back</v-btn>
-                  <v-btn color="primary" @click="step++">Continue</v-btn>
+                  <v-btn text @click="step--">Change Users</v-btn>
                 </v-card-actions>
               </v-card>
             </v-stepper-content>
@@ -201,27 +212,19 @@
 </template>
 
 <script lang="ts">
-import { User } from '@server/user/user.entity'
 import {
   defineComponent,
   ref,
   computed,
   toRefs,
   reactive,
-  useRoute,
 } from '@nuxtjs/composition-api'
-import {
-  useAuth,
-  UserEntity,
-  useUsers,
-  useMemberPayPal,
-  useMembership,
-} from '@/stores'
-import DialogUpdateUser from '@/components/dialog/UpdateUser.vue'
-import DialogConfirm from '@/components/dialog/Confirm.vue'
-import { genders } from '@/utils/constants'
-import { grades } from '@/utils/events'
-import { useSnackbar } from '@/composables'
+import { useAuth, UserEntity, useUsers, useMembership } from '~/stores'
+import DialogUpdateUser from '~/components/dialog/UpdateUser.vue'
+import DialogConfirm from '~/components/dialog/Confirm.vue'
+import { genders } from '~/utils/constants'
+import { grades } from '~/utils/events'
+import { useSnackbar } from '~/composables'
 
 enum RegisterStep {
   SELECTION = 1,
@@ -234,84 +237,45 @@ export default defineComponent({
     return from?.name === 'dashboard' ? 'slide-right' : 'slide-left'
   },
   setup() {
+    const editDialog = ref<InstanceType<typeof DialogUpdateUser>>()
+    const deleteDialog = ref<InstanceType<typeof DialogConfirm>>()
+
     const authStore = useAuth()
     const userStore = useUsers()
-    const route = useRoute()
     const membershipStore = useMembership()
-    const payPalStore = useMemberPayPal()
     const snackbar = useSnackbar()
 
     const state = reactive({
-      selections: [] as number[],
+      selectedUserIndices: [] as number[],
       membership: null as number | null,
       step: RegisterStep.SELECTION,
     })
 
-    const fee = computed(() => {
-      return '50.00'
-    })
+    const users = computed(() => authStore.accountUsers || [])
+    const statuses = computed(() => membershipStore.statuses)
+    const isLoading = computed(() => membershipStore.isLoading)
 
-    const checkoutCost = computed(() => {
-      if (typeof fee.value !== 'string') return 0
-      const feeNum = parseFloat(fee.value) || 0
-      return feeNum
-    })
-
-    const selectedUsers = computed(() =>
-      state.selections.map((s) => users.value[s].id)
-    )
-    const onRegister = async () => {
-      await membershipStore.create({
-        users: selectedUsers.value,
-      })
-
-      if (membershipStore.error) {
-        return snackbar.error(membershipStore.error.message)
-      }
-
-      await authStore.getMyAccount()
-
-      state.selections = []
-      snackbar.success('Registration Complete')
-      state.step = RegisterStep.SELECTION
-    }
-
-    const onPaymentComplete = async () => {
-      await Promise.all([membershipStore.findMemberships(), onRegister()])
-    }
-
-    // what to do here
-    const usersRequiringPayment = computed(() => {
-      const retval: User[] = []
-
-      for (const user of selectedUsers.value as User[]) {
-        if (user?.membership?.active) continue
-
-        retval.push(user)
-      }
-
-      return retval
-    })
-
-    const users = computed(() => authStore.accountUsers)
-
-    const unregisteredMembers = computed(() =>
-      users.value.filter((u: any) => !u.activeMember)
+    const nonMemberStatuses = computed(() =>
+      statuses.value.filter((s) => !s.isMember)
     )
 
-    const registeredMembers = computed(() =>
-      users.value.filter((u: any) => u.activeMember)
+    const selectedUserIds = computed(() =>
+      state.selectedUserIndices.map((s) => users.value[s].id)
     )
-    const editDialog = ref<InstanceType<typeof DialogUpdateUser>>()
-    const deleteDialog = ref<InstanceType<typeof DialogConfirm>>()
+
+    const selectedStatuses = computed(() =>
+      statuses.value.filter((s) => selectedUserIds.value.includes(s.user.id))
+    )
+
+    const checkoutCost = computed(() =>
+      selectedStatuses.value.reduce((cost, status) => {
+        return cost + ((status.fee && parseFloat(status.fee)) || 0)
+      }, 0)
+    )
 
     const gender = (user: UserEntity) =>
       genders.find((gender) => gender.value === user.gender)?.text
 
-    const onDeleteConfirm = async (user: UserEntity) => {
-      await userStore.delete(user.id)
-      await authStore.getMyAccount()
-    }
     const grade = (user: UserEntity) => {
       if (!user.grade) return null
 
@@ -320,7 +284,24 @@ export default defineComponent({
       return 'Graduated'
     }
 
-    const onUpdateUser = async () => await authStore.getMyAccount()
+    const onDeleteConfirm = async (user: UserEntity) => {
+      await userStore.delete(user.id)
+
+      snackbar.success('User deleted')
+
+      await authStore.getMyAccount()
+    }
+
+    const onPaymentComplete = async () => {
+      await membershipStore.findStatuses()
+    }
+
+    const onUpdateUser = async () => {
+      await Promise.all([
+        authStore.getMyAccount(),
+        membershipStore.findStatuses(),
+      ])
+    }
 
     return {
       ...toRefs(state),
@@ -330,19 +311,21 @@ export default defineComponent({
       editDialog,
       deleteDialog,
       users,
-      selectedUsers,
-      onRegister,
+      selectedUserIds,
+      selectedStatuses,
       onPaymentComplete,
       checkoutCost,
-      isPayPalLoading: computed(() => payPalStore.isLoading),
+      isLoading,
       isVerified: computed(() => authStore.isVerified),
-      unregisteredMembers,
-      registeredMembers,
-      usersRequiringPayment,
       primary: computed(() => authStore.primaryUser!),
       onDeleteConfirm,
       onUpdateUser,
+      statuses,
+      nonMemberStatuses,
     }
+  },
+  async asyncData({ pinia }) {
+    await useMembership(pinia).findStatuses()
   },
 })
 </script>

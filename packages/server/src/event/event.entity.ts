@@ -249,7 +249,7 @@ export class Event extends BaseEntity<Event, 'id'> {
 
     if (grades && user.grade && !grades.includes(user.grade)) return false;
 
-    if (membershipStatus && !user.activeMember) return false;
+    if (membershipStatus && !user.isMember) return false;
 
     return true;
   }

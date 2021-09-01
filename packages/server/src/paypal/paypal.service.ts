@@ -1,8 +1,8 @@
 import {
+  BadRequestException,
   HttpException,
   Inject,
   Injectable,
-  BadRequestException,
 } from '@nestjs/common';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import qs from 'querystring';
@@ -67,6 +67,15 @@ export class PayPalService {
   public async captureOrder(id: string) {
     const resp = await this.axios.post<OrderDetails>(
       `/v2/checkout/orders/${id}/capture`,
+      // Forces an `INSTRUMENT_DECLINED` insufficient funds error for negative testing.
+      // null,
+      // {
+      //   headers: {
+      //     'PayPal-Mock-Response': JSON.stringify({
+      //       mock_application_codes: 'INSTRUMENT_DECLINED',
+      //     }),
+      //   },
+      // },
     );
 
     return resp.data;
@@ -88,6 +97,10 @@ export class PayPalService {
 
   /**
    * Validates that an order matches the expected arributes.
+   *
+   * @param order PayPal order details.
+   * @param status Expected order status.
+   * @param value Acceptable cost(s) of the order.
    */
   public validateCapture(
     order: OrderDetails,
@@ -95,6 +108,7 @@ export class PayPalService {
     value: string | string[],
   ) {
     if (typeof value === 'string') value = [value];
+
     if (order.intent !== 'CAPTURE') {
       throw new BadRequestException('Order intent mismatch');
     }

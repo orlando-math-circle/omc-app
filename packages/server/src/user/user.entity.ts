@@ -1,4 +1,3 @@
-import { VolunteerWork } from './../volunteer-work/volunteer-work.entity';
 import {
   BaseEntity,
   Collection,
@@ -8,21 +7,21 @@ import {
   OneToMany,
   PrimaryKey,
   Property,
-  OneToOne,
 } from '@mikro-orm/core';
+import { Membership } from '@server/membership/membership.entity';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
 import { birthdayToAge } from '../app.utils';
+import { Attendance } from '../attendance/attendance.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { Invoice } from '../invoice/invoice.entity';
+import { VolunteerWork } from './../volunteer-work/volunteer-work.entity';
 import { IndustryDto } from './dtos/industry.dto';
 import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';
-import { Membership } from '@server/membership/membership.entity';
-import { Attendance } from '../attendance/attendance.entity';
 
 @Entity()
 export class User extends BaseEntity<User, 'id'> {
@@ -102,7 +101,10 @@ export class User extends BaseEntity<User, 'id'> {
   }
 
   /**
-   * Obtains the cumulative volunteer hours if the work relation is loaded.
+   * The summation of volunteer hours for a user.
+   *
+   * If the user's work orders are not initialized,
+   * this will return null.
    */
   @Property({ persist: false })
   get volunteerHours() {
@@ -140,38 +142,13 @@ export class User extends BaseEntity<User, 'id'> {
     return `${process.env.STATIC_BASE}${this.avatar}`;
   }
 
-  @Property({ persist: false, nullable: true })
-  get membershipFee() {
-    if (this.grade) {
-      if ([Grade.SIXTH, Grade.SEVENTH, Grade.EIGHTH].includes(this.grade))
-        return '25.00';
-      else if (
-        [Grade.NINTH, Grade.TENTH, Grade.ELEVENTH, Grade.TWELFTH].includes(
-          this.grade,
-        )
-      )
-        return '50.00';
-    } else {
-      return null;
-    }
-  }
-
   @Property({ persist: false })
-  get activeMember() {
-    if (!this.memberships) return false;
+  get isMember() {
+    if (!this.memberships.isInitialized()) return null;
 
-    for (const membership of this.memberships)
-      if (membership.active) return true;
-
-    return false;
+    return this.memberships.getItems().some((m) => m.isActive);
   }
 
-  /**
-   * Relationships
-   */
-
-  // Intentionally hidden as serializing an account entity causes
-  // a circular JSON structure when it reaches this property.
   @ManyToOne(() => Account, { hidden: true })
   account!: Account;
 
@@ -193,7 +170,7 @@ export class User extends BaseEntity<User, 'id'> {
   @OneToMany(() => FileAttachment, (a) => a.user, { orphanRemoval: true })
   attachments = new Collection<FileAttachment>(this);
 
-  @OneToMany(() => Membership, (m) => m.user, { nullable: true })
+  @OneToMany(() => Membership, (m) => m.user)
   memberships = new Collection<Membership>(this);
 
   @OneToMany(() => Attendance, (h) => h.user, {

@@ -78,6 +78,7 @@ export const parseAxiosError = (error: AxiosError): StateError => {
       url: error.config.url,
       status: error.response.status,
       message,
+      data: error.response.data,
     }
   }
 

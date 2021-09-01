@@ -392,13 +392,7 @@
                   Email Verification Required
                 </v-btn>
 
-                <v-btn
-                  v-else-if="!selections.length"
-                  rounded
-                  block
-                  disabled
-                  @click="onRegister"
-                >
+                <v-btn v-else-if="!selections.length" rounded block disabled>
                   Select Users
                 </v-btn>
 
@@ -420,13 +414,13 @@
           </v-stepper-content>
 
           <v-stepper-content class="pa-0" step="2">
-            <v-card :loading="isPayPalLoading">
+            <v-card :loading="isLoading">
               <v-card-title>Payment Due: ${{ checkoutCost }}</v-card-title>
 
               <v-card-text>
-                <PaymentPaypal
-                  :event="event.id"
-                  :users="usersRequiringPayment.map((u) => u.id)"
+                <PaymentEvent
+                  :event-id="event.id"
+                  :user-ids="usersRequiringPayment.map((u) => u.id)"
                   @payment:complete="onPaymentComplete"
                 />
               </v-card-text>
@@ -576,7 +570,6 @@ import {
   useRegistrations,
   useEvents,
   useAuth,
-  usePayPal,
   UserEntity,
   useAttendance,
 } from '@/stores'
@@ -613,7 +606,6 @@ export default defineComponent({
     const route = useRoute()
     const eventStore = useEvents()
     const authStore = useAuth()
-    const payPalStore = usePayPal()
     const registrationStore = useRegistrations()
     const snackbar = useSnackbar()
     const attendanceStore = useAttendance()
@@ -937,8 +929,8 @@ export default defineComponent({
       attendance,
       perms,
       isClosed,
+      isLoading: computed(() => eventStore.isLoading),
       isVerified: computed(() => authStore.isVerified),
-      isPayPalLoading: computed(() => payPalStore.isLoading),
       grade,
       usersRequiringPayment,
       registeredUsers,
