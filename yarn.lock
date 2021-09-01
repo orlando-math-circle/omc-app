@@ -3715,6 +3715,7 @@ __metadata:
     cookie-universal-nuxt: 2.1.5
     cropperjs: 1.5.12
     date-fns: 2.23.0
+    date-fns-tz: ^1.1.6
     deepmerge: 4.2.2
     eslint: 7.32.0
     eslint-config-prettier: 8.3.0
@@ -9232,6 +9233,15 @@ __metadata:
     whatwg-mimetype: ^2.3.0
     whatwg-url: ^8.0.0
   checksum: 42239927c6a202e2d02b7f41c94ca53e3cea036898b97b8bf6120ed1b25e0dd11c48ec7aa5c84cf807c2cb9f3a637df9fb50f3ca25a52863186a4ac46254726b
+  languageName: node
+  linkType: hard
+
+"date-fns-tz@npm:^1.1.6":
+  version: 1.1.6
+  resolution: "date-fns-tz@npm:1.1.6"
+  peerDependencies:
+    date-fns: ">=2.0.0-alpha.13"
+  checksum: e6fb51c4bc5051a08eaf714f965f2ded4c972381964599fa75d84928a063ccfdb8c5a345c9324e6eed9161b660e74c22c99947a76652fed43aef3f6a3ceafa72
   languageName: node
   linkType: hard
 

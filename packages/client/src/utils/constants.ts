@@ -4,6 +4,8 @@ import { Grade } from '@server/user/enums/grade.enum'
 import { ReminderFreq } from '@server/user/enums/reminder-freq.enum'
 import { VolunteerWorkStatus } from '@server/volunteer-work/enums/work-status.enum'
 
+export const TIMEZONE = 'America/New_York'
+
 export const months = [
   'January',
   'February',

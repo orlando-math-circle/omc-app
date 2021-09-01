@@ -130,9 +130,17 @@
 
         <!-- Permissions -->
         <v-list-item class="pl-2">
+          <v-list-item-avatar class="mr-2">
+            <v-icon>mdi-account-lock-outline</v-icon>
+          </v-list-item-avatar>
+
           <v-list-item-content>Members Only</v-list-item-content>
+
           <v-list-item-action>
-            <v-switch v-model="meta.permissions.membershipStatus" color="secondary" />
+            <v-switch
+              v-model="meta.permissions.membershipStatus"
+              color="secondary"
+            />
           </v-list-item-action>
         </v-list-item>
         <v-list-item class="pl-2">
@@ -307,6 +315,7 @@
                   v-model="meta.points"
                   label="Points (Optional)"
                   type="number"
+                  hide-details="auto"
                   outlined
                 />
               </v-col>
@@ -345,9 +354,7 @@
               </v-col>
 
               <v-col cols="auto" class="align-self-center">
-                <DialogCreateProject
-                  @create:project="(proj) => (project = proj.id)"
-                />
+                <DialogCreateProject @create:project="onProjectCreated" />
               </v-col>
             </v-row>
           </v-list-item-content>
@@ -520,14 +527,14 @@
 
 <script lang="ts">
 import { addDays, format, isBefore, parse, parseISO } from 'date-fns'
+import { zonedTimeToUtc } from 'date-fns-tz'
 import { Options } from 'rrule'
-import { Course } from '@server/course/course.entity'
 import { Grade } from '@server/user/enums/grade.enum'
 import { FeeType } from '@server/event/enums/fee-type.enum'
 import { Gender } from '@server/user/enums/gender.enum'
 import { EventTimeThreshold } from '@server/event/enums/event-time-threshold.enum'
 import { gradeGroups, contiguousGradeRanges, grades } from '@/utils/events'
-import { genders } from '@/utils/constants'
+import { genders, TIMEZONE } from '@/utils/constants'
 import { EventRecurrenceDto } from '@/types/events/event-recurrence.interface'
 import { addTime, isValidDate, roundDate, toDate } from '@/utils/utilities'
 import Calendar from '@/components/Calendar.vue'
@@ -539,7 +546,13 @@ import {
   computed,
   onBeforeMount,
 } from '@nuxtjs/composition-api'
-import { useEvents, useFiles, useProjects } from '@/stores'
+import {
+  useEvents,
+  useFiles,
+  useProjects,
+  ProjectEntity,
+  CourseEntity,
+} from '@/stores'
 import { useSnackbar, useDates, useTemplateRef } from '@/composables'
 import RecurrenceDialog from '@/components/dialog/Recurrence.vue'
 import DialogForm from '@/components/dialog/Form.vue'
@@ -626,6 +639,7 @@ export default defineComponent({
         cutoffOffset: 0,
         lateThreshold: EventTimeThreshold.AFTER_START,
         lateOffset: 0,
+        points: 0,
         permissions: {
           grades: [
             Grade.KINDERGARTEN,
@@ -643,7 +657,7 @@ export default defineComponent({
             Grade.TWELFTH,
           ],
           genders: [Gender.MALE, Gender.FEMALE],
-          membershipStatus:false
+          membershipStatus: false,
         },
       },
       project: null as number | null,
@@ -745,22 +759,21 @@ export default defineComponent({
       const dto = Object.assign(
         {
           rrule: state.rrule || undefined,
+          dtend: zonedTimeToUtc(
+            toDate(
+              state.dates.start.date,
+              state.dates.allday ? '23:59' : state.times.end.time
+            ),
+            TIMEZONE
+          ).toISOString(),
           project: state.project || undefined,
           course: state.course || undefined,
           ...state.meta,
         },
-        state.dates.allday
-          ? { dtend: toDate(state.dates.start.date, '23:59').toISOString() }
-          : {
-              dtend: toDate(
-                state.dates.end.date,
-                state.times.end.time
-              ).toISOString(),
-            },
         !state.rrule && {
-          dtstart: toDate(
-            state.dates.start.date,
-            state.times.start.time
+          dtstart: zonedTimeToUtc(
+            toDate(state.dates.start.date, state.times.start.time),
+            TIMEZONE
           ).toISOString(),
         },
         state.feeType !== 'free' && {
@@ -789,8 +802,12 @@ export default defineComponent({
       }
     }
 
-    const onCourseCreated = (course: Course) => {
+    const onCourseCreated = (course: CourseEntity) => {
       state.course = course.id
+    }
+
+    const onProjectCreated = (project: ProjectEntity) => {
+      state.project = project.id
     }
 
     return {
@@ -809,6 +826,7 @@ export default defineComponent({
       format,
       onSubmit,
       onCourseCreated,
+      onProjectCreated,
     }
   },
 })

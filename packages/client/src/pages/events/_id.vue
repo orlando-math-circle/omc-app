@@ -561,19 +561,15 @@
 </template>
 
 <script lang="ts">
-import { User } from '@server/user/user.entity'
-import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
-import { Roles } from '@server/app.roles'
-import { Gender } from '@server/user/enums/gender.enum'
-import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
-import {
-  useRegistrations,
-  useEvents,
-  useAuth,
-  UserEntity,
-  useAttendance,
-} from '@/stores'
 import DialogConfirm from '@/components/dialog/Confirm.vue'
+import { useSnackbar, useStateReset } from '@/composables'
+import {
+  useAttendance,
+  useAuth,
+  useEvents,
+  useRegistrations,
+  UserEntity,
+} from '@/stores'
 import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
 import { formatDate } from '@/utils/utilities'
 import {
@@ -585,10 +581,14 @@ import {
   useContext,
   useRoute,
 } from '@nuxtjs/composition-api'
-import { useSnackbar, useStateReset } from '@/composables'
-import { AttendanceStatus } from '@server/attendance/dtos/attendance-status.dto'
+import { Roles } from '@server/app.roles'
 import { Attendance } from '@server/attendance/attendance.entity'
+import { AttendanceStatus } from '@server/attendance/dtos/attendance-status.dto'
+import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
 import { EntityDTO } from '@server/shared/types/entity-dto'
+import { Gender } from '@server/user/enums/gender.enum'
+import { User } from '@server/user/user.entity'
+import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
 
 enum RegisterStep {
   SELECTION = 1,
@@ -624,6 +624,7 @@ export default defineComponent({
 
     const event = computed(() => eventStore.event!)
     const date = computed(() => format(event.value.dtstart, 'EEE, LLL d, yyyy'))
+
     const times = computed(
       () =>
         `${format(event.value.dtstart, 'h:mm a')} - ${format(

@@ -1,16 +1,19 @@
-import { defineStore } from 'pinia'
+import { StateError, StateStatus } from '@/types/state.interface'
 import { Course } from '@server/course/course.entity'
 import { CreateCourseDto } from '@server/course/dto/create-course.dto'
 import { FindAllCoursesDto } from '@server/course/dto/find-all-courses.dto'
-import { StateStatus, StateError } from '@/types/state.interface'
+import { EntityDTO } from '@server/shared/types/entity-dto'
+import { defineStore } from 'pinia'
+
+export type CourseEntity = EntityDTO<Course>
 
 export const useCourses = defineStore({
   id: 'courses',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    course: null as Course | null,
-    courses: [] as Course[],
+    course: null as CourseEntity | null,
+    courses: [] as CourseEntity[],
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',

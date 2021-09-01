@@ -181,8 +181,6 @@
 </template>
 
 <script lang="ts">
-import { Frequency, ByWeekday, Options } from 'rrule'
-import { format, parseISO } from 'date-fns'
 import {
   EventRecurrenceDto,
   EventRecurrenceOptions,
@@ -197,10 +195,14 @@ import {
   toRefs,
   watch,
 } from '@nuxtjs/composition-api'
+import { format, parseISO } from 'date-fns'
+import { zonedTimeToUtc } from 'date-fns-tz'
+import { Frequency, Options } from 'rrule'
+import { TIMEZONE } from '../../utils/constants'
 
 export interface Weekday {
   text: string
-  value: ByWeekday
+  value: number
   short: string
 }
 
@@ -319,12 +321,12 @@ export default defineComponent({
     // The v-date-picker component will not accept time.
     // Warning: This is also changed to a local date!
     const until = computed({
-      get() {
-        return format(new Date(state.options.until), 'yyyy-MM-dd')
-      },
-      set(date: string) {
-        state.options.until = parseISO(date).toISOString()
-      },
+      get: () => format(new Date(state.options.until), 'yyyy-MM-dd'),
+      set: (date: string) =>
+        (state.options.until = zonedTimeToUtc(
+          parseISO(date),
+          TIMEZONE
+        ).toISOString()),
     })
 
     const formattedUntilDate = computed(() => {
@@ -414,7 +416,7 @@ export default defineComponent({
           ? new Date(now.getFullYear() + 1, 0, 1)
           : new Date(now.getFullYear(), month + 1, 1)
 
-      state.options.until = nextMonth.toISOString()
+      state.options.until = zonedTimeToUtc(nextMonth, TIMEZONE).toISOString()
 
       const weekday = weekdays[date.value.getDay()].value
 
@@ -446,14 +448,14 @@ export default defineComponent({
         case RecurrenceTerminator.UNTIL:
           dto = {
             freq: state.options.freq,
-            dtstart: date.value.toISOString(),
+            dtstart: zonedTimeToUtc(date.value, TIMEZONE).toISOString(),
             until: state.options.until,
           }
           break
         case RecurrenceTerminator.COUNT:
           dto = {
             freq: state.options.freq,
-            dtstart: date.value.toISOString(),
+            dtstart: zonedTimeToUtc(date.value, TIMEZONE).toISOString(),
             count: state.options.count,
           }
 

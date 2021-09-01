@@ -220,12 +220,10 @@ export default defineComponent({
       deleteModeSelector,
       event,
       background,
-      dates,
       dateText,
       timeText,
       onDeleteMenu,
       onDeleteConfirm,
-      delete: del,
       onEventRefresh,
       breadcrumbs: [
         {

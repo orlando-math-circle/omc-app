@@ -4,14 +4,17 @@ import { CreateProjectDto } from '@server/project/dto/create-project.dto'
 import { FindAllProjectsDto } from '@server/project/dto/find-all-projects.dto'
 import { UpdateProjectDto } from '@server/project/dto/update-project.dto'
 import { StateStatus, StateError } from '@/types/state.interface'
+import { EntityDTO } from '@server/shared/types/entity-dto'
+
+export type ProjectEntity = EntityDTO<Project>
 
 export const useProjects = defineStore({
   id: 'projects',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    project: null as Project | null,
-    projects: [] as Project[],
+    project: null as ProjectEntity | null,
+    projects: [] as ProjectEntity[],
     total: null as number | null,
   }),
   getters: {

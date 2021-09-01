@@ -34,7 +34,7 @@ export const useEvents = defineStore({
     },
   },
   actions: {
-    async create(createEventDto: CreateEventDto) {
+    async create(createEventDto: EntityDTO<CreateEventDto>) {
       await this.$nuxt.$axios.$post('/event', createEventDto)
     },
     async findOne(id: number) {
