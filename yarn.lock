@@ -3218,7 +3218,7 @@ __metadata:
     "@types/jest": 26.0.23
     "@types/jsonwebtoken": 8.5.2
     "@types/lodash": 4.14.170
-    "@types/luxon": 1.27.0
+    "@types/luxon": 2.0.4
     "@types/multer": 1.4.6
     "@types/node": 15.12.4
     "@types/passport-jwt": 3.0.5
@@ -3242,7 +3242,7 @@ __metadata:
     jest: 27.0.5
     joi: 17.4.0
     lodash: 4.17.21
-    luxon: 1.27.0
+    luxon: 2.0.2
     moment: 2.29.1
     passport: 0.4.1
     passport-jwt: 4.0.0
@@ -3265,7 +3265,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/shared@workspace:packages/shared"
   dependencies:
-    luxon: 1.27.0
+    luxon: 2.0.2
   languageName: unknown
   linkType: soft
 
@@ -4136,10 +4136,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/luxon@npm:1.27.0":
-  version: 1.27.0
-  resolution: "@types/luxon@npm:1.27.0"
-  checksum: ebce0d4c671086c18517784abd5e49e836024d32eddcf189e03ecc1ef4547dadd194895461b53ea34c230e9eaf38f2d2c87183322e3dbcd5e0d658c6f9938995
+"@types/luxon@npm:2.0.4":
+  version: 2.0.4
+  resolution: "@types/luxon@npm:2.0.4"
+  checksum: cc785e798185191401991c58b8f3e0a62cd882c64c457ffc0d532899529124fb9a6b31e1d35067c92f9e68d1242410ea37b86e534124a687c47096844126866d
   languageName: node
   linkType: hard
 
@@ -14113,7 +14113,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"luxon@npm:1.27.0, luxon@npm:^1.21.3":
+"luxon@npm:2.0.2":
+  version: 2.0.2
+  resolution: "luxon@npm:2.0.2"
+  checksum: ea82fa2034e9d2e3b508f26bcf648771cacb8c988f6f9ff09f542efc6d6883251caab30e867019882cfb073a57da8d707ea515c7a3cd62ef50b25787a91d8697
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^1.21.3":
   version: 1.27.0
   resolution: "luxon@npm:1.27.0"
   checksum: c60f73b6b94bdd4e43c731133aa746388b907a26a5a426478c2520b263bec1dae4dc6e269a3410374789551309c65af5d245fae4cef61b72c3ad64a4c3e8b2b9
