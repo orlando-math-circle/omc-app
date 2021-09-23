@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "luxon": "1.27.0"
+    "luxon": "1.28.0"
   },
   "prettier": {
     "singleQuote": true,
