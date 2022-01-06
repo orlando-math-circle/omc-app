@@ -1,7 +1,6 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '../src/config/config.module';
 import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import Joi from 'joi';
@@ -10,15 +9,17 @@ import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { AccountService } from '../src/account/account.service';
 import { RegisterAccountDto } from '../src/account/dto/register.dto';
+import { ActivityRecordModule } from '../src/activity-record/activity-record.module';
 import { AuthModule } from '../src/auth/auth.module';
 import { AuthService } from '../src/auth/auth.service';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
 import { AccessGuard } from '../src/auth/guards/access-control.guard';
+import { ConfigModule } from '../src/config/config.module';
 import { CourseModule } from '../src/course/course.module';
 import { DevelopmentEmailService } from '../src/email/development-email.service';
 import { EmailModule } from '../src/email/email.module';
 import { FileModule } from '../src/file/file.module';
-import { CreateUserDto } from '../src/user/dtos/create-user.dto';
+import { CreateUserDto } from '../src/user/dto/create-user.dto';
 import { Gender } from '../src/user/enums/gender.enum';
 import { User } from '../src/user/user.entity';
 import { UserModule } from '../src/user/user.module';
@@ -72,6 +73,7 @@ describe('Auth', () => {
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
         AccountModule,
+        ActivityRecordModule,
         UserModule,
         FileModule,
         AuthModule,

@@ -1,24 +1,24 @@
 import { defineStore } from 'pinia'
-import { CreateRegistrationDto } from '@server/event-registration/dtos/create-registration.dto'
-import { CreateVolunteerRegistrationDto } from '@server/event-registration/dtos/create-volunteer-registration.dto'
-import { EventRegistrationStatus } from '@server/event-registration/dtos/event-registration-status.dto'
-import { EventRegistration } from '@server/event-registration/event-registration.entity'
-import { UpdateOwnEventRegistrationDto } from '@server/event-registration/dtos/update-event-registration.dto'
-import { EntityDTO } from '@server/shared/types/entity-dto'
+import {
+  EventRegistration,
+  EventRegistrationStatus,
+  CreateRegistrationDto,
+  CreateVolunteerRegistrationDto,
+  UpdateOwnEventRegistrationDto,
+} from '@omc/server'
 import { StateStatus, StateError } from '@/types/state.interface'
 
-export type RegistrationEntity = EntityDTO<EventRegistration>
-export type RegistrationStatusEntity = EntityDTO<EventRegistrationStatus>
+export { EventRegistration, EventRegistrationStatus }
 
 export const useRegistrations = defineStore({
   id: 'registrations',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    registration: null as RegistrationEntity | null,
-    registrations: [] as RegistrationEntity[],
+    registration: null as EventRegistration | null,
+    registrations: [] as EventRegistration[],
     total: null as number | null,
-    statuses: [] as RegistrationStatusEntity[],
+    statuses: [] as EventRegistrationStatus[],
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',

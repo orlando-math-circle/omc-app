@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia'
-import { File as FileEnt } from '@server/file/file.entity'
+import { File as FileEntity } from '@omc/server'
 import { StateStatus, StateError } from '@/types/state.interface'
-import { EntityDTO } from '../../../server/src/shared/types/entity-dto'
 
-export type FileEntity = EntityDTO<FileEnt>
+export { FileEntity }
 
 export const useFiles = defineStore({
   id: 'files',

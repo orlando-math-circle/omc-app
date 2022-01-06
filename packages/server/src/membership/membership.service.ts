@@ -6,16 +6,16 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { InvoiceStatus } from '@server/invoice/enums/invoice-status.enum';
-import { InvoiceService } from '@server/invoice/invoice.service';
-import { PurchaseUnitRequest } from '@server/paypal/interfaces/orders/purchase-unit.interface';
-import { PayPalService } from '@server/paypal/paypal.service';
+import { InvoiceStatus } from '../invoice/enums/invoice-status.enum';
+import { InvoiceService } from '../invoice/invoice.service';
+import { PurchaseUnitRequest } from '../paypal/interfaces/orders/purchase-unit.interface';
+import { PayPalService } from '../paypal/paypal.service';
 import { Account } from '../account/account.entity';
 import { PopulateFail } from '../app.utils';
 import { Invoice } from '../invoice/invoice.entity';
 import { Grade } from '../user/enums/grade.enum';
 import { User } from '../user/user.entity';
-import { MembershipStatus } from './interfaces/membership-status.interface';
+import { MembershipStatusDto } from './dto/membership-status-dto.interface';
 import {
   HIGH_SCHOOL_MEMBERSHIP_FEE,
   MIDDLE_SCHOOL_MEMBERSHIP_FEE,
@@ -117,7 +117,7 @@ export class MembershipService {
    */
   public async getMembershipStatuses(
     account: Account,
-  ): Promise<MembershipStatus[]> {
+  ): Promise<MembershipStatusDto[]> {
     const userIds = account.users.getIdentifiers();
 
     const memberships = await this.em.find(Membership, {

@@ -9,14 +9,12 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common';
+import { CreateEventDto, UpdateEventDto } from '..';
 import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
-import { CreateEventDto } from './dto/create-event.dto';
 import { FindAllEventsDto } from './dto/find-all-events.dto';
 import { FindAllRegisteredEventsDto } from './dto/find-all-registered-events.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
-import { UpdateEventsDto } from './dto/update-events.dto';
 import { EventService } from './event.service';
 import { CreateEventValidationPipe } from './pipes/create-event-validation.pipe';
 import { UpdateEventValidationPipe } from './pipes/update-event-validation.pipe';
@@ -51,13 +49,15 @@ export class EventController {
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.eventService.findOneOrFail(id, [
-      'author',
-      'fee',
-      'project.jobs',
-      'course.fee',
-      'recurrence',
-    ]);
+    return this.eventService.eventRepository.findOneOrFail(id, {
+      populate: [
+        'author',
+        'fee',
+        'project.jobs',
+        'course.fee',
+        'temporal.recurrence',
+      ],
+    });
   }
 
   @UserAuth('event', 'update:any')
@@ -75,9 +75,9 @@ export class EventController {
   @UsePipes(new UpdateEventValidationPipe())
   updateFutureEvents(
     @Param('id') id: number,
-    @Body() updateEventsDto: UpdateEventsDto,
+    @Body() updateEventDto: UpdateEventDto,
   ) {
-    return this.eventService.updateFutureEvents(id, updateEventsDto);
+    return this.eventService.updateFutureEvents(id, updateEventDto);
   }
 
   @UserAuth('event', 'update:any')
@@ -85,9 +85,9 @@ export class EventController {
   @UsePipes(new UpdateEventValidationPipe())
   updateAllEvents(
     @Param('id') id: number,
-    @Body() updateEventsDto: UpdateEventsDto,
+    @Body() updateEventDto: UpdateEventDto,
   ) {
-    return this.eventService.updateAllEvents(id, updateEventsDto);
+    return this.eventService.updateAllEvents(id, updateEventDto);
   }
 
   @UserAuth('event', 'delete:any')

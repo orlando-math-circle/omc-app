@@ -1,10 +1,10 @@
 import { EntityRepository, FilterQuery } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Populate, PopulateFail } from '../app.utils';
-import { CreateInvoiceDto } from './dtos/create-invoice.dto';
-import { Invoice } from './invoice.entity';
-import { EventFee } from '@server/event-fee/event-fee.entity';
 import { Account } from '../account/account.entity';
+import { Populate, PopulateFail } from '../app.utils';
+import { EventFee } from '../event-fee/event-fee.entity';
+import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { Invoice } from './invoice.entity';
 
 export class InvoiceService {
   constructor(

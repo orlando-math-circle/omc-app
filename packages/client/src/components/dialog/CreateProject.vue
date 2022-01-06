@@ -117,17 +117,17 @@
 </template>
 
 <script lang="ts">
-import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
-import { CreateProjectDto } from '@server/project/dto/create-project.dto'
+import { useSnackbar } from '@/composables/useSnackbar'
+import { useFiles, useProjects } from '@/stores'
+import { Nullable } from '@/types/nullable.type'
 import {
   computed,
   defineComponent,
   reactive,
   toRefs,
 } from '@nuxtjs/composition-api'
-import { useProjects, useFiles } from '@/stores'
-import { useSnackbar } from '@/composables/useSnackbar'
-import { Nullable } from '@/types/nullable.type'
+import { CreateProjectDto } from '@server/project/dto/create-project.dto'
+import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
 
 export default defineComponent({
   setup(_, { emit }) {
@@ -154,7 +154,7 @@ export default defineComponent({
     const onCreateJob = (job: CreateJobDto) => state.jobs.push(job)
 
     const onSubmit = async () => {
-      let picture: string | null
+      let picture: string | null = null
 
       if (state.file instanceof File) {
         const file = await fileStore.create(state.file)

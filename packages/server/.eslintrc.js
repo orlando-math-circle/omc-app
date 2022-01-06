@@ -27,7 +27,7 @@ module.exports = {
   overrides: [
     {
       // Types must be defined explicitly in entity fiels.
-      files: ['*.entity.ts'],
+      files: ['*.{entity,embedded}.ts'],
       rules: {
         '@typescript-eslint/no-inferrable-types': 'off',
       },

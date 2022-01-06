@@ -8,7 +8,6 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import { Membership } from '@server/membership/membership.entity';
 import { Account } from '../account/account.entity';
 import { Roles } from '../app.roles';
 import { birthdayToAge } from '../app.utils';
@@ -17,8 +16,9 @@ import { EventRegistration } from '../event-registration/event-registration.enti
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { Invoice } from '../invoice/invoice.entity';
+import { Membership } from '../membership/membership.entity';
 import { VolunteerWork } from './../volunteer-work/volunteer-work.entity';
-import { IndustryDto } from './dtos/industry.dto';
+import { IndustryDto } from './dto/industry.dto';
 import { Gender } from './enums/gender.enum';
 import { Grade } from './enums/grade.enum';
 import { ReminderFreq } from './enums/reminder-freq.enum';

@@ -2,27 +2,67 @@
   "name": "@omc/monorepo",
   "version": "1.0.0",
   "description": "Orlando Math Circle event calendar app",
-  "author": "John Gilbert",
+  "author": "John Gilbert <https://github.com/duckies>",
   "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/@nestjs/",
+      "**/@nestjs/**",
+      "**/@mikro-orm/",
+      "**/@mikro-orm/**"
+    ]
+  },
   "scripts": {
     "postinstall": "husky install",
     "client": "yarn workspace @omc/client",
     "server": "yarn workspace @omc/server",
     "shared": "yarn workspace @omc/shared",
     "docs": "yarn workspace @omc/docs",
-    "utils": "yarn workspace @omc/utils"
+    "test": "jest",
+    "test:cov": "jest --coverage"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "devDependencies": {
     "@commitlint/cli": "13.1.0",
     "@commitlint/config-conventional": "13.1.0",
-    "husky": "7.0.1"
+    "husky": "7.0.1",
+    "jest": "27.4.7",
+    "rimraf": "3.0.2",
+    "ts-jest": "27.1.2"
   },
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
     ]
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": false,
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "html",
+      "lcov",
+      "text"
+    ],
+    "collectCoverageFrom": [
+      "packages/*/{src,lib}/**/*.{ts,js}"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "main.ts"
+    ],
+    "testMatch": [
+      "/**/*.spec.ts"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    }
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
   }
 }

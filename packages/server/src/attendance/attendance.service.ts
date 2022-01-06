@@ -5,8 +5,8 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { MarkAttendanceDto } from './dtos/mark-attendance.dto';
-import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
+import { MarkAttendanceDto } from './dto/mark-attendance.dto';
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { Attendance } from './attendance.entity';
 import { UserService } from '../user/user.service';
 import { EventService } from '../event/event.service';
@@ -20,7 +20,7 @@ import {
 } from '@mikro-orm/core';
 import { PopulateFail } from '../app.utils';
 import { User } from '../user/user.entity';
-import { AttendanceStatus } from './dtos/attendance-status.dto';
+import { AttendanceStatus } from './dto/attendance-status.dto';
 
 @Injectable()
 export class AttendanceService {

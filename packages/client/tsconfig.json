@@ -6,6 +6,7 @@
     "declaration": false,
     "noEmit": true,
     "types": [
+      "jest",
       "@types/node",
       "@nuxt/types",
       "@nuxtjs/axios",

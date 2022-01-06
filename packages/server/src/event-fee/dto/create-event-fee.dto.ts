@@ -1,11 +1,16 @@
-import { IsDecimal, IsNumberString, IsOptional } from 'class-validator';
+import { IsDecimal, IsEnum, IsNumberString, IsOptional } from 'class-validator';
+import { FeeType } from '../../event/enums/fee-type.enum';
 
 export class CreateEventFeeDto {
+  @IsEnum(FeeType)
+  readonly type?: FeeType;
+
   @IsDecimal({ decimal_digits: '2', force_decimal: true })
   @IsNumberString()
-  readonly amount!: string;
+  amount!: string;
 
   @IsOptional()
+  @IsDecimal({ decimal_digits: '2', force_decimal: true })
   @IsNumberString()
-  readonly lateAmount?: string;
+  lateAmount?: string;
 }

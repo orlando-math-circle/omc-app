@@ -1,95 +1,81 @@
 import { Type } from 'class-transformer';
 import {
-  IsDate,
-  IsEnum,
-  IsNumber,
+  IsDateString,
+  IsIn,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Course } from '../../course/course.entity';
-import { CreateEventFeeDto } from '../../event-fee/dto/create-event-fee.dto';
-import { Project } from '../../project/project.entity';
-import { EventTimeThreshold } from '../enums/event-time-threshold.enum';
-import { FeeType } from '../enums/fee-type.enum';
-import { EventPermissionsDto } from './event-permissions.dto';
-import { EventRecurrenceDto } from './event-recurrence.dto';
+import { RRuleDto } from '.';
+import { UpdateEventFeeDto } from '../../event-fee/dto/update-event-fee.dto';
+import { UpdateEventMetaDto } from './update-event-meta.dto';
+
+class UpdateTemporalBase {
+  @IsString()
+  @IsIn(['single', 'recurring'])
+  mode!: 'single' | 'recurring';
+
+  @IsOptional()
+  @IsDateString()
+  dtend?: string;
+}
+
+export class UpdateRecurringEventDto extends UpdateTemporalBase {
+  mode!: 'recurring';
+
+  @Type(() => RRuleDto)
+  @ValidateNested()
+  rrule!: RRuleDto;
+}
+
+export class UpdateNonRecurringEventDto extends UpdateTemporalBase {
+  mode!: 'single';
+
+  @IsDateString()
+  dtstart!: string;
+}
 
 export class UpdateEventDto {
+  /**
+   * Starting date and time of the event in ISO 8601 format.
+   */
   @IsOptional()
-  @IsString()
-  name?: string;
+  @IsDateString()
+  readonly dtstart?: string;
 
+  /**
+   * Ending date and time of the event in ISO 8601 format.
+   */
   @IsOptional()
-  @IsString()
-  description?: string | null;
+  @IsDateString()
+  readonly dtend?: string;
 
+  /**
+   * Options for creating an rrule - a descriptive structure that
+   * creates a pattern of recurring events based on a set of rules,
+   * the `dtstart` and `dtend`, and the `rrule.freq` (frequency) of
+   * the recurrence.
+   */
   @IsOptional()
-  @IsString()
-  locationTitle?: string;
-
-  @IsOptional()
-  @IsString()
-  location?: string | null;
-
-  @IsOptional()
-  @IsString()
-  picture?: string | null;
-
-  @IsOptional()
-  @IsString()
-  color?: string | null;
-
-  @IsOptional()
-  @Type(() => EventPermissionsDto)
+  @Type(() => RRuleDto)
   @ValidateNested()
-  permissions?: EventPermissionsDto;
+  readonly rrule?: RRuleDto;
 
   @IsOptional()
-  @IsEnum(EventTimeThreshold)
-  cutoffThreshold?: EventTimeThreshold;
-
-  @IsOptional()
-  @IsNumber()
-  cutoffOffset?: number;
-
-  @IsOptional()
-  @IsEnum(EventTimeThreshold)
-  lateThreshold?: EventTimeThreshold;
-
-  @IsOptional()
-  @IsNumber()
-  lateOffset?: number;
-
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  dtstart?: Date;
-
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  dtend?: Date;
-
-  @IsOptional()
-  @IsNumber()
-  project?: number | Project | null;
-
-  @IsOptional()
-  @IsNumber()
-  course?: number | Course | null;
-
-  @IsOptional()
-  @IsEnum(FeeType)
-  feeType?: FeeType;
-
-  @IsOptional()
-  @Type(() => CreateEventFeeDto)
+  @Type(() => UpdateEventMetaDto)
   @ValidateNested()
-  fee?: CreateEventFeeDto;
+  readonly meta?: UpdateEventMetaDto;
 
   @IsOptional()
-  @Type(() => EventRecurrenceDto)
+  @Type(() => Number)
+  readonly courseId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  readonly projectId?: number;
+
+  @IsOptional()
+  @Type(() => UpdateEventFeeDto)
   @ValidateNested()
-  rrule?: EventRecurrenceDto;
+  readonly fee?: UpdateEventFeeDto;
 }

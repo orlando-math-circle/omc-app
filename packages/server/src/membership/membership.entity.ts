@@ -6,7 +6,7 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import { Invoice } from '@server/invoice/invoice.entity';
+import { Invoice } from '../invoice/invoice.entity';
 import { User } from '../user/user.entity';
 
 @Entity()

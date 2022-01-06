@@ -17,7 +17,7 @@ export class TokenStrategy extends PassportStrategy(Strategy, 'jwt') {
       ) {
         try {
           return done(null, await authService.getSigningKey(req, token));
-        } catch (error) {
+        } catch (error: any) {
           return done(error, null);
         }
       },

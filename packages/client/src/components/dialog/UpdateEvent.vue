@@ -487,7 +487,7 @@
 
       <v-slide-x-transition>
         <v-btn
-          v-show="Object.keys(changeset).length"
+          v-show="Object.keys(changesets).length"
           text
           @click="$emit('event:refresh', $route.params.id)"
         >
@@ -496,7 +496,7 @@
       </v-slide-x-transition>
 
       <v-btn
-        :disabled="!Object.keys(changeset).length"
+        :disabled="!Object.keys(changesets).length"
         :loading="isLoading"
         color="primary"
         type="submit"
@@ -507,7 +507,7 @@
 
     <DialogUpdateEventType
       ref="updateTypeRef"
-      :changeset="changeset"
+      :changeset="changesets"
       @submit:type="onSubmitType"
     />
   </DialogForm>
@@ -517,35 +517,36 @@
 import {
   computed,
   defineComponent,
+  nextTick,
   PropType,
   reactive,
   toRefs,
-  watch,
   useRoute,
-  nextTick,
+  watch,
 } from '@nuxtjs/composition-api'
-import { useTemplateRef, useDates, useRRule, useSnackbar } from '@/composables'
+import { CreateEventFeeDto } from '@server/event-fee/dto/create-event-fee.dto'
+import { EventRecurrenceDto } from '@server/event/dto/event-recurrence.dto'
+import { UpdateEventDto } from '@server/event/dto/update-event.dto'
+import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
+import { EventTimeThreshold } from '@server/event/enums/event-time-threshold.enum'
+import { FeeType } from '@server/event/enums/fee-type.enum'
+import { EntityDTO } from '@server/shared/types/entity-dto'
+import { Gender } from '@server/user/enums/gender.enum'
+import { Grade } from '@server/user/enums/grade.enum'
+import { utcToZonedTime } from 'date-fns-tz'
+import { isValidDate, shallowDiff, toDate } from '@/utils/utilities'
+import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
+import { genders, TIMEZONE } from '@/utils/constants'
 import {
-  useFiles,
-  useEvents,
-  useProjects,
   EventEntity,
   EventMode,
+  useEvents,
+  useFiles,
+  useProjects,
 } from '@/stores'
-import { FeeType } from '@server/event/enums/fee-type.enum'
-import { EventTimeThreshold } from '@server/event/enums/event-time-threshold.enum'
-import { Grade } from '@server/user/enums/grade.enum'
-import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
-import { UpdateEventDto } from '@server/event/dto/update-event.dto'
-import { Gender } from '@server/user/enums/gender.enum'
-import { EventRecurrenceDto } from '@server/event/dto/event-recurrence.dto'
-import { CreateEventFeeDto } from '@server/event-fee/dto/create-event-fee.dto'
-import DialogForm from '@/components/dialog/Form.vue'
+import { useDates, useRRule, useSnackbar, useTemplateRef } from '@/composables'
 import DialogUpdateEventType from '@/components/dialog/UpdateEventType.vue'
-import { isValidDate, shallowDiff, toDate } from '@/utils/utilities'
-import { genders } from '@/utils/constants'
-import { contiguousGradeRanges, gradeGroups, grades } from '@/utils/events'
-import { EntityDTO } from '@server/shared/types/entity-dto'
+import DialogForm from '@/components/dialog/Form.vue'
 
 const timeThresholds = [
   { text: 'Never', value: EventTimeThreshold.NEVER },
@@ -584,7 +585,6 @@ export default defineComponent({
     const projectStore = useProjects()
 
     const state = reactive({
-      success: false,
       colorMenu: false,
       internalEvent: null as EventEntity | null,
       dates: {
@@ -653,17 +653,15 @@ export default defineComponent({
 
     const isLoading = computed(() => eventStore.isLoading)
 
-    const feeDTO = computed(
-      (): CreateEventFeeDto => ({
-        amount: parseFloat(state.fee.amount || '0').toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-        }),
-        lateAmount: parseFloat(state.fee.lateAmount || '0').toLocaleString(
-          'en-US',
-          { minimumFractionDigits: 2 }
-        ),
-      })
-    )
+    const feeDTO = computed<CreateEventFeeDto>(() => ({
+      amount: parseFloat(state.fee.amount || '0').toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+      }),
+      lateAmount: parseFloat(state.fee.lateAmount || '0').toLocaleString(
+        'en-US',
+        { minimumFractionDigits: 2 }
+      ),
+    }))
 
     const internalGradeGroups = computed(() =>
       gradeGroups(contiguousGradeRanges(state.meta.permissions.grades))
@@ -678,6 +676,7 @@ export default defineComponent({
 
       return FeeType.FREE
     })
+
     const swatch = computed(() => ({
       height: '40px',
       width: '40px',
@@ -745,8 +744,7 @@ export default defineComponent({
      * Mastermind that determines the appropriate update actions
      * based on changes made to the event metadata, dates, or rrule.
      */
-    const changeset = computed(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const changesets = computed(() => {
       const { dtstart, ...rule } = rruleChanges.value
       const rruleOptsChanged = Object.keys(rule).length !== 0
       const changedStart = metaChanges.value.dtstart
@@ -756,30 +754,28 @@ export default defineComponent({
       }
       const rrule = state.rrule!
 
-      // If the fee type of values have changed, replace the fee.
-      const origFee = props.event.fee || props.event.course?.fee
+      const fee = props.event.fee || props.event.course?.fee
       const feeTypeChanged = eventFeeType.value !== state.feeType
-      if (
-        feeTypeChanged ||
-        (origFee &&
-          (origFee.amount !== feeDTO.value.amount ||
-            origFee.lateAmount !== feeDTO.value.lateAmount))
-      ) {
+      const costChanged = Boolean(fee && fee.amount !== feeDTO.value.amount)
+      const lateCostChanged = Boolean(
+        fee && fee.lateAmount !== feeDTO.value.lateAmount
+      )
+
+      // If the fee type or costs have changed, replace the fee.
+      if (feeTypeChanged || costChanged || lateCostChanged) {
         meta.fee = feeDTO.value
         meta.feeType = state.feeType
       }
 
-      // Changing the date of an event eliminates the "all" option, and
-      // changing the rrule options eliminates "single", so force a future update.
-      if (rruleOptsChanged && changedStart) {
-        return {
-          future: { ...meta, rrule },
-        }
-      }
-
-      // If the rrule options where changed this re-writes the rrule.
-      // Since the rrule is now different, single-event updates are not allowed.
+      // Changing a rrule eliminates the `single` flow.
       if (rruleOptsChanged) {
+        // Changing the starting time of an event eliminates the `all` option,
+        if (changedStart) {
+          return {
+            future: { ...meta, rrule },
+          }
+        }
+
         return {
           future: { ...meta, rrule },
           all: {
@@ -792,7 +788,7 @@ export default defineComponent({
         }
       }
 
-      // Changing just the dtstart of the event eliminates the "all" option.
+      // Changing just the `dtstart` of the event eliminates the `all` option.
       if (changedStart) {
         return {
           single: { ...meta, dtstart: metaChanges.value.dtstart },
@@ -838,8 +834,14 @@ export default defineComponent({
       () => props.event,
       (event) => {
         state.internalEvent = { ...event }
-        const start = new Date(state.internalEvent.dtstart)
-        const end = new Date(state.internalEvent.dtend)
+        const start = utcToZonedTime(
+          new Date(state.internalEvent.dtstart),
+          TIMEZONE
+        )
+        const end = utcToZonedTime(
+          new Date(state.internalEvent.dtend),
+          TIMEZONE
+        )
 
         // Copy event date data.
         state.dates.start.date = dateUtils.format(start, 'yyyy-MM-dd')
@@ -924,7 +926,7 @@ export default defineComponent({
     /**
      * The "save changes" button was pushed and the form has no errors.
      */
-    const onSubmit = async () => {
+    async function onSubmit() {
       if (state.upload instanceof File) {
         const file = await fileStore.create(state.upload)
 
@@ -938,18 +940,23 @@ export default defineComponent({
       }
 
       // Let the computed properties update.
-      // This is not ideal.
       await nextTick()
 
-      const numChangesets = Object.keys(changeset.value).length
+      const numChangesets = Object.keys(changesets.value).length
 
+      // It's important to prevent sending updates if there were
+      // no changes because it can override exceptions.
       if (numChangesets > 1) {
+        // If the original event is non-recurring, then just update it.
+        if (!props.event.recurrence) {
+          return update('single', changesets.value.single)
+        }
         return updateTypeRef.value.open()
       }
 
-      if (changeset.value.future) {
+      if (changesets.value.future) {
         // If we got here we removed any files.
-        await update('future', changeset.value.future)
+        await update('future', changesets.value.future)
       }
     }
 
@@ -974,7 +981,7 @@ export default defineComponent({
       format,
       onSubmitType,
       onSubmit,
-      changeset,
+      changesets,
       gradeGroups: internalGradeGroups,
       isSameDay: dateUtils.isSameDay,
       projectStore,

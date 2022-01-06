@@ -65,10 +65,8 @@ const config: NuxtConfig = {
   ],
   components: ['~/components', '~/components/inputs'],
   buildModules: [
-    ['@nuxt/typescript-build', { typeCheck: false }],
+    '@nuxt/typescript-build',
     '@nuxtjs/composition-api/module',
-    'unplugin-vue2-script-setup/nuxt',
-    // ['unplugin-auto-import/nuxt', { imports: ['@nuxtjs/composition-api'] }],
     '@nuxt/postcss8',
     'pinia/nuxt',
   ],
@@ -77,6 +75,11 @@ const config: NuxtConfig = {
     baseURL: process.env.AXIOS_BASE_URL || 'http://localhost:3000/',
     browserBaseURL: process.env.AXIOS_BROWSER_BASE_URL || undefined,
     proxyHeaders: false,
+  },
+  typescript: {
+    typecheck: {
+      files: './src/**/*.{ts,js,vue}',
+    },
   },
   alias: {
     '@server': resolve(__dirname, '../server/src'),

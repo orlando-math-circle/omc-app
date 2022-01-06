@@ -1,17 +1,17 @@
 import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Account } from '../account/account.entity';
-import { FindUserDto } from '../user/dtos/find-user.dto';
+import { FindUserDto } from '../user/dto/find-user.dto';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
 import { Acc } from './decorators/account.decorator';
 import { AccountAuth, UserAuth } from './decorators/auth.decorator';
 import { Usr } from './decorators/user.decorator';
-import { ChangeEmailDto } from './dtos/change-email.dto';
-import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ForgotPasswordDto } from './dtos/forgot-password.dto';
-import { ResetPasswordDto } from './dtos/reset-password.dto';
-import { VerifyTokenDto } from './dtos/verify-token.dto';
+import { ChangeEmailDto } from './dto/change-email.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyTokenDto } from './dto/verify-token.dto';
 
 @Controller()
 export class AuthController {

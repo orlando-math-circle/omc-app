@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
-import { Account as AccountEntity } from '@server/account/account.entity'
-import { CreateAccountDto } from '@server/account/dto/create-account.dto'
-import { EntityDTO } from '@server/shared/types/entity-dto'
+import { Account, CreateAccountDto } from '@omc/server'
 
-export type Account = EntityDTO<AccountEntity>
+export { Account }
 
 export const useAccount = defineStore({
   id: 'account',
@@ -11,7 +9,7 @@ export const useAccount = defineStore({
     account: null as Account | null,
   }),
   actions: {
-    async create(createAccountDto: EntityDTO<CreateAccountDto>) {
+    async create(createAccountDto: CreateAccountDto) {
       this.account = await this.$nuxt.$axios.$post('/account', createAccountDto)
     },
   },

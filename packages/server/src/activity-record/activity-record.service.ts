@@ -9,7 +9,7 @@ import {
 } from '@mikro-orm/core';
 import { SqlEntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
-import { User } from '@server/user/user.entity';
+import { User } from '../user/user.entity';
 import { EventRegistration } from '../event-registration/event-registration.entity';
 import { Event } from '../event/event.entity';
 import { ActivityRecord } from './activity-record.entity';

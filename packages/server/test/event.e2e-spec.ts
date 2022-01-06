@@ -6,7 +6,6 @@ import {
 } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '../src/config/config.module';
 import { Test } from '@nestjs/testing';
 import { addDays, addMonths } from 'date-fns';
 import Joi from 'joi';
@@ -14,14 +13,16 @@ import moment from 'moment';
 import RRule, { Frequency } from 'rrule';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
+import { ActivityRecordModule } from '../src/activity-record/activity-record.module';
 import { Roles } from '../src/app.roles';
 import { isBeforeDay } from '../src/app.utils';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { ConfigModule } from '../src/config/config.module';
 import { CourseModule } from '../src/course/course.module';
 import { EmailModule } from '../src/email/email.module';
-import { CreateEventDto } from '../src/event/dto/create-event.dto';
-import { UpdateEventDto } from '../src/event/dto/update-event.dto';
+import { CreateEventDto } from '../src/event/dto/create-event-old.dto';
+import { UpdateEventDto } from '../src/event/dto/update-event-old.dto';
 import { UpdateEventsDto } from '../src/event/dto/update-events.dto';
 import { EventRecurrence } from '../src/event/event-recurrence.entity';
 import { Event } from '../src/event/event.entity';
@@ -67,6 +68,7 @@ describe('Events', () => {
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
         AccountModule,
+        ActivityRecordModule,
         UserModule,
         FileModule,
         AuthModule,
@@ -274,7 +276,9 @@ describe('Events', () => {
       expect(resp.body.length).toBeGreaterThan(1);
 
       const isAscending = (resp.body as Event[]).every(
-        (e, i) => i === 0 || isBeforeDay(e.dtstart, resp.body[i - 1]),
+        (e, i) =>
+          i === 0 ||
+          isBeforeDay(new Date(e.dtstart), new Date(resp.body[i - 1])),
       );
 
       expect(isAscending).toBeTruthy();

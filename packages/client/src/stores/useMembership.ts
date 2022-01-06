@@ -1,21 +1,19 @@
 import { defineStore } from 'pinia'
-import { CreateMembershipDto } from '@server/membership/dto/create-membership.dto'
-import { EntityDTO } from '@server/shared/types/entity-dto'
+import {
+  Membership,
+  CreateMembershipDto,
+  MembershipStatusDto,
+} from '@omc/server'
 import { StateStatus, StateError } from '@/types/state.interface'
-import { Membership } from '@server/membership/membership.entity'
-import { MembershipStatus } from '@server/membership/interfaces/membership-status.interface'
-
-export type MembershipEntity = EntityDTO<Membership>
-export type MembershipStatusEntity = EntityDTO<MembershipStatus>
 
 export const useMembership = defineStore({
   id: 'Membership',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    membership: null as MembershipEntity | null,
-    memberships: [] as MembershipEntity[],
-    statuses: [] as MembershipStatusEntity[],
+    membership: null as Membership | null,
+    memberships: [] as Membership[],
+    statuses: [] as MembershipStatusDto[],
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',

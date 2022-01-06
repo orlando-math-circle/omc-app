@@ -11,21 +11,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Roles } from '@server/app.roles';
 import bcrypt from 'bcrypt';
 import { classToPlain } from 'class-transformer';
 import { eachWeekOfInterval, endOfWeek, format, sub } from 'date-fns';
 import { Account } from '../account/account.entity';
 import { BCRYPT_ROUNDS } from '../app.constants';
+import { Roles } from '../app.roles';
 import { Populate, PopulateFail } from '../app.utils';
 import { ConfigService } from '../config/config.service';
 import { FileAttachment } from '../file-attachment/file-attachment.entity';
 import { File } from '../file/file.entity';
 import { ApprovalStatus } from '../file/interfaces/approval-status.enum';
 import { MulterFile } from '../file/interfaces/multer-file.interface';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateOwnUserDto } from './dto/update-own-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { MonthlyUserStatistic } from './interfaces/monthly-user-statistic.interface';
 import { User } from './user.entity';
 

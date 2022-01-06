@@ -1,4 +1,4 @@
-import { FilterQuery } from '@mikro-orm/core';
+import { FilterQuery, expr } from '@mikro-orm/core';
 import {
   Body,
   Controller,
@@ -38,9 +38,9 @@ export class ProjectController {
       ? {}
       : {
           $or: [
-            { 'lower(id::text)': { $like: `%${contains}%` } },
-            { 'lower(name)': { $like: `%${contains}%` } },
-            { 'lower(description)': { $like: `%${contains}%` } },
+            { [expr('lower(id::text)')]: { $like: `%${contains}%` } },
+            { [expr('lower(name)')]: { $like: `%${contains}%` } },
+            { [expr('lower(description)')]: { $like: `%${contains}%` } },
           ],
         };
 

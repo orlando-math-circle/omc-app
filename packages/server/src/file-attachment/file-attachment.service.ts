@@ -2,7 +2,7 @@ import { EntityRepository, FilterQuery, Populate } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '../config/config.service';
-import { FileFieldService } from '../file-fields/file-field.service';
+import { FileFieldService } from '../file-field/file-field.service';
 import { File } from '../file/file.entity';
 import { MulterFile } from '../file/interfaces/multer-file.interface';
 import { User } from '../user/user.entity';

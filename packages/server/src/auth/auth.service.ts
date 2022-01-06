@@ -22,7 +22,7 @@ import { Email } from '../email/email.class';
 import { EmailService } from '../email/email.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
-import { ChangePasswordDto } from './dtos/change-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import {
   AuthPayload,
   ChangeEmailPayload,

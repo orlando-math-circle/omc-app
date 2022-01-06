@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { FileAttachment } from '@server/file-attachment/file-attachment.entity'
-import { FileField } from '@server/file-fields/file-field.entity'
+import { FileAttachment, FileField } from '@omc/server'
 import { StateStatus, StateError } from '@/types/state.interface'
+
+export { FileAttachment, FileField }
 
 export const useAttachments = defineStore({
   id: 'attachments',

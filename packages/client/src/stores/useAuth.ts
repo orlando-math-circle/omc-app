@@ -1,26 +1,26 @@
+import {
+  Account,
+  ChangeEmailDto,
+  ChangePasswordDto,
+  RegisterAccountDto,
+  ResetPasswordDto,
+  Roles,
+  User,
+} from '@omc/server'
 import { defineStore } from 'pinia'
-import { Account } from '@server/account/account.entity'
-import { RegisterAccountDto } from '@server/account/dto/register.dto'
-import { Roles } from '@server/app.roles'
-import { ChangePasswordDto } from '@server/auth/dtos/change-password.dto'
-import { User } from '@server/user/user.entity'
-import { COOKIE_COMPLETE, COOKIE_JWT } from '@/utils/constants'
 import { useCookies } from '@/composables'
-import { ResetPasswordDto } from '@server/auth/dtos/reset-password.dto'
-import { StateStatus, StateError } from '@/types/state.interface'
-import { EntityDTO } from '@server/shared/types/entity-dto'
-import { ChangeEmailDto } from '@server/auth/dtos/change-email.dto'
+import { StateError, StateStatus } from '@/types/state.interface'
+import { COOKIE_COMPLETE, COOKIE_JWT } from '@/utils/constants'
 
-export type UserEntity = EntityDTO<User>
-export type AccountEntity = EntityDTO<Account>
+export { User }
 
 export const useAuth = defineStore({
   id: 'auth',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    user: null as UserEntity | null,
-    account: null as AccountEntity | null,
+    user: null as User | null,
+    account: null as Account | null,
     token: null as string | null,
     complete: false,
     remember: true,

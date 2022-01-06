@@ -7,7 +7,7 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
-import { FileField } from '../file-fields/file-field.entity';
+import { FileField } from '../file-field/file-field.entity';
 import { File } from '../file/file.entity';
 import { ApprovalStatus } from '../file/interfaces/approval-status.enum';
 import { User } from '../user/user.entity';

@@ -160,7 +160,7 @@ export class PayPalService {
       this.loader.unlock();
 
       return token;
-    } catch (error) {
+    } catch (error: any) {
       this.token = null;
       this.loader.flush(error);
       this.loader.unlock();

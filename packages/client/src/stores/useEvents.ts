@@ -1,15 +1,17 @@
 import { defineStore } from 'pinia'
-import { FindAllEventsDto } from '@server/event/dto/find-all-events.dto'
-import { Event } from '@server/event/event.entity'
-import { FindAllRegisteredEventsDto } from '@server/event/dto/find-all-registered-events.dto'
-import { CreateEventDto } from '@server/event/dto/create-event.dto'
-import { UpdateEventsDto } from '@server/event/dto/update-events.dto'
-import { UpdateEventDto } from '@server/event/dto/update-event.dto'
+import {
+  Event,
+  CreateEventDto,
+  UpdateEventDto,
+  UpdateEventsDto,
+  FindAllEventsDto,
+  FindAllRegisteredEventsDto,
+} from '@omc/server'
 import { toLocalISO } from '@/utils/utilities'
-import { EntityDTO } from '@server/shared/types/entity-dto'
 import { StateStatus, StateError } from '@/types/state.interface'
 
-export type EventEntity = EntityDTO<Event>
+export { Event }
+
 export type EventMode = 'single' | 'future' | 'all'
 
 export const useEvents = defineStore({
@@ -17,8 +19,8 @@ export const useEvents = defineStore({
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    event: null as EventEntity | null,
-    events: [] as EventEntity[],
+    event: null as Event | null,
+    events: [] as Event[],
     defaultPicture: require('~/assets/images/programmer.jpg'),
   }),
   getters: {
@@ -34,7 +36,7 @@ export const useEvents = defineStore({
     },
   },
   actions: {
-    async create(createEventDto: EntityDTO<CreateEventDto>) {
+    async create(createEventDto: CreateEventDto) {
       await this.$nuxt.$axios.$post('/event', createEventDto)
     },
     async findOne(id: number) {
@@ -54,7 +56,7 @@ export const useEvents = defineStore({
     },
     async update(
       id: number,
-      data: EntityDTO<UpdateEventDto> | EntityDTO<UpdateEventsDto>,
+      data: UpdateEventDto | UpdateEventsDto,
       mode: EventMode
     ) {
       await this.$nuxt.$axios.$patch(`/event/${id}/${mode}`, data)

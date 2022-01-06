@@ -6,16 +6,16 @@ export class FindAllCoursesDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  limit?: number;
+  readonly limit?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  offset?: number;
+  readonly offset?: number;
 
   @IsOptional()
   @IsString()
-  contains?: string;
+  readonly contains?: string;
 
   /**
    * Sort expects properties in the pattern of

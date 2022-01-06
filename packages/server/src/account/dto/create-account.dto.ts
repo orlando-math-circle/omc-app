@@ -9,7 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Roles } from '../../app.roles';
-import { IndustryDto } from '../../user/dtos/industry.dto';
+import { IndustryDto } from '../../user/dto/industry.dto';
 import { Gender } from '../../user/enums/gender.enum';
 import { Grade } from '../../user/enums/grade.enum';
 import { ReminderFreq } from '../../user/enums/reminder-freq.enum';
@@ -52,7 +52,7 @@ export class CreateAccountDto {
   readonly password!: string;
 
   @IsDateString()
-  readonly dob!: Date;
+  readonly dob!: string;
 
   @IsOptional()
   @IsString()

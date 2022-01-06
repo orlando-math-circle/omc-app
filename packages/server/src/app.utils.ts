@@ -3,8 +3,16 @@ import {
   FindOneOrFailOptions,
   Populate as MikroORMPopulate,
 } from '@mikro-orm/core';
-import { differenceInYears, isAfter, isBefore, isSameDay } from 'date-fns';
-import moment from 'moment';
+import {
+  differenceInYears,
+  isAfter,
+  isBefore,
+  isSameDay,
+  addMinutes as _addMinutes,
+  subDays as _subDays,
+  differenceInMinutes,
+  min,
+} from 'date-fns';
 
 /**
  * Types
@@ -55,22 +63,18 @@ export const isBetweenInclusive = (start: Date, end: Date, date: Date) =>
 export const birthdayToAge = (date: Date | string) =>
   differenceInYears(new Date(), toDate(date));
 
-export const isBeforeDay = (dt1: Date, dt2: Date) =>
-  moment(dt1).isBefore(dt2, 'day');
+export const isBeforeDay = (dt1: Date, dt2: Date) => isBefore(dt1, dt2);
 
-export const isAfterDay = (dt1: Date, dt2: Date) =>
-  moment(dt1).isAfter(dt2, 'day');
+export const isAfterDay = (dt1: Date, dt2: Date) => isAfter(dt1, dt2);
 
 export const addMinutes = (date: Date, minutes: number) =>
-  moment(date).add(minutes, 'minutes').toDate();
+  _addMinutes(date, minutes);
 
 export const getMinutesDiff = (dt1: Date, dt2: Date) =>
-  moment(dt2).diff(dt1, 'minutes');
+  differenceInMinutes(dt1, dt2);
 
-export const getMinDate = (...dates: Date[]) =>
-  moment.min(dates.map((d) => moment(d))).toDate();
+export const getMinDate = (...dates: Date[]) => min(dates);
 
-export const subDays = (date: Date, days = 1) =>
-  moment(date).subtract(days, 'day').toDate();
+export const subDays = (date: Date, days = 1) => _subDays(date, days);
 
 export { isSameDay };

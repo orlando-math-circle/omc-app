@@ -1,7 +1,6 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import MikroORMConfig from '../mikro-orm.config';
 import { AccountModule } from './account/account.module';
 import { ActivityRecordModule } from './activity-record/activity-record.module';
 import { AttendanceModule } from './attendance/attendance.module';
@@ -13,7 +12,7 @@ import { EmailModule } from './email/email.module';
 import { EventRegistrationModule } from './event-registration/event-registration.module';
 import { EventModule } from './event/event.module';
 import { FileAttachmentModule } from './file-attachment/file-attachment.module';
-import { FileFieldModule } from './file-fields/file-field.module';
+import { FileFieldModule } from './file-field/file-field.module';
 import { FileModule } from './file/file.module';
 import { MembershipModule } from './membership/membership.module';
 import { PayPalModule } from './paypal/paypal.module';
@@ -31,7 +30,7 @@ import { VolunteerWorkModule } from './volunteer-work/volunteer-work.module';
       isGlobal: true,
       validationSchema: configSchema,
     }),
-    MikroOrmModule.forRoot(MikroORMConfig),
+    MikroOrmModule.forRoot(),
     EmailModule,
     AuthModule,
     ActivityRecordModule,

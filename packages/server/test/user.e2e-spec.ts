@@ -1,20 +1,21 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '../src/config/config.module';
 import { Test } from '@nestjs/testing';
 import Joi from 'joi';
 import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { RegisterAccountDto } from '../src/account/dto/register.dto';
+import { ActivityRecordModule } from '../src/activity-record/activity-record.module';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { ConfigModule } from '../src/config/config.module';
 import { EmailModule } from '../src/email/email.module';
 import { FileModule } from '../src/file/file.module';
-import { CreateUserDto } from '../src/user/dtos/create-user.dto';
-import { UpdateUserDto } from '../src/user/dtos/update-user.dto';
+import { CreateUserDto } from '../src/user/dto/create-user.dto';
+import { UpdateUserDto } from '../src/user/dto/update-user.dto';
 import { Gender } from '../src/user/enums/gender.enum';
 import { Grade } from '../src/user/enums/grade.enum';
 import { User } from '../src/user/user.entity';
@@ -72,6 +73,7 @@ describe('Users', () => {
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
+        ActivityRecordModule,
         AccountModule,
         UserModule,
         FileModule,

@@ -1,13 +1,8 @@
-import {
-  EntityRepository,
-  FilterQuery,
-  Populate,
-  QueryOrder,
-  QueryOrderMap,
-} from '@mikro-orm/core';
+import { EntityRepository, QueryOrder } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
+import { SqlEntityManager } from '@mikro-orm/postgresql';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { endOfDay } from '@shared/time';
+import { UpdateEventDto } from '..';
 import {
   addMinutes,
   getMinDate,
@@ -16,7 +11,6 @@ import {
   isBeforeDay,
   isBoolean,
   isSameDay,
-  PopulateFail,
   subDays,
 } from '../app.utils';
 import { ConfigService } from '../config/config.service';
@@ -27,23 +21,24 @@ import { User } from '../user/user.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { FindAllEventsDto } from './dto/find-all-events.dto';
 import { FindAllRegisteredEventsDto } from './dto/find-all-registered-events.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
-import { UpdateEventsDto } from './dto/update-events.dto';
 import { FeeType } from './enums/fee-type.enum';
 import { EventRecurrence } from './event-recurrence.entity';
 import { Event } from './event.entity';
 import { EventMetadata } from './interfaces/event-metadata.interface';
 import { Schedule } from './schedule.class';
 
+export type Mode = 'single' | 'future' | 'all';
+
 @Injectable()
 export class EventService {
   constructor(
     @InjectRepository(Event)
-    private readonly eventRepository: EntityRepository<Event>,
+    public readonly eventRepository: EntityRepository<Event>,
     @InjectRepository(EventRecurrence)
     private readonly recurrenceRepository: EntityRepository<EventRecurrence>,
     private readonly courseService: CourseService,
     private readonly config: ConfigService,
+    private readonly em: SqlEntityManager,
   ) {}
 
   /**
@@ -52,50 +47,51 @@ export class EventService {
    * @param createEventDto CreateEventDto
    * @param author User author
    */
-  async create(createEventDto: CreateEventDto, author: User) {
-    const { dtstart, dtend, rrule, feeType, fee, ...meta } = createEventDto;
+  async create(dto: CreateEventDto, author: User) {
+    const { courseId, projectId, metadata, temporal, fee: createFeeDto } = dto;
 
     const event = this.eventRepository.create({
-      dtstart: rrule?.dtstart || dtstart,
-      dtend: dtend || endOfDay((rrule?.dtstart || dtstart)!),
       author,
-      ...meta,
+      course: courseId,
+      project: projectId,
+      metadata,
+      temporal: {
+        dtend: new Date(temporal.dtend),
+      },
     });
 
-    if (feeType && fee) {
-      const eventFee = new EventFee(fee);
+    if (temporal.mode === 'single') {
+      event.temporal.dtstart = new Date(temporal.dtstart);
+    } else if (temporal.mode === 'recurring') {
+      const recurrence = new EventRecurrence(temporal.rrule);
 
-      switch (feeType) {
-        case FeeType.COURSE:
-          if (!meta.course) {
-            throw new BadRequestException(
-              'Cannot create event payment by course with no course',
-            );
-          }
+      this.eventRepository.assign(event, {
+        temporal: {
+          // Ensure that the first created event is the first occurrence.
+          dtstart: recurrence.first,
+          recurrence,
+        },
+      });
+    }
 
-          eventFee.course = await this.courseService.findOneOrFail(meta.course);
-          eventFee.populated();
-          break;
-        case FeeType.EVENT:
-          eventFee.event = event;
-          eventFee.populated();
-          break;
-        default:
-          break;
+    if (createFeeDto && createFeeDto.type !== FeeType.FREE) {
+      const fee = new EventFee(createFeeDto);
+
+      if (createFeeDto.type === FeeType.COURSE) {
+        if (!courseId) {
+          throw new BadRequestException(
+            'Course is required for fee type COURSE',
+          );
+        }
+
+        this.eventRepository.assign(event, { course: { fee } });
+      } else {
+        this.eventRepository.assign(event, { fee });
       }
     }
 
-    if (rrule) {
-      const schedule = new Schedule(rrule);
-      event.recurrence = new EventRecurrence(
-        schedule.toString(),
-        schedule.dtstart,
-        schedule.dtend,
-      );
-    }
-
-    if (!event.picture) {
-      event.picture = this.config.FILES.DEFAULT_EVENT_PICTURE;
+    if (!event.metadata.picture) {
+      event.metadata.picture = this.config.FILES.DEFAULT_EVENT_PICTURE;
     }
 
     await this.eventRepository.persist(event).flush();
@@ -104,25 +100,10 @@ export class EventService {
   }
 
   /**
-   * Finds an existing event entity or throws an error.
-   *
-   * @param where Id or query of event parameters.
-   * @param populate Boolean, attribute array, or population options.
-   * @param orderBy Query for element ordering.
-   */
-  async findOneOrFail(
-    where: FilterQuery<Event>,
-    populate?: PopulateFail<Event>,
-    orderBy?: QueryOrderMap,
-  ) {
-    return this.eventRepository.findOneOrFail(where, populate, orderBy);
-  }
-
-  /**
    * Finds all upcoming events a user is registered to attend or volunteer for.
    *
-   * @param {FindAllRegisteredEventsDto} findAllRegisteredEventsDto Query parameters.
-   * @param {User} user User to find registrations for.
+   * @param findAllRegisteredEventsDto Query parameters.
+   * @param user User to find registrations for.
    */
   async findAllRegistered(
     { limit, offset, volunteering }: FindAllRegisteredEventsDto,
@@ -135,7 +116,7 @@ export class EventService {
           ...(isBoolean(volunteering) ? { volunteering } : {}),
         },
       },
-      { limit, offset, orderBy: { dtstart: 'ASC' } },
+      { limit, offset, orderBy: { temporal: { dtstart: QueryOrder.ASC } } },
     );
   }
 
@@ -158,7 +139,7 @@ export class EventService {
           },
           projects && { project: { id: projects } },
         ),
-        ['course', 'fee', 'project', 'author'],
+        { populate: ['course', 'fee', 'project', 'author'] },
       ),
       this.recurrenceRepository.find(
         Object.assign(
@@ -175,9 +156,13 @@ export class EventService {
       recurrences,
       ['events.course', 'events.fee', 'events.project', 'events.author'],
       {
-        events: {
-          dtstart: { $lte: end },
-          $or: [{ dtend: { $gte: start } }, { dtend: null }],
+        where: {
+          events: {
+            temporal: {
+              dtstart: { $lte: end },
+              $or: [{ dtend: { $gte: start } }, { dtend: null }],
+            },
+          },
         },
       },
     );
@@ -190,12 +175,10 @@ export class EventService {
       // TODO: Consider an alternative to this as metadata exceptions
       // made to this queried reference will permeate to new hydrations.
       if (!recurrence.events.length) {
-        reference = await this.eventRepository.findOne({ recurrence }, [
-          'course',
-          'fee',
-          'project',
-          'author',
-        ]);
+        reference = await this.eventRepository.findOne(
+          { temporal: { recurrence } },
+          { populate: ['course', 'fee', 'project', 'author'] },
+        );
       } else {
         reference = recurrence.events[0];
       }
@@ -215,13 +198,13 @@ export class EventService {
     for (const recurrence of recurrences) {
       for (const event of recurrence.events) {
         // This avoids the parentEvent from being added to this list.
-        if (event.dtstart >= start && event.dtend <= end) {
+        if (event.temporal.dtstart >= start && event.temporal.dtend <= end) {
           allEvents.push(event);
         }
       }
     }
 
-    return allEvents.sort((a, b) => +a.dtstart - +b.dtstart);
+    return allEvents.sort((a, b) => +a.temporal.dtstart - +b.temporal.dtstart);
   }
 
   /**
@@ -261,7 +244,7 @@ export class EventService {
         }
 
         if (!event.course.isInitialized()) {
-          await this.eventRepository.populate(event, 'course');
+          await this.eventRepository.populate(event, ['course']);
         }
 
         if (event.course.fee) {
@@ -279,6 +262,107 @@ export class EventService {
   }
 
   /**
+   * Retrieves the pivot event and populates it with the
+   * appropriate data for the updating mode.
+   *
+   * @param id - Id of the event to update, or start an update from.
+   * @param mode - Methodology used in the update.
+   */
+  private async getUpdatingPivot(id: number, mode: Mode) {
+    let pivot = await this.eventRepository.findOneOrFail(id);
+
+    switch (mode) {
+      case 'single': {
+        return this.eventRepository.findOneOrFail(id, {
+          populate: ['fee', 'course.fee'],
+        });
+      }
+      case 'future': {
+        return this.eventRepository.findOneOrFail(id, {
+          populate: [
+            'fee',
+            'course.fee',
+            'temporal.recurrence.events.fee',
+            'temporal.recurrence.events.course.fee',
+          ],
+          having: {
+            temporal: {
+              recurrence: {
+                events: {
+                  temporal: { dtstart: { $gte: pivot.temporal.dtstart } },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      case 'all': {
+        await this.em.populate(
+          pivot,
+          [
+            'fee',
+            'course.fee',
+            'temporal.recurrence.events.fee',
+            'temporal.recurrence.events.course.fee',
+          ],
+          {
+            orderBy: {
+              temporal: {
+                recurrence: {
+                  events: { temporal: { dtstart: QueryOrder.ASC } },
+                },
+              },
+            },
+          },
+        );
+
+        // Ensure we're selecting the first chronological event
+        // in the recurrence if we weren't already.
+        if (pivot.temporal.recurrence) {
+          pivot = pivot.temporal.recurrence.events[0];
+        }
+
+        return pivot;
+      }
+    }
+  }
+
+  public async update(id: number, mode: Mode, updateEventDto: UpdateEventDto) {
+    const pivot = await this.getUpdatingPivot(id, mode);
+
+    // If the event is non-recurring, multi-event modes are invalid.
+    if (mode !== 'single' && !pivot.temporal.recurrence) {
+      throw new BadRequestException(
+        'Cannot update non-recurring event by mode: ' + mode,
+      );
+    }
+
+    // Each mode has a different procedure for updating the rrule.
+    if (updateEventDto.rrule) {
+      switch (mode) {
+        case 'single':
+          // Changing an existing rrule for a single event is an illegal operation.
+          if (pivot.temporal.recurrence) {
+            throw new BadRequestException(
+              'Cannot change the rrule of a single event',
+            );
+          }
+
+          // However, we can add new rrules to non-recurring events.
+          if (updateEventDto.rrule) {
+            const recurrence = new EventRecurrence(updateEventDto.rrule);
+            // TODO: Finish
+          }
+          break;
+
+        case 'future':
+        // TODO: Incomplete
+      }
+    }
+  }
+
+  /**
    * Modifies an event instance as an exception. If the modifications
    * are temporal a reference to the original times is maintained.
    *
@@ -286,7 +370,7 @@ export class EventService {
    * @param updateEventDto UpdateEventDto object
    */
   public async updateSingleEvent(id: number, updateEventDto: UpdateEventDto) {
-    const { dtstart, dtend, feeType, fee, ...meta } = updateEventDto;
+    const { dtstart, dtend, fee, ...meta } = updateEventDto;
     const event = await this.eventRepository.findOneOrFail(id, [
       'fee',
       'course.fee',
@@ -294,17 +378,17 @@ export class EventService {
 
     if (dtstart) {
       event.originalStart = event.dtstart;
-      event.dtstart = dtstart;
+      event.dtstart = new Date(dtstart);
     }
 
     if (dtend) {
-      event.dtend = dtend;
+      event.dtend = new Date(dtend);
     }
 
     event.assign({ ...meta });
 
-    if (feeType && fee) {
-      await this.upsertEventFee(event, feeType, fee);
+    if (fee?.type) {
+      await this.upsertEventFee(event, fee.type, fee);
     }
 
     await this.eventRepository.flush();
@@ -319,23 +403,14 @@ export class EventService {
    * @param id event id
    * @param updateEventDto UpdateEventDto object
    */
-  public async updateFutureEvents(
-    id: number,
-    updateEventsDto: UpdateEventsDto,
-  ) {
-    const { dtend, rrule, ...meta } = updateEventsDto;
-    const pivot = await this.eventRepository.findOneOrFail(
-      id,
-      [
-        'fee',
-        'course.fee',
-        'recurrence.events.fee',
-        'recurrence.events.course.fee',
-      ],
-      {
-        recurrence: { events: { dtstart: QueryOrder.ASC } },
-      },
-    );
+  public async updateFutureEvents(id: number, updateEventDto: UpdateEventDto) {
+    const { dtend, rrule, ...meta } = updateEventDto;
+    const pivot = await this.eventRepository.findOneOrFail(id, [
+      'fee',
+      'course.fee',
+      'recurrence.events.fee',
+      'recurrence.events.course.fee',
+    ]);
 
     // Edge-Case: There is no recurrence thus no "all" to update.
     if (!pivot.recurrence) {
@@ -344,8 +419,8 @@ export class EventService {
         const schedule = new Schedule(rrule);
         const recurrence = new EventRecurrence(
           schedule.toString(),
-          rrule.dtstart,
-          rrule.until,
+          new Date(rrule.dtstart),
+          rrule.until ? new Date(rrule.until) : undefined,
         );
         recurrence.events.add(pivot);
         pivot.recurrence = recurrence;
@@ -774,20 +849,5 @@ export class EventService {
     options.until = until;
 
     return new Schedule(options);
-  }
-
-  /**
-   * Loads relations on event entities.
-   *
-   * @param entities Event or events to populate.
-   * @param populate The relations to attempt to populate.
-   * @param where Query for population.
-   */
-  public async populate<P extends string | keyof Event | Populate<Event>>(
-    entities: Event | Event[],
-    populate: P,
-    where: FilterQuery<Event>,
-  ) {
-    return this.eventRepository.populate(entities, populate, where);
   }
 }

@@ -18,16 +18,16 @@ import { ActivityRecordEvent } from '../activity-record/enums/activity-record-ev
 import { Populate } from '../app.utils';
 import { AccessService } from '../auth/access.service';
 import { EventService } from '../event/event.service';
-import { CreateInvoiceDto } from '../invoice/dtos/create-invoice.dto';
+import { CreateInvoiceDto } from '../invoice/dto/create-invoice.dto';
 import { InvoiceStatus } from '../invoice/enums/invoice-status.enum';
 import { InvoiceService } from '../invoice/invoice.service';
 import { PurchaseUnitRequest } from '../paypal/interfaces/orders/purchase-unit.interface';
 import { PayPalService } from '../paypal/paypal.service';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
-import { VolunteerUserJobDto } from './dtos/create-volunteer-registration.dto';
-import { EventRegistrationStatus } from './dtos/event-registration-status.dto';
-import { UpdateOwnEventRegistrationDto } from './dtos/update-event-registration.dto';
+import { VolunteerUserJobDto } from './dto/create-volunteer-registration.dto';
+import { EventRegistrationStatus } from './dto/event-registration-status.dto';
+import { UpdateOwnEventRegistrationDto } from './dto/update-event-registration.dto';
 import { EventRegistration } from './event-registration.entity';
 
 export class EventRegistrationService {

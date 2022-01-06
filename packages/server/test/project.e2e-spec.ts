@@ -1,14 +1,15 @@
 import { MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '../src/config/config.module';
 import { Test } from '@nestjs/testing';
 import Joi from 'joi';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
+import { ActivityRecordModule } from '../src/activity-record/activity-record.module';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { ConfigModule } from '../src/config/config.module';
 import { CourseModule } from '../src/course/course.module';
 import { FileModule } from '../src/file/file.module';
 import { CreateProjectDto } from '../src/project/dto/create-project.dto';
@@ -53,6 +54,7 @@ describe('Projects', () => {
           ignoreEnvFile: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),
+        ActivityRecordModule,
         AccountModule,
         UserModule,
         FileModule,

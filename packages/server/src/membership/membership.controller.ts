@@ -11,7 +11,7 @@ import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Account } from '../account/account.entity';
 import { MembershipService } from './membership.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
-import { Acc } from '@server/auth/decorators/account.decorator';
+import { Acc } from '../auth/decorators/account.decorator';
 import { isBoolean } from 'lodash';
 
 @Controller('/membership')

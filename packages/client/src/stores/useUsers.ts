@@ -1,22 +1,21 @@
 import { defineStore } from 'pinia'
-import { CreateUserDto } from '@server/user/dtos/create-user.dto'
-import { FindUsersDto } from '@server/user/dtos/find-users.dto'
-import { UpdateOwnUserDto } from '@server/user/dtos/update-own-user.dto'
-import { UpdateUserDto } from '@server/user/dtos/update-user.dto'
-import { UserEntity } from '@/stores'
-import { StateStatus, StateError } from '@/types/state.interface'
-import { MonthlyUserStatistic as Statistic } from '@server/user/interfaces/monthly-user-statistic.interface'
-import { EntityDTO } from '@server/shared/types/entity-dto'
-
-export type MonthlyUserStatistic = EntityDTO<Statistic>
+import {
+  CreateUserDto,
+  FindUsersDto,
+  MonthlyUserStatistic,
+  UpdateOwnUserDto,
+  UpdateUserDto,
+  User,
+} from '@omc/server'
+import { StateError, StateStatus } from '@/types/state.interface'
 
 export const useUsers = defineStore({
   id: 'user',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    user: null as UserEntity | null,
-    users: [] as UserEntity[],
+    user: null as User | null,
+    users: [] as User[],
     statistics: [] as MonthlyUserStatistic[],
   }),
   getters: {

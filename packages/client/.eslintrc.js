@@ -10,6 +10,11 @@ module.exports = {
     'no-console': 'off',
     camelcase: 'off',
     quotes: [2, 'single', { avoidEscape: true }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { ignoreRestSiblings: true },
+    ],
+    'vue/no-v-for-template-key-on-child': 'off', // Vue3 only.
     'vue/custom-event-name-casing': [
       'error',
       { ignores: ['/^[a-z]+(?:-[a-z]+)*:[a-z]+(?:-[a-z]+)*$/u'] },

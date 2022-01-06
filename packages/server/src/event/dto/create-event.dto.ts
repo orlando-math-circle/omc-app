@@ -1,96 +1,67 @@
 import { Type } from 'class-transformer';
 import {
-  IsDate,
-  IsEnum,
-  IsNumber,
+  IsDateString,
+  IsIn,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { CreateEventFeeDto } from '../../event-fee/dto/create-event-fee.dto';
-import { EventTimeThreshold } from '../enums/event-time-threshold.enum';
-import { FeeType } from '../enums/fee-type.enum';
-import { EventPermissionsDto } from './event-permissions.dto';
-import { EventRecurrenceDto } from './event-recurrence.dto';
+import { EventPermissionsDto, RRuleDto } from '.';
+import { CreateEventFeeDto } from '../..';
+import { CreateEventMetaDto } from './create-event-meta.dto';
+
+class TemportalBaseDto {
+  @IsString()
+  @IsIn(['single', 'recurring'])
+  readonly mode!: 'single' | 'recurring';
+
+  @IsDateString()
+  dtend!: string;
+}
+
+export class RecurringTemporalDto extends TemportalBaseDto {
+  readonly mode!: 'recurring';
+
+  @Type(() => RRuleDto)
+  @ValidateNested()
+  rrule!: RRuleDto;
+}
+
+export class NonRecurringTemportalDto extends TemportalBaseDto {
+  readonly mode!: 'single';
+
+  @IsDateString()
+  dtstart!: string;
+}
 
 export class CreateEventDto {
-  @IsString()
-  name!: string;
+  @ValidateNested()
+  @Type(() => TemportalBaseDto, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: 'mode',
+      subTypes: [
+        { value: RecurringTemporalDto, name: 'recurring' },
+        { value: NonRecurringTemportalDto, name: 'single' },
+      ],
+    },
+  })
+  temporal!: RecurringTemporalDto | NonRecurringTemportalDto;
 
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsString()
-  location?: string;
-
-  @IsOptional()
-  @IsString()
-  locationTitle?: string = 'Online';
-
-  @IsOptional()
-  @IsString()
-  picture?: string;
-
-  @IsOptional()
-  @IsString()
-  color?: string;
-
-  @IsOptional()
   @Type(() => EventPermissionsDto)
   @ValidateNested()
-  permissions?: EventPermissionsDto;
+  metadata!: CreateEventMetaDto;
 
   @IsOptional()
-  @IsEnum(EventTimeThreshold)
-  cutoffThreshold?: EventTimeThreshold;
+  @Type(() => Number)
+  courseId?: number;
 
   @IsOptional()
-  @IsNumber()
-  cutoffOffset?: number;
-
-  @IsOptional()
-  @IsEnum(EventTimeThreshold)
-  lateThreshold?: EventTimeThreshold;
-
-  @IsOptional()
-  @IsNumber()
-  lateOffset?: number;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  dtstart?: Date;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  dtend?: Date;
-
-  @IsOptional()
-  @Type(() => EventRecurrenceDto)
-  @ValidateNested()
-  rrule?: EventRecurrenceDto;
-
-  @IsOptional()
-  @IsEnum(FeeType)
-  feeType?: FeeType;
+  @Type(() => Number)
+  projectId?: number;
 
   @IsOptional()
   @Type(() => CreateEventFeeDto)
   @ValidateNested()
   fee?: CreateEventFeeDto;
-
-  @IsOptional()
-  @Type(() => Number)
-  course?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  project?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  points?: number;
 }

@@ -1,23 +1,23 @@
 import { defineStore } from 'pinia'
-import { MarkAttendanceDto } from '@server/attendance/dtos/mark-attendance.dto'
-import { UpdateAttendanceDto } from '@server/attendance/dtos/update-attendance.dto'
-import { FindAllAttendancesDto } from '@server/attendance/dtos/find-all-attendances.dto'
-import { EntityDTO } from '@server/shared/types/entity-dto'
+import {
+  Attendance,
+  AttendanceStatus,
+  MarkAttendanceDto,
+  UpdateAttendanceDto,
+  FindAllAttendancesDto,
+} from '@omc/server'
 import { StateStatus, StateError } from '@/types/state.interface'
-import { Attendance } from '@server/attendance/attendance.entity'
-import { AttendanceStatus } from '@server/attendance/dtos/attendance-status.dto'
 
-export type AttendanceEntity = EntityDTO<Attendance>
-export type AttendanceStatusEntity = EntityDTO<AttendanceStatus>
+export { Attendance, AttendanceStatus }
 
 export const useAttendance = defineStore({
   id: 'attendance',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    attendance: null as AttendanceEntity | null,
-    attendances: [] as AttendanceEntity[],
-    statuses: [] as AttendanceStatusEntity[],
+    attendance: null as Attendance | null,
+    attendances: [] as Attendance[],
+    statuses: [] as AttendanceStatus[],
   }),
   getters: {
     isLoading: (state) => state.status === 'Loading',

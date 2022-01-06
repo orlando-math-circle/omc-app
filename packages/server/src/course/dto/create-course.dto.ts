@@ -9,21 +9,21 @@ import { CreateEventFeeDto } from '../../event-fee/dto/create-event-fee.dto';
 
 export class CreateCourseDto {
   @IsString()
-  name!: string;
+  readonly name!: string;
 
   @IsOptional()
   @IsString()
-  description?: string;
+  readonly description?: string;
 
   @IsNumber()
-  project!: number;
+  readonly project!: number;
 
   @IsOptional()
   @IsNumber({}, { each: true })
-  events?: number[];
+  readonly events?: number[];
 
   @IsOptional()
   @Type(() => CreateEventFeeDto)
   @ValidateNested()
-  fee?: CreateEventFeeDto;
+  readonly fee?: CreateEventFeeDto;
 }

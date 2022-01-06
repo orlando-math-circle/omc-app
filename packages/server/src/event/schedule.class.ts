@@ -1,14 +1,20 @@
+import { isString, toDate } from '@omc/shared';
 import RRule, { RRuleSet, rrulestr } from 'rrule';
-import { RRuleOptions } from './interfaces/rrule.interface';
+import { RRuleDto } from '..';
 
 export class Schedule {
   private _rrule: RRule | RRuleSet;
 
-  constructor(rrule: string | RRuleOptions, forceset = false) {
-    this._rrule =
-      typeof rrule === 'string'
-        ? rrulestr(rrule, { forceset })
-        : new RRule(rrule);
+  constructor(options: string | RRuleDto, forceset = false) {
+    if (isString(options)) {
+      this._rrule = rrulestr(options, { forceset });
+    } else {
+      this._rrule = new RRule({
+        ...options,
+        dtstart: toDate(options.dtstart),
+        until: options.until ? toDate(options.until) : undefined,
+      });
+    }
   }
 
   set rrule(rrule: RRule | RRuleSet) {
@@ -27,8 +33,6 @@ export class Schedule {
 
       return events[events.length - 1];
     }
-
-    return undefined;
   }
 
   get options() {

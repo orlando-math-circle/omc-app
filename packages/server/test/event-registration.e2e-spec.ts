@@ -1,13 +1,14 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '../src/config/config.module';
 import { Test } from '@nestjs/testing';
 import Joi from 'joi';
 import request from 'supertest';
 import { AccountModule } from '../src/account/account.module';
+import { ActivityRecordModule } from '../src/activity-record/activity-record.module';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
+import { ConfigModule } from '../src/config/config.module';
 import { CourseModule } from '../src/course/course.module';
 import { EmailModule } from '../src/email/email.module';
 import { EventRegistrationModule } from '../src/event-registration/event-registration.module';
@@ -54,6 +55,7 @@ describe('Event Registrations', () => {
         MikroOrmModule.forRoot(MikroORMTestingConfig),
         EmailModule,
         AccountModule,
+        ActivityRecordModule,
         UserModule,
         FileModule,
         AuthModule,

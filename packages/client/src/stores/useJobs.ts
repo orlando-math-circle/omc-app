@@ -1,20 +1,21 @@
 import { defineStore } from 'pinia'
-import { VolunteerJob } from '@server/volunteer-job/volunteer-job.entity'
-import { CreateJobDto } from '@server/volunteer-job/dto/create-job.dto'
-import { FindAllJobsDto } from '@server/volunteer-job/dto/find-all-jobs.dto'
-import { UpdateJobDto } from '@server/volunteer-job/dto/update-job.dto'
+import {
+  VolunteerJob,
+  CreateJobDto,
+  FindAllJobsDto,
+  UpdateJobDto,
+} from '@omc/server'
 import { StateStatus, StateError } from '@/types/state.interface'
-import { EntityDTO } from '@server/shared/types/entity-dto'
 
-export type JobEntity = EntityDTO<VolunteerJob>
+export { VolunteerJob }
 
 export const useJobs = defineStore({
   id: 'jobs',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    job: null as JobEntity | null,
-    jobs: [] as JobEntity[],
+    job: null as VolunteerJob | null,
+    jobs: [] as VolunteerJob[],
     total: null as number | null,
   }),
   actions: {

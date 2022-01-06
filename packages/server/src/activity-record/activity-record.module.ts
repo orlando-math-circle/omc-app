@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { UserModule } from '@server/user/user.module';
+import { UserModule } from '../user/user.module';
 import { ActivityRecordController } from './activity-record.controller';
 import { ActivityRecordService } from './activity-record.service';
 

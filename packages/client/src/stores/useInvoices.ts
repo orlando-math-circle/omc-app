@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
-import { Invoice } from '@server/invoice/invoice.entity'
+import { Invoice } from '@omc/server'
 import { StateStatus, StateError } from '@/types/state.interface'
+
+export { Invoice }
 
 export const useInvoices = defineStore({
   id: 'invoices',

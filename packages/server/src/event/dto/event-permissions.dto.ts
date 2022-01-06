@@ -15,5 +15,5 @@ export class EventPermissionsDto {
 
   @IsOptional()
   @IsBoolean()
-  readonly membershipStatus?: Boolean;
+  readonly membershipStatus?: boolean;
 }

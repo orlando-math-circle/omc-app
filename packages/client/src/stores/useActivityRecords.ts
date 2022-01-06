@@ -1,23 +1,20 @@
-import { StateError, StateStatus } from '@/types/state.interface'
-import type { ActivityRecord as ActivityRecordEntity } from '@server/activity-record/activity-record.entity'
-import { EntityDTO } from '@server/shared/types/entity-dto'
 import { defineStore } from 'pinia'
-import { UserEntity } from './useAuth'
-import { EventEntity } from './useEvents'
-import { RegistrationEntity } from './useRegistrations'
+import { ActivityRecord } from '@omc/server'
+import { User, Event, EventRegistration } from '@/stores'
+import { StateError, StateStatus } from '@/types/state.interface'
 
-export type RecordEntity = EntityDTO<ActivityRecordEntity>
+export { ActivityRecord }
 
 export const useActivityRecords = defineStore({
   id: 'audit',
   state: () => ({
     status: 'Idle' as StateStatus,
     error: null as StateError | null,
-    record: null as RecordEntity | null,
-    records: [] as RecordEntity[],
-    users: [] as UserEntity[],
-    events: [] as EventEntity[],
-    registrations: [] as RegistrationEntity[],
+    record: null as ActivityRecord | null,
+    records: [] as ActivityRecord[],
+    users: [] as User[],
+    events: [] as Event[],
+    registrations: [] as EventRegistration[],
     count: 0,
   }),
   getters: {

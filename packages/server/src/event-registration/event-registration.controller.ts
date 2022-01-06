@@ -14,12 +14,12 @@ import { Acc } from '../auth/decorators/account.decorator';
 import { AccountAuth, UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
-import { CreateOrderDto } from './dtos/create-order.dto';
-import { CreateRegistrationDto } from './dtos/create-registration.dto';
-import { CreateVolunteerRegistrationDto } from './dtos/create-volunteer-registration.dto';
-import { FindAllRegistrationsDto } from './dtos/find-all-registrations.dto';
-import { FindEventWithInvoiceDto } from './dtos/find-event-with-invoice.dto';
-import { UpdateOwnEventRegistrationDto } from './dtos/update-event-registration.dto';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateRegistrationDto } from './dto/create-registration.dto';
+import { CreateVolunteerRegistrationDto } from './dto/create-volunteer-registration.dto';
+import { FindAllRegistrationsDto } from './dto/find-all-registrations.dto';
+import { FindEventWithInvoiceDto } from './dto/find-event-with-invoice.dto';
+import { UpdateOwnEventRegistrationDto } from './dto/update-event-registration.dto';
 import { EventRegistrationService } from './event-registration.service';
 
 @Controller('/registration')

@@ -9,9 +9,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
-import { MarkAttendanceDto } from './dtos/mark-attendance.dto';
-import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
-import { FindAllAttendancesDto } from './dtos/find-all-attendances.dto';
+import { MarkAttendanceDto } from './dto/mark-attendance.dto';
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { FindAllAttendancesDto } from './dto/find-all-attendances.dto';
 import { Usr } from '../auth/decorators/user.decorator';
 import { User } from '../user/user.entity';
 import { UserAuth } from '../auth/decorators/auth.decorator';

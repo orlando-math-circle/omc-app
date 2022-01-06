@@ -3,17 +3,17 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class UpdateCourseDto {
   @IsOptional()
   @IsString()
-  name?: string;
+  readonly name?: string;
 
   @IsOptional()
   @IsString()
-  description?: string;
+  readonly description?: string;
 
   @IsOptional()
   @IsNumber()
-  project?: number;
+  readonly project?: number;
 
   @IsOptional()
   @IsNumber({}, { each: true })
-  events?: number[];
+  readonly events?: number[];
 }

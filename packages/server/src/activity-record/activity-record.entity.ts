@@ -1,9 +1,7 @@
 import { AnyEntity, Entity, Enum, PrimaryKey, Property } from '@mikro-orm/core';
-import { isNumber, isString } from '@omc/utils';
-import { EventRegistration } from '../event-registration/event-registration.entity';
+import { isNumber, isString } from '@omc/shared';
 import { User } from '../user/user.entity';
 import { ActivityRecordChangeDto } from './dto/activity-record-change.dto';
-import { ActivityRecordChangeKey } from './enums/activity-record-change-key.enum';
 import { ActivityRecordEvent } from './enums/activity-record-event.enum';
 
 @Entity()

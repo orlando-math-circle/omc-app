@@ -1,6 +1,6 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
-import { FileFieldModule } from '../file-fields/file-field.module';
+import { FileFieldModule } from '../file-field/file-field.module';
 import { FileAttachmentController } from './file-attachment.controller';
 import { FileAttachment } from './file-attachment.entity';
 import { FileAttachmentService } from './file-attachment.service';

@@ -7,7 +7,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { IndustryDto } from '../../user/dtos/industry.dto';
+import { IndustryDto } from '../../user/dto/industry.dto';
 import { Gender } from '../../user/enums/gender.enum';
 import { Grade } from '../../user/enums/grade.enum';
 import { ReminderFreq } from '../../user/enums/reminder-freq.enum';
@@ -33,7 +33,7 @@ export class RegisterAccountDto {
   readonly password!: string;
 
   @IsDateString()
-  readonly dob!: Date;
+  readonly dob!: string;
 
   @IsOptional()
   @IsArray()

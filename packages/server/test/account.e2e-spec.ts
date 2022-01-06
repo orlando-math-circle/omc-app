@@ -7,6 +7,7 @@ import request from 'supertest';
 import { Account } from '../src/account/account.entity';
 import { AccountModule } from '../src/account/account.module';
 import { CreateAccountDto } from '../src/account/dto/create-account.dto';
+import { ActivityRecordModule } from '../src/activity-record/activity-record.module';
 import { Roles } from '../src/app.roles';
 import { AuthModule } from '../src/auth/auth.module';
 import { JsonWebTokenFilter } from '../src/auth/filters/jwt.filter';
@@ -50,6 +51,7 @@ describe('Accounts', () => {
           ignoreEnvFile: true,
         }),
         MikroOrmModule.forRoot(MikroORMTestingConfig),
+        ActivityRecordModule,
         EmailModule,
         AccountModule,
         UserModule,

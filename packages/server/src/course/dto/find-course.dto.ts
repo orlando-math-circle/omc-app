@@ -4,5 +4,5 @@ import { IsNumber } from 'class-validator';
 export class FindCourseDto {
   @Type(() => Number)
   @IsNumber()
-  id!: number;
+  readonly id!: number;
 }

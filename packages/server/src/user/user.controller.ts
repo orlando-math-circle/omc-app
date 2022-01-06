@@ -17,11 +17,11 @@ import { UserAuth } from '../auth/decorators/auth.decorator';
 import { Usr } from '../auth/decorators/user.decorator';
 import { FileInterceptor } from '../file/interceptors/file.interceptor';
 import { MulterFile } from '../file/interfaces/multer-file.interface';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { FindUserDto } from './dtos/find-user.dto';
-import { FindUsersDto } from './dtos/find-users.dto';
-import { UpdateOwnUserDto } from './dtos/update-own-user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { FindUserDto } from './dto/find-user.dto';
+import { FindUsersDto } from './dto/find-users.dto';
+import { UpdateOwnUserDto } from './dto/update-own-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 

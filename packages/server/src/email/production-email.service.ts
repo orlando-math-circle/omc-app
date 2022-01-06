@@ -33,7 +33,7 @@ export class ProductionEmailService extends EmailService {
       );
 
       return (await firstValueFrom(resp))?.data;
-    } catch (error) {
+    } catch (error: any) {
       const status = error.response?.status || 500;
       const message = error.response?.data || {
         message: 'Unexpected MailerSend error',
