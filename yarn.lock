@@ -3225,7 +3225,7 @@ __metadata:
     "@types/passport-local": 1.0.33
     "@types/rimraf": 3.0.0
     "@types/supertest": 2.0.11
-    "@types/uuid": 8.3.0
+    "@types/uuid": 8.3.4
     "@typescript-eslint/eslint-plugin": 4.28.0
     "@typescript-eslint/parser": 4.28.0
     accesscontrol: 2.2.1
@@ -4615,10 +4615,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:8.3.0":
-  version: 8.3.0
-  resolution: "@types/uuid@npm:8.3.0"
-  checksum: 620985aed8fdb4aed153daca5235f4303457a67a4d181efac0021712eabd9edd7e88895f79730c0e651effde7633b1b61e49a81519ac8d4e75019d2ac9b6412f
+"@types/uuid@npm:8.3.4":
+  version: 8.3.4
+  resolution: "@types/uuid@npm:8.3.4"
+  checksum: eec476ba760e83ba6c67bd246c4400fa329ea10990e6427051722d90d6f52e7d062ba12b595703cb6aa92480775ee792802d4d90ae0f1c864a0e74c81e1e6c67
   languageName: node
   linkType: hard
 
