@@ -2398,16 +2398,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/schedule@npm:0.4.3":
-  version: 0.4.3
-  resolution: "@nestjs/schedule@npm:0.4.3"
+"@nestjs/schedule@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@nestjs/schedule@npm:1.1.0"
   dependencies:
-    cron: 1.7.2
+    cron: 1.8.2
     uuid: 8.3.2
   peerDependencies:
-    "@nestjs/common": ^6.10.11 || ^7.0.0
+    "@nestjs/common": ^6.10.11 || ^7.0.0 || ^8.0.0
+    "@nestjs/core": ^7.0.0 || ^8.0.0
     reflect-metadata: ^0.1.12
-  checksum: 4d6c5c3587a0ac243fdde8ba67a4a3c5aba1b21a61390c98fc29f7f3c901ea356c61d49fc5e29f1d48fa11b38894b954b568915d277ed1672f82f27a59cb1300
+  checksum: 595d8126f6181220f1bc91f51833258f2cab418f8a6f07385eb831bc3550ed8c7dabaf0959886c95ca482d10c2ae27e7404bc59d45b7f04f2872c95066f41c52
   languageName: node
   linkType: hard
 
@@ -3209,7 +3210,7 @@ __metadata:
     "@nestjs/jwt": 7.2.0
     "@nestjs/passport": 7.1.5
     "@nestjs/platform-express": 7.6.18
-    "@nestjs/schedule": 0.4.3
+    "@nestjs/schedule": 1.1.0
     "@nestjs/schematics": 7.3.1
     "@nestjs/testing": 7.6.18
     "@types/bcrypt": 5.0.0
@@ -8172,12 +8173,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cron@npm:1.7.2":
-  version: 1.7.2
-  resolution: "cron@npm:1.7.2"
+"cron@npm:1.8.2":
+  version: 1.8.2
+  resolution: "cron@npm:1.8.2"
   dependencies:
     moment-timezone: ^0.5.x
-  checksum: 99e1343f5117f62dab6204d54a720943c97db187eb2d0c54d582ca829ac963f714fc1bd7cd9ac8139e7fc2a6bd9389020c9dc1cd6c60e8d5e460451b846f5391
+  checksum: 58189a955b6f504eb7a6d17a47f3b01806331477ac8f905278c44c18e9dcf76abd754177c5c82c87d5a846acd9cdaec5dc458a97213314172350bbdc08b7391e
   languageName: node
   linkType: hard
 
