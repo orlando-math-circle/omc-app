@@ -2360,15 +2360,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/jwt@npm:7.2.0":
-  version: 7.2.0
-  resolution: "@nestjs/jwt@npm:7.2.0"
+"@nestjs/jwt@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@nestjs/jwt@npm:8.0.1"
   dependencies:
-    "@types/jsonwebtoken": 8.5.0
+    "@types/jsonwebtoken": 8.5.8
     jsonwebtoken: 8.5.1
   peerDependencies:
-    "@nestjs/common": ^6.0.0 || ^7.0.0
-  checksum: 61832d1400209f4d3c79c5e8788a92b50d9c51e2b4d771e340d59b8843a13c0de333c2ea9cb83d98f650926d1513ed091f540f73025426d6c32e3604bbd1d12c
+    "@nestjs/common": ^6.0.0 || ^7.0.0 || ^8.0.0
+  checksum: 7d55ca1e6127f9c4940ef9293de9de3a1d4e2122be2862fe773078bff71d77d01d9fbc1bb6e56c3a9eb1163214b6ad683c7bf7e8ac414c970e594d8548804292
   languageName: node
   linkType: hard
 
@@ -3206,7 +3206,7 @@ __metadata:
     "@nestjs/cli": 7.6.0
     "@nestjs/common": 7.6.18
     "@nestjs/core": 7.6.18
-    "@nestjs/jwt": 7.2.0
+    "@nestjs/jwt": 8.0.1
     "@nestjs/passport": 7.1.5
     "@nestjs/platform-express": 7.6.18
     "@nestjs/schedule": 0.4.3
@@ -4088,21 +4088,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsonwebtoken@npm:8.5.0":
-  version: 8.5.0
-  resolution: "@types/jsonwebtoken@npm:8.5.0"
-  dependencies:
-    "@types/node": "*"
-  checksum: d1a6b28f826898bc4f5596d91705aa864419c4a5ca49215507260644af8ceff9edb6db1901a108207cfb22558d035655b55309f38b75fa081da01be9f5408b21
-  languageName: node
-  linkType: hard
-
 "@types/jsonwebtoken@npm:8.5.2":
   version: 8.5.2
   resolution: "@types/jsonwebtoken@npm:8.5.2"
   dependencies:
     "@types/node": "*"
   checksum: 835c4bf15ccc0531cb6f145093be76dbc1222d2868b9d4c6f93a40b6d46c65e4337abed6b62eddd1aa06a604bfee6326bba5e5757b4f947a72a942093e5e859f
+  languageName: node
+  linkType: hard
+
+"@types/jsonwebtoken@npm:8.5.8":
+  version: 8.5.8
+  resolution: "@types/jsonwebtoken@npm:8.5.8"
+  dependencies:
+    "@types/node": "*"
+  checksum: 811e814ea6d1b5c1dc1360ae0788fe1697888e8f462eabaa68036b0fdc6fef003bc1982b992d73755d51a2bac1ed2858d3fccbf66bfdb2710088b0303f19f31b
   languageName: node
   linkType: hard
 
