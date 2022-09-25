@@ -3216,7 +3216,7 @@ __metadata:
     "@types/cache-manager": 3.4.0
     "@types/express": 4.17.12
     "@types/jest": 26.0.23
-    "@types/jsonwebtoken": 8.5.2
+    "@types/jsonwebtoken": 8.5.9
     "@types/lodash": 4.14.170
     "@types/luxon": 1.27.0
     "@types/multer": 1.4.6
@@ -4097,12 +4097,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsonwebtoken@npm:8.5.2":
-  version: 8.5.2
-  resolution: "@types/jsonwebtoken@npm:8.5.2"
+"@types/jsonwebtoken@npm:8.5.9":
+  version: 8.5.9
+  resolution: "@types/jsonwebtoken@npm:8.5.9"
   dependencies:
     "@types/node": "*"
-  checksum: 835c4bf15ccc0531cb6f145093be76dbc1222d2868b9d4c6f93a40b6d46c65e4337abed6b62eddd1aa06a604bfee6326bba5e5757b4f947a72a942093e5e859f
+  checksum: 65a9abb515ff96ac11d845a6dd48413162f547746bfa7d21de0b82c109b2af9912cc6b038f92dc9d352a7b3055664eaa6008880e745066511cfba1bbe5c4857f
   languageName: node
   linkType: hard
 
