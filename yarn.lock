@@ -3242,7 +3242,7 @@ __metadata:
     jest: 27.0.5
     joi: 17.4.0
     lodash: 4.17.21
-    luxon: 1.27.0
+    luxon: 1.28.1
     moment: 2.29.1
     passport: 0.4.1
     passport-jwt: 4.0.0
@@ -3265,7 +3265,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omc/shared@workspace:packages/shared"
   dependencies:
-    luxon: 1.27.0
+    luxon: 1.28.1
   languageName: unknown
   linkType: soft
 
@@ -14113,7 +14113,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"luxon@npm:1.27.0, luxon@npm:^1.21.3":
+"luxon@npm:1.28.1":
+  version: 1.28.1
+  resolution: "luxon@npm:1.28.1"
+  checksum: c7e02b18b9f686f2437a70429d545aca100515679ad5f242ef2cb0981ddbee3ce002cfe4dd28f78f5794e10d03e57c2e9a1b32dd97bed823f87c02903f2c299d
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^1.21.3":
   version: 1.27.0
   resolution: "luxon@npm:1.27.0"
   checksum: c60f73b6b94bdd4e43c731133aa746388b907a26a5a426478c2520b263bec1dae4dc6e269a3410374789551309c65af5d245fae4cef61b72c3ad64a4c3e8b2b9
