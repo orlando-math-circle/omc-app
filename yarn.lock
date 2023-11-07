@@ -3214,7 +3214,7 @@ __metadata:
     "@nestjs/testing": 7.6.18
     "@types/bcrypt": 5.0.0
     "@types/cache-manager": 3.4.0
-    "@types/express": 4.17.12
+    "@types/express": 4.17.21
     "@types/jest": 26.0.23
     "@types/jsonwebtoken": 8.5.2
     "@types/lodash": 4.14.170
@@ -3931,7 +3931,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:*, @types/express@npm:4.17.12":
+"@types/express-serve-static-core@npm:^4.17.33":
+  version: 4.17.41
+  resolution: "@types/express-serve-static-core@npm:4.17.41"
+  dependencies:
+    "@types/node": "*"
+    "@types/qs": "*"
+    "@types/range-parser": "*"
+    "@types/send": "*"
+  checksum: 915cce9d05b8b159def187428b50e8b705836d1ace8a04607d296e7ec8d327cc56b21747deb344fb38f33e5c63632f843a327e9e80bce50fd5ec7f49576725c0
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:*":
   version: 4.17.12
   resolution: "@types/express@npm:4.17.12"
   dependencies:
@@ -3940,6 +3952,18 @@ __metadata:
     "@types/qs": "*"
     "@types/serve-static": "*"
   checksum: b1ab50e0373095283f5a58c8c1aa7e206182d241d24279e24d754819ae39959b35996d34633b1e4b3a9d3817559abad00ec33c94b96da945a9c3d1546f3e4f70
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:4.17.21":
+  version: 4.17.21
+  resolution: "@types/express@npm:4.17.21"
+  dependencies:
+    "@types/body-parser": "*"
+    "@types/express-serve-static-core": ^4.17.33
+    "@types/qs": "*"
+    "@types/serve-static": "*"
+  checksum: ddd71500db76f2110e8336b7bac37f601f453fda26327d67ffa89b10f71fc38b80e0fd25f2132162b8cb7a5b0fb7579c1f5f9bd87bc1e3c46838e203e2ebb5ba
   languageName: node
   linkType: hard
 
@@ -4507,6 +4531,16 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: e95d14da2d05dea49e913db55922857234b01f2b1b513dd8cc556b64ffa6d89fb81ce4c1f21a6b4cd20f39d61455975e623ed681502b3d06b2d24a2ddd03a21e
+  languageName: node
+  linkType: hard
+
+"@types/send@npm:*":
+  version: 0.17.3
+  resolution: "@types/send@npm:0.17.3"
+  dependencies:
+    "@types/mime": ^1
+    "@types/node": "*"
+  checksum: 463d9632338bf3d0b2ae0f960a503366c59c51726154503be7f0f5dd53018d387e74e9811aff02fa797f38227f562b2d2dedcc8c5a1caed5c80acb20baf8ccd7
   languageName: node
   linkType: hard
 
