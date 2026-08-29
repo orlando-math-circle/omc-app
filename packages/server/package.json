@@ -51,7 +51,7 @@
     "rrule": "2.6.8",
     "rxjs": "7.1.0",
     "systeminformation": "5.7.7",
-    "uuid": "8.3.2"
+    "uuid": "11.1.1"
   },
   "devDependencies": {
     "@nestjs/cli": "7.6.0",
