@@ -22,7 +22,7 @@
     "cookie-universal-nuxt": "2.1.5",
     "cropperjs": "1.5.12",
     "date-fns": "2.22.1",
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "nuxt": "2.15.7",
     "nuxt-dropzone": "1.0.4",
     "pinia": "0.5.2",
